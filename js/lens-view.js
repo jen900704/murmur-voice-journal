@@ -7,6 +7,7 @@ import { suggestLenses, heavinessShift, onlyHere, relatedSessions } from './lens
 import { checkRisk, helpList } from './safety.js';
 import { createAiChat, callModel, MODELS } from './ai-chat.js';
 import { pickProvider, adaptQuestions, personalSummary } from './lens-llm.js';
+import { lookBack } from './lookback.js';
 import { sceneFromSpec, sceneSvg } from './scene.js';
 import { fitText } from './postcard.js';
 import { stripCitations } from './rag.js';
@@ -24,6 +25,11 @@ const S = {
     answerHint: '寫幾個字就好。想不到的話，寫「不知道」也可以。',
     moreAbout: '多了解這個學派',
     savedMore: '這個角度的看法和小練習',
+    map: {
+      title: (n, k) => `回頭看：${n} 次練習，用過 ${k} 個角度`,
+      note: (m) => `只是整理你自己的紀錄，不代表哪個取向比較有效。前後輕重至少有 ${m} 次才算平均。`,
+      row: (r) => [`${r.sessions} 次`, r.withShift ? `輕了 ${r.lighter}・差不多 ${r.same}・重了 ${r.heavier}` : null, r.meanShift !== null ? `平均 ${r.meanShift > 0 ? '+' : ''}${r.meanShift}` : null, r.meanRating !== null ? `幫助程度平均 ${r.meanRating}` : null].filter(Boolean).join('，'),
+    },
     saveFailed: '沒有存成功，請再試一次。',
     broken: '剛才那一頁出了問題，先回到這裡。你存下的練習都還在。',
     intro:
@@ -138,6 +144,11 @@ const S = {
     answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
     moreAbout: 'More about this approach',
     savedMore: 'The approach and something to try',
+    map: {
+      title: (n, k) => `Looking back: ${n} exercises, ${k} approaches`,
+      note: (m) => `A summary of your own records, not a sign that one approach works better. Averages need at least ${m} sessions with both ratings.`,
+      row: (r) => [`${r.sessions} ${r.sessions === 1 ? 'time' : 'times'}`, r.withShift ? `lighter ${r.lighter}, same ${r.same}, heavier ${r.heavier}` : null, r.meanShift !== null ? `average ${r.meanShift > 0 ? '+' : ''}${r.meanShift}` : null, r.meanRating !== null ? `helpfulness ${r.meanRating}` : null].filter(Boolean).join('; '),
+    },
     saveFailed: 'Could not save. Please try again.',
     broken: 'That page ran into a problem, so you are back here. Saved exercises are still here.',
     title: 'Theory lens',
@@ -1565,10 +1576,38 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // A plain look back over saved exercises: how many times each approach was used, and how
+  // the heaviness changed (lighter / same / heavier counts; an average only from three on).
+  function angleMap() {
+    const known = st.sessions.filter((s) => lensById(s.lensId));
+    if (known.length < 2) return null;
+    const lb = lookBack(known);
+    const T = L().map;
+    return h(
+      'details',
+      { class: 'lens-more angle-map', 'data-key': 'lens-angle-map' },
+      h('summary', {}, T.title(lb.sessions, lb.distinctLenses)),
+      h('p', { class: 'muted small' }, T.note(lb.minForAverage)),
+      h(
+        'ul',
+        { class: 'angle-map-list' },
+        lb.lenses.map((r) =>
+          h(
+            'li',
+            {},
+            h('span', { class: 'angle-map-name' }, lensById(r.lensId)[lk()].name),
+            h('span', { class: 'muted small' }, T.row(r))
+          )
+        )
+      )
+    );
+  }
+
   function saved() {
     return [
       h('h2', {}, L().saved),
       st.sessions.some((s) => lensById(s.lensId)) ? null : h('p', { class: 'empty' }, L().savedEmpty),
+      angleMap(),
       [...st.sessions].reverse().map((s) => {
         const l = lensById(s.lensId);
         if (!l) return null; // from a lens that no longer exists; "delete all data" still removes it

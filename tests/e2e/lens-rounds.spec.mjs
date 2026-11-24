@@ -295,3 +295,35 @@ test.describe('lens with a language model', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+test('saved exercises show a plain look back: counts per approach, averages only from three', async ({ page }) => {
+  await page.goto('/#lens');
+  await page.locator('[data-key="lens-start"]').waitFor();
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const q = indexedDB.open('murmur');
+        q.onsuccess = () => {
+          const t = q.result.transaction('lensSessions', 'readwrite');
+          const st = t.objectStore('lensSessions');
+          const day = 86400000;
+          [[7, 5], [6, 6], [5, 6]].forEach(([b, a], i) => st.put({ id: `c${i}`, createdAt: Date.now() - (5 - i) * day, lensId: 'cognitive', topics: ['work'], concern: '報告', answers: ['a'], rating: 4, before: b, after: a }));
+          st.put({ id: 'n1', createdAt: Date.now() - day, lensId: 'narrative', topics: ['self'], concern: '我', answers: ['b'], rating: 3, before: 8, after: 4 });
+          t.oncomplete = () => {
+            q.result.close();
+            resolve();
+          };
+        };
+      })
+  );
+  await page.reload();
+  await page.getByRole('button', { name: /My saved exercises/ }).click();
+  const map = page.locator('[data-key="lens-angle-map"]');
+  await expect(map.locator('summary')).toHaveText('Looking back: 4 exercises, 2 approaches');
+  await map.locator('summary').click();
+  const rows = map.locator('li');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0)).toContainText('lighter 1, same 1, heavier 1');
+  await expect(rows.nth(0)).toContainText('average -0.3');
+  await expect(rows.nth(1)).not.toContainText('average');
+});
