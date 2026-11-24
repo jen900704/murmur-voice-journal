@@ -1,5 +1,6 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
+import { icon } from './icons.js';
 import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText, quote, isNonAnswer } from './lenses.js';
 import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { readScene, sceneNotes } from './scene.js';
@@ -293,7 +294,8 @@ const S = {
   },
 };
 
-const HUES = [262, 200, 28, 340, 160, 220, 120, 8, 300, 185, 45, 320, 95, 240];
+// one colour family for all fourteen approaches (purple to blue-violet), so cards and marks match the icons
+const HUES = [250, 262, 240, 270, 246, 256, 236, 266, 244, 258, 238, 268, 252, 242];
 
 // One plain line per approach for the suggestion cards: what it does, in everyday words.
 const HOOK = {
@@ -312,10 +314,10 @@ const HOOK = {
   narrative: ['你不等於這個問題，換個說法看看', 'You are not the problem. Try telling it another way'],
   'family-systems': ['看看你在家裡的位置', 'Look at where you stand in your family'],
 };
-const TOPIC_EMOJI = { work: '💼', relationship: '💞', family: '🏠', self: '🌱', loss: '🍂', other: '💭' };
-const RATE_FACES = ['😶', '🙂', '😊', '😄', '🤩'];
+const TOPIC_ICON = { work: 'work', relationship: 'relationship', family: 'family', self: 'self', loss: 'loss', other: 'other' };
+const RATE_FACES = ['face1', 'face2', 'face3', 'face4', 'face5'];
 // how heavy, as weather: clear when light, rain when heavy
-const weather = (v) => (v === null || v === undefined ? '⛅' : v <= 1 ? '☀️' : v <= 3 ? '🌤️' : v <= 5 ? '⛅' : v <= 7 ? '☁️' : '🌧️');
+const weather = (v) => (v === null || v === undefined ? 'partly' : v <= 1 ? 'sun' : v <= 3 ? 'partly' : v <= 5 ? 'cloud' : v <= 7 ? 'rain' : 'storm');
 
 export function createLensView({ h, add, getLang, rerender, toast, db, openGentle }) {
   const st = {
@@ -530,10 +532,10 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h(
         'div',
         { class: 'lens-home-links lens-tiles' },
-        tile('🃏', L().deck, L().explored(explored), () => go('deck'), 'lens-tile-deck'),
-        tile('🧭', L().fit, null, () => go('fit'), 'lens-tile-fit'),
-        tile('📔', L().saved, L().savedCount(st.sessions.length), () => go('saved'), 'lens-tile-saved'),
-        openGentle ? tile('🎬', L().gentle, null, openGentle, 'lens-tile-gentle') : null
+        tile(icon('deck', { size: 24 }), L().deck, L().explored(explored), () => go('deck'), 'lens-tile-deck'),
+        tile(icon('compass', { size: 24 }), L().fit, null, () => go('fit'), 'lens-tile-fit'),
+        tile(icon('bookmark', { size: 24 }), L().saved, L().savedCount(st.sessions.length), () => go('saved'), 'lens-tile-saved'),
+        openGentle ? tile(icon('gentle', { size: 24 }), L().gentle, null, openGentle, 'lens-tile-gentle') : null
       ),
       h(
         'details',
@@ -713,7 +715,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                   rerender();
                 },
               },
-              h('span', { class: 'topic-emoji', 'aria-hidden': 'true' }, TOPIC_EMOJI[tp]),
+              h('span', { class: 'topic-emoji', 'aria-hidden': 'true' }, icon(TOPIC_ICON[tp], { size: 24 })),
               h('span', {}, L().topics[tp])
             );
           })
@@ -747,7 +749,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function heavySlider(which, onChange) {
     const cur = st[which];
     const set = Number.isInteger(cur);
-    const sky = h('span', { class: 'heavy-sky' + (set ? '' : ' unset'), 'aria-hidden': 'true' }, weather(set ? cur : null));
+    const sky = h('span', { class: 'heavy-sky' + (set ? '' : ' unset'), 'aria-hidden': 'true' }, icon(weather(set ? cur : null), { size: 56 }));
     const num = h('span', { class: 'heavy-val' + (set ? '' : ' unset'), 'aria-hidden': 'true' }, set ? String(cur) : L().heavySlide);
     const text = (v) => `${v} / 10`;
     const input = h('input', {
@@ -762,7 +764,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       oninput: (e) => {
         const v = Number(e.target.value);
         st[which] = v;
-        sky.textContent = weather(v);
+        sky.replaceChildren(icon(weather(v), { size: 56 }));
         num.textContent = String(v);
         for (const el of [sky, num, e.target]) el.classList.remove('unset');
         e.target.setAttribute('aria-valuetext', text(v));
@@ -1602,7 +1604,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 'data-key': `rate-${v}`,
                 onclick: () => rate(v),
               },
-              h('span', { 'aria-hidden': 'true' }, RATE_FACES[v - 1])
+              icon(RATE_FACES[v - 1], { size: 30 })
             )
           )
         ),
@@ -1704,7 +1706,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h(
         'div',
         { class: 'lens-sheet-body' },
-        h('div', { class: 'lens-sheet-head' }, h('h2', { id: 'lens-sheet-title' }, L().more), h('button', { type: 'button', class: 'lens-sheet-close', 'data-key': 'lens-sheet-close', 'aria-label': L().close, onclick: close }, h('span', { 'aria-hidden': 'true' }, '✕'))),
+        h('div', { class: 'lens-sheet-head' }, h('h2', { id: 'lens-sheet-title' }, L().more), h('button', { type: 'button', class: 'lens-sheet-close', 'data-key': 'lens-sheet-close', 'aria-label': L().close, onclick: close }, icon('close', { size: 20 }))),
         h(
           'div',
           { class: 'lens-sheet-actions' },

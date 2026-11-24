@@ -1,3 +1,4 @@
+import { icon } from './icons.js';
 import { t, setLang, getLang, detectLang, STRINGS } from './i18n.js';
 import { Recorder, decodeToMono16k, isSupported, TARGET_SR } from './recorder.js';
 import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
@@ -600,10 +601,10 @@ function toolRow(lowCard) {
   return h(
     'div',
     { class: 'tool-row', role: 'group', 'aria-label': t('toolsLabel') },
-    lowCard ? null : tile('breathe-link', '🫧', t('toolBreathe'), () => openSheet(breatheSheet({ h, getLang }))),
-    tile('calm-link', '🌊', t('toolCalm'), openCalm),
-    lowCard ? null : tile('writing-link', '✏️', t('toolWrite'), openWriting),
-    lowCard || isEvening() ? null : tile('night-link', '🌙', t('toolNight'), () => nightView.begin(), ' night-link')
+    lowCard ? null : tile('breathe-link', icon('breathe', { size: 26 }), t('toolBreathe'), () => openSheet(breatheSheet({ h, getLang }))),
+    tile('calm-link', icon('calm', { size: 26 }), t('toolCalm'), openCalm),
+    lowCard ? null : tile('writing-link', icon('write', { size: 26 }), t('toolWrite'), openWriting),
+    lowCard || isEvening() ? null : tile('night-link', icon('moon', { size: 26 }), t('toolNight'), () => nightView.begin(), ' night-link')
   );
 }
 
@@ -758,18 +759,18 @@ function welcomeCard() {
     h(
       'div',
       { class: 'welcome-doors' },
-      door('welcome-lens', '🔭', t('welcomeLens'), t('welcomeLensBody'), () => {
+      door('welcome-lens', icon('lens', { size: 26 }), t('welcomeLens'), t('welcomeLensBody'), () => {
         dismiss();
         startLens();
       }),
-      door('welcome-voice', '🎙️', t('welcomeVoice'), t('welcomeVoiceBody'), () => {
+      door('welcome-voice', icon('mic', { size: 26 }), t('welcomeVoice'), t('welcomeVoiceBody'), () => {
         dismiss();
         render();
         const rec = document.querySelector('[data-key="rec"]');
         if (rec) rec.scrollIntoView({ block: 'center', behavior: 'smooth' });
         focusKey('rec');
       }),
-      door('welcome-night', '🌙', t('welcomeNight'), t('welcomeNightBody'), () => {
+      door('welcome-night', icon('moon', { size: 26 }), t('welcomeNight'), t('welcomeNightBody'), () => {
         dismiss();
         nightView.begin();
       })

@@ -9,5 +9,6 @@ Read this before changing code. These rules come from the project's privacy and 
 - **No regex lookbehind** anywhere in `js/` (older Safari fails to parse the whole app).
 - **Release files:** after any change to app files, run `npm run prepare-release` (service worker cache name, content review), then `npm test`.
 - **End-to-end tests:** `npm run test:e2e` (Playwright, Chromium); WebKit runs in CI. Kill anything on port 8787 first.
+- **Icons only from `js/icons.js`** (one line style, current text colour, soft accent fill). No emoji as icons, no other icon sets. Lens marks and colours stay in the purple to blue-violet family.
 - **Respect `prefers-reduced-motion`** for any animation; 44px touch targets; check 375px width and dark mode.
 - Where things live: `docs/architecture.md`. Why 換角度 is built the way it is: `docs/change-the-angle.md`.
