@@ -5,7 +5,7 @@
   "description": "A private, on-device voice journal that tracks how your voice changes over time.",
   "type": "module",
   "scripts": {
-    "test": "node tests/features.test.mjs && node tests/stats.test.mjs && node tests/lenses.test.mjs && node tests/search.test.mjs && node tests/policy.test.mjs && node tests/langlab.test.mjs && node tests/writing.test.mjs && node tests/voice-report.test.mjs",
+    "test": "node tests/features.test.mjs && node tests/stats.test.mjs && node tests/lenses.test.mjs && node tests/scene.test.mjs && node tests/search.test.mjs && node tests/policy.test.mjs && node tests/langlab.test.mjs && node tests/writing.test.mjs && node tests/voice-report.test.mjs",
     "serve": "python3 -m http.server 8080",
     "test:e2e": "playwright test --project=chromium",
     "test:webkit": "playwright test --project=webkit",

@@ -7,6 +7,8 @@
 // Step text can quote earlier answers with {1}, {2}, {3}.
 // A step with `scale: true` asks for a 0 to 10 rating instead of text.
 // A step with `rewrite` shows the previous answer transformed, before its question.
+// `noticed` and `experiment` (with placeholders) are no longer shown in the app; the content
+// review export and lab/mcp still read them. The summary page uses SUMMARY_TEXT below.
 
 export const TOPICS = ['work', 'relationship', 'family', 'self', 'loss', 'other'];
 
@@ -466,12 +468,237 @@ export const LENSES = [
   },
 ];
 
+// What the summary page shows besides the person's own words. `shorts` are the questions in
+// a short form (one per step, no {n} placeholders). `perspective` is how the approach looks
+// at a worry in general: a description of the lens, never a statement about this person.
+// `tryThis` is the small experiment written to stand alone, without quoting any answer.
+const SUMMARY_TEXT = {
+  psychoanalytic: {
+    zh: {
+      shorts: ['這種感覺以前什麼時候有過', '一部分想要的，另一部分擔心的', '它出現時，怎麼讓自己好過一點'],
+      perspective: '這個取向認為，現在的反應常帶著過去關係的影子。它會留意同樣的感覺是不是在不同時期重複出現，以及心裡想要的和擔心的怎麼互相拉扯。讓自己好過一點的方式在這裡叫做防衛，它不被當成缺點；這個取向好奇的是它以前保護過什麼，現在是不是還需要用同樣的方式。',
+      tryThis: '這週，在這個模式出現的那一刻，只是把它記下來（時間、在誰身邊、做了什麼），先不急著改變。',
+    },
+    en: {
+      shorts: ['When this feeling has come up before', 'What one part wants and another part fears', 'How it gets made more bearable'],
+      perspective: 'This approach holds that present reactions often carry the shape of earlier relationships. It watches for the same feeling returning at different times in a life, and for wishes and fears that pull against each other. Ways of making a feeling bearable are called defenses here and are not treated as flaws; the question is what they once protected, and whether they are still needed in the same way.',
+      tryThis: 'This week, when the pattern shows up, just note it (when, who was there, what you did). No need to change it yet.',
+    },
+  },
+  adlerian: {
+    zh: {
+      shorts: ['困擾不見的話，生活會有什麼不同', '心裡那句「我必須……才……」', '可以「彷彿」去做的一件小事'],
+      perspective: '阿德勒學派認為行為背後有目標，而人最深的需要之一是歸屬和貢獻。它把「我必須……才……」這類很少說出口的句子叫做私人邏輯，會問這句話是從哪裡學來的、現在還適不適用。它也會從「困擾不見之後的生活」去看一個人真正想靠近的是什麼。如果傷害來自環境或別人，這個取向不會把它算成個人的錯。',
+      tryThis: '選一天，挑一件小事（可以是剛才寫的那件），彷彿已經是不被這個困擾綁住的自己，去做做看。結束後記下別人的反應，和自己的感覺。',
+    },
+    en: {
+      shorts: ['What would be different with this worry gone', 'The "I must ... in order to ..." sentence', 'One small thing to do "as if"'],
+      perspective: 'Adlerians hold that behavior has a purpose, and that one of the deepest human needs is to belong and to contribute. A rarely spoken sentence like "I must ... in order to ..." is called private logic; this approach asks where the sentence was learned and whether it still fits. It also reads the picture of life without the worry as a sign of what a person is reaching for. When the hurt comes from surroundings or other people, it is not counted as a personal failing.',
+      tryThis: 'Pick one day and one small thing (it can be the one you wrote), and do it as if you were already the person who is not held back by this. Afterward, note how others responded and how you felt.',
+    },
+  },
+  existential: {
+    zh: {
+      shorts: ['這個煩惱透露你在乎什麼', '沒辦法選的，和還能選的', '朝在乎的方向走的一小步'],
+      perspective: '存在主義取向把焦慮看成活著的一部分，不只是症狀。它認為一件事會讓人困擾，常是因為裡面有在乎的東西。它承認有些處境沒得選，也認為在限制裡面，人仍然有回應的自由，而意義是在選擇和行動裡活出來的。',
+      tryThis: '這週朝在乎的方向走一小步（可以是剛才寫的那一步）。做完後問自己：這一步有沒有比較像我想成為的人？',
+    },
+    en: {
+      shorts: ['What this worry shows you care about', 'What cannot be chosen, and what still can', 'One small step toward what matters'],
+      perspective: 'An existential view treats anxiety as part of being alive, not only as a symptom. It holds that a worry often has something cared about underneath it. It accepts that some circumstances cannot be chosen, and holds that within those limits there is still freedom in how to respond. Meaning, in this view, is lived through choices and actions.',
+      tryThis: 'This week, take one small step toward what matters to you (it can be the one you wrote). Afterward ask: was that step closer to who I want to be?',
+    },
+  },
+  'person-centered': {
+    zh: {
+      shorts: ['現在的感受', '最少讓別人看見的感受', '希望被明白的，和現在需要的'],
+      perspective: '個人中心取向相信每個人都有往成長方向走的力量，也相信當事人自己最知道需要什麼。它不分析也不給建議，在意的是心裡真正的感受和表現給別人看的樣子之間有多少距離。Rogers 認為，一個人被真誠、不帶條件、準確地理解時，改變才會開始。',
+      tryThis: '如果身邊有讓你安心的人，可以只說一句「我最近其實有點……」，也可以先說「你聽我講就好」。現在沒有這樣的人，就錄一段話給自己聽，也算數。',
+    },
+    en: {
+      shorts: ['How you feel right now', 'The feeling you show least', 'What you want understood, and what you need'],
+      perspective: 'A person-centered view trusts that people tend toward growth and know best what they need. It does not analyze or advise. It pays attention to the gap between what is felt inside and what is shown to others. For Rogers, change begins when a person is met with genuineness, acceptance without conditions, and accurate understanding.',
+      tryThis: 'If there is someone you feel safe with, say one sentence: "Lately I have actually been feeling a bit ...", and you can start with "Just listen, you do not have to fix it". If there is no one like that right now, record a few words for yourself; that counts too.',
+    },
+  },
+  gestalt: {
+    zh: {
+      shorts: ['身體哪裡最有感覺', '一句「我必須……」或「我不得不……」', '讀成「我選擇……」之後的不同'],
+      perspective: '完形取向從此時此刻開始，先看身體正在感覺什麼、話是怎麼說的，而不是先解釋原因。它認為「我必須」這種說法會讓人看不清楚哪些是自己的選擇，哪些是別人加上來的。把句子換成「我選擇」不是為了得到某個答案；「不是我選的」和「我願意扛」在這個取向裡都算清楚的接觸。',
+      tryThis: '這週每天一次，停下來問自己：「我現在正在做什麼？身體有什麼感覺？」只要注意，不用改變。',
+    },
+    en: {
+      shorts: ['Where it sits in the body', 'One "I have to ..." sentence', 'What changes when it is read as "I choose ..."'],
+      perspective: 'Gestalt starts from the present moment: what the body feels and how a sentence is phrased, before any explanation of why. It holds that "I have to" can blur which parts are a person\'s own choice and which were put there by someone else. Reading the sentence as "I choose" is not meant to produce a particular answer. "I did not choose this" and "I am willing to carry this" both count as clearer contact.',
+      tryThis: 'Once a day this week, stop and ask: "What am I doing right now? What do I feel in my body?" Just notice. You do not need to change anything.',
+    },
+  },
+  behavioral: {
+    zh: {
+      shorts: ['困擾出現之前發生的事', '當時做了什麼，之後怎麼樣', '下次可以試的小做法'],
+      perspective: '行為治療認為行為是在情境裡學會、也在情境裡被維持的。它把一次經過拆成前因、行為、後果三段來看，特別留意那些短時間內讓人好過、長期卻讓困擾留下來的做法。它不靠意志力，而是把改變做成很小、看得見的一步，再用結果來檢驗。',
+      tryThis: '幫一個小做法（可以是剛才寫的那個）在行事曆上排一個時間。做之前和做之後各用 0 到 10 記一下心情，一週後比較看看。',
+    },
+    en: {
+      shorts: ['What was happening just before', 'What you did, and what followed', 'A small different response for next time'],
+      perspective: 'Behavior therapy holds that behavior is learned and kept going in context. It breaks one episode into what came before, what was done, and what followed, and looks closely at responses that bring relief in the short term while keeping the problem in place over time. It does not rely on willpower. Change is made into one small, observable step and then tested by its results.',
+      tryThis: 'Put one small response (it can be the one you wrote) on your calendar. Rate your mood 0 to 10 before and after, and compare after a week.',
+    },
+  },
+  acceptance: {
+    zh: {
+      shorts: ['這個困擾最常說的一句話', '把它看成「一個想法」之後', '它還在的時候，仍想做的一點點'],
+      perspective: '正念與接納取向認為，和難受的想法、感受對抗，常常讓它們更大。它不去爭論一個想法是真是假，而是練習把它看成「一個想法」，讓人和它之間多一點距離。接納在這裡不是放棄，也不是忍受不合理的處境，而是把力氣留給自己在乎的方向。',
+      tryThis: '這週每次那句話出現，就在心裡加上「我注意到我有一個想法：……」，再朝在乎的方向做一件小事（可以是剛才寫的那件）。',
+    },
+    en: {
+      shorts: ['What the worry says most often', 'Seeing it as "a thought"', 'A small step to take even with it here'],
+      perspective: 'Mindfulness and acceptance approaches hold that fighting difficult thoughts and feelings often makes them bigger. They do not argue about whether a thought is true. They practice seeing it as "a thought", which puts a little distance between the person and the sentence. Acceptance here does not mean giving up or putting up with an unfair situation. It means keeping energy for what matters.',
+      tryThis: 'Each time that sentence shows up this week, add "I notice I am having the thought that ..." in your head, then do one small thing toward what matters to you (it can be the step you wrote).',
+    },
+  },
+  rebt: {
+    zh: {
+      shorts: ['事件（A）', '「應該」或「必須」（B）', '感受和反應（C）', '把「一定要」換成「很希望」之後'],
+      perspective: '理情行為治療把事件（A）、對事件的信念（B）和隨之而來的感受（C）分開來看。它認為讓失望變成難以承受的，常常是信念裡「一定要、不然就完了」的那一部分。它不否定人想要的東西，只看「一定要」能不能換成「很希望」。有些「應該」是真心看重的責任，有些指向真實的不公平，這個取向不會把這些都當成想法的問題。',
+      tryThis: '這週每次發現自己說「應該」或「必須」，就試著在心裡改成「我很希望……」，看看感受有沒有不同。',
+    },
+    en: {
+      shorts: ['The event (A)', 'The "should" or "must" (B)', 'Feelings and reactions (C)', 'Holding it as a preference, not a demand'],
+      perspective: 'REBT separates the event (A), the belief about it (B), and the feelings that follow (C). It holds that the "it has to happen, or it is all over" part of a belief is often what turns disappointment into something unbearable. It does not dismiss what a person wants; it asks whether "must" can become "would really like". Some "shoulds" are duties a person truly values, and some point to real unfairness. This approach does not treat those as thinking errors.',
+      tryThis: 'Whenever you catch yourself saying "should" or "must" this week, try turning it into "I would really like ...", and notice whether the feeling shifts.',
+    },
+  },
+  cognitive: {
+    zh: {
+      shorts: ['第一個冒出來的想法', '支持和不符合的證據', '會對在乎的人說的話'],
+      perspective: '認知治療認為感受深受自動冒出來的想法影響。它把這種想法當成可以檢驗的假設，把支持和不符合的證據都擺出來看。它也常借用人對朋友說話的方式，因為人對朋友通常比對自己公平。如果檢驗之後想法是準確的，這個取向會把問題放回處境本身。',
+      tryThis: '準備三句可以對自己說的話：事前（例如「我知道這會有點難，我可以一步一步來」）、當下、事後各一句。這是 Meichenbaum 的因應自我對話。',
+    },
+    en: {
+      shorts: ['The first thought that came up', 'Evidence for it and against it', 'What you would say to someone you care about'],
+      perspective: 'Cognitive therapy holds that feelings are shaped by thoughts that come up automatically. It treats such a thought as a hypothesis and lays out the evidence on both sides. It often borrows the way people talk to a friend, because people are usually fairer to a friend than to themselves. When a thought turns out to be accurate, this approach puts the problem back in the situation itself.',
+      tryThis: 'Prepare three things to say to yourself: one for before (for example "I know this will be a little hard, and I can take it one step at a time"), one for during, one for after. These are Meichenbaum\'s coping self-statements.',
+    },
+  },
+  reality: {
+    zh: {
+      shorts: ['真正想要的（W）', '現在實際在做的（D）', '這樣做有沒有更接近（E）', '一個簡單的計畫（P）'],
+      perspective: '現實治療認為人都在努力滿足幾種基本需求：生存、愛與歸屬、成就感、自由和樂趣。它不停在過去，而是照順序問四件事：想要什麼、正在做什麼、這樣做有沒有用、接下來的計畫是什麼。評估是由當事人自己做的。計畫沒做到時，這個取向不追究原因，只把計畫改小。',
+      tryThis: '照一個今天或明天就做得到的計畫做做看（可以是剛才寫的那個）。如果沒做到，不用責怪自己，回來把計畫改得更小一點。',
+    },
+    en: {
+      shorts: ['What you really want (W)', 'What you are doing now (D)', 'Whether it is getting you closer (E)', 'A simple plan (P)'],
+      perspective: 'Reality therapy holds that people are always trying to meet a few basic needs: survival, love and belonging, a sense of achievement, freedom, and fun. It does not stay in the past. It asks four things in order: what is wanted, what is being done, whether that is working, and what the plan is. The person makes the evaluation themselves. When a plan does not happen, this approach does not look for blame; the plan is made smaller.',
+      tryThis: 'Try a plan you can carry out today or tomorrow (it can be the one you wrote). If it does not happen, do not blame yourself; come back and make the plan smaller.',
+    },
+  },
+  feminist: {
+    zh: {
+      shorts: ['別人或社會給的「應該」', '誰說了算，自己的話有多少份量', '能處理的，和不是一個人的責任'],
+      perspective: '女性主義治療認為個人的困擾常和社會角色、性別期待、權力關係連在一起。它會問一個「應該」是誰給的、誰在這件事裡說了算，並且把一個人能處理的部分，和不該由一個人扛的部分分開。在這個取向裡，把這些分清楚本身就是有用的工作，而且它不把結構造成的壓力說成個人的問題。',
+      tryThis: '把「不是我一個人的責任」那部分寫下來，這週和一個能理解的人聊聊，看看別人是不是也背著類似的期待。',
+    },
+    en: {
+      shorts: ['"Shoulds" handed down by others or society', 'Who has the final say, and how much yours counts', 'What you can handle, and what is not yours alone'],
+      perspective: 'Feminist therapy holds that personal distress is often tied to social roles, gender expectations, and power. It asks who handed down a "should" and who has the say in a situation, and it separates what one person can handle from what was never one person\'s to carry. In this approach, sorting these out is useful work in itself, and pressure that comes from structures is not described as a personal problem.',
+      tryThis: 'Write down the part that is not yours alone. This week, talk about it with someone who might understand, and see whether they carry similar expectations.',
+    },
+  },
+  'solution-focused': {
+    zh: {
+      shorts: ['現在在幾分（0 到 10）', '為什麼不是更低', '困擾比較小的那一刻'],
+      perspective: '焦點解決取向不深入分析問題，而是去找已經有用的部分。它用分數讓模糊的感覺變得可以談，並且問分數為什麼沒有更低，因為那裡面有人已經在做的事。它也會找困擾比較小的例外時刻，看那時有什麼不同。',
+      tryThis: '往上一分會是什麼樣子？這週找一個小跡象。如果困擾比較小的那一刻裡有什麼有用的，就多做一點。',
+    },
+    en: {
+      shorts: ['Where things are now (0 to 10)', 'What keeps it from being lower', 'A moment when the worry was smaller'],
+      perspective: 'A solution-focused view does not analyze the problem in depth. It looks for what already works. It uses a number to make a vague feeling something that can be talked about, and asks what keeps the number from being lower, because the answer holds things a person is already doing. It also looks for exceptions, the moments when the problem is smaller, and asks what was different then.',
+      tryThis: 'What would one point higher look like? Look for one small sign this week. If something helped in the moment when the worry was smaller, do a little more of it.',
+    },
+  },
+  narrative: {
+    zh: {
+      shorts: ['給這個困擾取的名字', '它怎麼影響你', '沒有照它說的做的那一次'],
+      perspective: '敘事治療的出發點是：人不是問題，問題才是問題。它替困擾取名字，讓人可以站在旁邊看它怎麼運作、叫人相信什麼。它也會留意沒有照困擾說的去做的時刻，就算很小，因為那些時刻屬於另一個也能說的故事。',
+      tryThis: '這週每當這個困擾出現（可以用你取的名字叫它），就記下它說了什麼，以及有沒有哪一次沒聽它的。',
+    },
+    en: {
+      shorts: ['The name given to this worry', 'How it affects you', 'A time you did not do what it said'],
+      perspective: 'Narrative therapy starts from the idea that the person is not the problem; the problem is the problem. Giving the worry a name lets a person stand beside it and see how it works and what it asks them to believe. This approach also watches for moments when the problem was not obeyed, however small, because those moments belong to another story that can also be told.',
+      tryThis: 'Each time this worry shows up this week (you can call it by the name you gave it), note what it said, and any time you did not listen to it.',
+    },
+  },
+  'family-systems': {
+    zh: {
+      shorts: ['有過類似經驗的家人或重要的人', '壓力大時，家裡的人怎麼反應', '自己的想法，以「我」開頭的一句話'],
+      perspective: '家族系統取向把一個人的困擾放進整個關係系統裡看。它留意類似的擔心有沒有在家人之間、世代之間出現，也留意壓力大的時候誰被拉進來、誰被夾在中間。Bowen 把同時保持連結又保有自己的想法叫做自我分化。這個取向看模式是為了減少自責，不是要找誰來怪。',
+      tryThis: '這週觀察一次家裡的壓力模式，注意自己在裡面的位置。要不要說、對誰說、用什麼方式（當面、傳訊息、請家裡比較好講話的人轉達），都由你決定。不說，也不代表你沒有立場。',
+    },
+    en: {
+      shorts: ['Family or close people with something similar', 'How the family reacts under stress', 'Your own view, in one "I" sentence'],
+      perspective: 'Family systems work places one person\'s distress inside a whole set of relationships. It watches for similar worries appearing across family members and generations, and for who gets pulled in or caught in the middle when stress is high. Bowen called staying connected while keeping a view of one\'s own differentiation of self. The point of seeing a pattern, in this approach, is less self-blame, not finding someone to blame.',
+      tryThis: 'This week, watch for the stress pattern once and notice where you stand in it. Whether to say anything, to whom, and how (in person, by text, through a family member who is easier to talk to) is up to you. Staying quiet does not mean you do not have a view.',
+    },
+  },
+};
+for (const l of LENSES) {
+  for (const lang of ['zh', 'en']) {
+    const t = SUMMARY_TEXT[l.id][lang];
+    l[lang].perspective = t.perspective;
+    l[lang].tryThis = t.tryThis;
+    l[lang].steps.forEach((s, i) => (s.short = t.shorts[i]));
+  }
+}
+
 export function lensById(id) {
   return LENSES.find((l) => l.id === id);
 }
 
 export function lensesForTopic(topic) {
   return LENSES.filter((l) => !l.excludeTopics.includes(topic));
+}
+
+// A worry can belong to several topics. `topics` may be an array, one topic, or a saved
+// session (new ones store `topics`, older ones a single `topic`). Unknown values are dropped.
+export function topicList(topics) {
+  let t = topics;
+  if (t && typeof t === 'object' && !Array.isArray(t)) t = Array.isArray(t.topics) && t.topics.length ? t.topics : t.topic;
+  const arr = Array.isArray(t) ? t : [t];
+  return arr.filter((x, i) => TOPICS.includes(x) && arr.indexOf(x) === i);
+}
+
+// Safety: a lens is left out when ANY chosen topic excludes it, so a loss chosen together
+// with something else still hides the lenses unsuited to grief.
+export function lensesForTopics(topics) {
+  const chosen = topicList(topics);
+  return LENSES.filter((l) => !l.excludeTopics.some((t) => chosen.includes(t)));
+}
+
+// The pick list's first group: each chosen topic's TOPIC_COMMON in the order the topics were
+// chosen, without repeats, and only lenses that every chosen topic allows.
+export function commonForTopics(topics) {
+  const allowed = lensesForTopics(topics);
+  const out = [];
+  for (const t of topicList(topics)) {
+    for (const id of TOPIC_COMMON[t] || []) {
+      const l = lensById(id);
+      if (l && allowed.includes(l) && !out.includes(l)) out.push(l);
+    }
+  }
+  return out;
+}
+
+// What the summary shows of the person's answers: each question in its short form and the
+// answer exactly as written (`text`), never placed inside a generated sentence. A scale answer
+// reads "6 / 10". A blank or "not sure" answer is `open` and has no text.
+export function answerRows(lens, lang, answers) {
+  const list = Array.isArray(answers) ? answers : [];
+  return lens[lang].steps.map((s, i) => {
+    const raw = list[i] === undefined || list[i] === null ? '' : String(list[i]);
+    if (s.scale) return /^\s*(10|\d)\s*$/.test(raw) ? { q: s.short, text: `${raw.trim()} / 10`, open: false } : { q: s.short, text: '', open: true };
+    return isNonAnswer(raw) ? { q: s.short, text: '', open: true } : { q: s.short, text: raw, open: false };
+  });
 }
 
 // Approaches often reached for with each kind of worry, listed first on the pick screen. A

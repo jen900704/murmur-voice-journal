@@ -154,6 +154,14 @@ export function evidenceTotal(evidence) {
 }
 
 // ---------- gate and decision ----------
+// The lens context when a worry has several topics: 'loss' whenever it is among them (so the
+// loss gate holds), otherwise the first topic chosen. One of the six topic names either way,
+// so the learner keeps at most six lens contexts however topics are combined.
+export function topicsContext(topics) {
+  const t = (Array.isArray(topics) ? topics : [topics]).filter((x) => typeof x === 'string' && x);
+  return t.includes('loss') ? 'loss' : t[0] || 'none';
+}
+
 // The first reason that applies, in the spec's order, or null. 'opt-out' logs nothing.
 export function gateReason({ optedIn = false, risk = false, mood = null, surface, context } = {}) {
   if (!optedIn) return 'opt-out';

@@ -1,6 +1,6 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
-import { LENSES, TOPICS, TOPIC_COMMON, lensById, lensesForTopic, fill, rewriteText, isNonAnswer } from './lenses.js';
+import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText } from './lenses.js';
 import { checkRisk, helpList } from './safety.js';
 import { createAiChat } from './ai-chat.js';
 import { createFlowHistory } from './flow-history.js';
@@ -16,8 +16,7 @@ const S = {
     redraw: '再抽一張',
     answerHint: '寫幾個字就好。想不到的話，寫「不知道」也可以。',
     moreAbout: '多了解這個學派',
-    savedMore: '看完整內容',
-    yourAnswers: '你當時的回答',
+    savedMore: '這個角度的看法和小練習',
     saveFailed: '沒有存成功，請再試一次。',
     broken: '剛才那一頁出了問題，先回到這裡。你存下的練習都還在。',
     intro:
@@ -34,7 +33,7 @@ const S = {
     gentle: '溫柔的作品推薦（電影、書、音樂劇）',
     worryLabel: '用一兩句話寫下讓你在意的事',
     worryPlaceholder: '例如：我一直擔心報告做不好，晚上也睡不太好',
-    topicLabel: '它比較接近哪一類？',
+    topicLabel: '它比較接近哪幾類？可以選不只一個。',
     topics: { work: '學業或工作', relationship: '伴侶或朋友', family: '家人', self: '自己（情緒、自我價值）', loss: '失落或悲傷', other: '其他' },
     next: '下一步',
     back: '上一步',
@@ -45,7 +44,6 @@ const S = {
     compareWhy: '看三個學派各自會先問什麼，再選一個',
     pick: '自己選',
     pickTitle: '選一個角度',
-    mostlyOpen: '這次的問題你大多先留白了，沒關係。下面的小練習一樣可以試。',
     pickCommon: '常用來看這類煩惱的',
     pickOthers: '其他角度',
     pickWhy: '從全部適合的學派裡挑',
@@ -54,8 +52,12 @@ const S = {
     why: '為什麼這樣問',
     answerPlaceholder: '寫下你想到的，幾個字也可以',
     seeSummary: '看小結',
-    noticed: '從這個角度看見的',
-    experiment: '這週可以試試',
+    wrote: '你寫下的',
+    leftOpen: '（先留白）',
+    allOpen: '（這次每一題都先留白）',
+    perspective: '這個角度會怎麼看',
+    tryThis: '可以試試',
+    aiNote: '這一頁只照原樣列出你寫的內容，不會解讀它。想針對你寫的內容聊，可以用下面的 AI 對話。',
     concepts: '關鍵概念',
     misses: '這個角度可能忽略的',
     reading: (ch) => `想多了解：Corey《Theory and Practice of Counseling and Psychotherapy》原文第 10 版第 ${ch} 章（中譯本章節可能不同）`,
@@ -95,8 +97,7 @@ const S = {
     redraw: 'Draw again',
     answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
     moreAbout: 'More about this approach',
-    savedMore: 'Show full exercise',
-    yourAnswers: 'What you answered',
+    savedMore: 'The approach and something to try',
     saveFailed: 'Could not save. Please try again.',
     broken: 'That page ran into a problem, so you are back here. Saved exercises are still here.',
     title: 'Theory lens',
@@ -114,7 +115,7 @@ const S = {
     gentle: 'Gentle recommendations (films, books, musicals)',
     worryLabel: 'In a sentence or two, what is on your mind?',
     worryPlaceholder: 'For example: I keep worrying my report is not good enough, and I am not sleeping well',
-    topicLabel: 'Which is it closest to?',
+    topicLabel: 'Which is it closest to? Choose any that fit.',
     topics: { work: 'School or work', relationship: 'Partner or friends', family: 'Family', self: 'Myself (feelings, self-worth)', loss: 'Loss or grief', other: 'Something else' },
     next: 'Next',
     back: 'Back',
@@ -125,7 +126,6 @@ const S = {
     compareWhy: 'See what three schools would ask first, then pick one',
     pick: 'Choose myself',
     pickTitle: 'Choose a lens',
-    mostlyOpen: 'You left most of these open this time, and that is fine. The small experiment below still works.',
     pickCommon: 'Often used for this kind of worry',
     pickOthers: 'Other lenses',
     pickWhy: 'Pick from every school that fits',
@@ -134,8 +134,12 @@ const S = {
     why: 'Why this question',
     answerPlaceholder: 'Write what comes to mind. A few words is fine',
     seeSummary: 'See summary',
-    noticed: 'What this lens noticed',
-    experiment: 'A small experiment',
+    wrote: 'What you wrote',
+    leftOpen: '(left open)',
+    allOpen: '(every question left open this time)',
+    perspective: 'How this approach looks at it',
+    tryThis: 'Something to try',
+    aiNote: 'This page lists what you wrote as you wrote it and does not interpret it. For a response to your own words, use the AI conversation below.',
     concepts: 'Key ideas',
     misses: 'What this lens might miss',
     reading: (ch) => `To read more: Corey, Theory and Practice of Counseling and Psychotherapy (10th ed.), chapter ${ch}`,
@@ -178,7 +182,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   const st = {
     stage: 'home',
     concern: '',
-    topic: null,
+    topics: [], // in the order chosen; 'other' stands alone
     lensId: null,
     answers: [],
     step: 0,
@@ -232,7 +236,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ai.abort();
     st.prevStage = null;
     st.concern = '';
-    st.topic = null;
+    st.topics = [];
     st.lensId = null;
     st.answers = [];
     st.step = 0;
@@ -351,7 +355,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       oninput: (e) => {
         st.concern = e.target.value;
         const b = document.querySelector('[data-key="lens-concern-next"]');
-        if (b) b.disabled = !st.concern.trim() || !st.topic;
+        if (b) b.disabled = !st.concern.trim() || !st.topics.length;
       },
     });
     input.value = st.concern;
@@ -359,26 +363,29 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('label', { class: 'lens-label', for: 'lens-concern' }, L().worryLabel),
       input,
       h('p', { class: 'lens-label', id: 'topic-label' }, L().topicLabel),
+      // several can be chosen; each chip is a toggle button. "Other" stands alone.
       h(
         'div',
-        { class: 'chips wrap', role: 'radiogroup', 'aria-labelledby': 'topic-label' },
-        TOPICS.map((tp) =>
-          h(
+        { class: 'chips wrap topic-chips', role: 'group', 'aria-labelledby': 'topic-label' },
+        TOPICS.map((tp) => {
+          const on = st.topics.includes(tp);
+          return h(
             'button',
             {
               type: 'button',
-              role: 'radio',
-              'aria-checked': st.topic === tp ? 'true' : 'false',
-              class: 'chip' + (st.topic === tp ? ' on' : ''),
+              'aria-pressed': on ? 'true' : 'false',
+              class: 'chip' + (on ? ' on' : ''),
               'data-key': `topic-${tp}`,
               onclick: () => {
-                st.topic = tp;
+                if (on) st.topics = st.topics.filter((t) => t !== tp);
+                else if (tp === 'other') st.topics = ['other'];
+                else st.topics = [...st.topics.filter((t) => t !== 'other'), tp];
                 rerender();
               },
             },
             L().topics[tp]
-          )
-        )
+          );
+        })
       ),
       h(
         'div',
@@ -389,7 +396,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             type: 'button',
             class: 'btn primary',
             'data-key': 'lens-concern-next',
-            disabled: !st.concern.trim() || !st.topic,
+            disabled: !st.concern.trim() || !st.topics.length,
             onclick: () => {
               const next = () => (onNext ? onNext() : go('choose'));
               if (guard(st.concern, next)) next();
@@ -403,7 +410,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   function choose() {
-    const pool = lensesForTopic(st.topic);
+    const pool = lensesForTopics(st.topics);
     const option = (label, why, onclick) => h('button', { type: 'button', class: 'lens-option', onclick }, h('strong', {}, label), h('span', {}, why));
     return [
       h('h2', {}, L().choose),
@@ -449,7 +456,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   function drawn() {
     const lens = lensById(st.drawn);
-    const pool = lensesForTopic(st.topic);
+    const pool = lensesForTopics(st.topics);
     return [
       h('h2', {}, L().drewTitle),
       lensCard(lens, { first: true, primary: true, action: () => startLens(lens.id) }),
@@ -468,9 +475,10 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   // one compact row per lens (mark, name, first sentence of its idea); tapping starts it
   // the pick list's order: approaches often used for this kind of worry, then the other suitable ones
-  function expertOrder(topic) {
-    const all = lensesForTopic(topic);
-    const common = (TOPIC_COMMON[topic] || []).map(lensById).filter((l) => l && all.includes(l));
+  // (with several topics: each topic's usual approaches in the order the topics were chosen)
+  function expertOrder(topics) {
+    const all = lensesForTopics(topics);
+    const common = commonForTopics(topics);
     return { common, rest: all.filter((l) => !common.includes(l)) };
   }
 
@@ -482,12 +490,14 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     p.dec = null;
     p.whyOpen = false;
     if (!p.mod || p.optIn !== true) return; // off: nothing is decided and nothing is logged
-    const { common, rest } = expertOrder(st.topic);
-    const [entries, risk, evidence] = await Promise.all([db.listEntries(), p.store.recentRisk(), p.store.evidence('lens', st.topic)]);
-    const gated = p.mod.gateReason({ optedIn: true, risk: st.riskSeen || risk, mood: p.mod.recentMood(entries), surface: 'lens', context: st.topic });
+    const { common, rest } = expertOrder(st.topics);
+    // one small context per decision: 'loss' if it is among the topics, else the first chosen
+    const context = p.mod.topicsContext(st.topics);
+    const [entries, risk, evidence] = await Promise.all([db.listEntries(), p.store.recentRisk(), p.store.evidence('lens', context)]);
+    const gated = p.mod.gateReason({ optedIn: true, risk: st.riskSeen || risk, mood: p.mod.recentMood(entries), surface: 'lens', context });
     const decision = p.mod.decide({ eligible: [...common, ...rest].map((l) => l.id), evidence, gated, seed: p.mod.newSeed() });
     if (!decision) return;
-    const record = p.mod.makeRecord({ surface: 'lens', context: st.topic, decision });
+    const record = p.mod.makeRecord({ surface: 'lens', context, decision });
     await p.store.log(record);
     p.logCount++;
     p.dec = { id: record.id, action: decision.action, gated: decision.gated, used: null };
@@ -631,7 +641,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   function pick() {
-    const order = expertOrder(st.topic);
+    const order = expertOrder(st.topics);
     // the featured lens gets its own row on top; the others keep their usual order below it
     const dec = st.pol.dec;
     const featured = dec ? [...order.common, ...order.rest].find((l) => l.id === dec.action) : null;
@@ -748,10 +758,20 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
-  // when most written answers were left blank or "not sure", a sentence of dots helps no one
-  function mostlyOpen(c, answers) {
-    const typed = c.steps.map((s, i) => (s.scale ? null : answers[i])).filter((a) => a !== null);
-    return typed.length > 0 && typed.filter(isNonAnswer).length * 2 > typed.length;
+  // The person's answers, exactly as written: each question in its short form, then the answer
+  // as a quotation. Nothing here puts their words inside a sentence of ours.
+  function answerList(lens, answers) {
+    const rows = answerRows(lens, lk(), answers);
+    // nothing written at all: one line, rather than the same note under every question
+    if (rows.every((r) => r.open)) return h('div', { class: 'lens-answers' }, h('p', { class: 'lens-answer-open muted' }, L().allOpen));
+    return h(
+      'div',
+      { class: 'lens-answers' },
+      rows.map((r) => [
+        h('p', { class: 'lens-answer-q' }, r.q),
+        r.open ? h('p', { class: 'lens-answer-open muted' }, L().leftOpen) : h('blockquote', { class: 'lens-answer' }, r.text),
+      ])
+    );
   }
 
   function summary() {
@@ -766,10 +786,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         'article',
         { class: 'lens-summary', style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}` },
         h('div', { class: 'lens-card-head' }, lensMark(lens), h('h2', {}, c.name)),
-        h('h3', {}, L().noticed),
-        h('p', {}, mostlyOpen(c, st.answers) ? L().mostlyOpen : fill(c.noticed, st.answers)),
-        h('h3', {}, L().experiment),
-        h('p', {}, fill(c.experiment, st.answers)),
+        h('h3', {}, L().wrote),
+        answerList(lens, st.answers),
+        h('h3', {}, L().perspective),
+        h('p', { 'data-key': 'lens-perspective' }, c.perspective),
+        h('h3', {}, L().tryThis),
+        h('p', { 'data-key': 'lens-try' }, c.tryThis),
         h('h3', {}, L().misses),
         h('p', {}, c.misses),
         // background on the approach, folded so rating and saving are close at hand
@@ -825,7 +847,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
                 createdAt: Date.now(),
                 lensId: lens.id,
-                topic: st.topic,
+                topics: st.topics.slice(),
                 concern: st.concern,
                 answers: st.answers.slice(),
                 rating: st.rating,
@@ -853,7 +875,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             class: 'btn',
             onclick: () => {
               commitRating();
-              const keep = { concern: st.concern, topic: st.topic, riskSeen: st.riskSeen };
+              const keep = { concern: st.concern, topics: st.topics.slice(), riskSeen: st.riskSeen };
               reset();
               Object.assign(st, keep);
               go('choose');
@@ -863,6 +885,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         ),
         h('button', { type: 'button', class: 'btn ghost', onclick: finish }, L().finish)
       ),
+      // personal responses belong in the AI conversation, not in fixed sentences on this page
+      st.aiEnabled ? h('p', { class: 'muted small lens-ai-note', 'data-key': 'ai-note' }, L().aiNote) : null,
       st.aiEnabled
         ? h(
             'button',
@@ -980,7 +1004,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function concernForLens() {
     const lens = lensById(st.pendingLens);
     return concern(() => {
-      if (lens.excludeTopics.includes(st.topic)) go('choose');
+      if (!lensesForTopics(st.topics).includes(lens)) go('choose');
       else startLens(lens.id);
     });
   }
@@ -1021,15 +1045,16 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('div', { class: 'lens-card-head' }, lensMark(l, 32), h('h3', {}, c.name)),
           h('p', { class: 'muted small' }, new Intl.DateTimeFormat(getLang(), { dateStyle: 'medium' }).format(new Date(s.createdAt))),
           h('blockquote', { class: 'lens-concern-quote' }, s.concern),
-          h('p', {}, mostlyOpen(c, s.answers) ? L().mostlyOpen : fill(c.noticed, s.answers)),
+          h('h4', {}, L().wrote),
+          answerList(l, s.answers),
           h(
             'details',
             { class: 'lens-more' },
             h('summary', {}, L().savedMore),
-            h('h4', {}, L().experiment),
-            h('p', {}, fill(c.experiment, s.answers)),
-            h('h4', {}, L().yourAnswers),
-            h('ol', { class: 'plain-list' }, c.steps.map((stp, i) => h('li', {}, h('span', { class: 'muted small' }, stp.q), h('br'), String(s.answers[i] ?? '–'))))
+            h('h4', {}, L().perspective),
+            h('p', {}, c.perspective),
+            h('h4', {}, L().tryThis),
+            h('p', {}, c.tryThis)
           ),
           h(
             'button',

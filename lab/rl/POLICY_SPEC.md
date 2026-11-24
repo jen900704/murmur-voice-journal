@@ -9,7 +9,9 @@ differs is the bug. Constants are collected in section 9.
 | Surface | Context | Arms | Expert order |
 |---|---|---|---|
 | `lens` | worry topic, one of `TOPICS` in `js/lenses.js` (`work, relationship, family, self, loss, other`) | lens ids from `lensesForTopic(topic)` | `TOPIC_COMMON[topic]` first, in that order, then every other eligible lens in `LENSES` order. `other` has no `TOPIC_COMMON` entry, so its expert order is `LENSES` order. |
-| `track` | bedtime theme, one of `THEMES` in `js/bedtime.js` (`work, relationship, family, health, future, unsure`), or `none` when nothing was set down | all 9 ids in `TRACKS` | `THEME_TRACK[theme]` first, then the other tracks in `TRACKS` order. `none` uses `TRACKS` order. |
+| `track` | bedtime theme, one of `THEMES` in `js/bedtime.js` (`work, relationship, family, health, future, unsure`), or `none` when nothing was set down; when several themes are chosen the context is the first one chosen | all 9 ids in `TRACKS` | `THEME_TRACK[theme]` first, then the tracks of any other chosen themes in the order chosen (deduplicated), then the other tracks in `TRACKS` order. `none` uses `TRACKS` order. |
+
+Lens topics are multi-select in the app: the context is `loss` whenever loss is among the chosen topics, otherwise the first topic chosen (`topicsContext` in `js/policy.js`), so there are still at most six lens contexts; the eligible set drops every lens excluded by any chosen topic (`lensesForTopics`), and the expert order is each chosen topic's `TOPIC_COMMON` in the order chosen, deduplicated, then the rest in `LENSES` order.
 
 The track surface is specified here and simulated in the lab. The app now asks an
 optional "did this help?" after playback, so the in-app policy runs for tracks too,

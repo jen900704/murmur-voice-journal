@@ -194,6 +194,60 @@ test("the track that fits tonight's worry comes first", async ({ page }) => {
   await expect(page.locator('.track')).toHaveCount(10);
 });
 
+test('several kinds of worry can be chosen; the first leads the tracks and the night keeps them all', async ({ page }) => {
+  await startRitual(page);
+  const chip = (k) => page.locator(`[data-key="night-theme-${k}"]`);
+  await expect(page.locator('.theme-chips [role="radio"]')).toHaveCount(0);
+  await chip('unsure').click();
+  await expect(chip('unsure')).toHaveAttribute('aria-pressed', 'true');
+  await chip('family').click(); // a named kind switches "hard to say" off
+  await expect(chip('unsure')).toHaveAttribute('aria-pressed', 'false');
+  await chip('work').click();
+  await chip('health').click();
+  await chip('health').click(); // and off again
+  await expect(chip('family')).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip('work')).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip('health')).toHaveAttribute('aria-pressed', 'false');
+  await expect(chip('health')).toBeFocused(); // the keyboard stays on the chip just pressed
+  for (const k of ['work', 'relationship', 'family', 'health', 'future', 'unsure']) {
+    const box = await chip(k).boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(44);
+  }
+  await expect(page.locator('[data-key="night-next"]')).toHaveText('下一步');
+  await page.locator('[data-key="night-next"]').click();
+  await page.locator('[data-key="night-next"]').click();
+  // family was chosen first, so its track is the suggestion; the track for work comes next
+  await expect(page.locator('.track').nth(1)).toHaveAttribute('data-key', 'track-family-systems');
+  await expect(page.locator('.track').nth(2)).toHaveAttribute('data-key', 'track-solution-focused');
+  await expect(page.locator('.track.suggested')).toHaveCount(1);
+  // lines pass quickly in tests, so collect every line the track shows
+  await page.evaluate(() => {
+    window.__lines = new Set();
+    new MutationObserver(() => {
+      const el = document.getElementById('night-line');
+      if (el) window.__lines.add(el.textContent);
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  });
+  await page.locator('[data-key="track-family-systems"]').click();
+  await expect(page.locator('.postcard svg')).toBeVisible({ timeout: 20_000 });
+  const night = await page.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const open = indexedDB.open('murmur');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const all = open.result.transaction('nights').objectStore('nights').getAll();
+          all.onsuccess = () => resolve(all.result.at(-1));
+          all.onerror = () => reject(all.error);
+        };
+      })
+  );
+  expect(await page.evaluate(() => [...window.__lines])).toContain('今晚心上有家裡的事，也有工作或學業的事。');
+  expect(night.themes).toEqual(['family', 'work']);
+  expect(night.theme).toBe('family');
+});
+
 test('the journal shows a quiet look back at the last seven days, and nothing when there is nothing', async ({ page }) => {
   await page.goto('/#journal');
   await expect(page.locator('.week-card')).toHaveCount(0);

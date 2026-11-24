@@ -22,12 +22,12 @@ function setting(page, key) {
   );
 }
 
-async function toPickList(page, { concern = '我一直擔心報告做不好', topic = 'work', risky = false } = {}) {
+async function toPickList(page, { concern = '我一直擔心報告做不好', topic = 'work', topics = [topic], risky = false } = {}) {
   await page.goto('/#lens');
   await page.reload(); // a fresh lens home page, wherever the last exercise was left
   await page.locator('[data-key="lens-start"]').click();
   await page.fill('#lens-concern', concern);
-  await page.locator(`[data-key="topic-${topic}"]`).click();
+  for (const t of topics) await page.locator(`[data-key="topic-${t}"]`).click();
   await page.locator('[data-key="lens-concern-next"]').click();
   if (risky) await page.locator('[data-key="crisis-continue"]').click();
   await page.getByRole('button', { name: /自己選/ }).click();
@@ -321,4 +321,27 @@ test('"delete all data" also removes the switch, what was learned, and the decis
     await db.clearAll();
   });
   for (const k of ['policyOptIn', 'policyLog', 'policyState', 'policyRiskAt']) expect(await setting(page, k)).toBeNull();
+});
+
+test('several topics: one small context, and a loss among them is gated with only the grief lenses', async ({ page }) => {
+  await optInFromSettingsPanel(page);
+  // the context is the first topic chosen, so combinations do not add contexts
+  await toPickList(page, { concern: '主管和爸媽都在催我', topics: ['family', 'work'] });
+  await expect(page.locator('[data-key="policy-featured"] .lens-row')).toHaveCount(1);
+  let log = await setting(page, 'policyLog');
+  expect(log).toHaveLength(1);
+  expect(log[0].context).toBe('family');
+  expect(log[0].eligible).toHaveLength(14);
+  expect(log[0].eligible.slice(0, 6)).toEqual(['family-systems', 'adlerian', 'feminist', 'narrative', 'person-centered', 'cognitive']);
+
+  // loss chosen second: still the loss context, gated, and no lens unsuited to grief is eligible
+  await toPickList(page, { concern: '外婆上個月走了，工作也顧不好', topics: ['work', 'loss'] });
+  log = await setting(page, 'policyLog');
+  expect(log).toHaveLength(2);
+  expect(log[1].context).toBe('loss');
+  expect(log[1].gated).toBe('loss');
+  expect(log[1].propensity).toBe(1);
+  expect([...log[1].eligible].sort()).toEqual(['acceptance', 'family-systems', 'feminist', 'person-centered', 'psychoanalytic']);
+  await expect(page.locator('.lens-row')).toHaveCount(5);
+  await expect(page.locator('[data-key="policy-featured"] .lens-row')).toHaveAttribute('data-key', `pick-${log[1].eligible[0]}`);
 });

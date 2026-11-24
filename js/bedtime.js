@@ -5,17 +5,57 @@
 // puts its way out before its invitation, and is never picked at random.
 //
 // A script is a list of [sentence, pause in seconds after it].
-// {theme} is replaced with a short phrase for what the person set down tonight.
+// One line near the start names tonight's kinds of worry (themeLine), when any were chosen.
 
 export const THEMES = ['work', 'relationship', 'family', 'health', 'future', 'unsure'];
 
 // A gentle suggestion for each kind of worry; the person can still pick any track.
 export const THEME_TRACK = { work: 'solution-focused', relationship: 'person-centered', family: 'family-systems', health: 'relaxation', future: 'acceptance', unsure: 'person-centered' };
 
+// How each kind of worry is said aloud. `one` stands in a full clause ("今晚心上有…" /
+// "Tonight, … is on your mind"); `short` is for the line that names three.
 const THEME_TEXT = {
-  'zh-TW': { work: '工作或學業的事', relationship: '關係裡的事', family: '家裡的事', health: '身體的事', future: '對以後的擔心', unsure: '那件說不太清楚的事', none: '今天的事' },
-  en: { work: 'something about work or school', relationship: 'something about a relationship', family: 'something about family', health: 'something about your health', future: 'a worry about what comes next', unsure: 'something that is hard to name', none: 'today' },
+  'zh-TW': {
+    work: { one: '工作或學業的事', short: '工作或學業的' },
+    relationship: { one: '關係裡的事', short: '關係裡的' },
+    family: { one: '家裡的事', short: '家裡的' },
+    health: { one: '身體的事', short: '身體的' },
+    future: { one: '對以後的擔心', short: '以後的' },
+  },
+  en: {
+    work: { one: 'work or school' },
+    relationship: { one: 'a relationship' },
+    family: { one: 'family' },
+    health: { one: 'your health' },
+    future: { one: 'what comes next' },
+  },
 };
+
+// The themes a script may name: known ones, in the order chosen, each once. 'unsure' names
+// nothing, so it is dropped; an old single `theme` string is read as a list of one.
+export function namedThemes(themes) {
+  const list = Array.isArray(themes) ? themes : themes ? [themes] : [];
+  return [...new Set(list)].filter((tm) => tm !== 'unsure' && THEMES.includes(tm));
+}
+
+// One short spoken line for what is on the person's mind tonight. Written out per count so it
+// reads as a sentence and not as a filled-in list; past three, the kinds are not named at all.
+export function themeLine(themes, lang) {
+  const l = lang === 'en' ? 'en' : 'zh-TW';
+  const names = namedThemes(themes).map((tm) => THEME_TEXT[l][tm]);
+  const [a, b, c] = names;
+  if (!names.length) return '';
+  if (l === 'en') {
+    if (names.length === 1) return `Tonight, ${a.one} is on your mind.`;
+    if (names.length === 2) return `Tonight, ${a.one} is on your mind, and ${b.one} too.`;
+    if (names.length === 3) return `Tonight there is more than one thing on your mind. ${a.one[0].toUpperCase()}${a.one.slice(1)}, ${b.one}, and ${c.one}.`;
+    return 'Tonight there is a lot on your mind.';
+  }
+  if (names.length === 1) return `今晚心上有${a.one}。`;
+  if (names.length === 2) return `今晚心上有${a.one}，也有${b.one}。`;
+  if (names.length === 3) return `今晚心上不只一件事。有${a.short}，有${b.short}，也有${c.short}。`;
+  return '今晚，心上放了好幾件事。';
+}
 
 const OPEN = {
   'zh-TW': [
@@ -46,18 +86,29 @@ const SET_DOWN_GENERIC = {
   ],
 };
 
+// After the line from themeLine(): one kind of worry, or several.
 const SET_DOWN = {
   'zh-TW': [
-    ['今晚，{theme}，在你心上。', 3],
     ['它是真的，也值得好好處理。只是，不用現在。', 4],
     ['想像把它放在床邊的桌上。', 5],
     ['明天早上，它還會在那裡。到時候，再決定怎麼做。', 6],
   ],
   en: [
-    ['Tonight, {theme} is on your mind.', 3],
     ['It is real, and it deserves attention. Just not right now.', 4],
     ['Imagine placing it on the table beside your bed.', 5],
     ['It will still be there in the morning. You can decide what to do with it then.', 6],
+  ],
+};
+const SET_DOWN_MANY = {
+  'zh-TW': [
+    ['這些都是真的，也都值得好好處理。只是，不用現在。', 4],
+    ['想像把它們一件一件，放在床邊的桌上。', 6],
+    ['明天早上，它們還會在那裡。到時候，再決定怎麼做。', 6],
+  ],
+  en: [
+    ['They are real, and they deserve attention. Just not right now.', 4],
+    ['Imagine placing them, one at a time, on the table beside your bed.', 6],
+    ['They will still be there in the morning. You can decide what to do with them then.', 6],
   ],
 };
 
@@ -183,6 +234,7 @@ export const TRACKS = [
     zh: {
       name: '讓煩惱先放在門外',
       style: '敘事治療風格',
+      many: { 0: '想像今晚心上的這幾件事，都裝在一個包包裡。你今天一路都帶著它。' },
       core: [
         ['想像那件讓你在意的事，是一個包包。你今天一路都帶著它。', 5],
         ['它有重量，裡面也裝著它想提醒你的事。', 5],
@@ -197,6 +249,7 @@ export const TRACKS = [
     en: {
       name: 'Setting the worry outside the door',
       style: 'in the spirit of narrative therapy',
+      many: { 0: 'Imagine the things on your mind packed into one bag you have carried around all day.' },
       core: [
         ['Imagine the thing on your mind as a bag you have carried around all day.', 5],
         ['It has some weight, and it holds things it wants you to remember.', 5],
@@ -405,13 +458,16 @@ export function trackById(id) {
   return TRACKS.find((t) => t.id === id);
 }
 
-// The full script for a track, theme filled in.
-export function buildScript(trackId, theme, lang) {
+// The full script for a track. `themes` is tonight's kinds of worry in the order chosen (an old
+// single theme string works too). A track may give `many`: core lines, by index, to use instead
+// when more than one kind was named.
+export function buildScript(trackId, themes, lang) {
   const l = lang === 'en' ? 'en' : 'zh-TW';
   const t = trackById(trackId)[l === 'en' ? 'en' : 'zh'];
-  const setDown = theme && THEME_TEXT[l][theme] ? SET_DOWN[l] : SET_DOWN_GENERIC[l];
-  const themeText = THEME_TEXT[l][theme] || '';
-  return [...OPEN[l], ...setDown, ...t.core, ...CLOSE[l]].map(([s, p]) => [s.replace('{theme}', themeText), p]);
+  const n = namedThemes(themes).length;
+  const setDown = n ? [[themeLine(themes, l), 3], ...(n > 1 ? SET_DOWN_MANY : SET_DOWN)[l]] : SET_DOWN_GENERIC[l];
+  const core = n > 1 && t.many ? t.core.map(([s, p], i) => [t.many[i] || s, p]) : t.core;
+  return [...OPEN[l], ...setDown, ...core, ...CLOSE[l]];
 }
 
 export function scriptSeconds(script, charsPerSecond) {

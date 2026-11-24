@@ -57,10 +57,13 @@ export function cleanEntry(e) {
 
 export function cleanNight(n) {
   if (!plain(n) || typeof n.id !== 'string' || !n.id || !isTime(n.createdAt)) return null;
+  // nights saved before several themes could be chosen have one `theme`; it is read as a list of one
+  const themes = [...new Set((Array.isArray(n.themes) ? n.themes : [n.theme]).filter((x) => typeof x === 'string' && x).map((x) => x.slice(0, 30)))].slice(0, 6);
   return {
     id: n.id.slice(0, 80),
     createdAt: n.createdAt,
-    theme: optStr(n.theme, 30),
+    theme: themes[0] ?? null,
+    themes,
     worry: str(n.worry, 1000),
     kindness: str(n.kindness, 200),
     track: optStr(n.track, 40),
@@ -75,7 +78,8 @@ export function cleanSession(s) {
     id: s.id.slice(0, 80),
     createdAt: s.createdAt,
     lensId: s.lensId.slice(0, 40),
-    topic: optStr(s.topic, 30),
+    topic: optStr(s.topic, 30), // sessions saved before topics could be combined
+    topics: (Array.isArray(s.topics) ? s.topics : typeof s.topic === 'string' ? [s.topic] : []).filter((t) => typeof t === 'string' && t).slice(0, 6).map((t) => t.slice(0, 30)),
     concern: str(s.concern, 400),
     answers: Array.isArray(s.answers) ? s.answers.slice(0, 10).map((a) => (Number.isFinite(a) ? a : str(a, 400))) : [],
     rating: Number.isInteger(s.rating) && s.rating >= 1 && s.rating <= 5 ? s.rating : null,

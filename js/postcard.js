@@ -1,4 +1,6 @@
 // Pastel bedtime postcards, drawn procedurally so every night looks a little different.
+import { readScene, sceneSvg } from './scene.js';
+
 // Original motifs only (sleepy moon, cloud, sprout, teacup, stars, bun, cat, lamp). Exported as PNG.
 
 const PALETTES = [
@@ -205,6 +207,8 @@ export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
 
 // Render the SVG to a PNG blob (2x for sharp sharing).
 export async function postcardPng(svg, scale = 2) {
+  // a still image: drop the card's animation so the picture is drawn in its final state
+  svg = String(svg).replace(/<style>[\s\S]*?<\/style>/g, '');
   const blob = new Blob([svg], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
   try {
@@ -245,4 +249,16 @@ export async function sharePng(pngBlob, filename, text) {
     a.remove();
   }, 1000);
   return 'downloaded';
+}
+
+// A card whose picture follows what the person wrote. When their words name something
+// the scene can draw (tea, a cat, an exam, the sea), the card shows that scene; otherwise
+// it falls back to the pastel postcard, with a motif picked from the words when possible.
+// texts: the person's own words to draw from (default: the line on the card).
+export function cardSvg({ seed, line, label, date, brand = 'Murmur', texts = null, topics = [], lensId = null, shift = null, animate = false }) {
+  const scene = readScene({ texts: texts || [line], topics, lensId, shift });
+  if (!scene.calm && (scene.objects.length || scene.companion === 'cat' || scene.companion === 'dog' || lensId)) {
+    return sceneSvg(scene, { seed, line, label, date, brand, animate, fitText });
+  }
+  return postcardSvg({ seed, line, label, date, brand });
 }

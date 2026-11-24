@@ -1,6 +1,6 @@
 // Smaller features around the core: gentle recommendations, the nights list and kindness
 // jar in the Journal, a low-mood card on Today, and exchanging today's prompt with someone.
-import { postcardSvg } from './postcard.js';
+import { cardSvg } from './postcard.js';
 import { trackById } from './bedtime.js';
 import { checkRisk, helpList } from './safety.js';
 
@@ -328,8 +328,9 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   function nightCardSvg(n) {
     const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date(n.createdAt));
     const zh = n.lang !== 'en';
-    return postcardSvg({
+    return cardSvg({
       seed: n.seed,
+      texts: [n.kindness || ''],
       line: n.kindness || (zh ? '今晚就到這裡。' : 'That is enough for tonight.'),
       label: n.kindness ? (zh ? '今天對自己好的一件事' : 'One kind thing I did for myself') : zh ? '晚安' : 'Good night',
       date,

@@ -31,6 +31,7 @@ async function enableAi(page, key = 'sk-ant-test') {
 test('AI conversation is off by default', async ({ page }) => {
   await finishLens(page);
   await expect(page.locator('[data-key="ai-open"]')).toHaveCount(0);
+  await expect(page.locator('[data-key="ai-note"]')).toHaveCount(0);
 });
 
 test('with a key, the conversation uses the lens and sends only what it should', async ({ page }) => {
@@ -53,6 +54,9 @@ test('with a key, the conversation uses the lens and sends only what it should',
   await page.goto('/#journal');
   await expect(page.locator('.silent-list')).toContainText(JOURNAL_NOTE);
   await finishLens(page);
+  // the page itself does not respond to the answers; one quiet line says where that happens
+  await expect(page.locator('[data-key="ai-note"]')).toContainText('AI 對話');
+  await expect(page.locator('.lens-summary blockquote.lens-answer').first()).toHaveText('回答 1');
   await page.locator('[data-key="ai-open"]').click();
   await page.fill('#ai-input', '我覺得自己很爛');
   await page.locator('[data-key="ai-send"]').click();

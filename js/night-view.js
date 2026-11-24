@@ -1,7 +1,7 @@
 // The bedtime ritual: set a worry down, note one kind thing, listen to a short wind-down
 // track, and get a postcard. Every step can be skipped. No streaks, no reminders of missed days.
 import { TRACKS, THEMES, THEME_TRACK, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
-import { postcardSvg, postcardPng, sharePng } from './postcard.js';
+import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
 import { createFlowHistory } from './flow-history.js';
 
@@ -26,7 +26,7 @@ const S = {
     worryTitle: '把今天的心事放下來',
     worryHelp: '寫幾句也好，不寫也可以。這些字只存在這個裝置上，睡前引導也不會唸出來。',
     worryPlaceholder: '今天讓我放不下的是……',
-    themeLabel: '它比較像哪一類？（選填）',
+    themeLabel: '它比較像哪幾類？可以不只選一個。（選填）',
     themes: { work: '學業或工作', relationship: '伴侶或朋友', family: '家人', health: '身體', future: '以後的事', unsure: '說不清楚' },
     keep: '存進夜晚的紀錄',
     kindTitle: '今天對自己好的一件事',
@@ -87,7 +87,7 @@ const S = {
     worryTitle: 'Set down what is on your mind',
     worryHelp: 'A few lines, or nothing at all. What you write stays on this device, and the track never reads it aloud.',
     worryPlaceholder: 'What I cannot put down tonight is…',
-    themeLabel: 'What is it closest to? (optional)',
+    themeLabel: 'What is it closest to? Pick as many as fit. (optional)',
     themes: { work: 'School or work', relationship: 'Partner or friends', family: 'Family', health: 'My body', future: 'What comes next', unsure: 'Hard to say' },
     keep: 'Keep it in Journal, under Nights',
     kindTitle: 'One kind thing I did for myself today',
@@ -140,7 +140,7 @@ export function isEvening(d = new Date()) {
 }
 
 export function createNightView({ h, add, getLang, rerender, toast, db, onExit, latestMood, openGentle }) {
-  const st = { run: 0, preparing: false, stage: 'card', worry: '', theme: null, keep: true, kind: '', track: null, player: null, line: '', lineIndex: 0, paused: false, readAlong: false, postcard: null, jar: [], voiceName: null };
+  const st = { run: 0, preparing: false, stage: 'card', worry: '', themes: [], keep: true, kind: '', track: null, player: null, line: '', lineIndex: 0, paused: false, readAlong: false, postcard: null, jar: [], voiceName: null };
   const L = () => S[getLang()] || S.en;
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
   // suggested track: mod and store once loaded, optIn, and dec for tonight's suggestion
@@ -204,7 +204,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.sendPng = null;
     st.sendOpen = false;
     st.worry = '';
-    st.theme = null;
+    st.themes = [];
     st.kind = '';
     st.track = null;
     st.keep = (await db.getSetting('nightKeep', true).catch(() => true)) !== false;
@@ -273,7 +273,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function worry() {
     const ta = h('textarea', { id: 'night-worry', rows: '4', maxlength: '1000', placeholder: L().worryPlaceholder, oninput: (e) => {
       st.worry = e.target.value;
-      nextLabel(st.worry || (st.theme ? '-' : ''));
+      nextLabel(st.worry || (st.themes.length ? '-' : ''));
     } });
     ta.value = st.worry;
     return [
@@ -282,18 +282,21 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       h('p', { class: 'lens-label', id: 'night-theme' }, L().themeLabel),
       h(
         'div',
-        { class: 'chips wrap', role: 'radiogroup', 'aria-labelledby': 'night-theme' },
+        { class: 'chips wrap theme-chips', role: 'group', 'aria-labelledby': 'night-theme' },
         THEMES.map((tm) =>
           h(
             'button',
             {
               type: 'button',
-              role: 'radio',
-              'aria-checked': st.theme === tm ? 'true' : 'false',
-              class: 'chip' + (st.theme === tm ? ' on' : ''),
+              'aria-pressed': st.themes.includes(tm) ? 'true' : 'false',
+              class: 'chip' + (st.themes.includes(tm) ? ' on' : ''),
               'data-key': `night-theme-${tm}`,
               onclick: () => {
-                st.theme = st.theme === tm ? null : tm;
+                // several kinds can be on at once, kept in the order chosen;
+                // 'unsure' stands alone, so it and the named kinds switch each other off
+                if (st.themes.includes(tm)) st.themes = st.themes.filter((x) => x !== tm);
+                else if (tm === 'unsure') st.themes = ['unsure'];
+                else st.themes = [...st.themes.filter((x) => x !== 'unsure'), tm];
                 rerender();
               },
             },
@@ -317,7 +320,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       ),
       nav(() => {
         if (guard(st.worry, () => go('kind'))) go('kind');
-      }, { back: () => { st.stage = 'card'; flow.sync(); onExit(); }, nextLabel: st.worry.trim() || st.theme ? L().next : L().skip }),
+      }, { back: () => { st.stage = 'card'; flow.sync(); onExit(); }, nextLabel: st.worry.trim() || st.themes.length ? L().next : L().skip }),
     ];
   }
 
@@ -340,16 +343,20 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
 
   // the usual order: the track suited to tonight's kind of worry, then the others as listed.
   // 'drift' invites images to surface, so it is never suggested, only chosen on purpose.
+  // With several kinds chosen, the first one's track leads and the others' follow, each once.
+  const themeTracks = () => [...new Set(st.themes.map((tm) => THEME_TRACK[tm]).filter(Boolean))];
+  const themeContext = () => st.themes[0] || 'none'; // what the suggestion is learned under
   function trackOrder() {
-    const first = THEME_TRACK[st.theme];
-    return TRACKS.map((t) => t.id).filter((id) => id !== 'drift').sort((a, b) => (b === first) - (a === first));
+    const lead = themeTracks();
+    const rest = TRACKS.map((t) => t.id).filter((id) => id !== 'drift' && !lead.includes(id));
+    return [...lead, ...rest];
   }
 
   // Decides tonight's one suggested track, only when the person has switched this on. The gate
   // (risk language, a low latest mood) is worked out here, outside the learner; a gated
-  // suggestion is the usual one. One decision per theme per night, however often the step is opened.
+  // suggestion is the usual one. One decision per first-chosen theme per night, however often the step is opened.
   async function featureTrack() {
-    const context = st.theme || 'none';
+    const context = themeContext();
     if (!pol.mod || pol.optIn !== true) return (pol.dec = null); // off: nothing decided, nothing logged
     if (pol.dec && pol.dec.context === context && !pol.dec.used) return;
     pol.dec = null;
@@ -399,14 +406,21 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     const gentle = ['person-centered', 'relaxation', 'acceptance'];
     // 'drift' invites images to surface, so it is only ever chosen on purpose
     const pool = mood !== null && mood <= 3 ? gentle : TRACKS.map((t) => t.id).filter((id) => id !== 'drift');
-    return pool[Math.floor(Math.random() * pool.length)];
+    // when kinds of worry were chosen, pick among the tracks that suit them, if the pool allows any
+    const fitting = themeTracks().filter((id) => pool.includes(id));
+    const from = fitting.length ? fitting : pool;
+    return from[Math.floor(Math.random() * from.length)];
   }
 
   function tone() {
     // with suggestions switched on and not gated, the policy's track takes the suggested place
-    const learned = pol.dec && !pol.dec.gated && pol.dec.context === (st.theme || 'none') ? pol.dec.action : null;
-    const suggestedId = learned || THEME_TRACK[st.theme];
-    const tag = learned && learned !== THEME_TRACK[st.theme] ? PT().trackTag : L().suggested;
+    const learned = pol.dec && !pol.dec.gated && pol.dec.context === themeContext() ? pol.dec.action : null;
+    const lead = themeTracks();
+    const suggestedId = learned || lead[0];
+    const tag = learned && learned !== lead[0] ? PT().trackTag : L().suggested;
+    // the suggestion, then the tracks for the other kinds chosen, then the rest as listed
+    const front = [...new Set([suggestedId, ...lead].filter(Boolean))];
+    const rank = (id) => (front.includes(id) ? front.indexOf(id) : front.length);
     return [
       ...stepHead(3, L().toneTitle, L().toneHelp),
       h(
@@ -416,7 +430,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         // the track suited to tonight's kind of worry comes first, marked as a suggestion;
         // a few are shown at first so the choice is not a long list at bedtime
         [...TRACKS]
-          .sort((a, b) => (b.id === suggestedId) - (a.id === suggestedId))
+          .sort((a, b) => rank(a.id) - rank(b.id))
           .slice(0, st.allTracks ? TRACKS.length : 3)
           .map((t) =>
           h(
@@ -470,7 +484,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     if (st.player) st.player.stop();
     st.track = trackId;
     const lang = getLang();
-    const script = buildScript(trackId, st.theme, lang);
+    const script = buildScript(trackId, st.themes, lang);
     await voicesReady();
     if (run !== st.run) return; // the person left while voices were loading
     const voice = pickVoice(lang === 'en' ? 'en' : 'zh', st.voiceName);
@@ -587,16 +601,20 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       const seed = `${now.toDateString()}-${st.track}-${st.kind}`;
       const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(now);
       const hasKind = st.kind.trim().length > 0;
-      st.postcard = postcardSvg({
+      // the picture follows the kind thing they wrote (never the worry, which stays private)
+      st.postcard = cardSvg({
         seed,
         line: hasKind ? st.kind.trim() : L().nightLine,
         label: hasKind ? L().kindLabel : L().nightLabel,
         date,
+        texts: hasKind ? [st.kind.trim()] : [''],
+        animate: true,
       });
       const night = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
         createdAt: Date.now(),
-        theme: st.theme,
+        theme: st.themes[0] || null, // kept so an older copy of the app can still read this night
+        themes: [...st.themes],
         worry: st.keep ? st.worry.trim() : '',
         kindness: st.kind.trim(),
         track: st.track,
@@ -683,7 +701,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     }
     const lines = L().sendLines;
     const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
-    const svgFor = (line) => postcardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
+    const svgFor = (line) => cardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
     const pick = st.sendPick ?? null;
     const preview = pick !== null ? h('div', { class: 'send-preview', role: 'img', 'aria-label': lines[pick] }) : null;
     if (preview) preview.innerHTML = svgFor(lines[pick]);
@@ -841,7 +859,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       st.nightAt = null;
       st.worry = '';
       st.kind = '';
-      st.theme = null;
+      st.themes = [];
       st.track = null;
       st.stage = 'card';
       flow.sync();

@@ -3046,3 +3046,36 @@ input[type='radio'] {
 .about .lang {
   margin: var(--s4) 0;
 }
+
+/* ---------- bedtime: kinds of worry (several can be on) ---------- */
+.theme-chips .chip {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ---------- lens summary: the person's answers as written; topics as toggles ---------- */
+.lens-answers {
+  margin: var(--s2) 0 var(--s4);
+}
+.lens-answer-q {
+  margin: var(--s3) 0 var(--s1);
+  font-size: 14px;
+  color: var(--muted);
+}
+.lens-answer {
+  margin: 0;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--accent);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lens-answer-open {
+  margin: 0;
+  padding-left: 15px;
+}
+.lens-ai-note {
+  margin: var(--s4) 0 var(--s1);
+}
+.topic-chips .chip {
+  min-height: 44px;
+}

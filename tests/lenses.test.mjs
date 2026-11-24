@@ -4,7 +4,9 @@ import { buildContent } from '../tools/export-content.mjs';
 import { expectedCache, shellFiles } from '../tools/bump-cache.mjs';
 import { checkRisk, hasHelpLine } from '../js/safety.js';
 import { cleanEntry, cleanNight, cleanSession } from '../js/validate.js';
-import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
+import { TRACKS, THEMES, buildScript, themeLine } from '../js/bedtime.js';
+import { LENSES, fill, rewriteText, lensesForTopic, lensesForTopics, commonForTopics, topicList, answerRows, lensById, TOPICS, TOPIC_COMMON } from '../js/lenses.js';
+import { topicsContext, gateReason } from '../js/policy.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -198,7 +200,7 @@ test('every lens has both languages, matching step counts, and a chapter', () =>
     assert.ok(l.zh && l.en && l.chapter >= 4 && l.chapter <= 14, l.id);
     assert.equal(l.zh.steps.length, l.en.steps.length, l.id);
     for (const lang of ['zh', 'en']) {
-      for (const k of ['name', 'idea', 'noticed', 'experiment', 'misses']) assert.ok(l[lang][k], `${l.id}.${lang}.${k}`);
+      for (const k of ['name', 'idea', 'noticed', 'experiment', 'misses', 'perspective', 'tryThis']) assert.ok(l[lang][k], `${l.id}.${lang}.${k}`);
       assert.ok(l[lang].steps.length >= 3 && l[lang].steps.length <= 4, l.id);
     }
   }
@@ -288,6 +290,107 @@ test('lenses unsuited to loss are excluded for that topic', () => {
   for (const t of TOPICS) assert.ok(lensesForTopic(t).length >= 5, t);
 });
 
+test('several topics: a lens is excluded when any chosen topic excludes it', () => {
+  const loss = lensesForTopic('loss').map((l) => l.id);
+  for (const other of TOPICS.filter((t) => t !== 'loss')) {
+    for (const pair of [['loss', other], [other, 'loss'], [other, 'work', 'loss']]) {
+      assert.deepEqual(lensesForTopics(pair).map((l) => l.id), loss, pair.join('+'));
+      for (const l of commonForTopics(pair)) assert.ok(loss.includes(l.id), `${pair.join('+')} lists ${l.id}`);
+    }
+  }
+  assert.equal(lensesForTopics(['work', 'family']).length, LENSES.length);
+  assert.deepEqual(lensesForTopics('loss').map((l) => l.id), loss);
+  // every lens's own exclusions hold against any combination that contains one of them
+  for (const l of LENSES) for (const t of l.excludeTopics) assert.ok(!lensesForTopics(['self', t]).includes(l), l.id);
+});
+
+test('several topics: usual approaches follow the order chosen, without repeats', () => {
+  const ids = (t) => commonForTopics(t).map((l) => l.id);
+  assert.deepEqual(ids(['family', 'work']), [...TOPIC_COMMON.family, ...TOPIC_COMMON.work]);
+  assert.deepEqual(ids(['work', 'family']), [...TOPIC_COMMON.work, ...TOPIC_COMMON.family]);
+  const both = ids(['relationship', 'family']);
+  assert.equal(new Set(both).size, both.length);
+  assert.deepEqual(both.slice(0, 5), TOPIC_COMMON.relationship);
+  assert.deepEqual(ids(['other']), []);
+  assert.deepEqual(ids(['family']), TOPIC_COMMON.family);
+});
+
+test('topics are read from new sessions, old sessions, and plain values', () => {
+  assert.deepEqual(topicList({ topics: ['work', 'loss'] }), ['work', 'loss']);
+  assert.deepEqual(topicList({ topic: 'family' }), ['family']);
+  assert.deepEqual(topicList({ topics: [], topic: 'self' }), ['self']);
+  assert.deepEqual(topicList(['work', 'work', 'nope', null]), ['work']);
+  assert.deepEqual(topicList(null), []);
+  assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', topic: 'work' }).topics, ['work']);
+  assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', topics: ['work', 3, 'loss'] }).topics, ['work', 'loss']);
+  assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt' }).topics, []);
+});
+
+test('the suggestion context is one topic name, and a loss among the topics is gated', () => {
+  assert.equal(topicsContext(['work', 'family']), 'work');
+  assert.equal(topicsContext(['family', 'work']), 'family');
+  assert.equal(topicsContext(['work', 'loss']), 'loss');
+  assert.equal(topicsContext(['other']), 'other');
+  assert.equal(topicsContext([]), 'none');
+  assert.equal(gateReason({ optedIn: true, surface: 'lens', context: topicsContext(['self', 'loss']) }), 'loss');
+  assert.equal(gateReason({ optedIn: true, surface: 'lens', context: topicsContext(['self', 'work']) }), null);
+  for (const a of TOPICS) for (const b of TOPICS) assert.ok(TOPICS.includes(topicsContext([a, b])));
+});
+
+test('summary text stands alone: no placeholders, no dashes, no praise or "you should"', () => {
+  for (const l of LENSES) {
+    for (const lang of ['zh', 'en']) {
+      const c = l[lang];
+      for (const [k, t] of [['perspective', c.perspective], ['tryThis', c.tryThis], ...c.steps.map((s, i) => [`short ${i + 1}`, s.short])]) {
+        assert.ok(typeof t === 'string' && t.trim(), `${l.id}.${lang}.${k} missing`);
+        assert.ok(!/\{\d\}/.test(t), `${l.id}.${lang}.${k} has a placeholder`);
+        assert.ok(!/[—–]/.test(t), `${l.id}.${lang}.${k} has a dash`);
+        assert.ok(!/你應該|你很棒|做得很好|很勇敢|you should|well done|good job|great job|proud of you/i.test(t), `${l.id}.${lang}.${k}`);
+        assert.equal(/[一-鿿]/.test(t), lang === 'zh', `${l.id}.${lang}.${k} is in the wrong language`);
+      }
+      // a perspective describes the approach; it makes no statement about the reader
+      assert.ok(!/你寫|你說|you wrote|you said|you named/i.test(c.perspective), `${l.id}.${lang} perspective speaks about the person`);
+      for (const s of c.steps) assert.ok([...s.short].length <= (lang === 'zh' ? 22 : 52), `${l.id}.${lang} short form is long: ${s.short}`);
+    }
+  }
+});
+
+test('the summary never puts an answer inside a generated sentence', () => {
+  const MARK = 'ZQX可能不會QZX';
+  for (const l of LENSES) {
+    for (const lang of ['zh', 'en']) {
+      const c = l[lang];
+      const answers = c.steps.map((s, i) => (s.scale ? '6' : `${MARK}${i}\n second line  `));
+      const rows = answerRows(l, lang, answers);
+      assert.equal(rows.length, c.steps.length);
+      rows.forEach((r, i) => {
+        // the answer is its own block, unchanged; the label beside it is fixed text
+        if (c.steps[i].scale) assert.equal(r.text, '6 / 10');
+        else assert.equal(r.text, answers[i], `${l.id}.${lang} step ${i + 1} changed the answer`);
+        assert.equal(r.q, c.steps[i].short);
+        assert.ok(!r.q.includes(MARK));
+      });
+      // everything else on the page is the same whatever was answered
+      for (const t of [c.perspective, c.tryThis, c.misses]) assert.ok(!t.includes(MARK));
+    }
+  }
+  // the view shows only these fields, and no longer fills the old templates
+  const view = readFileSync(new URL('../js/lens-view.js', import.meta.url), 'utf8');
+  assert.ok(!/\.noticed|\.experiment/.test(view), 'lens-view.js still reads a template');
+  assert.equal([...view.matchAll(/fill\(/g)].length, 2, 'fill() is only for the question text of a step and a card');
+});
+
+test('blank and "not sure" answers are shown as left open, scale answers as a number out of 10', () => {
+  const sf = lensById('solution-focused');
+  const rows = answerRows(sf, 'en', ['0', 'Not sure.', '']);
+  assert.deepEqual(rows.map((r) => [r.text, r.open]), [['0 / 10', false], ['', true], ['', true]]);
+  assert.deepEqual(answerRows(sf, 'zh', [7, '不知道', '我不知道該怎麼辦']).map((r) => r.text), ['7 / 10', '', '我不知道該怎麼辦']);
+  // an old or damaged saved session: missing answers, too few, not an array
+  assert.equal(answerRows(sf, 'zh', undefined).filter((r) => r.open).length, 3);
+  assert.equal(answerRows(lensById('rebt'), 'en', ['a']).filter((r) => r.open).length, 3);
+  assert.equal(answerRows(sf, 'en', ['eleven', 'x', 'y'])[0].open, true);
+});
+
 
 test('help numbers are matched as whole numbers only', () => {
   for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '請現在撥打 1925 或 988', 'call the Samaritans on 116 123', 'Lifeline 13 11 14']) assert.ok(hasHelpLine(t), t);
@@ -342,6 +445,44 @@ test('backup records are checked before they are stored', () => {
   assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', answers: null }).answers, []);
   assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', answers: ['a', 7, {}] }).answers, ['a', 7, '']);
   assert.equal(({}).polluted, undefined);
+});
+
+test('bedtime scripts name one, two or three kinds of worry in one spoken line, and none for unsure', () => {
+  assert.equal(themeLine(['work', 'family'], 'zh-TW'), '今晚心上有工作或學業的事，也有家裡的事。');
+  assert.equal(themeLine(['work', 'family'], 'en'), 'Tonight, work or school is on your mind, and family too.');
+  assert.equal(themeLine('family', 'en'), 'Tonight, family is on your mind.'); // an old single theme
+  assert.equal(themeLine(['unsure'], 'en'), '');
+  const named = THEMES.filter((tm) => tm !== 'unsure');
+  for (const lang of ['zh-TW', 'en']) {
+    for (const t of TRACKS) {
+      const neutral = buildScript(t.id, [], lang);
+      assert.deepEqual(buildScript(t.id, ['unsure'], lang), neutral);
+      assert.deepEqual(buildScript(t.id, null, lang), neutral);
+      assert.deepEqual(buildScript(t.id, 'work', lang), buildScript(t.id, ['work'], lang));
+      for (let n = 1; n <= named.length; n++) {
+        const script = buildScript(t.id, named.slice(0, n), lang);
+        for (const [line, pause] of script) {
+          assert.ok(line && !/[{}]|undefined|null/.test(line), `${t.id} ${lang} ${n}: ${line}`);
+          assert.ok(pause > 0);
+        }
+        // one line more than the neutral script's two set-down lines, whatever the count
+        assert.equal(script.length, neutral.length + 2, `${t.id} ${lang} ${n}`);
+        assert.ok(script[5][0].length <= (lang === 'en' ? 110 : 40), script[5][0]);
+      }
+    }
+  }
+});
+
+test('nights keep a themes list, and older nights with one theme stay valid', () => {
+  const old = cleanNight({ id: 'n', createdAt: 5, theme: 'work' });
+  assert.deepEqual(old.themes, ['work']);
+  assert.equal(old.theme, 'work');
+  const many = cleanNight({ id: 'n', createdAt: 5, themes: ['family', 'work', 'family', 7, ''] });
+  assert.deepEqual(many.themes, ['family', 'work']);
+  assert.equal(many.theme, 'family');
+  const none = cleanNight({ id: 'n', createdAt: 5, themes: 'work' });
+  assert.deepEqual(none.themes, []);
+  assert.equal(none.theme, null);
 });
 
 console.log(`\n${passed} passed`);

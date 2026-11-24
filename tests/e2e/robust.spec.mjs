@@ -122,14 +122,24 @@ test.describe('backup import', () => {
   test('the same backup imported twice does not duplicate anything', async ({ page }) => {
     const data = backup({
       entries: [entry('e1'), entry('e2', { silent: true, features: null })],
-      nights: [{ id: 'n1', createdAt: Date.now() - 1000, theme: 'work', worry: 'w', kindness: 'k', track: 'acceptance', seed: 's', lang: 'zh-TW' }],
-      lensSessions: [{ id: 's1', createdAt: Date.now() - 1000, lensId: 'cbt', topic: 'work', concern: 'c', answers: ['a', '3'], rating: 4 }],
+      // n1 is a night from before several themes could be chosen; n2 has the list
+      nights: [
+        { id: 'n1', createdAt: Date.now() - 1000, theme: 'work', worry: 'w', kindness: 'k', track: 'acceptance', seed: 's', lang: 'zh-TW' },
+        { id: 'n2', createdAt: Date.now() - 500, theme: 'family', themes: ['family', 'future'], worry: 'w2', kindness: 'k2', track: 'family-systems', seed: 's2', lang: 'zh-TW' },
+      ],
+      // s1 is from before several topics could be chosen; s2 has the list
+      lensSessions: [
+        { id: 's1', createdAt: Date.now() - 1000, lensId: 'cbt', topic: 'work', concern: 'c', answers: ['a', '3'], rating: 4 },
+        { id: 's2', createdAt: Date.now() - 500, lensId: 'gestalt', topics: ['family', 'work', 7], concern: 'c2', answers: ['a'], rating: null },
+      ],
     });
     expect(await importFile(page, data)).toContain('2');
     expect(await importFile(page, data)).toContain('0');
     expect(await storedEntries(page)).toHaveLength(2);
-    expect(await stored(page, 'nights')).toHaveLength(1);
-    expect(await stored(page, 'lensSessions')).toHaveLength(1);
+    const nights = (await stored(page, 'nights')).sort((x, y) => x.createdAt - y.createdAt);
+    expect(nights.map((n) => n.themes)).toEqual([['work'], ['family', 'future']]);
+    const sessions = (await stored(page, 'lensSessions')).sort((x, y) => x.createdAt - y.createdAt);
+    expect(sessions.map((x) => x.topics)).toEqual([['work'], ['family', 'work']]);
   });
 
   test('a file with the same id twice reports the number actually stored', async ({ page }) => {
