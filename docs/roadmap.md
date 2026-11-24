@@ -23,6 +23,14 @@
 - Whether to mention the app to the program or site supervisor, since it carries a counseling student's name.
 - Chinese terms to check against the Taiwan edition of Corey before changing them (a reviewer suggested these but could not check the book): REBT's A as 觸發事件 versus 促發事件 or 緣起事件; the coping self-talk experiment in the cognitive lens, which is Meichenbaum's 認知行為矯正 rather than Beck; 真誠 in the existential lens, which collides with Rogers' 真誠一致 (perhaps 活得真實); reality therapy's 權力 (perhaps 權力（成就感）); and 前因 versus 前事 in behavioral ABC.
 
+## Before sharing widely
+
+1. On your own iPhone: open the site in Safari, add it to the Home Screen, open it from there, record once, do one bedtime ritual with sound on, and send yourself a goodnight card. (Real speech voices, the share sheet and iOS storage cannot be tested in the cloud.)
+2. Read `content-review.md` and tick or edit each line; check the Corey terms listed above.
+3. Give `reviewer-brief.md` to a supervisor or faculty member.
+4. Decide whether the app shows your name, and whether the program should know.
+5. Check the Taiwan titles and content notes in `data/recs.json`.
+
 ## Needs a decision
 
 - Social features: which platform (if any), and who moderates. Requirements are in [`social-design.md`](social-design.md).
