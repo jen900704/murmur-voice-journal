@@ -139,7 +139,7 @@ python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
 npm run test:e2e              # browser tests in Chromium: recording through a fake microphone, the main flows,
                               # a mocked AI API, offline use, double taps and damaged backups, and an axe-core
-                              # WCAG 2.1 AA audit of 20 screens
+                              # WCAG 2.1 AA audit of 31 screens
                               # (each in Chinese with light colors and in English with dark colors)
 npm run test:webkit           # the same flows in WebKit (Safari's engine), without the microphone tests
                               # and the offline reload test

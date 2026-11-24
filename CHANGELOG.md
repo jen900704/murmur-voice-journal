@@ -41,4 +41,4 @@ The first public version, built and reviewed over one night. Each area below wen
 - Recording cannot hang, ends cleanly when the microphone is lost or the app is hidden, and decodes on older Safari.
 - Backups are checked record by record on import; a damaged file cannot break a screen.
 - The service worker serves one release at a time, fetches past the CDN cache, applies updates only when the app is idle, and the cache name is a hash of the app files checked by a unit test.
-- 374 unit checks and 205 browser tests in Chromium (most also run in WebKit in CI), plus lab tests, including an offline test and a WCAG 2.1 AA audit of 20 screens (Chinese in light mode, English in dark mode).
+- 374 unit checks and 205 browser tests in Chromium (most also run in WebKit in CI), plus lab tests, including an offline test and a WCAG 2.1 AA audit of 31 screens (Chinese in light mode, English in dark mode).
