@@ -1409,7 +1409,8 @@ async function init() {
     }
   });
   render();
-  if ('serviceWorker' in navigator && location.protocol === 'https:') setupUpdates();
+  // on localhost the worker is off unless a test asks for it (?sw), so development reloads stay fresh
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || new URLSearchParams(location.search).has('sw'))) setupUpdates();
 }
 
 // A new release waits until the app is reopened and idle, then reloads once, so a page never
