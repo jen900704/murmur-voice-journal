@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openLensMore } from './helpers.mjs';
 import { readFileSync } from 'node:fs';
 
 // The featured-item policy (js/policy.js): off until the person says yes, one featured row,
@@ -27,10 +28,12 @@ async function toPickList(page, { concern = '我一直擔心報告做不好', to
   await page.reload(); // a fresh lens home page, wherever the last exercise was left
   await page.locator('[data-key="lens-start"]').click();
   await page.fill('#lens-concern', concern);
-  for (const t of topics) await page.locator(`[data-key="topic-${t}"]`).click();
-  await page.locator('[data-key="lens-concern-next"]').click();
+  await page.locator('[data-key="lens-worry-next"]').click();
   if (risky) await page.locator('[data-key="crisis-continue"]').click();
-  await page.getByRole('button', { name: /自己選/ }).click();
+  for (const t of topics) await page.locator(`[data-key="topic-${t}"]`).click();
+  await page.locator('[data-key="lens-topics-next"]').click();
+  await page.locator('[data-key="lens-concern-next"]').click();
+  await page.locator('[data-key="lens-pick-all"]').click();
   await expect(page.getByRole('heading', { name: '選一個角度' })).toBeVisible();
 }
 
@@ -117,6 +120,7 @@ test('a rating updates the log and the learner; export has a propensity column; 
   await page.locator('[data-key="pick-narrative"]').click();
   await answerAll(page);
   await page.locator('[data-key="rate-5"]').click();
+  await openLensMore(page);
   await page.getByRole('button', { name: '結束，不儲存' }).click();
   await expect.poll(async () => (await setting(page, 'policyLog'))?.[0]?.reward).toBe(1);
   let log = await setting(page, 'policyLog');
@@ -131,6 +135,7 @@ test('a rating updates the log and the learner; export has a propensity column; 
   await toPickList(page);
   await page.locator('[data-key="policy-featured"] .lens-row').click();
   await answerAll(page);
+  await openLensMore(page);
   await page.getByRole('button', { name: '結束，不儲存' }).click();
   await expect.poll(async () => (await setting(page, 'policyLog'))?.[1]?.used ?? null).not.toBeNull();
   log = await setting(page, 'policyLog');
@@ -181,6 +186,7 @@ test('risk language, a loss, or a low mood: the usual first lens, propensity 1, 
   await page.locator('[data-key="policy-featured"] .lens-row').click();
   await answerAll(page);
   await page.locator('[data-key="rate-5"]').click();
+  await openLensMore(page);
   await page.getByRole('button', { name: '結束，不儲存' }).click();
   await expect.poll(async () => (await setting(page, 'policyLog'))?.[0]?.reward).toBe(1);
   let log = await setting(page, 'policyLog');

@@ -4,6 +4,7 @@ import { TRACKS, THEMES, THEME_TRACK, trackById, buildScript, BedtimePlayer, pic
 import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
 import { createFlowHistory } from './flow-history.js';
+import { mascot } from './mascot.js';
 
 // The suggested-track policy (js/policy.js) is optional and off by default; loaded on its own
 // so the ritual still works if that one file cannot be fetched.
@@ -13,8 +14,8 @@ const S = {
   'zh-TW': {
     cardTitle: '睡前儀式',
     cardDoneTitle: '今晚完成了，晚安',
-    cardDoneBody: '明信片收在「紀錄」的「夜晚」裡。想再聽一段的話，也可以。',
-    cardBody: '放下今天的心事，聽一段三到五分鐘的睡前引導，收一張晚安明信片。',
+    cardDoneBody: '明信片收在「紀錄」的「夜晚」裡。',
+    cardBody: '放下心事，聽一段睡前引導，收一張明信片。',
     cardStart: '開始',
     cardAgain: '再做一次',
     cardListen: '只想聽一段',
@@ -74,8 +75,8 @@ const S = {
   en: {
     cardTitle: 'Bedtime ritual',
     cardDoneTitle: 'Done for tonight. Good night',
-    cardDoneBody: 'Your postcard is in Journal, under Nights. You can listen to another track if you like.',
-    cardBody: 'Set down today\'s worry, listen to a three to five minute wind-down, and get a small postcard.',
+    cardDoneBody: 'Your postcard is in Journal, under Nights.',
+    cardBody: 'Set a worry down, listen to a wind-down, get a postcard.',
     cardStart: 'Start',
     cardAgain: 'Do it again',
     cardListen: 'Just listen',
@@ -265,7 +266,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     return h(
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
-      h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
+      // Mumu, dozing: the bedtime card is where the companion sits in the evening
+      mascot(isEvening() ? 'sleepy' : 'idle', { size: 64 }),
       h('div', {}, h('h2', {}, done ? L().cardDoneTitle : L().cardTitle), h('p', {}, done ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, done ? L().cardAgain : L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
@@ -277,6 +279,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     } });
     ta.value = st.worry;
     return [
+      h('div', { class: 'night-mumu' }, mascot('sleepy', { size: 88 })),
       ...stepHead(1, L().worryTitle, L().worryHelp),
       ta,
       h('p', { class: 'lens-label', id: 'night-theme' }, L().themeLabel),
@@ -653,7 +656,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function postcard() {
     const holder = h('div', { class: 'postcard', role: 'img', 'aria-label': isEvening() ? L().cardDone : L().cardDoneDay });
     holder.innerHTML = st.postcard;
+    // Mumu is glad, quietly: one slow hop (css "Night, Mumu"), no words
     return [
+      h('div', { class: 'night-mumu night-mumu--done' }, mascot('happy', { size: 72 })),
       h('h2', {}, isEvening() ? L().cardDone : L().cardDoneDay),
       holder,
       h(

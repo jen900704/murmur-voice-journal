@@ -11,7 +11,7 @@ for (const [locale, scheme] of [
       const errors = [];
       page.on('pageerror', (e) => errors.push(String(e)));
       await page.goto('/#journal');
-      await page.locator('.journal .btn').click();
+      await page.locator('[data-key="journal-demo"]').click();
       await expect(page).toHaveURL(/#trends$/);
       await expect(page.locator('.demo-banner')).toBeVisible();
       await expect(page.locator('.chart')).toHaveAttribute('aria-label', /.+/);

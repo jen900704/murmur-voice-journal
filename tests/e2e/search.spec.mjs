@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { enterConcern } from './helpers.mjs';
 
 test.use({ locale: 'zh-TW' });
 
@@ -24,10 +25,8 @@ async function seed(page) {
   await silentCheckin(page, NOTE_EN);
   await page.goto('/#lens');
   await page.locator('[data-key="lens-start"]').click();
-  await page.fill('#lens-concern', CONCERN);
-  await page.locator('[data-key="topic-family"]').click();
-  await page.locator('[data-key="lens-concern-next"]').click();
-  await page.getByRole('button', { name: /自己選/ }).click();
+  await enterConcern(page, CONCERN, ['family']);
+  await page.locator('[data-key="lens-pick-all"]').click();
   await page.locator('[data-key="pick-family-systems"]').click();
   const answers = ['哥哥也被催過', '我夾在爸爸和媽媽中間', '我想先留在這裡兩年', '再想想'];
   for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {

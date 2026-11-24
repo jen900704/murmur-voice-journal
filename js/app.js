@@ -13,6 +13,7 @@ import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 import { LENSES } from './lenses.js';
 import { calmSheet } from './calm.js';
+import { mascot, setMascot, restingState } from './mascot.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -325,6 +326,25 @@ async function savePending() {
   toast(message);
   render();
   if (noteRisk) extras.showHelp();
+  else celebrate();
+}
+
+// A small moment when something is done: Mumu hops under the toast for about two seconds.
+// No words, no counts. With reduced motion it simply appears and goes (css "Today, Mumu").
+function celebrate() {
+  // on Today, the hero's own Mumu reacts, so there is never a second one on screen
+  const hero = $('#sheet').hidden ? document.querySelector('.lens-hero .mumu') : null;
+  if (hero) {
+    setMascot(hero, 'happy');
+    setTimeout(() => hero.isConnected && setMascot(hero, restingState()), 2000);
+    return;
+  }
+  const old = document.querySelector('.mumu-pop');
+  if (old) old.remove();
+  const pop = h('div', { class: 'mumu-pop', 'aria-hidden': 'true' }, mascot('happy', { size: 84 }));
+  document.body.appendChild(pop);
+  setTimeout(() => pop.classList.add('out'), 1800);
+  setTimeout(() => pop.remove(), 2300);
 }
 
 // ---------- demo data ----------
@@ -534,27 +554,78 @@ function viewToday() {
   }
 
   const idle = state.phase === 'idle' || state.phase === 'error';
-  if (idle && !state.welcomed && !state.entries.length) add(wrap, welcomeCard());
   const welcoming = idle && !state.welcomed && !state.entries.length;
+  if (welcoming) add(wrap, welcomeCard());
   // in the evening the bedtime card comes first, and a low check-in adds a short note under it
   const evening = idle && isEvening() && !welcoming;
   // at the lowest rating the note, with help first, stays on top even in the evening
   const lowest = latestRated();
   const helpFirst = lowest && lowest.mood <= 1;
   if (evening && !helpFirst) add(wrap, nightView.card());
-  // the low-mood card offers breathing, writing and (by day) the ritual itself; the row under
-  // the record button then leaves those out, so each action appears once on the screen
+  // the low-mood card offers breathing, writing and (by day) the ritual itself; the tool row
+  // then leaves those out, so each action appears once on the screen
   const lowCard = idle ? extras.lowMoodCard(lowest, { evening }) : null;
   if (lowCard) add(wrap, lowCard);
   if (evening && helpFirst) add(wrap, nightView.card());
   if (idle) add(wrap, iosInstallNote());
-  add(wrap, 
+  // 換角度 is the heart of Today; on a first visit the welcome card already offers it.
+  // One Mumu per screen: in the evening the bedtime card has the sleepy one.
+  if (!welcoming) add(wrap, lensHero(!evening));
+  if (idle) add(wrap, toolRow(lowCard));
+  add(wrap, voiceCard(prompt, promptIdx, prompts));
+  // the demo offer is for a first visit only; it sits last and quiet
+  if (idle && !state.entries.length) {
+    add(wrap, h('button', { type: 'button', class: 'link center demo-offer', onclick: loadDemo }, t('loadDemoShort')));
+  }
+  return wrap;
+}
+
+// The hero: one question and one big button into 換角度. What it is sits behind a small tap.
+function lensHero(withMumu) {
+  const mood = state.phase === 'recording' ? 'listen' : state.phase === 'analyzing' ? 'think' : restingState();
+  return h(
+    'div',
+    { class: 'lens-hero' + (withMumu ? '' : ' no-mumu') },
+    withMumu ? mascot(mood, { size: 104 }) : null,
+    h('h2', { class: 'hero-title' }, t('heroTitle')),
+    h('button', { type: 'button', class: 'btn primary hero-btn', 'data-key': 'hero-lens', onclick: startLens }, t('heroStart')),
+    h('details', { class: 'hero-what' }, h('summary', { 'data-key': 'hero-what' }, t('heroWhat')), h('p', {}, t('heroWhatBody')))
+  );
+}
+
+// Breathe, too much, write and bedtime as a row of round tiles. The data-keys stay as they were.
+function toolRow(lowCard) {
+  const tile = (key, icon, label, onclick, extra = '') =>
+    h('button', { type: 'button', class: 'tool-tile' + extra, 'data-key': key, onclick }, h('span', { class: 'tool-icon', 'aria-hidden': 'true' }, icon), h('span', { class: 'tool-label' }, label));
+  return h(
+    'div',
+    { class: 'tool-row', role: 'group', 'aria-label': t('toolsLabel') },
+    lowCard ? null : tile('breathe-link', '🫧', t('toolBreathe'), () => openSheet(breatheSheet({ h, getLang }))),
+    tile('calm-link', '🌊', t('toolCalm'), openCalm),
+    lowCard ? null : tile('writing-link', '✏️', t('toolWrite'), openWriting),
+    lowCard || isEvening() ? null : tile('night-link', '🌙', t('toolNight'), () => nightView.begin(), ' night-link')
+  );
+}
+
+// The voice journal, now a smaller card under the hero: the day's prompt, the record button,
+// and the way in without speaking. Every data-key and the recording flow are unchanged.
+function voiceCard(prompt, promptIdx, prompts) {
+  const idle = state.phase === 'idle' || state.phase === 'error';
+  const recording = state.phase === 'recording';
+  const analyzing = state.phase === 'analyzing';
+  const card = h('div', { class: 'voice-card' + (recording || analyzing ? ' is-busy' : '') });
+  add(
+    card,
+    h(
+      'div',
+      { class: 'voice-head' },
+      h('h2', { class: 'voice-title' }, h('span', { class: 'voice-dot', 'aria-hidden': 'true' }), t('voiceTitle'))
+    ),
     h(
       'div',
       { class: 'prompt' },
-      h('div', { class: 'prompt-label' }, t('promptLabel')),
       h('p', { class: 'prompt-text' }, prompt),
-      state.phase === 'idle' || state.phase === 'error'
+      idle
         ? h(
             'button',
             {
@@ -570,12 +641,10 @@ function viewToday() {
             t('newPrompt')
           )
         : null,
-      state.phase === 'idle' || state.phase === 'error' ? extras.exchangeBox(prompt, promptIdx, state.askIndex !== null) : null
+      idle ? extras.exchangeBox(prompt, promptIdx, state.askIndex !== null) : null
     )
   );
 
-  const recording = state.phase === 'recording';
-  const analyzing = state.phase === 'analyzing';
   const stage = h('div', { class: 'stage' + (recording ? ' is-recording' : '') + (analyzing ? ' is-analyzing' : '') });
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
@@ -601,22 +670,22 @@ function viewToday() {
       h('span', { class: 'rec-icon' })
     )
   );
-  wrap.appendChild(stage);
+  card.appendChild(stage);
 
   if (recording) {
-    add(wrap, 
+    add(card, 
       h('div', { class: 'timer', id: 'timer', 'aria-live': 'off' }, '0:00'),
       h('p', { class: 'hint', id: 'rec-hint' }, t('tooShortHint')),
       h('button', { type: 'button', class: 'link center', onclick: cancelRecording }, t('discard'))
     );
   } else if (analyzing) {
-    add(wrap, h('p', { class: 'hint', role: 'status' }, t('analyzing')));
+    add(card, h('p', { class: 'hint', role: 'status' }, t('analyzing')));
   } else {
-    if (state.phase === 'error') add(wrap, h('p', { class: 'error', role: 'alert' }, state.error));
-    add(wrap, h('p', { class: 'hint' }, t('tapToRecord')));
+    if (state.phase === 'error') add(card, h('p', { class: 'error', role: 'alert' }, state.error));
+    add(card, h('p', { class: 'hint' }, t('tapToRecord')));
     // for nights when speaking aloud is not possible (family or roommates asleep nearby)
     add(
-      wrap,
+      card,
       h('button', { type: 'button', class: 'link center', 'data-key': 'silent-checkin', onclick: () => {
         state.pending = { silent: true, features: null, mood: null, energy: null, note: '' };
         state.phase = 'result';
@@ -628,24 +697,9 @@ function viewToday() {
         focusKey('silent-title');
       } }, t('silentLink'))
     );
-    add(
-      wrap,
-      h(
-        'div',
-        { class: 'today-links' },
-        lowCard ? null : h('button', { type: 'button', class: 'link', 'data-key': 'breathe-link', onclick: () => openSheet(breatheSheet({ h, getLang })) }, t('breatheLink')),
-        h('button', { type: 'button', class: 'link', 'data-key': 'calm-link', onclick: openCalm }, t('calmLink')),
-        lowCard ? null : h('button', { type: 'button', class: 'link', 'data-key': 'writing-link', onclick: openWriting }, t('writingLink')),
-        lowCard || isEvening() ? null : h('button', { type: 'button', class: 'link night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink'))
-      )
-    );
-    // the demo offer is for a first visit only; it sits last and quiet, so "just your mood" stays the one text link
-    if (!state.entries.length) {
-      add(wrap, h('button', { type: 'button', class: 'link center demo-offer', onclick: loadDemo }, t('loadDemoShort')));
-    }
     const recent = state.entries.filter(usable).slice(-7);
     if (recent.length) {
-      add(wrap, 
+      add(card, 
         h(
           'div',
           { class: 'recent', role: 'list', 'aria-label': t('recentLabel') },
@@ -670,7 +724,7 @@ function viewToday() {
       );
     }
   }
-  return wrap;
+  return card;
 }
 
 // Safari on iPhone may clear a site's data after about a week without a visit; a home-screen
@@ -688,36 +742,39 @@ function iosInstallNote() {
   return h('div', { class: 'demo-banner', role: 'note' }, h('span', {}, t('iosInstall')), h('button', { type: 'button', class: 'link', 'data-key': 'ios-install-ok', onclick: dismiss }, t('gotIt')));
 }
 
-// First visit only: three ways in, and what the app is not. Dismissed for good with one tap.
+// First visit only: Mumu, one line, three ways in as small tiles, and the one note that matters
+// (it stays on this phone; it is not counseling; help is under About). Dismissed with one tap.
 function welcomeCard() {
   const dismiss = () => {
     state.welcomed = true;
     db.setSetting('welcomed', true).catch(() => {});
   };
-  const door = (key, title, body, onclick) => h('button', { type: 'button', class: 'welcome-door', 'data-key': key, onclick }, h('span', { class: 'welcome-door-title' }, title), h('span', { class: 'welcome-door-body' }, body));
+  const door = (key, icon, title, body, onclick) =>
+    h('button', { type: 'button', class: 'welcome-door', 'data-key': key, onclick }, h('span', { class: 'welcome-door-icon', 'aria-hidden': 'true' }, icon), h('span', { class: 'welcome-door-title' }, title), h('span', { class: 'welcome-door-body' }, body));
   return h(
     'section',
     { class: 'welcome', 'aria-labelledby': 'welcome-title' },
-    h('h2', { id: 'welcome-title' }, t('welcomeTitle')),
-    h('p', {}, t('welcomeBody')),
+    h('div', { class: 'welcome-head' }, mascot(restingState(), { size: 76 }), h('h2', { id: 'welcome-title' }, t('welcomeTitle'))),
     h(
       'div',
       { class: 'welcome-doors' },
-      door('welcome-voice', t('welcomeVoice'), t('welcomeVoiceBody'), () => {
+      door('welcome-lens', '🔭', t('welcomeLens'), t('welcomeLensBody'), () => {
+        dismiss();
+        startLens();
+      }),
+      door('welcome-voice', '🎙️', t('welcomeVoice'), t('welcomeVoiceBody'), () => {
         dismiss();
         render();
+        const rec = document.querySelector('[data-key="rec"]');
+        if (rec) rec.scrollIntoView({ block: 'center', behavior: 'smooth' });
         focusKey('rec');
       }),
-      door('welcome-lens', t('welcomeLens'), t('welcomeLensBody'), () => {
-        dismiss();
-        location.hash = '#lens';
-      }),
-      door('welcome-night', t('welcomeNight'), t('welcomeNightBody'), () => {
+      door('welcome-night', '🌙', t('welcomeNight'), t('welcomeNightBody'), () => {
         dismiss();
         nightView.begin();
       })
     ),
-    h('p', { class: 'muted small' }, t('welcomeNote')),
+    h('p', { class: 'muted small welcome-note' }, t('welcomeNote')),
     h('button', { type: 'button', class: 'link', 'data-key': 'welcome-close', onclick: () => { dismiss(); render(); window.scrollTo(0, 0); } }, t('welcomeClose'))
   );
 }
@@ -753,7 +810,19 @@ function viewJournal() {
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
     const silentOnly = state.entries.some((e) => e.silent);
-    add(wrap, h('p', { class: 'empty' }, t(silentOnly ? 'journalEmptyVoice' : 'journalEmpty')), silentOnly ? null : h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')), silentSection());
+    // Mumu, one short line, one action; the demo stays a quiet link for a first look
+    add(
+      wrap,
+      h(
+        'div',
+        { class: 'empty-state' },
+        mascot('idle', { size: 92 }),
+        h('p', { class: 'empty' }, t('journalEmptyVoice')),
+        h('button', { type: 'button', class: 'btn primary', 'data-key': 'journal-record', onclick: () => goRecord() }, t('journalRecordFirst')),
+        silentOnly ? null : h('button', { type: 'button', class: 'link', 'data-key': 'journal-demo', onclick: loadDemo }, t('journalDemo'))
+      ),
+      silentSection()
+    );
     return wrap;
   }
   add(wrap, demoBanner(), h('p', { class: 'muted' }, t('entries', entries.length)));
@@ -790,6 +859,20 @@ function viewJournal() {
   }
   add(wrap, silentSection());
   return wrap;
+}
+
+// From another tab to Today, with the record button in view and focused.
+function goRecord() {
+  const focusRec = () => {
+    const rec = document.querySelector('[data-key="rec"]');
+    if (!rec) return;
+    rec.scrollIntoView({ block: 'center' });
+    rec.focus({ preventScroll: true });
+  };
+  if (location.hash === '#today') return focusRec();
+  // runs after the app's own hashchange handler has drawn Today
+  window.addEventListener('hashchange', () => setTimeout(focusRec, 0), { once: true });
+  location.hash = '#today';
 }
 
 // Check-ins saved without a recording, newest first, each removable on its own.
@@ -1397,102 +1480,16 @@ function viewAbout() {
     },
   });
   const hasDemo = state.entries.some((e) => e.demo);
+  // a small fold for long explanations; the heading of the section stays visible
+  const more = (key, label, ...kids) => h('details', { class: 'mini-more' }, h('summary', { 'data-key': key }, label), ...kids);
   add(wrap, 
-    h('h2', {}, t('aboutTitle')),
-    h('p', {}, t('aboutBody')),
+    h('div', { class: 'about-intro' }, mascot('idle', { size: 64 }), h('div', {}, h('h2', {}, t('aboutTitle')), h('p', {}, t('aboutShort')))),
+    h('p', { class: 'muted small' }, t('notMedicalShort')),
     // help lines near the top: the welcome card and other screens point here
-    h('h2', {}, t('notMedicalTitle')),
-    h('p', {}, t('notMedicalBody')),
     h('div', { class: 'help', id: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), helpList(h, getLang())),
     h('h2', {}, t('privacyTitle')),
     h('p', {}, t('privacyBody')),
-    h('h3', { class: 'sub' }, t('storageTitle')),
-    h('ul', { class: 'plain-list' }, t('storageNotes').map((s) => h('li', {}, s))),
-    h(
-      'details',
-      { class: 'about-more' },
-      h('summary', {}, h('h2', { class: 'inline' }, t('featuresTitle'))),
-      h(
-        'dl',
-        { class: 'feature-list' },
-        FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
-      )
-    ),
-    // how the app is checked, for anyone curious; every link goes to the public repository
-    h(
-      'details',
-      { class: 'about-more' },
-      h('summary', {}, h('h2', { class: 'inline' }, t('testedTitle'))),
-      h('ul', { class: 'plain-list' }, t('testedItems').map(([text, path]) => h('li', {}, h('a', { href: `https://github.com/jen900704/murmur-voice-journal/blob/main/${path}`, rel: 'noopener' }, text))))
-    ),
-    h('h2', {}, t('experimentalTitle')),
-    h('p', { class: 'small' }, t('aiAbout')),
-    h(
-      'label',
-      { class: 'toggle' },
-      h('input', {
-        type: 'checkbox',
-        checked: state.aiEnabled,
-        'data-key': 'ai-enabled',
-        onchange: async (e) => {
-          state.aiEnabled = e.target.checked;
-          await db.setSetting('aiEnabled', state.aiEnabled);
-          if (lensView) lensView.setAiEnabled(state.aiEnabled);
-          render();
-        },
-      }),
-      h('span', {}, t('aiEnable'))
-    ),
-    state.aiEnabled
-      ? h(
-          'div',
-          { class: 'ai-settings' },
-          h('label', { for: 'ai-key' }, t('aiKeyLabel')),
-          h('input', {
-            id: 'ai-key',
-            type: 'password',
-            spellcheck: 'false',
-            autocomplete: 'new-password',
-            placeholder: state.aiKeySet ? t('aiKeySaved') : 'sk-ant-…',
-            onchange: async (e) => {
-              const v = e.target.value.trim();
-              if (!v) return;
-              await db.setSetting('aiKey', v);
-              state.aiKeySet = true;
-              e.target.value = '';
-              toast(t('aiKeyStored'));
-              render();
-            },
-          }),
-          h('label', { for: 'ai-model' }, t('aiModelLabel')),
-          h(
-            'select',
-            {
-              id: 'ai-model',
-              onchange: (e) => {
-                state.aiModel = e.target.value;
-                db.setSetting('aiModel', e.target.value);
-              },
-            },
-            AI_MODELS.map((m) => h('option', { value: m.id, selected: m.id === state.aiModel ? 'selected' : null }, m.label))
-          ),
-          state.aiKeySet
-            ? h(
-                'button',
-                {
-                  type: 'button',
-                  class: 'btn danger small-btn',
-                  onclick: async () => {
-                    await db.setSetting('aiKey', '');
-                    state.aiKeySet = false;
-                    render();
-                  },
-                },
-                t('aiKeyClear')
-              )
-            : null
-        )
-      : null,
+    more('about-storage', t('storageTitle'), h('ul', { class: 'plain-list' }, t('storageNotes').map((s) => h('li', {}, s)))),
     h('h2', {}, t('settingsTitle')),
     h(
       'div',
@@ -1595,7 +1592,106 @@ function viewAbout() {
         t('deleteAll')
       )
     ),
-    h('p', { class: 'muted small' }, t('installHint')),
+    h('h2', {}, t('experimentalTitle')),
+    h('p', { class: 'small' }, t('aiShort')),
+    more('about-ai', t('aiMore'), h('p', { class: 'small' }, t('aiAbout'))),
+    h(
+      'label',
+      { class: 'toggle' },
+      h('input', {
+        type: 'checkbox',
+        checked: state.aiEnabled,
+        'data-key': 'ai-enabled',
+        onchange: async (e) => {
+          state.aiEnabled = e.target.checked;
+          await db.setSetting('aiEnabled', state.aiEnabled);
+          if (lensView) lensView.setAiEnabled(state.aiEnabled);
+          render();
+        },
+      }),
+      h('span', {}, t('aiEnable'))
+    ),
+    state.aiEnabled
+      ? h(
+          'div',
+          { class: 'ai-settings' },
+          h('label', { for: 'ai-key' }, t('aiKeyLabel')),
+          h('input', {
+            id: 'ai-key',
+            type: 'password',
+            spellcheck: 'false',
+            autocomplete: 'new-password',
+            placeholder: state.aiKeySet ? t('aiKeySaved') : 'sk-ant-…',
+            onchange: async (e) => {
+              const v = e.target.value.trim();
+              if (!v) return;
+              await db.setSetting('aiKey', v);
+              state.aiKeySet = true;
+              e.target.value = '';
+              toast(t('aiKeyStored'));
+              render();
+            },
+          }),
+          h('label', { for: 'ai-model' }, t('aiModelLabel')),
+          h(
+            'select',
+            {
+              id: 'ai-model',
+              onchange: (e) => {
+                state.aiModel = e.target.value;
+                db.setSetting('aiModel', e.target.value);
+              },
+            },
+            AI_MODELS.map((m) => h('option', { value: m.id, selected: m.id === state.aiModel ? 'selected' : null }, m.label))
+          ),
+          state.aiKeySet
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'btn danger small-btn',
+                  onclick: async () => {
+                    await db.setSetting('aiKey', '');
+                    state.aiKeySet = false;
+                    render();
+                  },
+                },
+                t('aiKeyClear')
+              )
+            : null
+        )
+      : null,
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('aboutMore'))),
+      h('p', {}, t('aboutBody')),
+      h('h3', { class: 'sub' }, t('notMedicalTitle')),
+      h('p', {}, t('notMedicalBody'))
+    ),
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('featuresTitle'))),
+      h(
+        'dl',
+        { class: 'feature-list' },
+        FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
+      )
+    ),
+    // how the app is checked, for anyone curious; every link goes to the public repository
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('testedTitle'))),
+      h('ul', { class: 'plain-list' }, t('testedItems').map(([text, path]) => h('li', {}, h('a', { href: `https://github.com/jen900704/murmur-voice-journal/blob/main/${path}`, rel: 'noopener' }, text))))
+    ),
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('installTitle'))),
+      h('p', { class: 'small' }, t('installHint'))
+    ),
     h('p', { class: 'muted small' }, h('a', { href: 'https://github.com/jen900704/murmur-voice-journal', rel: 'noopener' }, t('sourceCode')), getLang() === 'en' ? '. ' : '。', t('methodsNote'))
   );
   return wrap;
@@ -1631,6 +1727,16 @@ function goLens(stage) {
     if (location.hash !== '#lens') location.hash = '#lens';
   }, () => {});
 }
+// Today's hero: straight into a new 換角度 exercise. One already under way is kept, not reset.
+function startLens() {
+  if (lensView && lensView.active()) {
+    location.hash = '#lens';
+    return;
+  }
+  // the tab opens at once, even while the lens is still loading
+  if (location.hash !== '#lens') location.hash = '#lens';
+  goLens('concern');
+}
 const extras = createExtras({
   h,
   add,
@@ -1642,7 +1748,10 @@ const extras = createExtras({
   openSheet,
   closeSheet,
   goLens,
-  startRitual: () => nightView.begin(),
+  startRitual: () => {
+    if (state.tab !== 'today') location.hash = '#today';
+    nightView.begin();
+  },
   openBreathe: () => openCalm(),
   openWriting: () => openWriting(),
 });
@@ -1664,6 +1773,8 @@ async function openWriting() {
         state.entries.push(entry);
         journalSearch.entrySaved(entry);
         render();
+        // not after hard writing, and not when the text needed the help lines
+        if (!(entry.writing && entry.writing.weight === 'deep') && !checkRisk(entry.note || '').risk) celebrate();
       },
       onUpdated: (entry) => journalSearch.entrySaved(entry),
     })

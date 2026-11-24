@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterConcern, openLensMore } from './helpers.mjs';
 
 // The lens upgrades: keepsake card, before/after heaviness, explained suggestions,
 // earlier exercises about the same worry, and the step-back question.
@@ -19,14 +20,11 @@ async function sessions(page) {
 async function startConcern(page, text, topic = 'work', before = null) {
   await page.goto('/#lens');
   await page.locator('[data-key="lens-start"]').click();
-  await page.fill('#lens-concern', text);
-  await page.locator(`[data-key="topic-${topic}"]`).click();
-  if (before !== null) await page.locator(`[data-key="heavy-before-${before}"]`).click();
-  await page.locator('[data-key="lens-concern-next"]').click();
+  await enterConcern(page, text, [topic], { before });
 }
 
 async function pickAndAnswer(page, lensId, answers) {
-  await page.getByRole('button', { name: /自己選/ }).click();
+  await page.locator('[data-key="lens-pick-all"]').click();
   await page.locator(`[data-key="pick-${lensId}"]`).click();
   await answerAll(page, answers);
 }
@@ -57,6 +55,8 @@ test.describe('lens rounds', () => {
     await expect(art.locator('svg')).toHaveCount(1);
     // the line is the last real answer ("不知道" is skipped)
     await expect(art.locator('svg')).toContainText('先放著');
+    // the card comes first on the summary; its notes and "save as image" are in the More sheet
+    await openLensMore(page);
     const notes = page.locator('[data-key="lens-card-notes"]');
     await expect(notes).not.toHaveAttribute('open', /.*/);
     await notes.locator('summary').click();
@@ -68,6 +68,7 @@ test.describe('lens rounds', () => {
     await page.locator('[data-key="lens-card-save"]').click();
     expect((await download).suggestedFilename()).toMatch(/^murmur-lens-\d{4}-\d\d-\d\d\.png$/);
     // the saved view shows the same card, still
+    await page.keyboard.press('Escape');
     await page.locator('[data-key="lens-save"]').click();
     await page.getByRole('button', { name: /我存下的練習/ }).click();
     await page.locator('.lens-summary.compact details summary').click();
@@ -78,23 +79,23 @@ test.describe('lens rounds', () => {
 
   test('heaviness before and after: plain numbers, neutral words, saved on the session', async ({ page }) => {
     await startConcern(page, '報告做不完', 'work', 7);
-    await expect(page.locator('h2')).toContainText('要怎麼選角度');
+    await expect(page.locator('h2')).toContainText('試試這幾個角度');
     await pickAndAnswer(page, 'behavioral', []);
     await expect(page.locator('[data-key="heavy-result"]')).toHaveCount(0);
-    const chip = page.locator('[data-key="heavy-after-5"]');
-    await expect(chip).toHaveAttribute('aria-pressed', 'false');
-    await chip.click();
-    await expect(page.locator('[data-key="heavy-after-5"]')).toHaveAttribute('aria-pressed', 'true');
+    const slider = page.locator('[data-key="heavy-after-input"]');
+    await expect(slider).toHaveAttribute('aria-valuetext', '拖動來選');
+    await slider.fill('5');
+    await expect(page.locator('[data-key="heavy-after-input"]')).toHaveAttribute('aria-valuetext', '5 / 10');
     await expect(page.locator('[data-key="heavy-result"]')).toContainText('7 → 5');
     await expect(page.locator('[data-key="heavy-result"]')).not.toContainText(/進步|改善|好多了/);
-    await page.locator('[data-key="heavy-after-9"]').click();
+    await page.locator('[data-key="heavy-after-input"]').fill('9');
     await expect(page.locator('[data-key="heavy-result"]')).toContainText('有時候看清楚反而更重，這也很常見');
-    await page.locator('[data-key="heavy-after-7"]').click();
+    await page.locator('[data-key="heavy-after-input"]').fill('7');
     await expect(page.locator('[data-key="heavy-result"]')).toContainText('7 → 7');
-    await page.locator('[data-key="heavy-after-4"]').click();
-    const box = await page.locator('[data-key="heavy-after-4"]').boundingBox();
+    await page.locator('[data-key="heavy-after-input"]').fill('4');
+    await expect(page.locator('[data-key="heavy-result"]')).toContainText('7 → 4');
+    const box = await page.locator('[data-key="heavy-after-input"]').boundingBox();
     expect(box.height).toBeGreaterThanOrEqual(44);
-    expect(box.width).toBeGreaterThanOrEqual(44);
     await page.locator('[data-key="lens-save"]').click();
     const s = await sessions(page);
     expect(s[0].before).toBe(7);
@@ -116,16 +117,20 @@ test.describe('lens rounds', () => {
     await expect(block).toBeVisible();
     await expect(block.locator('mark').first()).toHaveText(/應該|一定要/);
     await expect(block).toContainText('因為你寫了');
-    // the usual three ways to choose are still there below it
+    // at most three cards, then the usual three ways to choose below them
+    await expect(block.locator('.lens-pick-card')).toHaveCount(3);
     await expect(page.locator('.lens-option')).toHaveCount(3);
     await block.locator('[data-key="suggest-rebt"]').click();
     await expect(page.locator('.lens-name')).toContainText('理情');
   });
 
-  test('no matching words: no suggestion block at all', async ({ page }) => {
+  test('no matching words: cards for the usual approaches, with no words quoted', async ({ page }) => {
     await startConcern(page, '今天下雨', 'other');
     await expect(page.locator('.lens-option')).toHaveCount(3);
-    await expect(page.locator('[data-key="lens-suggest"]')).toHaveCount(0);
+    const block = page.locator('[data-key="lens-suggest"]');
+    await expect(block.locator('.lens-pick-card')).toHaveCount(3);
+    await expect(block.locator('mark')).toHaveCount(0);
+    await expect(block).not.toContainText('因為你寫了');
   });
 
   test('user text in suggestions is never parsed as HTML', async ({ page }) => {
@@ -152,11 +157,16 @@ test.describe('lens rounds', () => {
     await page.locator('[data-key="lens-back-summary"]').click();
     await expect(page.locator('[data-key="lens-related"]')).toBeVisible();
     // keeps the worry, topics and the before number, and goes to choosing a lens
+    await openLensMore(page);
     await page.locator('[data-key="lens-another"]').click();
-    await expect(page.locator('h2')).toContainText('要怎麼選角度');
+    await expect(page.locator('h2')).toContainText('試試這幾個角度');
+    await page.getByRole('button', { name: '上一步' }).click();
+    await expect(page.locator('[data-key="heavy-before-input"]')).toHaveValue('6');
+    await expect(page.locator('[data-key="heavy-before-input"]')).toHaveAttribute('aria-valuetext', '6 / 10');
+    await page.getByRole('button', { name: '上一步' }).click();
+    await expect(page.locator('[data-key="topic-relationship"]')).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: '上一步' }).click();
     await expect(page.locator('#lens-concern')).toHaveValue('跟室友吵架，那句話一直在腦袋裡');
-    await expect(page.locator('[data-key="heavy-before-6"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('step-back question: optional, goes through the risk check, saved and shown', async ({ page }) => {
@@ -193,7 +203,7 @@ test.describe('lens rounds', () => {
     await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
     await startConcern(page, '考試前一直喝茶，覺得自己應該更努力', 'work', 7);
     await pickAndAnswer(page, 'acceptance', ['腦袋停不下來', '先放著', '晚上散步']);
-    await page.locator('[data-key="heavy-after-5"]').click();
+    await page.locator('[data-key="heavy-after-input"]').fill('5');
     await page.locator('[data-key="lens-card-art"]').scrollIntoViewIfNeeded();
     await expect(page.locator('[data-key="lens-card-art"] svg')).toHaveCount(1);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -241,11 +251,10 @@ test.describe('lens with a language model', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '報告一直拖著沒寫');
-    await page.locator('[data-key="topic-work"]').click();
     await expect(page.locator('[data-key="lens-llm-note"]')).toContainText('Anthropic');
+    await enterConcern(page, '報告一直拖著沒寫', ['work']);
     expect(calls).toHaveLength(0);
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     await expect(page.locator('#lens-q')).toContainText('想到「報告一直拖著」的時候');
     await expect(page.locator('[data-key="lens-adapted"]')).toContainText('依你寫的內容調整過的問題');
@@ -267,11 +276,13 @@ test.describe('lens with a language model', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '報告寫不完，不想活了');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('[data-key="lens-worry-next"]').click();
     await expect(page.locator('.crisis')).toBeVisible();
     await page.locator('[data-key="crisis-continue"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-topics-next"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     await answerAll(page, ['a', 'b', 'c']);
     await expect(page.locator('[data-key="lens-llm-label"]')).toHaveCount(0);
@@ -285,10 +296,9 @@ test.describe('lens with a language model', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '報告一直拖著沒寫');
-    await page.locator('[data-key="topic-work"]').click();
     await page.locator('[data-key="lens-llm-off"]').check();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告一直拖著沒寫', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     await answerAll(page, ['a', 'b', 'c']);
     await expect(page.locator('[data-key="lens-adapted"]')).toHaveCount(0);

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { enterConcern, openLensMore } from './helpers.mjs';
 
 // the first visit shows a welcome card; close it so the usual Today screen is there
 async function skipWelcome(page) {
@@ -53,21 +54,41 @@ const screens = [
   }],
   ['journal (demo)', async (page) => {
     await page.goto('/#journal');
-    await page.locator('.journal .btn').click();
+    await page.locator('[data-key="journal-demo"]').click();
     await page.goto('/#journal');
   }],
   ['trends (demo)', async (page) => {
     await page.goto('/#journal');
-    await page.locator('.journal .btn').click();
+    await page.locator('[data-key="journal-demo"]').click();
     await page.waitForURL(/#trends/);
   }],
   ['lens home', async (page) => page.goto('/#lens')],
-  ['lens step', async (page) => {
+  ['lens worry, kinds of worry', async (page) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', 'work stress');
+    await page.locator('[data-key="lens-worry-next"]').click();
     await page.locator('[data-key="topic-work"]').click();
-    await page.locator('.actions .btn.primary').click();
+  }],
+  ['lens worry, heaviness', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', 'work stress');
+    await page.locator('[data-key="lens-worry-next"]').click();
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-topics-next"]').click();
+    await page.locator('[data-key="heavy-before-input"]').waitFor();
+  }],
+  ['lens choose', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await enterConcern(page, 'I should try harder, my report must be perfect', ['work']);
+    await page.locator('.lens-pick-card').first().waitFor();
+  }],
+  ['lens step', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await enterConcern(page, 'work stress', ['work']);
     await page.locator('.lens-option').nth(2).click();
     await page.locator('.lens-row').first().click();
   }],
@@ -119,9 +140,7 @@ const screens = [
     await page.waitForTimeout(300);
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', 'work stress');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await enterConcern(page, 'work stress', ['work']);
     await page.locator('.lens-option').nth(2).click();
     await page.locator('.lens-row').first().click();
     for (let i = 0; i < 5 && !(await page.locator('.lens-summary').count()); i++) {
@@ -129,6 +148,7 @@ const screens = [
       else await page.fill('#lens-answer', 'something');
       await page.locator('[data-key="lens-next"]').click();
     }
+    await openLensMore(page);
     await page.locator('[data-key="ai-open"]').click();
     await page.fill('#ai-input', 'I keep putting it off');
     await page.locator('[data-key="ai-send"]').click();
@@ -138,16 +158,13 @@ const screens = [
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '最近真的不想活了');
-    await page.locator('[data-key="topic-self"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('[data-key="lens-worry-next"]').click();
     await page.locator('.crisis').waitFor();
   }],
   ['compare three', async (page) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', 'work stress');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await enterConcern(page, 'work stress', ['work']);
     await page.locator('.lens-option').nth(1).click();
     await page.locator('.lens-card').first().waitFor();
   }],
@@ -176,18 +193,14 @@ const screens = [
   ['lens pick list', async (page) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', 'family pressure');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await enterConcern(page, 'family pressure', ['family']);
     await page.locator('.lens-option').nth(2).click();
     await page.locator('.lens-row').first().waitFor();
   }],
   ['lens summary', async (page) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', 'family pressure');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await enterConcern(page, 'family pressure', ['family']);
     await page.locator('.lens-option').nth(2).click();
     await page.locator('[data-key="pick-family-systems"]').click();
     for (let i = 0; i < 3; i++) {
@@ -196,6 +209,19 @@ const screens = [
     }
     await page.locator('.lens-summary').waitFor();
     await page.locator('[data-key="rate-4"]').click();
+  }],
+  ['lens summary, More sheet', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await enterConcern(page, 'family pressure', ['family'], { before: 6 });
+    await page.locator('[data-key="lens-pick-all"]').click();
+    await page.locator('[data-key="pick-family-systems"]').click();
+    for (let i = 0; i < 3; i++) {
+      await page.fill('#lens-answer', 'a few words');
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await page.locator('[data-key="heavy-after-input"]').fill('4');
+    await openLensMore(page);
   }],
   ['calm sheet', openCalm],
   ['calm breathing', async (page) => {
@@ -244,9 +270,7 @@ const screens = [
   ['policy opt-in card', async (page) => {
     await page.goto('/#lens');
     await key(page, 'lens-start').click();
-    await page.fill('#lens-concern', 'work stress');
-    await key(page, 'topic-work').click();
-    await key(page, 'lens-concern-next').click();
+    await enterConcern(page, 'work stress', ['work']);
     await page.locator('.lens-option').nth(2).click();
     await page.locator('.lens-row').first().waitFor();
     // the card is offered only until the person answers it; audit it when it is there

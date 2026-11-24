@@ -3,6 +3,7 @@
 import { cardSvg } from './postcard.js';
 import { trackById } from './bedtime.js';
 import { checkRisk, helpList } from './safety.js';
+import { mascot } from './mascot.js';
 
 // The featured-item policy (js/policy.js) is optional and off by default; loaded on its own
 // so these screens still work if that one file cannot be fetched.
@@ -34,10 +35,11 @@ const S = {
     close: '關閉',
     none: '沒有符合的作品。',
     modes: { voice: '聲音', nights: '夜晚', jar: '小罐子', words: '語言鏡' },
-    nightsEmpty: '還沒有夜晚的紀錄。晚上在「今天」可以開始睡前儀式。',
+    nightsEmpty: '還沒有夜晚的紀錄。',
+    emptyRitual: '做一次睡前儀式',
     jarTitle: '對自己好的小罐子',
     jarIntro: '你寫過的、對自己好的事。低潮的時候，可以從這裡抽一張。',
-    jarEmpty: '小罐子還是空的。睡前儀式的第二步，可以放進今天對自己好的一件事。',
+    jarEmpty: '小罐子還是空的。睡前儀式裡可以放一件進來。',
     draw: '抽一張',
     worry: '那天放下的心事',
     kind: '對自己好的一件事',
@@ -99,10 +101,11 @@ const S = {
     close: 'Close',
     none: 'Nothing matches.',
     modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar', words: 'Words' },
-    nightsEmpty: 'No nights yet. In the evening, start the bedtime ritual from Today.',
+    nightsEmpty: 'No nights yet.',
+    emptyRitual: 'Try the bedtime ritual',
     jarTitle: 'Kindness jar',
     jarIntro: 'Kind things you have done for yourself. On a low day, draw one from here.',
-    jarEmpty: 'The jar is empty. Step two of the bedtime ritual adds one kind thing you did for yourself today.',
+    jarEmpty: 'The jar is empty. The bedtime ritual can add one.',
     draw: 'Draw one',
     worry: 'What you set down',
     kind: 'One kind thing for yourself',
@@ -337,12 +340,23 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     });
   }
 
+  // Mumu, one short line, one way to fill it
+  function emptyState(mood, line, key) {
+    return h(
+      'div',
+      { class: 'empty-state' },
+      mascot(mood, { size: 92 }),
+      h('p', { class: 'empty' }, line),
+      startRitual ? h('button', { type: 'button', class: 'btn primary', 'data-key': key, onclick: () => startRitual() }, L().emptyRitual) : null
+    );
+  }
+
   function nightsSection() {
     if (!ex.loaded) {
       loadNights().then(render);
       return [];
     }
-    if (!ex.nights.length) return [h('p', { class: 'empty' }, L().nightsEmpty)];
+    if (!ex.nights.length) return [emptyState('sleepy', L().nightsEmpty, 'nights-empty-start')];
     return [
       h(
         'div',
@@ -400,7 +414,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     const items = jarItems();
     return [
       h('h2', {}, L().jarTitle),
-      h('p', { class: 'muted small' }, L().jarIntro),
+      items.length ? h('p', { class: 'muted small' }, L().jarIntro) : null,
       items.length
         ? [
             h(
@@ -418,7 +432,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
             ex.jarPick ? h('div', { class: 'jar-pick', role: 'status' }, h('p', {}, ex.jarPick.text), h('p', { class: 'muted small' }, new Intl.DateTimeFormat(getLang(), { dateStyle: 'medium' }).format(new Date(ex.jarPick.at)))) : null,
             h('ul', { class: 'jar-list' }, [...items].reverse().map((it) => h('li', {}, h('span', {}, it.text), h('span', { class: 'muted small' }, new Intl.DateTimeFormat(getLang(), { month: 'numeric', day: 'numeric' }).format(new Date(it.at)))))),
           ]
-        : h('p', { class: 'empty' }, L().jarEmpty),
+        : emptyState('idle', L().jarEmpty, 'jar-empty-start'),
     ];
   }
 

@@ -1,5 +1,5 @@
 import { test, expect, chromium } from '@playwright/test';
-import { fakeMic, storedEntries } from './helpers.mjs';
+import { fakeMic, storedEntries, enterConcern, openLensMore } from './helpers.mjs';
 
 // Robustness checks: things a phone user runs into without trying (double taps, the back
 // button, long text, a backup file that is not quite right, storage that does not work).
@@ -285,10 +285,15 @@ test.describe('double taps', () => {
   test('lens: Next twice does not skip a question, Save twice stores one exercise', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
+    // a double tap on the worry's Next lands on the kinds of worry, whose Next waits for a choice
     await page.fill('#lens-concern', '報告做不完');
+    await page.locator('[data-key="lens-worry-next"]').dblclick();
+    await expect(page.locator('[data-key="topic-work"]')).toBeVisible();
     await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').dblclick();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="lens-topics-next"]').dblclick();
+    await expect(page.locator('[data-key="heavy-before-input"]')).toBeVisible();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('.lens-row').first().click();
     let steps = 0;
     for (let i = 0; i < 8; i++) {
@@ -489,10 +494,8 @@ test.describe('back button and hashes', () => {
     await page.goto('/#today');
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '報告做不完');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告做不完', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     await page.locator('.lens-q').waitFor();
     await page.fill('#lens-answer', '第一個回答');
@@ -502,9 +505,13 @@ test.describe('back button and hashes', () => {
     await expect(page.locator('.view.lens')).toBeVisible();
     await expect(page.locator('#lens-answer')).toHaveValue('第一個回答');
     await expect(page.locator('.lens-q')).toBeFocused();
-    // from the first question: the choice of lens, then the worry (still there), then the lens home
+    // from the first question: the choice of lens, then the worry's three screens (still filled in), then the lens home
     await page.goBack();
     await expect(page.locator('.lens-options')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('[data-key="heavy-before-input"]')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('[data-key="topic-work"]')).toHaveAttribute('aria-pressed', 'true');
     await page.goBack();
     await expect(page.locator('#lens-concern')).toHaveValue('報告做不完');
     await page.goBack();
@@ -520,10 +527,8 @@ test.describe('back button and hashes', () => {
     await page.goto('/#today');
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '報告做不完');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告做不完', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     for (let i = 0; i < 6; i++) {
       if (await page.locator('.lens-summary').count()) break;
@@ -553,10 +558,8 @@ test.describe('back button and hashes', () => {
   test('a sheet opened in the middle of a lens exercise closes on Back without changing the question', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '報告做不完');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告做不完', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     await page.fill('#lens-answer', '第一個回答');
     await page.evaluate(() => (location.hash = '#entry'));
@@ -577,15 +580,14 @@ test.describe('back button and hashes', () => {
     await expect(page.locator('#ai-key')).toHaveAttribute('placeholder', /已儲存/);
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '報告做不完');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告做不完', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-cognitive"]').click();
     for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {
       await page.fill('#lens-answer', `回答${i}`);
       await page.locator('[data-key="lens-next"]').click();
     }
+    await openLensMore(page);
     await page.locator('[data-key="ai-open"]').click();
     await page.locator('#ai-input').waitFor();
     await page.goBack();
@@ -677,10 +679,8 @@ test.describe('long text', () => {
       const errors = collectErrors(page);
       await page.goto('/#lens');
       await page.locator('[data-key="lens-start"]').click();
-      await page.fill('#lens-concern', text.slice(0, 400));
-      await page.locator('[data-key="topic-work"]').click();
-      await page.locator('[data-key="lens-concern-next"]').click();
-      await page.getByRole('button', { name: /自己選/ }).click();
+      await enterConcern(page, text.slice(0, 400), ['work']);
+      await page.locator('[data-key="lens-pick-all"]').click();
       await page.locator('.lens-row').first().click();
       for (let i = 0; i < 8; i++) {
         if (await page.locator('.lens-summary').count()) break;
@@ -723,10 +723,8 @@ test.describe('long text', () => {
   test('a pasted link in a lens worry wraps instead of widening the page', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', LONG);
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, LONG, ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('.lens-row').first().click();
     await page.locator('.lens-concern-quote').waitFor();
     expect(await overflow(page)).toBeNull();
@@ -782,13 +780,12 @@ test.describe('language and time', () => {
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '煩惱還在');
-    await page.locator('[data-key="topic-work"]').click();
     await page.locator('#tabs a[href="#about"]').click();
     await page.locator('[data-key="lang-en"]').click();
     await expect(page.locator('#brand-tag')).not.toBeEmpty();
     await page.locator('#tabs a[href="#lens"]').click();
     await expect(page.locator('#lens-concern')).toHaveValue('煩惱還在');
-    await expect(page.locator('[data-key="lens-concern-next"]')).toBeEnabled();
+    await expect(page.locator('[data-key="lens-worry-next"]')).toBeEnabled();
     await page.locator('#tabs a[href="#today"]').click();
     await expect(page.locator('#night-worry')).toHaveValue('心事還在');
     await expect(page.locator('.view.night h2')).toHaveText('Set down what is on your mind');
@@ -989,11 +986,9 @@ test.describe('focus in the new flows', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await expect(page.locator('#lens-concern, .view.lens h2').first()).toBeVisible();
-    await page.fill('#lens-concern', '報告做不完');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await enterConcern(page, '報告做不完', ['work']);
     await expect(page.locator('.view.lens h2')).toBeFocused();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('.lens-row').first().click();
     for (let i = 0; i < 8; i++) {
       if (await page.locator('.lens-summary').count()) break;

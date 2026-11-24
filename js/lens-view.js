@@ -12,6 +12,7 @@ import { sceneFromSpec, sceneSvg } from './scene.js';
 import { fitText } from './postcard.js';
 import { stripCitations } from './rag.js';
 import { createFlowHistory } from './flow-history.js';
+import { mascot, setMascot } from './mascot.js';
 
 // The featured-row policy (js/policy.js) is optional and off by default. It is loaded on its
 // own so the lens screens still work if that one file cannot be fetched.
@@ -22,7 +23,6 @@ const S = {
     title: '換個角度看看',
     drewTitle: '你抽到的是',
     redraw: '再抽一張',
-    answerHint: '寫幾個字就好。想不到的話，寫「不知道」也可以。',
     moreAbout: '多了解這個學派',
     savedMore: '這個角度的看法和小練習',
     plan: {
@@ -50,23 +50,34 @@ const S = {
     saved: '我存下的練習',
     savedCount: (n) => (n ? `${n} 個` : '還沒有'),
     aiContinue: '和 AI 用這個角度繼續聊（實驗功能）',
-    gentle: '溫柔的作品推薦（電影、書、音樂劇）',
-    worryLabel: '用一兩句話寫下讓你在意的事',
-    worryPlaceholder: '例如：我一直擔心報告做不好，晚上也睡不太好',
-    topicLabel: '它比較接近哪幾類？可以選不只一個。',
+    gentle: '溫柔的作品推薦',
+    homeLine: '心裡有什麼事？換個角度看看。',
+    stays: '寫的內容只留在這台裝置上',
+    about: '關於這個練習',
+    worryLabel: '什麼事讓你在意？',
+    worryPlaceholder: '一句話就好',
+    topicLabel: '比較像哪一類？可以選好幾個',
+    heavyAsk: '現在感覺有多重？',
+    heavySlide: '拖動來選',
+    skip: '跳過',
+    stageOf: (i, n) => `第 ${i} 步，共 ${n} 步`,
+    pickAll: (n) => `看全部 ${n} 個`,
+    dunno: '不知道也可以',
+    dunnoValue: '不知道',
+    doneLine: '寫完了，這是這次的小卡',
+    seeAll: (n) => `看全部 ${n} 題`,
+    seeLess: '收起',
+    more: '更多',
+    close: '關閉',
     topics: { work: '學業或工作', relationship: '伴侶或朋友', family: '家人', self: '自己（情緒、自我價值）', loss: '失落或悲傷', other: '其他' },
     next: '下一步',
     back: '上一步',
-    choose: '要怎麼選角度？',
+    choose: '試試這幾個角度',
     draw: '抽一張卡',
-    drawWhy: '隨機抽一個適合這類煩惱的學派',
     compare: '比較三個角度',
-    compareWhy: '看三個學派各自會先問什麼，再選一個',
-    pick: '自己選',
     pickTitle: '選一個角度',
     pickCommon: '常用來看這類煩惱的',
     pickOthers: '其他角度',
-    pickWhy: '從全部適合的學派裡挑',
     useThis: '用這個角度',
     stepOf: (i, n) => `第 ${i} 題，共 ${n} 題`,
     why: '為什麼這樣問',
@@ -84,7 +95,7 @@ const S = {
     people: '代表人物',
     talk: '這個練習可以幫你換個角度，但它取代不了和一個人好好談談。如果這件事已經讓你辛苦了一段時間，學校的諮商中心、公司的員工協助方案，或各縣市的社區心理衛生中心，都是很好的起點，很多是免費或低價的。',
     rateQ: '這個角度對你有幫助嗎？',
-    rateLabels: ['沒什麼幫助', '', '普通', '', '很有幫助'],
+    rateLabels: ['沒什麼幫助', '有一點', '普通', '有幫助', '很有幫助'],
     anotherLens: '換一個角度看同一件事',
     save: '儲存到這個裝置',
     savedToast: '已儲存，只存在這個裝置上',
@@ -111,7 +122,6 @@ const S = {
     resourcesTitle: '求助資源',
     resourcesBody: '如果你或身邊的人有立即的危險，請直接打緊急電話。',
     topicHidden: '有些學派不適合用來看這類煩惱，所以沒有列出。',
-    heavyQ: '現在這件事有多重？0 到 10（可以不選）',
     heavyAfterQ: '寫完之後，現在呢？',
     heavyEnds: ['0 很輕', '10 很重'],
     heavyLighter: '這是寫完之後此刻的感覺，之後還可能再變。',
@@ -148,7 +158,6 @@ const S = {
   en: {
     drewTitle: 'You drew',
     redraw: 'Draw again',
-    answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
     moreAbout: 'More about this approach',
     savedMore: 'The approach and something to try',
     plan: {
@@ -177,23 +186,34 @@ const S = {
     saved: 'My saved exercises',
     savedCount: (n) => (n ? `${n} saved` : 'None yet'),
     aiContinue: 'Keep talking with AI through this lens (experimental)',
-    gentle: 'Gentle recommendations (films, books, musicals)',
-    worryLabel: 'In a sentence or two, what is on your mind?',
-    worryPlaceholder: 'For example: I keep worrying my report is not good enough, and I am not sleeping well',
-    topicLabel: 'Which is it closest to? Choose any that fit.',
+    gentle: 'Gentle recommendations',
+    homeLine: 'Something on your mind? Look at it from another angle.',
+    stays: 'What you write stays on this device',
+    about: 'About this exercise',
+    worryLabel: 'What is on your mind?',
+    worryPlaceholder: 'One sentence is enough',
+    topicLabel: 'What kind of worry is it? Pick any',
+    heavyAsk: 'How heavy does it feel right now?',
+    heavySlide: 'Slide to choose',
+    skip: 'Skip',
+    stageOf: (i, n) => `Step ${i} of ${n}`,
+    pickAll: (n) => `See all ${n}`,
+    dunno: 'Not sure is fine',
+    dunnoValue: 'not sure',
+    doneLine: 'All written. Here is your card',
+    seeAll: (n) => `See all ${n}`,
+    seeLess: 'Show less',
+    more: 'More',
+    close: 'Close',
     topics: { work: 'School or work', relationship: 'Partner or friends', family: 'Family', self: 'Myself (feelings, self-worth)', loss: 'Loss or grief', other: 'Something else' },
     next: 'Next',
     back: 'Back',
-    choose: 'How would you like to choose a lens?',
+    choose: 'Try one of these angles',
     draw: 'Draw a card',
-    drawWhy: 'A random school that suits this kind of worry',
     compare: 'Compare three lenses',
-    compareWhy: 'See what three schools would ask first, then pick one',
-    pick: 'Choose myself',
     pickTitle: 'Choose a lens',
     pickCommon: 'Often used for this kind of worry',
     pickOthers: 'Other lenses',
-    pickWhy: 'Pick from every school that fits',
     useThis: 'Use this lens',
     stepOf: (i, n) => `Question ${i} of ${n}`,
     why: 'Why this question',
@@ -211,7 +231,7 @@ const S = {
     people: 'Associated with',
     talk: 'This can help you see things differently, but it does not replace talking with a person. If this keeps weighing on you, campus counseling, an employee assistance program, or a community mental health center is a good place to start; many are free or low cost.',
     rateQ: 'Was this lens helpful?',
-    rateLabels: ['Not at all', '', 'Somewhat', '', 'Very helpful'],
+    rateLabels: ['Not at all', 'A little', 'Somewhat', 'Helpful', 'Very helpful'],
     anotherLens: 'Look at the same worry through another lens',
     save: 'Save on this device',
     savedToast: 'Saved on this device only',
@@ -238,7 +258,6 @@ const S = {
     resourcesTitle: 'Where to get help',
     resourcesBody: 'If you or someone near you is in immediate danger, call your emergency number.',
     topicHidden: 'Some schools are not suited to this kind of worry, so they are not listed.',
-    heavyQ: 'How heavy does this feel right now? 0 to 10 (optional)',
     heavyAfterQ: 'Now that you have written it out, how heavy does it feel?',
     heavyEnds: ['0 light', '10 very heavy'],
     heavyLighter: 'This is how it feels right after writing; it may shift again.',
@@ -275,6 +294,28 @@ const S = {
 };
 
 const HUES = [262, 200, 28, 340, 160, 220, 120, 8, 300, 185, 45, 320, 95, 240];
+
+// One plain line per approach for the suggestion cards: what it does, in everyday words.
+const HOOK = {
+  psychoanalytic: ['看看這種感覺以前是不是也出現過', 'Notice whether this feeling has come up before'],
+  adlerian: ['找出心裡那句「我必須……才……」', 'Find the "I must ... in order to ..." you tell yourself'],
+  existential: ['看看這件事透露你在乎什麼', 'See what this worry says you care about'],
+  'person-centered': ['先好好聽見自己真正的感受', 'Hear what you really feel, first'],
+  gestalt: ['從身體此刻的感覺開始', 'Start with what your body feels right now'],
+  behavioral: ['拆開前因和後果，找一個小做法', 'Take apart what came before and after, and find one small change'],
+  acceptance: ['把想法當成一個想法，不用跟它吵', 'Treat the thought as a thought, with no need to argue'],
+  rebt: ['把「一定要」換成「很希望」', 'Turn "it must" into "I would like"'],
+  cognitive: ['把第一個冒出來的想法拿來檢查', 'Check the first thought that came up'],
+  reality: ['想要什麼、正在做什麼、有沒有更接近', 'What you want, what you are doing, and whether it helps'],
+  feminist: ['看看哪些「應該」是別人給的', 'See which "shoulds" came from other people'],
+  'solution-focused': ['找出已經有用的那一點點', 'Find the little that already works'],
+  narrative: ['你不等於這個問題，換個說法看看', 'You are not the problem. Try telling it another way'],
+  'family-systems': ['看看你在家裡的位置', 'Look at where you stand in your family'],
+};
+const TOPIC_EMOJI = { work: '💼', relationship: '💞', family: '🏠', self: '🌱', loss: '🍂', other: '💭' };
+const RATE_FACES = ['😶', '🙂', '😊', '😄', '🤩'];
+// how heavy, as weather: clear when light, rain when heavy
+const weather = (v) => (v === null || v === undefined ? '⛅' : v <= 1 ? '☀️' : v <= 3 ? '🌤️' : v <= 5 ? '⛅' : v <= 7 ? '☁️' : '🌧️');
 
 export function createLensView({ h, add, getLang, rerender, toast, db, openGentle }) {
   const st = {
@@ -321,6 +362,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   function go(stage) {
     st.stage = stage;
+    st.sheet = false; // the More sheet belongs to the summary it was opened on
     rerender();
     window.scrollTo(0, 0);
     const hd = document.querySelector('.view.lens h2, .view.lens .lens-q');
@@ -334,6 +376,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ai.abort();
     st.prevStage = null;
     st.concern = '';
+    st.cstep = 0;
+    st.sheet = false;
+    st.showAll = false;
     st.topics = [];
     st.lensId = null;
     st.answers = [];
@@ -385,6 +430,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.plan = '';
     st.planChecked = false;
     st.cardAnimated = null;
+    st.showAll = false;
     st.startedAt = Date.now();
     st.counted = false;
     startAdapt(lensById(id));
@@ -439,22 +485,62 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return helpList(h, getLang());
   }
 
+  // Mumu leans in while the person types, and settles back a moment after they stop.
+  let listenTimer = null;
+  function listen(m) {
+    if (!m) return;
+    setMascot(m, 'listen');
+    clearTimeout(listenTimer);
+    listenTimer = setTimeout(() => setMascot(m, 'idle'), 1400);
+  }
+
+  // A short row of segments (the worry's three screens) or dots (a lens's questions).
+  function progress(i, n, { dots = false, label } = {}) {
+    return h(
+      'div',
+      { class: 'lens-progress' + (dots ? ' dots' : ''), role: 'progressbar', 'aria-valuemin': '1', 'aria-valuemax': String(n), 'aria-valuenow': String(i), 'aria-label': label || L().stageOf(i, n) },
+      Array.from({ length: n }, (_, k) => h('span', { class: 'lens-progress-seg' + (k < i ? ' on' : '') + (k === i - 1 ? ' now' : ''), 'aria-hidden': 'true' })),
+      dots ? h('span', { class: 'lens-progress-num', 'aria-hidden': 'true' }, `${i} / ${n}`) : null
+    );
+  }
+
+  // Back on the left, the one primary button on the right: the same place on every screen.
+  function nav(primary, onBack) {
+    return h('div', { class: 'actions lens-nav' }, h('button', { type: 'button', class: 'btn ghost', 'data-key': 'lens-back', onclick: onBack }, L().back), primary);
+  }
+
   // ----- stages -----
   function home() {
     const explored = LENSES.filter((l) => st.stats[l.id] && st.stats[l.id].used).length;
+    const tile = (icon, label, meta, onclick, key) =>
+      h('button', { type: 'button', class: 'lens-link lens-tile', 'data-key': key, onclick }, h('span', { class: 'lens-tile-icon', 'aria-hidden': 'true' }, icon), h('strong', {}, label), meta ? h('span', { class: 'lens-tile-meta' }, meta) : null);
     return [
-      h('h2', {}, L().title),
-      h('p', {}, L().intro),
-      h('p', { class: 'muted small' }, L().madeBy, ' ', L().privacy, st.aiEnabled ? ' ' + L().privacyAi : ''),
-      planCheck(),
-      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-start', onclick: () => go('concern') }, L().start)),
       h(
         'div',
-        { class: 'lens-home-links' },
-        h('button', { type: 'button', class: 'lens-link', onclick: () => go('deck') }, h('strong', {}, L().deck), h('span', {}, L().explored(explored))),
-        h('button', { type: 'button', class: 'lens-link', onclick: () => go('fit') }, h('strong', {}, L().fit)),
-        h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, L().savedCount(st.sessions.length))),
-        openGentle ? h('button', { type: 'button', class: 'lens-link', onclick: openGentle }, h('strong', {}, L().gentle)) : null
+        { class: 'lens-hero' },
+        mascot('idle', { size: 112 }),
+        h('h2', { class: 'lens-hero-line' }, L().homeLine),
+        h('button', { type: 'button', class: 'btn primary lens-hero-btn', 'data-key': 'lens-start', onclick: () => {
+          st.cstep = 0;
+          go('concern');
+        } }, L().start),
+        h('p', { class: 'muted small lens-stays' }, L().stays)
+      ),
+      planCheck(),
+      h(
+        'div',
+        { class: 'lens-home-links lens-tiles' },
+        tile('🃏', L().deck, L().explored(explored), () => go('deck'), 'lens-tile-deck'),
+        tile('🧭', L().fit, null, () => go('fit'), 'lens-tile-fit'),
+        tile('📔', L().saved, L().savedCount(st.sessions.length), () => go('saved'), 'lens-tile-saved'),
+        openGentle ? tile('🎬', L().gentle, null, openGentle, 'lens-tile-gentle') : null
+      ),
+      h(
+        'details',
+        { class: 'lens-more lens-about', 'data-key': 'lens-about' },
+        h('summary', {}, L().about),
+        h('p', {}, L().intro),
+        h('p', { class: 'muted small' }, L().madeBy, ' ', L().privacy, st.aiEnabled ? ' ' + L().privacyAi : '')
       ),
       policyPanel(),
     ];
@@ -562,158 +648,198 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return sum;
   }
 
+  // The worry in three short screens: the words, the kinds of worry, how heavy it feels.
+  // The risk check runs when the words are done, before anything else uses them.
   function concern(onNext) {
-    const input = h('textarea', {
-      id: 'lens-concern',
-      rows: '3',
-      maxlength: '400',
-      placeholder: L().worryPlaceholder,
-      'data-key': 'lens-concern',
-      oninput: (e) => {
-        st.concern = e.target.value;
-        const b = document.querySelector('[data-key="lens-concern-next"]');
-        if (b) b.disabled = !st.concern.trim() || !st.topics.length;
-      },
-    });
-    input.value = st.concern;
-    return [
-      h('label', { class: 'lens-label', for: 'lens-concern' }, L().worryLabel),
-      input,
-      h('p', { class: 'lens-label', id: 'topic-label' }, L().topicLabel),
-      // several can be chosen; each chip is a toggle button. "Other" stands alone.
-      h(
-        'div',
-        { class: 'chips wrap topic-chips', role: 'group', 'aria-labelledby': 'topic-label' },
-        TOPICS.map((tp) => {
-          const on = st.topics.includes(tp);
-          return h(
-            'button',
-            {
-              type: 'button',
-              'aria-pressed': on ? 'true' : 'false',
-              class: 'chip' + (on ? ' on' : ''),
-              'data-key': `topic-${tp}`,
-              onclick: () => {
-                if (on) st.topics = st.topics.filter((t) => t !== tp);
-                else if (tp === 'other') st.topics = ['other'];
-                else st.topics = [...st.topics.filter((t) => t !== 'other'), tp];
-                rerender();
-              },
-            },
-            L().topics[tp]
-          );
-        })
-      ),
-      heavyRow('before', L().heavyQ),
-      (resolveProvider(), llmDisclosure()),
-      h(
-        'div',
-        { class: 'actions left' },
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'btn primary',
-            'data-key': 'lens-concern-next',
-            disabled: !st.concern.trim() || !st.topics.length,
-            onclick: () => {
-              const next = () => (onNext ? onNext() : go('choose'));
-              if (guard(st.concern, next)) next();
-            },
-          },
-          L().next
+    const cs = Math.min(2, Math.max(0, st.cstep || 0));
+    const here = st.stage;
+    const to = (i) => {
+      st.cstep = i;
+      go(here);
+    };
+    const back = () => (cs > 0 ? to(cs - 1) : go('home'));
+    if (cs === 0) {
+      const m = mascot('idle', { size: 64 });
+      const input = h('textarea', {
+        id: 'lens-concern',
+        rows: '4',
+        maxlength: '400',
+        placeholder: L().worryPlaceholder,
+        'aria-labelledby': 'lens-concern-q',
+        'data-key': 'lens-concern',
+        oninput: (e) => {
+          st.concern = e.target.value;
+          listen(m);
+          const b = document.querySelector('[data-key="lens-worry-next"]');
+          if (b) b.disabled = !st.concern.trim();
+        },
+      });
+      input.value = st.concern;
+      return [
+        progress(1, 3),
+        h('div', { class: 'lens-ask' }, m, h('h2', { id: 'lens-concern-q' }, L().worryLabel)),
+        input,
+        (resolveProvider(), llmDisclosure()),
+        nav(
+          h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-worry-next', disabled: !st.concern.trim(), onclick: () => {
+            if (!st.concern.trim()) return;
+            if (guard(st.concern, () => to(1))) to(1);
+          } }, L().next),
+          back
         ),
-        h('button', { type: 'button', class: 'btn ghost', onclick: () => go('home') }, L().back)
-      ),
+      ];
+    }
+    if (cs === 1) {
+      return [
+        progress(2, 3),
+        h('h2', { id: 'topic-label' }, L().topicLabel),
+        // several can be chosen; each chip is a toggle button. "Other" stands alone.
+        h(
+          'div',
+          { class: 'chips wrap topic-chips', role: 'group', 'aria-labelledby': 'topic-label' },
+          TOPICS.map((tp) => {
+            const on = st.topics.includes(tp);
+            return h(
+              'button',
+              {
+                type: 'button',
+                'aria-pressed': on ? 'true' : 'false',
+                class: 'chip topic-chip' + (on ? ' on' : ''),
+                'data-key': `topic-${tp}`,
+                onclick: () => {
+                  if (on) st.topics = st.topics.filter((t) => t !== tp);
+                  else if (tp === 'other') st.topics = ['other'];
+                  else st.topics = [...st.topics.filter((t) => t !== 'other'), tp];
+                  rerender();
+                },
+              },
+              h('span', { class: 'topic-emoji', 'aria-hidden': 'true' }, TOPIC_EMOJI[tp]),
+              h('span', {}, L().topics[tp])
+            );
+          })
+        ),
+        nav(h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-topics-next', disabled: !st.topics.length, onclick: () => st.topics.length && to(2) }, L().next), back),
+      ];
+    }
+    // Next sits in the same place on every screen: the second tap of a double tap on the
+    // previous screen's Next (detail 2) must not also answer this one
+    const next = (e) => {
+      if (e && e.detail > 1) return;
+      if (!st.concern.trim() || !st.topics.length) return to(st.concern.trim() ? 1 : 0);
+      if (onNext) onNext();
+      else go('choose');
+    };
+    return [
+      progress(3, 3),
+      h('h2', { id: 'heavy-before-label' }, L().heavyAsk),
+      heavySlider('before'),
+      h('div', { class: 'lens-skip-row' }, h('button', { type: 'button', class: 'link', 'data-key': 'lens-heavy-skip', onclick: (e) => {
+        if (e.detail > 1) return;
+        st.before = null;
+        next();
+      } }, L().skip)),
+      nav(h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-concern-next', onclick: next }, L().next), back),
     ];
   }
 
-  // 0-10 as eleven toggle chips; pressing the chosen one again clears it (the question is optional)
-  function heavyRow(which, question) {
-    const id = `heavy-${which}-label`;
+  // 0 to 10 as a slider with a little weather that changes with it. Untouched, nothing is
+  // chosen (the question is optional); the label for it is the <h2> or <p> with id heavy-<which>-label.
+  function heavySlider(which, onChange) {
     const cur = st[which];
+    const set = Number.isInteger(cur);
+    const sky = h('span', { class: 'heavy-sky' + (set ? '' : ' unset'), 'aria-hidden': 'true' }, weather(set ? cur : null));
+    const num = h('span', { class: 'heavy-val' + (set ? '' : ' unset'), 'aria-hidden': 'true' }, set ? String(cur) : L().heavySlide);
+    const text = (v) => `${v} / 10`;
+    const input = h('input', {
+      type: 'range',
+      min: '0',
+      max: '10',
+      step: '1',
+      class: 'heavy-range' + (set ? '' : ' unset'),
+      'data-key': `heavy-${which}-input`,
+      'aria-labelledby': `heavy-${which}-label`,
+      'aria-valuetext': set ? text(cur) : L().heavySlide,
+      oninput: (e) => {
+        const v = Number(e.target.value);
+        st[which] = v;
+        sky.textContent = weather(v);
+        num.textContent = String(v);
+        for (const el of [sky, num, e.target]) el.classList.remove('unset');
+        e.target.setAttribute('aria-valuetext', text(v));
+      },
+      onchange: () => onChange && onChange(),
+    });
+    input.value = String(set ? cur : 5);
     return h(
       'div',
-      { class: 'heavy', 'data-key': `heavy-${which}` },
-      h('p', { class: 'lens-label', id }, question),
-      h(
-        'div',
-        { class: 'heavy-chips', role: 'group', 'aria-labelledby': id },
-        Array.from({ length: 11 }, (_, i) =>
-          h(
-            'button',
-            {
-              type: 'button',
-              class: 'chip heavy-chip' + (cur === i ? ' on' : ''),
-              'aria-pressed': cur === i ? 'true' : 'false',
-              'data-key': `heavy-${which}-${i}`,
-              onclick: () => {
-                st[which] = cur === i ? null : i;
-                rerender();
-                const b = document.querySelector(`[data-key="heavy-${which}-${i}"]`);
-                if (b) b.focus();
-              },
-            },
-            String(i)
-          )
-        )
-      ),
+      { class: 'heavy heavy-slider', 'data-key': `heavy-${which}` },
+      h('div', { class: 'heavy-readout' }, sky, num),
+      input,
       h('div', { class: 'scale-ends', 'aria-hidden': 'true' }, h('span', {}, L().heavyEnds[0]), h('span', {}, L().heavyEnds[1]))
     );
   }
 
-  // Lenses whose cue words appear in the worry, each with the words that matched. Nothing
-  // matched: nothing is shown.
-  function suggestBlock() {
+  // Up to three approaches to start from: first those whose cue words appear in the worry
+  // (each with the words that matched), then the ones usually used for this kind of worry.
+  function suggestions() {
     let found = [];
     try {
       found = suggestLenses(st.concern, { allowed: lensesForTopics(st.topics).map((l) => l.id) }).filter((x) => lensById(x.id));
     } catch (_) {
       found = [];
     }
-    if (!found.length) return null;
+    const out = found.map((x) => ({ lens: lensById(x.id), evidence: x.evidence || [] }));
+    const { common, rest } = expertOrder(st.topics);
+    for (const l of [...common, ...rest]) {
+      if (out.length >= 3) break;
+      if (!out.some((x) => x.lens === l)) out.push({ lens: l, evidence: [] });
+    }
+    return out.slice(0, 3);
+  }
+
+  function suggestCard({ lens, evidence }) {
     const zh = lk() === 'zh';
+    const ev = evidence[0];
     return h(
-      'section',
-      { class: 'lens-suggest', 'data-key': 'lens-suggest', 'aria-labelledby': 'lens-suggest-title' },
-      h('h3', { id: 'lens-suggest-title' }, L().suggestTitle),
-      found.map((x) => {
-        const lens = lensById(x.id);
-        return h(
-          'div',
-          { class: 'lens-suggest-item' },
-          h('button', { type: 'button', class: 'btn', 'data-key': `suggest-${x.id}`, onclick: () => startLens(x.id) }, lensMark(lens, 24), ' ', lens[lk()].name),
-          x.evidence.map((ev) =>
-            h('p', { class: 'muted small lens-because' }, L().because, zh ? '「' : ' "', ev.before, h('mark', {}, ev.match), ev.after, zh ? '」' : '"')
-          )
-        );
-      })
+      'button',
+      { type: 'button', class: 'lens-pick-card', 'data-key': `suggest-${lens.id}`, style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}`, onclick: () => startLens(lens.id) },
+      h('span', { class: 'lens-pick-mark' }, lensMark(lens, 48)),
+      h(
+        'span',
+        { class: 'lens-pick-text' },
+        h('span', { class: 'lens-pick-name' }, lens[lk()].name),
+        h('span', { class: 'lens-pick-hook' }, (HOOK[lens.id] || [])[zh ? 0 : 1] || ''),
+        ev ? h('span', { class: 'lens-because' }, L().because, zh ? '「' : ' "', ev.before, h('mark', {}, ev.match), ev.after, zh ? '」' : '"') : null
+      )
     );
   }
 
   function choose() {
     const pool = lensesForTopics(st.topics);
-    const option = (label, why, onclick) => h('button', { type: 'button', class: 'lens-option', onclick }, h('strong', {}, label), h('span', {}, why));
+    const option = (label, key, onclick) => h('button', { type: 'button', class: 'lens-option', 'data-key': key, onclick }, label);
     return [
-      h('h2', {}, L().choose),
-      suggestBlock(),
+      h('div', { class: 'lens-ask' }, mascot('idle', { size: 56 }), h('h2', {}, L().choose)),
+      h('div', { class: 'lens-suggest', 'data-key': 'lens-suggest' }, suggestions().map(suggestCard)),
       h(
         'div',
-        { class: 'lens-options' },
-        option(L().draw, L().drawWhy, () => {
+        { class: 'lens-options lens-choose-options' },
+        option(L().draw, 'lens-draw', () => {
           // show what was drawn first, with a chance to draw again
           const others = pool.filter((l) => l.id !== st.drawn);
           st.drawn = shuffle(others.length ? others : pool)[0].id;
           go('drawn');
         }),
-        option(L().compare, L().compareWhy, () => {
+        option(L().compare, 'lens-compare', () => {
           st.compare = shuffle(pool).slice(0, 3).map((l) => l.id);
           go('compare');
         }),
-        option(L().pick, L().pickWhy, openPick)
+        option(L().pickAll(pool.length), 'lens-pick-all', openPick)
       ),
-      pool.length < LENSES.length ? h('p', { class: 'muted small' }, L().topicHidden) : null,
-      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('concern') }, L().back)),
+      pool.length < LENSES.length ? h('p', { class: 'muted small lens-hidden-note' }, L().topicHidden) : null,
+      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => {
+        st.cstep = 2;
+        go('concern');
+      } }, L().back)),
     ];
   }
 
@@ -975,6 +1101,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const fq = (t) => fill(t, st.answers, { inQuestion: true });
     const fixedQ = fq(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q);
     const adapted = adaptedFor(st.step, s);
+    const m = mascot('idle', { size: 48 });
     let field;
     if (s.scale) {
       field = h(
@@ -1005,19 +1132,38 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         maxlength: '400',
         placeholder: L().answerPlaceholder,
         'aria-labelledby': 'lens-q',
+        'data-key': 'lens-answer',
         oninput: (e) => {
           st.answers[st.step] = e.target.value;
           // from the first keystroke this step keeps the question it showed
-          const m = llmState();
-          if (m.lock[st.step] === undefined) m.lock[st.step] = adapted;
+          const ls = llmState();
+          if (ls.lock[st.step] === undefined) ls.lock[st.step] = adapted;
+          listen(m);
           const btn = document.querySelector('[data-key="lens-next"]');
           if (btn) btn.disabled = !e.target.value.trim();
         },
       });
       field.value = answer;
     }
+    // "not sure" is a real answer here: one tap writes it in, and Next works as usual
+    const dunno = field.tagName === 'TEXTAREA'
+      ? h('div', { class: 'chips lens-dunno-row' }, h('button', { type: 'button', class: 'chip lens-dunno', 'data-key': 'lens-dunno', onclick: () => {
+          const ls = llmState();
+          if (ls.lock[st.step] === undefined) ls.lock[st.step] = adapted;
+          st.answers[st.step] = L().dunnoValue;
+          field.value = L().dunnoValue;
+          const btn = document.querySelector('[data-key="lens-next"]');
+          if (btn) btn.disabled = false;
+        } }, L().dunno))
+      : null;
     return [
-      h('div', { class: 'lens-step-head' }, lensMark(lens, 36), h('div', {}, h('p', { class: 'lens-name' }, c.name), h('p', { class: 'muted small' }, L().stepOf(st.step + 1, n)))),
+      h(
+        'div',
+        { class: 'lens-step-head' },
+        lensMark(lens, 36),
+        h('div', { class: 'lens-step-title' }, h('p', { class: 'lens-name' }, c.name), progress(st.step + 1, n, { dots: true, label: L().stepOf(st.step + 1, n) })),
+        m
+      ),
       st.step === 0 ? h('blockquote', { class: 'lens-concern-quote' }, st.concern) : null,
       s.rewrite && prevAnswer ? h('p', { class: 'lens-rewrite' }, rewriteText(s.rewrite, prevAnswer, getLang())) : null,
       h('p', { class: 'lens-q', id: 'lens-q' }, adapted ? fq(adapted) : fixedQ),
@@ -1035,29 +1181,16 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           )
         : null,
       adapted && llmState().orig[st.step] ? h('p', { class: 'muted small lens-original', 'data-key': 'lens-original' }, fixedQ) : null,
-      h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
       field,
-      field.tagName === 'TEXTAREA' ? h('p', { class: 'muted small lens-hint' }, L().answerHint) : null,
-      h(
-        'div',
-        { class: 'actions left' },
-        h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-next', disabled: !String(answer).trim(), onclick: advance }, isLast ? L().seeSummary : L().next),
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'btn ghost',
-            onclick: () => {
-              if (st.step === 0) go('choose');
-              else {
-                st.step--;
-                rerender();
-              }
-            },
-          },
-          L().back
-        )
-      ),
+      dunno,
+      h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
+      nav(h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-next', disabled: !String(answer).trim(), onclick: advance }, isLast ? L().seeSummary : L().next), () => {
+        if (st.step === 0) go('choose');
+        else {
+          st.step--;
+          rerender();
+        }
+      }),
     ];
   }
 
@@ -1178,8 +1311,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return node;
   }
 
-  // The keepsake card: drawn from the worry and answers, with notes on where each part came from.
-  function keepsake({ concern, answers, topics, lensId, before, after, createdAt, animate, saveKey = true, showNotes = true, onPlayed = null, spec = null, genLine = null }) {
+  // The keepsake card, in parts: how to draw it (from the worry and answers) and the notes on
+  // where each part of the picture came from. null if it cannot be drawn.
+  function cardParts({ concern, answers, topics, lensId, before, after, createdAt, spec = null, genLine = null }) {
     const lens = lensById(lensId);
     const name = lens[lk()].name;
     const sh = heavinessShift(before, after);
@@ -1189,24 +1323,32 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     // with a model's picture choices: the scene from them (each tied to a word the person wrote)
     const specScene = spec ? sceneFromSpec(spec, { texts, topics, lensId, shift }) : null;
     const draw = (anim) => (specScene && !specScene.calm ? sceneSvg(specScene, { seed: args.seed, line: args.line, label: args.label, date: args.date, animate: anim, fitText }) : cardSvg({ ...args, animate: anim }));
-    let svg;
-    let notes = [];
     try {
-      svg = draw(animate);
-      notes = sceneNotes(specScene || readScene({ texts, topics, lensId, shift }), lk()) || [];
+      const first = draw(false);
+      const notes = sceneNotes(specScene || readScene({ texts, topics, lensId, shift }), lk()) || [];
+      return { name, draw, first, notes, createdAt };
     } catch (_) {
       return null;
     }
-    const art = svgNode(svg);
+  }
+
+  // The picture itself. Animated, it plays when it first comes into view.
+  function cardArt(parts, { animate = false, onPlayed = null } = {}) {
+    let art;
+    try {
+      art = svgNode(animate ? parts.draw(true) : parts.first);
+    } catch (_) {
+      art = null;
+    }
     if (!art) return null;
-    const box = h('div', { class: 'lens-card-art', role: 'img', 'aria-label': L().cardAlt(name), 'data-key': 'lens-card-art' });
+    const box = h('div', { class: 'lens-card-art', role: 'img', 'aria-label': L().cardAlt(parts.name), 'data-key': 'lens-card-art' });
     if (animate && 'IntersectionObserver' in window) {
-      // the card sits at the end of the summary: its short animation starts when it scrolls into view
       box.classList.add('waiting');
       const io = new IntersectionObserver((list) => {
         if (!list.some((e) => e.isIntersecting)) return;
         io.disconnect();
         box.classList.remove('waiting');
+        box.classList.add('arrive');
         box.appendChild(art);
         if (onPlayed) onPlayed();
       }, { threshold: 0.3 });
@@ -1215,30 +1357,37 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       box.appendChild(art);
       if (animate && onPlayed) onPlayed();
     }
-    return h(
-      'div',
-      { class: 'lens-keepsake' },
-      box,
-      showNotes && notes.length
-        ? h('details', { class: 'lens-more', 'data-key': 'lens-card-notes' }, h('summary', {}, L().cardNotes), h('ul', { class: 'lens-card-notes' }, notes.map((n) => h('li', {}, n))))
-        : null,
-      saveKey
-        ? h('button', { type: 'button', class: 'btn', 'data-key': 'lens-card-save', onclick: async (e) => {
-            const b = e.currentTarget;
-            b.disabled = true;
-            try {
-              const png = await postcardPng(draw(false));
-              const d = new Date(createdAt || Date.now());
-              const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-              await sharePng(png, `murmur-lens-${ymd}.png`, name);
-            } catch (_) {
-              toast(L().cardSaveFailed);
-            } finally {
-              b.disabled = false;
-            }
-          } }, L().cardSave)
-        : null
-    );
+    return box;
+  }
+
+  function cardNotes(parts) {
+    if (!parts || !parts.notes.length) return null;
+    return h('details', { class: 'lens-more', 'data-key': 'lens-card-notes' }, h('summary', {}, L().cardNotes), h('ul', { class: 'lens-card-notes' }, parts.notes.map((n) => h('li', {}, n))));
+  }
+
+  function cardSave(parts, cls = 'btn') {
+    if (!parts) return null;
+    return h('button', { type: 'button', class: cls, 'data-key': 'lens-card-save', onclick: async (e) => {
+      const b = e.currentTarget;
+      b.disabled = true;
+      try {
+        const png = await postcardPng(parts.draw(false));
+        const d = new Date(parts.createdAt || Date.now());
+        const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        await sharePng(png, `murmur-lens-${ymd}.png`, parts.name);
+      } catch (_) {
+        toast(L().cardSaveFailed);
+      } finally {
+        b.disabled = false;
+      }
+    } }, L().cardSave);
+  }
+
+  // The card still, for the saved list.
+  function keepsake(opts) {
+    const parts = cardParts(opts);
+    const box = parts && cardArt(parts);
+    return box ? h('div', { class: 'lens-keepsake' }, box) : null;
   }
 
   function heavyResult() {
@@ -1297,18 +1446,31 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   // The person's answers, exactly as written: each question in its short form, then the answer
   // as a quotation. Nothing here puts their words inside a sentence of ours.
-  function answerList(lens, answers) {
+  // collapsible: only the first answer shows, the rest one tap away ("see all").
+  function answerList(lens, answers, { collapsible = false } = {}) {
     const rows = answerRows(lens, lk(), answers);
     // nothing written at all: one line, rather than the same note under every question
     if (rows.every((r) => r.open)) return h('div', { class: 'lens-answers' }, h('p', { class: 'lens-answer-open muted' }, L().allOpen));
-    return h(
-      'div',
-      { class: 'lens-answers' },
-      rows.map((r) => [
-        h('p', { class: 'lens-answer-q' }, r.q),
-        r.open ? h('p', { class: 'lens-answer-open muted' }, L().leftOpen) : h('blockquote', { class: 'lens-answer' }, r.text),
-      ])
-    );
+    const row = (r) => [
+      h('p', { class: 'lens-answer-q' }, r.q),
+      r.open ? h('p', { class: 'lens-answer-open muted' }, L().leftOpen) : h('blockquote', { class: 'lens-answer' }, r.text),
+    ];
+    if (!collapsible || rows.length < 2) return h('div', { class: 'lens-answers' }, rows.map(row));
+    const rest = h('div', { id: 'lens-answers-rest', hidden: st.showAll ? null : true }, rows.slice(1).map(row));
+    const toggle = h('button', {
+      type: 'button',
+      class: 'link lens-see-all',
+      'data-key': 'lens-see-all',
+      'aria-expanded': st.showAll ? 'true' : 'false',
+      'aria-controls': 'lens-answers-rest',
+      onclick: (e) => {
+        st.showAll = !st.showAll;
+        rest.hidden = !st.showAll;
+        e.currentTarget.setAttribute('aria-expanded', st.showAll ? 'true' : 'false');
+        e.currentTarget.textContent = st.showAll ? L().seeLess : L().seeAll(rows.length);
+      },
+    }, st.showAll ? L().seeLess : L().seeAll(rows.length));
+    return h('div', { class: 'lens-answers' }, row(rows[0]), rest, toggle);
   }
 
   // An optional if-then plan for the small thing to try ("I'll try it when ..."). Saved with
@@ -1365,44 +1527,61 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function summary() {
     const lens = lensById(st.lensId);
     const c = lens[lk()];
+    const hue = `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}`;
     const sum = startSummary(lens);
     const loading = sum && sum.status === 'loading';
     const gen = sum && sum.status === 'done' ? sum.result : null;
     const genPerspective = gen && gen.perspective ? stripCitations(gen.perspective) : null;
     const genTry = gen && gen.tryThis ? gen.tryThis : null;
-    const skel = () => h('p', { class: 'lens-skel muted small', 'aria-busy': 'true', 'data-key': 'lens-llm-loading' }, L().llmLoading);
+    const skel = () => h('p', { class: 'lens-skel', 'aria-hidden': 'true' }, h('span', {}), h('span', {}));
     const genLabel = () => h('p', { class: 'muted small lens-llm-label', 'data-key': 'lens-llm-label' }, L().llmLabel);
+    // the card waits for the summary, so its picture does not change under the person
+    const key = `${st.lensId}|${st.before}|${st.after}`;
+    const parts = loading ? null : cardParts({ concern: st.concern, answers: st.answers, topics: st.topics, lensId: lens.id, before: st.before, after: st.after, createdAt: st.startedAt, spec: gen && gen.card, genLine: gen && gen.cardLine });
+    const fresh = st.cardAnimated !== key;
     const rate = (v) => {
       st.rating = v;
       rerender();
     };
+    // the high point of the exercise: Mumu and the card, with a few sparkles the first time
+    const title = h('div', { class: 'lens-celebrate-title' }, h('h2', {}, c.name), h('p', { class: 'lens-celebrate-line' }, loading ? L().llmLoading : L().doneLine));
+    const top = loading
+      ? h('section', { class: 'lens-celebrate thinking', style: hue, 'aria-busy': 'true', 'data-key': 'lens-llm-loading' }, h('div', { class: 'lens-celebrate-head' }, mascot('think', { size: 64 }), title))
+      : h(
+          'section',
+          { class: 'lens-celebrate' + (fresh ? ' fresh' : ''), style: hue },
+          h('div', { class: 'lens-celebrate-head' }, mascot('happy', { size: 64 }), title),
+          parts
+            ? h(
+                'div',
+                { class: 'lens-card-stage' },
+                fresh ? h('span', { class: 'lens-confetti', 'aria-hidden': 'true' }, Array.from({ length: 9 }, (_, i) => h('i', { style: `--i:${i}` }))) : null,
+                h('div', { class: 'lens-keepsake' }, cardArt(parts, { animate: fresh, onPlayed: () => (st.cardAnimated = key) }))
+              )
+            : null
+        );
     return [
+      top,
       h(
         'article',
-        { class: 'lens-summary', style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}` },
-        h('div', { class: 'lens-card-head' }, lensMark(lens), h('h2', {}, c.name)),
+        { class: 'lens-summary lens-summary-body', style: hue, 'aria-label': c.name },
         h('h3', {}, L().wrote),
-        answerList(lens, st.answers),
+        answerList(lens, st.answers, { collapsible: true }),
         distanceInline(),
         h('h3', {}, L().perspective),
         loading ? skel() : [genPerspective ? genLabel() : null, h('p', { 'data-key': 'lens-perspective' }, genPerspective || c.perspective)],
         h('h3', {}, L().tryThis),
         loading ? skel() : [genTry ? genLabel() : null, h('p', { 'data-key': 'lens-try' }, genTry || c.tryThis)],
-        planInput(),
-        h('h3', {}, L().misses),
-        h('p', {}, c.misses),
-        // background on the approach, folded so rating and saving are close at hand
-        h(
-          'details',
-          { class: 'lens-more' },
-          h('summary', {}, L().moreAbout),
-          h('h3', {}, L().concepts),
-          h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
-          h('p', { class: 'muted small' }, L().people, lk() === 'zh' ? '：' : ': ', (lk() === 'zh' && lens.peopleZh) || lens.people),
-          h('p', { class: 'muted small' }, L().reading(lens.chapter))
-        )
+        planInput()
       ),
-      st.before !== null && st.before !== undefined ? heavyRow('after', L().heavyAfterQ) : null,
+      relatedBlock(lens),
+      st.before !== null && st.before !== undefined
+        ? h('div', { class: 'lens-after' }, h('p', { class: 'lens-label', id: 'heavy-after-label' }, L().heavyAfterQ), heavySlider('after', () => {
+            const y = window.scrollY;
+            rerender();
+            window.scrollTo(0, y);
+          }))
+        : null,
       heavyResult(),
       h(
         'div',
@@ -1410,7 +1589,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('p', { id: 'rate-q' }, L().rateQ),
         h(
           'div',
-          { class: 'scale', role: 'radiogroup', 'aria-labelledby': 'rate-q' },
+          { class: 'lens-faces', role: 'radiogroup', 'aria-labelledby': 'rate-q' },
           [1, 2, 3, 4, 5].map((v) =>
             h(
               'button',
@@ -1418,20 +1597,20 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 type: 'button',
                 role: 'radio',
                 'aria-checked': st.rating === v ? 'true' : 'false',
-                'aria-label': `${v}/5`,
-                class: 'scale-num' + (st.rating === v ? ' on' : ''),
+                'aria-label': `${v}/5 ${L().rateLabels[v - 1]}`,
+                class: 'lens-face' + (st.rating === v ? ' on' : ''),
                 'data-key': `rate-${v}`,
                 onclick: () => rate(v),
               },
-              String(v)
+              h('span', { 'aria-hidden': 'true' }, RATE_FACES[v - 1])
             )
           )
         ),
-        h('div', { class: 'scale-ends', 'aria-hidden': 'true' }, h('span', {}, L().rateLabels[0]), h('span', {}, L().rateLabels[4]))
+        h('p', { class: 'lens-face-word muted small', 'aria-hidden': 'true' }, st.rating ? L().rateLabels[st.rating - 1] : ' ')
       ),
       h(
         'div',
-        { class: 'actions left wrap' },
+        { class: 'actions lens-summary-actions' },
         h(
           'button',
           {
@@ -1479,54 +1658,119 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           },
           L().save
         ),
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'btn',
-            'data-key': 'lens-another',
-            onclick: () => {
-              commitRating();
-              const keep = { concern: st.concern, topics: st.topics.slice(), riskSeen: st.riskSeen, before: st.before, startedAt: st.startedAt };
-              const m = llmState();
-              reset();
-              Object.assign(st.llm, { provider: m.provider, off: m.off, shown: m.shown });
-              Object.assign(st, keep);
-              go('choose');
-            },
-          },
-          L().sameAnother
-        ),
-        h('button', { type: 'button', class: 'btn ghost', onclick: finish }, L().finish)
+        h('button', { type: 'button', class: 'btn lens-more-btn', 'data-key': 'lens-more-open', 'aria-haspopup': 'dialog', onclick: () => {
+          st.sheet = true;
+          const y = window.scrollY;
+          rerender();
+          window.scrollTo(0, y);
+        } }, L().more)
       ),
-      // the keepsake card closes the summary; it animates the first time it is seen, and later
-      // redraws (rating, the after number) show it still
-      (() => {
-        const key = `${st.lensId}|${st.before}|${st.after}`;
-        if (loading) return null; // the card waits for the summary, so its picture does not change under the person
-        return keepsake({ concern: st.concern, answers: st.answers, topics: st.topics, lensId: lens.id, before: st.before, after: st.after, createdAt: st.startedAt, animate: st.cardAnimated !== key, onPlayed: () => (st.cardAnimated = key), spec: gen && gen.card, genLine: gen && gen.cardLine });
-      })(),
-      relatedBlock(lens),
-      // personal responses belong in the AI conversation, not in fixed sentences on this page
-      st.aiEnabled ? h('p', { class: 'muted small lens-ai-note', 'data-key': 'ai-note' }, L().aiNote) : null,
-      st.aiEnabled
-        ? h(
+      // what this exercise is not, right under the buttons rather than between the summary and them
+      h('p', { class: 'lens-talk' }, L().talk),
+      st.sheet ? moreSheet(lens, parts) : null,
+    ];
+  }
+
+  // Everything else the summary offers, in a sheet from the bottom: another angle on the same
+  // worry, the card as an image and its notes, the AI conversation, the approach's limits and
+  // background, and finishing without saving. Escape, the close button and the backdrop close it.
+  function moreSheet(lens, parts) {
+    const c = lens[lk()];
+    const dlg = h('dialog', { class: 'lens-sheet', 'data-key': 'lens-sheet', 'aria-labelledby': 'lens-sheet-title' });
+    const close = () => {
+      st.sheet = false;
+      if (dlg.open) dlg.close();
+      const y = window.scrollY;
+      rerender();
+      window.scrollTo(0, y);
+      const b = document.querySelector('[data-key="lens-more-open"]');
+      if (b) b.focus({ preventScroll: true });
+    };
+    // leaving the summary from the sheet: close it first, then go
+    const leave = (fn) => () => {
+      st.sheet = false;
+      if (dlg.open) dlg.close();
+      fn();
+    };
+    dlg.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      close();
+    });
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) close();
+    });
+    add(
+      dlg,
+      h(
+        'div',
+        { class: 'lens-sheet-body' },
+        h('div', { class: 'lens-sheet-head' }, h('h2', { id: 'lens-sheet-title' }, L().more), h('button', { type: 'button', class: 'lens-sheet-close', 'data-key': 'lens-sheet-close', 'aria-label': L().close, onclick: close }, h('span', { 'aria-hidden': 'true' }, '✕'))),
+        h(
+          'div',
+          { class: 'lens-sheet-actions' },
+          h(
             'button',
             {
               type: 'button',
-              class: 'link',
-              'data-key': 'ai-open',
-              onclick: () => {
-                ai.open(lens.id, { concern: st.concern, answers: st.answers.slice() });
-                go('ai');
-              },
+              class: 'btn',
+              'data-key': 'lens-another',
+              onclick: leave(() => {
+                commitRating();
+                const keep = { concern: st.concern, topics: st.topics.slice(), riskSeen: st.riskSeen, before: st.before, startedAt: st.startedAt };
+                const m = llmState();
+                reset();
+                Object.assign(st.llm, { provider: m.provider, off: m.off, shown: m.shown });
+                Object.assign(st, keep);
+                go('choose');
+              }),
             },
-            L().aiContinue
-          )
-        : null,
-      // what this exercise is not, right under the buttons rather than between the summary and them
-      h('p', { class: 'lens-talk' }, L().talk),
-    ];
+            L().sameAnother
+          ),
+          cardSave(parts),
+          st.aiEnabled
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'btn',
+                  'data-key': 'ai-open',
+                  onclick: leave(() => {
+                    ai.open(lens.id, { concern: st.concern, answers: st.answers.slice() });
+                    go('ai');
+                  }),
+                },
+                L().aiContinue
+              )
+            : null
+        ),
+        // personal responses belong in the AI conversation, not in fixed sentences on this page
+        st.aiEnabled ? h('p', { class: 'muted small lens-ai-note', 'data-key': 'ai-note' }, L().aiNote) : null,
+        cardNotes(parts),
+        h('section', { class: 'lens-sheet-misses', 'data-key': 'lens-misses' }, h('h3', {}, L().misses), h('p', {}, c.misses)),
+        h(
+          'details',
+          { class: 'lens-more' },
+          h('summary', {}, L().moreAbout),
+          h('h3', {}, L().concepts),
+          h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
+          h('p', { class: 'muted small' }, L().people, lk() === 'zh' ? '：' : ': ', (lk() === 'zh' && lens.peopleZh) || lens.people),
+          h('p', { class: 'muted small' }, L().reading(lens.chapter))
+        ),
+        h('button', { type: 'button', class: 'btn ghost lens-finish', 'data-key': 'lens-finish', onclick: leave(finish) }, L().finish)
+      )
+    );
+    // shown as a modal once it is in the page (the view is attached right after it is built)
+    const show = (n) => {
+      if (!st.sheet || dlg.open) return;
+      if (!dlg.isConnected) return n < 5 && requestAnimationFrame(() => show(n + 1));
+      try {
+        dlg.showModal();
+      } catch (_) {
+        dlg.setAttribute('open', '');
+      }
+    };
+    queueMicrotask(() => show(0));
+    return dlg;
   }
 
   function commitRating() {
@@ -1703,7 +1947,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             'details',
             { class: 'lens-more' },
             h('summary', {}, L().savedMore),
-            keepsake({ concern: s.concern, answers: s.answers, topics: s.topics || [], lensId: l.id, before: s.before, after: s.after, createdAt: s.createdAt, animate: false, saveKey: false, showNotes: false }),
+            keepsake({ concern: s.concern, answers: s.answers, topics: s.topics || [], lensId: l.id, before: s.before, after: s.after, createdAt: s.createdAt, }),
             h('h4', {}, L().perspective),
             s.generated && s.generated.perspective ? h('p', { class: 'muted small lens-llm-label' }, L().llmLabel) : null,
             h('p', {}, (s.generated && s.generated.perspective) || c.perspective),
@@ -1820,6 +2064,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       body = [h('p', { class: 'error', role: 'alert' }, L().broken), ...home()];
     }
     add(wrap, body);
+    // the worry and the questions are one-question screens: their buttons sit at the bottom
+    wrap.classList.toggle('lens-flow', ['concern', 'concern-for-lens', 'step'].includes(st.stage));
     // any page below the lens home owns one history entry; back on the home page it is removed
     flow.sync(true);
     if (st.stage !== 'crisis' && st.stage !== 'resources') add(wrap, helpBar());
@@ -1831,7 +2077,21 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   // the worry typed so far stays in its field.
   function goBack() {
     const s = st.stage;
-    if (s === 'choose') go('concern');
+    if (s === 'summary' && st.sheet) {
+      // the More sheet closes first, as a sheet does
+      st.sheet = false;
+      const y = window.scrollY;
+      rerender();
+      window.scrollTo(0, y);
+      const b = document.querySelector('[data-key="lens-more-open"]');
+      if (b) b.focus({ preventScroll: true });
+    } else if ((s === 'concern' || s === 'concern-for-lens') && st.cstep > 0) {
+      st.cstep--;
+      go(s);
+    } else if (s === 'choose') {
+      st.cstep = 2;
+      go('concern');
+    }
     else if (s === 'drawn' || s === 'compare' || s === 'pick') go('choose');
     else if (s === 'step') {
       if (st.step === 0) go('choose');

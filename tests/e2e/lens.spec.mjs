@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterConcern, openLensMore } from './helpers.mjs';
 
 test.describe('theory lens', () => {
   test.use({ locale: 'zh-TW' });
@@ -12,9 +13,7 @@ test.describe('theory lens', () => {
     page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '我一直擔心報告做不好，晚上睡不好');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.getByRole('button', { name: '下一步' }).click();
+    await enterConcern(page, '我一直擔心報告做不好，晚上睡不好', ['work']);
     await page.getByRole('button', { name: /比較三個角度/ }).click();
     await expect(page.locator('.lens-card')).toHaveCount(3);
     await page.locator('.lens-card .btn').first().click();
@@ -45,7 +44,6 @@ test.describe('theory lens', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '最近真的不想活了');
-    await page.locator('[data-key="topic-self"]').click();
     await page.getByRole('button', { name: '下一步' }).click();
     await expect(page.locator('.crisis')).toBeVisible();
     await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
@@ -55,10 +53,8 @@ test.describe('theory lens', () => {
   test('risk language inside an answer also stops the exercise', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '工作壓力很大，今天累死了');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.getByRole('button', { name: '下一步' }).click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '工作壓力很大，今天累死了', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('.lens-row').first().click();
     if (await page.locator('.scale-11').count()) {
       await page.locator('[data-key="scale-2"]').click();
@@ -73,12 +69,12 @@ test.describe('theory lens', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '報告被退回，我想死');
-    await page.locator('[data-key="topic-work"]').click();
     await page.getByRole('button', { name: '下一步' }).click();
     await expect(page.locator('.crisis')).toBeVisible();
     await page.locator('[data-key="crisis-continue"]').click();
     await expect(page.locator('.crisis')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /自己選/ })).toBeVisible();
+    // continuing goes on to the next screen of the worry, with the words kept
+    await expect(page.locator('[data-key="topic-work"]')).toBeVisible();
     await page.getByRole('button', { name: '上一步' }).click();
     await expect(page.locator('#lens-concern')).toHaveValue('報告被退回，我想死');
   });
@@ -86,10 +82,8 @@ test.describe('theory lens', () => {
   test('opening help mid-exercise and tapping the tab keeps the exercise', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '主管一直改需求');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '主管一直改需求', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('.lens-row').first().click();
     await page.getByRole('button', { name: '求助專線' }).click();
     await page.locator('#tabs a[href="#lens"]').click();
@@ -105,22 +99,38 @@ test.describe('theory lens', () => {
     await expect(page.locator('#lens-concern')).toBeVisible();
   });
 
-  test('Next turns on whether the topic or the text comes first', async ({ page }) => {
+  test('each screen of the worry waits for its answer; heaviness can be skipped', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.locator('[data-key="topic-work"]').click();
-    const next = page.locator('[data-key="lens-concern-next"]');
-    await expect(next).toBeDisabled();
+    const worryNext = page.locator('[data-key="lens-worry-next"]');
+    await expect(worryNext).toBeDisabled();
     await page.fill('#lens-concern', '主管一直改需求');
-    await expect(next).toBeEnabled();
+    await expect(worryNext).toBeEnabled();
+    await worryNext.click();
+    await expect(page.locator('.lens-progress')).toHaveAttribute('aria-valuenow', '2');
+    const topicsNext = page.locator('[data-key="lens-topics-next"]');
+    await expect(topicsNext).toBeDisabled();
+    await page.locator('[data-key="topic-work"]').click();
+    await expect(topicsNext).toBeEnabled();
+    await topicsNext.click();
+    // heaviness: a slider, nothing chosen until it is moved; Skip goes on without a number
+    const slider = page.locator('[data-key="heavy-before-input"]');
+    await expect(slider).toHaveAttribute('type', 'range');
+    await expect(slider).toHaveAttribute('aria-valuetext', '拖動來選');
+    await slider.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(slider).toHaveAttribute('aria-valuetext', '6 / 10');
+    await page.locator('[data-key="lens-heavy-skip"]').click();
+    await expect(page.getByRole('heading', { name: '試試這幾個角度' })).toBeVisible();
+    await page.getByRole('button', { name: '上一步' }).click();
+    await expect(slider).toHaveAttribute('aria-valuetext', '拖動來選');
   });
 
   test('help lines switch region and remember it', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '最近真的不想活了');
-    await page.locator('[data-key="topic-self"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('[data-key="lens-worry-next"]').click();
     await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
     await expect(page.locator('.crisis a[href="tel:988"]')).toHaveCount(0);
     await page.locator('[data-key="region-US"]').click();
@@ -133,8 +143,9 @@ test.describe('theory lens', () => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '主管一直改需求，回家又和爸媽吵');
+    await page.locator('[data-key="lens-worry-next"]').click();
     const chip = (t) => page.locator(`[data-key="topic-${t}"]`);
-    const next = page.locator('[data-key="lens-concern-next"]');
+    const next = page.locator('[data-key="lens-topics-next"]');
     await chip('work').click();
     await chip('family').click();
     await expect(chip('work')).toHaveAttribute('aria-pressed', 'true');
@@ -163,11 +174,8 @@ test.describe('theory lens', () => {
   test('two topics: usual approaches of both come first, in the order chosen, and both are saved', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '爸媽一直催我回家工作');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '爸媽一直催我回家工作', ['family', 'work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     const names = await page.locator('.lens-row-name').allInnerTexts();
     expect(names).toHaveLength(14);
     expect(new Set(names).size).toBe(14);
@@ -199,12 +207,10 @@ test.describe('theory lens', () => {
       await page.goto('/#lens');
       await page.reload();
       await page.locator('[data-key="lens-start"]').click();
-      await page.fill('#lens-concern', '外婆上個月過世了，工作也顧不好');
-      for (const t of order) await page.locator(`[data-key="topic-${t}"]`).click();
-      await page.locator('[data-key="lens-concern-next"]').click();
+      await enterConcern(page, '外婆上個月過世了，工作也顧不好', order);
       await expect(page.locator('.view.lens')).toContainText('有些學派不適合用來看這類煩惱');
       // pick list
-      await page.getByRole('button', { name: /自己選/ }).click();
+      await page.locator('[data-key="lens-pick-all"]').click();
       const names = await page.locator('.lens-row-name').allInnerTexts();
       expect([...names].sort()).toEqual([...allowed].sort());
       await page.getByRole('button', { name: '上一步' }).click();
@@ -225,20 +231,15 @@ test.describe('theory lens', () => {
     await page.getByRole('button', { name: /理論卡/ }).click();
     await page.locator('.deck-card', { hasText: '焦點解決取向' }).click();
     await page.getByRole('button', { name: '用這個角度開始' }).click();
-    await page.fill('#lens-concern', '外婆上個月過世了，工作也顧不好');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="topic-loss"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await expect(page.getByRole('heading', { name: '要怎麼選角度？' })).toBeVisible();
+    await enterConcern(page, '外婆上個月過世了，工作也顧不好', ['work', 'loss']);
+    await expect(page.getByRole('heading', { name: '試試這幾個角度' })).toBeVisible();
   });
 
   test('loss topic hides lenses unsuited to grief', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '外婆上個月過世了');
-    await page.locator('[data-key="topic-loss"]').click();
-    await page.getByRole('button', { name: '下一步' }).click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '外婆上個月過世了', ['loss']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     const names = await page.locator('.lens-row-name').allInnerTexts();
     expect(names).not.toContain('存在主義取向');
     expect(names).not.toContain('焦點解決取向');
@@ -248,10 +249,8 @@ test.describe('theory lens', () => {
   test('the pick list puts lenses often used for the topic first, in compact rows', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '爸媽一直催我回家工作');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.getByRole('button', { name: '下一步' }).click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '爸媽一直催我回家工作', ['family']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await expect(page.locator('.lens-row').first()).toContainText('家族系統取向');
     await expect(page.locator('.lens-row')).toHaveCount(14);
     await page.locator('[data-key="pick-family-systems"]').click();
@@ -266,10 +265,8 @@ test.describe('theory lens', () => {
   test('answering "不知道" everywhere is never quoted back, and saving is in reach', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '爸媽一直催我回家工作');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '爸媽一直催我回家工作', ['family']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-family-systems"]').click();
     for (let i = 0; i < 3; i++) {
       await page.fill('#lens-answer', '不知道');
@@ -290,10 +287,8 @@ test.describe('theory lens', () => {
     const answers = ['Maybe not. 可能不會', '第一行\n第二行', 'I have no idea what to put here, honestly'];
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '爸媽一直催我回家工作');
-    await page.locator('[data-key="topic-family"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '爸媽一直催我回家工作', ['family']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-existential"]').click();
     for (const a of answers) {
       await page.fill('#lens-answer', a);
@@ -301,15 +296,20 @@ test.describe('theory lens', () => {
     }
     const sum = page.locator('.lens-summary');
     await expect(sum).toBeVisible();
-    for (const hd of ['你寫下的', '這個角度會怎麼看', '可以試試', '這個角度可能忽略的']) await expect(sum.getByRole('heading', { name: hd })).toBeVisible();
-    // every answer is a quotation block holding exactly what was typed
+    for (const hd of ['你寫下的', '這個角度會怎麼看', '可以試試']) await expect(sum.getByRole('heading', { name: hd })).toBeVisible();
+    // every answer is a quotation block holding exactly what was typed; past the first, one tap away
+    await expect(sum.locator('blockquote.lens-answer').nth(1)).toBeHidden();
+    await page.locator('[data-key="lens-see-all"]').click();
+    await expect(page.locator('[data-key="lens-see-all"]')).toHaveAttribute('aria-expanded', 'true');
+    await expect(sum.locator('blockquote.lens-answer').nth(2)).toBeVisible();
     expect(await sum.locator('blockquote.lens-answer').evaluateAll((els) => els.map((e) => e.textContent))).toEqual(answers);
     await expect(sum.locator('.lens-answer-q')).toHaveText(['這個煩惱透露你在乎什麼', '沒辦法選的，和還能選的', '朝在乎的方向走的一小步']);
     // outside those blocks, no element of the page contains any of the person's words
     const leaked = await page.evaluate((list) => {
       const out = [];
       for (const el of document.querySelectorAll('.view.lens *')) {
-        if (el.closest('blockquote')) continue;
+        // quotations: the answer blocks, and the keepsake card, which shows one answer as its own line
+        if (el.closest('blockquote') || el.closest('[data-key="lens-card-art"]')) continue;
         const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
         for (const a of list) for (const part of a.split('\n')) if (own.includes(part)) out.push(own);
       }
@@ -321,6 +321,12 @@ test.describe('theory lens', () => {
     // the perspective and the thing to try are the same text whatever was answered
     const fixed = [await page.locator('[data-key="lens-perspective"]').innerText(), await page.locator('[data-key="lens-try"]').innerText()];
     expect(fixed[0]).toContain('存在主義取向');
+    // what the approach may miss is in the More sheet, which closes with Escape
+    await openLensMore(page);
+    await expect(page.getByRole('dialog').getByRole('heading', { name: '這個角度可能忽略的' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-key="lens-sheet"]')).toHaveCount(0);
+    await expect(page.locator('[data-key="lens-more-open"]')).toBeFocused();
     await page.locator('[data-key="lens-save"]').click();
     await page.getByRole('button', { name: /我存下的練習/ }).click();
     const saved = page.locator('.lens-summary.compact');
@@ -333,10 +339,8 @@ test.describe('theory lens', () => {
   test('a scale answer reads as a number out of 10 and a skipped answer as left open', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
-    await page.fill('#lens-concern', '報告一直拖著沒寫');
-    await page.locator('[data-key="topic-work"]').click();
-    await page.locator('[data-key="lens-concern-next"]').click();
-    await page.getByRole('button', { name: /自己選/ }).click();
+    await enterConcern(page, '報告一直拖著沒寫', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
     await page.locator('[data-key="pick-solution-focused"]').click();
     await page.locator('[data-key="scale-6"]').click();
     await page.locator('[data-key="lens-next"]').click();

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterConcern, openLensMore } from './helpers.mjs';
 
 test.use({ locale: 'zh-TW' });
 
@@ -8,10 +9,9 @@ async function finishLens(page) {
   await page.goto('/#lens');
   await page.locator('[data-key="lens-start"]').click();
   await page.fill('#lens-concern', '報告一直拖著沒寫');
-  await page.locator('[data-key="topic-work"]').click();
   // with AI on, the lens exercise can also use the model; these tests are about the chat, so use the fixed version
   await page.locator('[data-key="lens-llm-off"]').waitFor({ state: 'visible', timeout: 3000 }).then(() => page.locator('[data-key="lens-llm-off"]').check()).catch(() => {});
-  await page.locator('.actions .btn.primary').click();
+  await enterConcern(page, '報告一直拖著沒寫', ['work']);
   await page.locator('.lens-option').nth(2).click();
   // pick the cognitive lens explicitly
   await page.locator('.lens-row', { hasText: '認知取向' }).click();
@@ -20,6 +20,8 @@ async function finishLens(page) {
     await page.locator('[data-key="lens-next"]').click();
   }
   await expect(page.locator('.lens-summary')).toBeVisible();
+  // the AI conversation is one of the summary's secondary actions, in the More sheet
+  await openLensMore(page);
 }
 
 async function enableAi(page, key = 'sk-ant-test') {

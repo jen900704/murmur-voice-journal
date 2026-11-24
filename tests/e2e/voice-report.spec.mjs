@@ -11,7 +11,7 @@ async function grab(page, key) {
 
 async function loadDemo(page) {
   await page.goto('/#journal');
-  await page.locator('.journal .btn').click();
+  await page.locator('[data-key="journal-demo"]').click();
   await expect(page).toHaveURL(/#trends$/);
   await expect(page.locator('.links-table')).toBeVisible();
 }

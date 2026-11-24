@@ -5,6 +5,7 @@
 // Ranking is BM25 over weighted fields, with a boost when the whole query appears as written
 // and a small nudge toward newer items. See docs/search-and-rag.md for the formula.
 import { lensById, isNonAnswer } from './lenses.js';
+import { mascot } from './mascot.js';
 
 // k1 is the usual value. b is kept low because journal items are short: a one-line check-in
 // should not outrank a longer exercise on length alone. On the labeled queries in
@@ -463,6 +464,7 @@ const S = {
     label: '搜尋你寫過的內容',
     hint: '備註、只記心情、睡前的心事和對自己好的事、存下的練習。只在這個裝置上搜尋。',
     clear: '清除',
+    clearSearch: '清除搜尋',
     count: (n, shown) => (n > shown ? `共 ${n} 筆，顯示前 ${shown} 筆` : `${n} 筆結果`),
     none: '找不到符合的內容。',
     loading: '正在整理……',
@@ -481,6 +483,7 @@ const S = {
     label: 'Search what you wrote',
     hint: 'Notes, silent check-ins, bedtime worries and kind things, saved exercises. Searched on this device only.',
     clear: 'Clear',
+    clearSearch: 'Clear search',
     count: (n, shown) => (n > shown ? `${n} results, showing the first ${shown}` : n === 1 ? '1 result' : `${n} results`),
     none: 'Nothing matches.',
     loading: 'Getting ready…',
@@ -587,6 +590,7 @@ export function createJournalSearch({ h, getLang, db, getEntries, openEntry, ope
     dom.wrap.classList.toggle('searching', !!query);
     dom.results.hidden = !query;
     dom.list.replaceChildren();
+    dom.empty.hidden = true;
     if (!query) {
       dom.count.textContent = '';
       return;
@@ -599,6 +603,7 @@ export function createJournalSearch({ h, getLang, db, getEntries, openEntry, ope
     const found = index.search(q);
     const shown = found.slice(0, SHOWN);
     dom.count.textContent = found.length ? L().count(found.length, shown.length) : L().none;
+    dom.empty.hidden = found.length > 0;
     for (const r of shown) {
       const lens = r.doc.type === 'lens' ? lensById(r.doc.lensId) : null;
       const type = L().types[r.doc.type] + (lens ? ` · ${lens[lk()].name}` : '');
@@ -672,9 +677,11 @@ export function createJournalSearch({ h, getLang, db, getEntries, openEntry, ope
     const clear = h('button', { type: 'button', class: 'link search-clear', 'data-key': 'journal-search-clear', onclick: () => (setQuery(''), input.focus()) }, L().clear);
     const count = h('p', { class: 'search-count', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' });
     const list = h('ul', { class: 'search-list', 'aria-label': L().results });
-    const results = h('div', { class: 'search-results', id: 'journal-search-results' }, list);
+    // nothing found: Mumu, the count line above says so, and one way back
+    const empty = h('div', { class: 'empty-state search-empty', hidden: true }, mascot('think', { size: 80 }), h('button', { type: 'button', class: 'btn', 'data-key': 'search-empty-clear', onclick: () => (setQuery(''), input.focus()) }, L().clearSearch));
+    const results = h('div', { class: 'search-results', id: 'journal-search-results' }, empty, list);
     const box = h('div', { class: 'journal-search', role: 'search', onkeydown: moveFocus }, h('label', { for: 'journal-search-input' }, L().label), h('div', { class: 'search-row' }, input, clear), h('p', { class: 'muted small', id: 'journal-search-hint' }, L().hint), count, results);
-    st.dom = { wrap, input, clear, count, list, results };
+    st.dom = { wrap, input, clear, count, list, results, empty };
     wrap.appendChild(box);
     // results are drawn at once from the index in memory, so focus can return to a result after
     // a redraw; storage is read again in the background
