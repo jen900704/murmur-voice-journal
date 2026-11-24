@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Murmur</title>
+    <meta name="description" content="A private voice journal. Speak for 30 seconds a day and see how your pitch, pace, and pauses change. Everything stays on your device." />
+    <meta name="theme-color" content="#f1f0f6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16142a" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Murmur" />
+    <meta property="og:title" content="Murmur · a private voice journal" />
+    <meta property="og:description" content="Speak for 30 seconds a day. See how your voice changes. Nothing leaves your device." />
+    <meta property="og:image" content="icons/og.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="preload" href="fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6c5 0 6 4 9 5s6 4 5 9-4 6-5 9-4 6-9 5-6-4-9-5-6-4-5-9 4-6 5-9 4-5 9-5z" /></svg>
+      <div>
+        <h1 id="brand-name">Murmur</h1>
+        <p id="brand-tag"></p>
+      </div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <div id="sheet" class="sheet" hidden></div>
+    <nav id="tabs" class="tabs" aria-label="Sections"></nav>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <noscript><p class="empty">Murmur needs JavaScript to run.</p></noscript>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
