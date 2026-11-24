@@ -15,6 +15,7 @@ const S = {
     deck: '理論卡',
     fit: '哪個角度適合我',
     saved: '我存下的練習',
+    savedCount: (n) => (n ? `${n} 個` : '還沒有'),
     aiContinue: '和 AI 用這個角度繼續聊（實驗功能）',
     gentle: '溫和的作品推薦（電影、書、音樂劇）',
     worryLabel: '用一兩句話寫下讓你在意的事',
@@ -81,6 +82,7 @@ const S = {
     deck: 'Lens cards',
     fit: 'Which lens fits me',
     saved: 'My saved exercises',
+    savedCount: (n) => (n ? String(n) : 'None yet'),
     aiContinue: 'Keep talking with AI through this lens (experimental)',
     gentle: 'Gentle recommendations (films, books, musicals)',
     worryLabel: 'In a sentence or two, what is on your mind?',
@@ -282,7 +284,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         { class: 'lens-home-links' },
         h('button', { type: 'button', class: 'lens-link', onclick: () => go('deck') }, h('strong', {}, L().deck), h('span', {}, L().explored(explored))),
         h('button', { type: 'button', class: 'lens-link', onclick: () => go('fit') }, h('strong', {}, L().fit)),
-        h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, String(st.sessions.length))),
+        h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, L().savedCount(st.sessions.length))),
         openGentle ? h('button', { type: 'button', class: 'lens-link', onclick: openGentle }, h('strong', {}, L().gentle)) : null
       ),
     ];
