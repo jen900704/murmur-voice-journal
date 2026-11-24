@@ -118,7 +118,7 @@ cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
 npm run test:e2e              # browser tests in Chromium: recording through a fake microphone, the main flows,
-                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 19 screens
+                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 22 screens
 npm run test:webkit           # the same flows in WebKit (Safari's engine), without the microphone tests
 ```
 

@@ -62,8 +62,8 @@
       ],
       "cw": [],
       "why": {
-        "zh": "把情緒畫成角色，最後讓悲傷也有它的位置。",
-        "en": "Emotions as characters, ending with sadness earning its place."
+        "zh": "把情緒畫成角色，悲傷也有它的位置。",
+        "en": "Emotions as characters, with room for sadness too."
       }
     },
     {
@@ -146,13 +146,15 @@
       },
       "creator": "Hirokazu Kore-eda",
       "year": 2015,
-      "minutes": 128,
+      "minutes": 126,
       "tones": [
         "quiet",
         "warm"
       ],
       "cw": [
-        "death"
+        "death",
+        "illness",
+        "infidelity"
       ],
       "why": {
         "zh": "四姊妹在海邊小鎮的日常，溫柔地面對家人之間的缺口。",
@@ -204,7 +206,7 @@
       "id": "paddington-2",
       "type": "film",
       "title": {
-        "zh": "",
+        "zh": "柏靈頓熊熊出任務",
         "en": "Paddington 2",
         "orig": "Paddington 2"
       },
@@ -237,7 +239,8 @@
         "warm"
       ],
       "cw": [
-        "death"
+        "death",
+        "sexual content"
       ],
       "why": {
         "zh": "關於童年、電影和一段跨世代的友誼。",
@@ -311,7 +314,8 @@
         "companionship"
       ],
       "cw": [
-        "death"
+        "death",
+        "illness"
       ],
       "why": {
         "zh": "一條巷子裡五個家庭的日常，像被鄰居照顧著。",
@@ -333,7 +337,9 @@
         "quiet",
         "companionship"
       ],
-      "cw": [],
+      "cw": [
+        "death"
+      ],
       "why": {
         "zh": "每集一道菜、一個客人的故事，短短一集剛好睡前看。",
         "en": "One dish and one customer's story per episode; short enough for bedtime."
@@ -347,7 +353,7 @@
         "en": "Daily Dose of Sunshine",
         "orig": "정신병동에도 아침이 와요"
       },
-      "creator": "Lee Jae-gyu",
+      "creator": "Lee Jae-kyoo",
       "year": 2023,
       "minutes": null,
       "tones": [
@@ -357,7 +363,8 @@
       "cw": [
         "suicide",
         "self-harm",
-        "mental illness"
+        "mental illness",
+        "death"
       ],
       "why": {
         "zh": "從精神科病房護理師的角度看見病人，也看見照顧者自己。",
@@ -368,11 +375,11 @@
       "id": "ted-lasso",
       "type": "series",
       "title": {
-        "zh": "",
+        "zh": "泰德拉索：錯棚教練趣事多",
         "en": "Ted Lasso",
         "orig": "Ted Lasso"
       },
-      "creator": "Jason Sudeikis, Bill Lawrence",
+      "creator": "Jason Sudeikis, Bill Lawrence, Brendan Hunt, Joe Kelly",
       "year": 2020,
       "minutes": 30,
       "tones": [
@@ -407,7 +414,8 @@
         "death",
         "violence",
         "bullying",
-        "suicide"
+        "suicide",
+        "mental illness"
       ],
       "why": {
         "zh": "台灣穿越劇，關於想念和被理解。劇情較重。",
@@ -431,7 +439,8 @@
       "cw": [
         "violence",
         "mental illness",
-        "grief"
+        "grief",
+        "death"
       ],
       "why": {
         "zh": "從加害者、受害者和精神疾病家屬的角度看同一件事。內容沉重，適合精神好的時候。",
@@ -475,7 +484,9 @@
       ],
       "cw": [
         "genocide",
-        "death"
+        "death",
+        "war",
+        "suicide"
       ],
       "lens": "existential",
       "why": {
@@ -525,8 +536,8 @@
       ],
       "cw": [],
       "why": {
-        "zh": "用童話角色走過一段諮商歷程，以溝通分析為基礎。",
-        "en": "A storybook walk through counseling, based on transactional analysis."
+        "zh": "心情低落的蛤蟆走過一段諮商歷程，以溝通分析為基礎。",
+        "en": "A very low Toad goes through counseling, step by step; based on transactional analysis."
       }
     },
     {
@@ -590,7 +601,8 @@
       ],
       "cw": [
         "death",
-        "suicide"
+        "suicide",
+        "illness"
       ],
       "why": {
         "zh": "寫信給雜貨店問煩惱的人，和回信的人。",
@@ -602,10 +614,10 @@
       "type": "book",
       "title": {
         "zh": "情緒勒索",
-        "en": "Emotional Blackmail (Taiwanese book by Chou Mu-tzu)",
+        "en": "Emotional Blackmail",
         "orig": "情緒勒索"
       },
-      "creator": "周慕姿",
+      "creator": "周慕姿 (Chou Mu-tzu)",
       "year": 2017,
       "minutes": null,
       "tones": [
@@ -613,8 +625,8 @@
       ],
       "cw": [],
       "why": {
-        "zh": "台灣心理師寫的，幫你看清家人和伴侶間的情緒壓力。",
-        "en": "By a Taiwanese psychologist; helps name emotional pressure in families and couples."
+        "zh": "台灣諮商心理師寫的，幫你看清家人和伴侶間的情緒壓力。",
+        "en": "By a Taiwanese counseling psychologist; helps name emotional pressure in families and couples. Not the Susan Forward book of the same name."
       }
     },
     {
@@ -678,7 +690,10 @@
       "cw": [
         "death",
         "suicide",
-        "war"
+        "war",
+        "violence",
+        "abuse",
+        "illness"
       ],
       "why": {
         "zh": "關於寬恕和重新開始。適合想好好哭一場的時候。",
@@ -689,7 +704,7 @@
       "id": "next-to-normal",
       "type": "musical",
       "title": {
-        "zh": "",
+        "zh": "近乎正常",
         "en": "Next to Normal",
         "orig": "Next to Normal"
       },
@@ -703,7 +718,8 @@
       "cw": [
         "mental illness",
         "grief",
-        "suicide"
+        "suicide",
+        "death"
       ],
       "why": {
         "zh": "一個家庭面對母親的躁鬱症和失落。內容沉重。",
@@ -718,7 +734,7 @@
         "en": "Dear Evan Hansen",
         "orig": "Dear Evan Hansen"
       },
-      "creator": "Benj Pasek, Justin Paul",
+      "creator": "Benj Pasek, Justin Paul (songs); Steven Levenson (book)",
       "year": 2015,
       "minutes": null,
       "tones": [
@@ -726,7 +742,10 @@
       ],
       "cw": [
         "suicide",
-        "social anxiety"
+        "social anxiety",
+        "death",
+        "grief",
+        "mental illness"
       ],
       "why": {
         "zh": "關於社交焦慮和被看見的渴望。內容沉重。",
@@ -741,7 +760,7 @@
         "en": "Mamma Mia!",
         "orig": "Mamma Mia!"
       },
-      "creator": "Catherine Johnson (book), ABBA songs",
+      "creator": "Benny Andersson, Björn Ulvaeus (songs); Catherine Johnson (book)",
       "year": 1999,
       "minutes": null,
       "tones": [
@@ -794,7 +813,7 @@
       ],
       "cw": [],
       "why": {
-        "zh": "輕鬆的喜歌劇，有一首很有名的詠嘆調〈偷灑一滴淚〉。",
+        "zh": "輕鬆的喜歌劇，有一首很有名的詠嘆調〈一滴美妙的情淚〉。",
         "en": "A light comic opera with the famous aria \"Una furtiva lagrima\"."
       }
     },
@@ -814,8 +833,8 @@
       ],
       "cw": [],
       "why": {
-        "zh": "作曲家專門為睡眠寫的八小時音樂，也有一小時版本。",
-        "en": "Eight hours of music written for sleep; there is also a one-hour version."
+        "zh": "作曲家專門為睡眠寫的音樂，全長約八個半小時，也有一小時的精選版。",
+        "en": "About eight and a half hours of music written for sleep; there is also a one-hour version."
       }
     },
     {
@@ -910,7 +929,7 @@
         "en": "Hair Love",
         "orig": "Hair Love"
       },
-      "creator": "Matthew A. Cherry",
+      "creator": "Matthew A. Cherry, Everett Downing Jr., Bruce W. Smith",
       "year": 2019,
       "minutes": 7,
       "tones": [

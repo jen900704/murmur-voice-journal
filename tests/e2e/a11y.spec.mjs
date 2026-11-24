@@ -130,6 +130,36 @@ const screens = [
     await page.goto('/');
     await page.locator('.welcome').waitFor();
   }],
+  ['silent check-in', async (page) => {
+    await page.goto('/');
+    await skipWelcome(page);
+    await page.locator('[data-key="silent-checkin"]').click();
+    await page.locator('[data-key="mood-3"]').click();
+  }],
+  ['lens pick list', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', 'family pressure');
+    await page.locator('[data-key="topic-family"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('.lens-option').nth(2).click();
+    await page.locator('.lens-row').first().waitFor();
+  }],
+  ['lens summary', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', 'family pressure');
+    await page.locator('[data-key="topic-family"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('.lens-option').nth(2).click();
+    await page.locator('[data-key="pick-family-systems"]').click();
+    for (let i = 0; i < 3; i++) {
+      await page.fill('#lens-answer', 'a few words');
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await page.locator('.lens-summary').waitFor();
+    await page.locator('[data-key="rate-4"]').click();
+  }],
 ];
 
 for (const [locale, scheme] of [

@@ -243,6 +243,28 @@ test('rewrite turns "I have to" into "I choose"', () => {
   assert.ok(!rewriteText(true, '我得了憂鬱症', 'zh').startsWith('我選擇'));
 });
 
+test('a quoted answer does not end in doubled punctuation', () => {
+  assert.equal(fill('你寫到：「{1}」。', ['先去散步。']), '你寫到：「先去散步」。');
+  assert.equal(fill('You wrote: "{1}".', ['Go for a walk.']), 'You wrote: "Go for a walk".');
+  assert.equal(fill('「{1}」', ['我不知道……']), '「我不知道……」');
+});
+
+test('summaries quote answers after a colon or as a name, and questions stay short', () => {
+  for (const l of LENSES) {
+    for (const lang of ['zh', 'en']) {
+      const c = l[lang];
+      for (const tpl of [c.noticed, c.experiment]) {
+        assert.ok(!/[\u2014\u2013]/.test(tpl), `${l.id}.${lang} has a dash`);
+        assert.ok(!/(你會|去做|(?<!叫)做|想做的是)「\{\d\}」|\b(you|do|Do|to) "\{\d\}"/.test(tpl), `${l.id}.${lang} drops a quote into a verb slot`);
+      }
+      for (const s of c.steps) {
+        const n = lang === 'zh' ? [...s.q].length : s.q.split(/\s+/).length;
+        assert.ok(n <= (lang === 'zh' ? 66 : 42), `${l.id}.${lang} question is long (${n})`);
+      }
+    }
+  }
+});
+
 test('lenses unsuited to loss are excluded for that topic', () => {
   const ids = lensesForTopic('loss').map((l) => l.id);
   for (const bad of ['existential', 'solution-focused', 'rebt', 'narrative', 'adlerian', 'reality', 'gestalt']) assert.ok(!ids.includes(bad), bad);
