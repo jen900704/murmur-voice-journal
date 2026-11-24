@@ -84,6 +84,7 @@ test('a reply that gives help lines ends the chat and shows tappable numbers; 19
   await page.fill('#ai-input', '一直都很累');
   await page.locator('[data-key="ai-send"]').click();
   await expect(page.locator('.ai-msg.assistant')).toHaveCount(1);
+  await expect(page.locator('#sr-live')).toContainText('1988');
   await expect(page.locator('#ai-input')).toBeVisible();
   await page.fill('#ai-input', '說不清楚');
   await page.locator('[data-key="ai-send"]').click();

@@ -363,16 +363,30 @@ export class BedtimePlayer {
     this.gen = 0; // bumped on every pause/stop so stale callbacks are ignored
   }
 
-  async start() {
+  async lock() {
     try {
-      if ('wakeLock' in navigator) {
+      if ('wakeLock' in navigator && !this.wakeLock) {
         const lock = await navigator.wakeLock.request('screen');
         if (this.stopped) lock.release().catch(() => {});
-        else this.wakeLock = lock;
+        else {
+          this.wakeLock = lock;
+          lock.addEventListener('release', () => {
+            if (this.wakeLock === lock) this.wakeLock = null;
+          });
+        }
       }
     } catch (_) {
       /* not available */
     }
+  }
+
+  async start() {
+    // the browser drops the wake lock when the page is hidden; take it again on return
+    this.onVisible = () => {
+      if (document.visibilityState === 'visible' && !this.stopped) this.lock();
+    };
+    document.addEventListener('visibilitychange', this.onVisible);
+    await this.lock();
     if (!this.stopped) this.next();
   }
 
@@ -439,6 +453,10 @@ export class BedtimePlayer {
   }
 
   release() {
+    if (this.onVisible) {
+      document.removeEventListener('visibilitychange', this.onVisible);
+      this.onVisible = null;
+    }
     if (this.wakeLock) {
       this.wakeLock.release().catch(() => {});
       this.wakeLock = null;

@@ -275,6 +275,17 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
 
   async function play(trackId) {
     unlockSpeech(); // must run before the first await
+    if (st.starting) return; // a double tap would start two players talking over each other
+    st.starting = true;
+    try {
+      await startTrack(trackId);
+    } finally {
+      st.starting = false;
+    }
+  }
+
+  async function startTrack(trackId) {
+    if (st.player) st.player.stop();
     st.track = trackId;
     const lang = getLang();
     const script = buildScript(trackId, st.theme, lang);
@@ -303,7 +314,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function playView() {
-    const t = trackById(st.track)[lk()];
+    const track = trackById(st.track);
+    if (!track) return tone();
+    const t = track[lk()];
     const voices = voicesFor(getLang() === 'en' ? 'en' : 'zh');
     return h(
       'div',
@@ -376,29 +389,33 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   async function finishTrack() {
     if (st.stage !== 'play' || st.finishing) return;
     st.finishing = true;
-    const now = new Date();
-    const seed = `${now.toDateString()}-${st.track}-${st.kind}`;
-    const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(now);
-    const hasKind = st.kind.trim().length > 0;
-    st.postcard = postcardSvg({
-      seed,
-      line: hasKind ? st.kind.trim() : L().nightLine,
-      label: hasKind ? L().kindLabel : L().nightLabel,
-      date,
-    });
-    const night = {
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-      createdAt: Date.now(),
-      theme: st.theme,
-      worry: st.keep ? st.worry.trim() : '',
-      kindness: st.kind.trim(),
-      track: st.track,
-      seed,
-      lang: getLang(),
-    };
-    await db.saveNight(night).catch(() => {});
-    st.finishing = false;
-    go('postcard');
+    try {
+      const now = new Date();
+      const seed = `${now.toDateString()}-${st.track}-${st.kind}`;
+      const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(now);
+      const hasKind = st.kind.trim().length > 0;
+      st.postcard = postcardSvg({
+        seed,
+        line: hasKind ? st.kind.trim() : L().nightLine,
+        label: hasKind ? L().kindLabel : L().nightLabel,
+        date,
+      });
+      const night = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        createdAt: Date.now(),
+        theme: st.theme,
+        worry: st.keep ? st.worry.trim() : '',
+        kindness: st.kind.trim(),
+        track: st.track,
+        seed,
+        lang: getLang(),
+      };
+      // the postcard still shows even if saving failed
+      await db.saveNight(night).catch(() => {});
+      go('postcard');
+    } finally {
+      st.finishing = false;
+    }
   }
 
   function postcard() {
