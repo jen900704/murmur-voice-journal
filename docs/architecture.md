@@ -274,15 +274,16 @@ Counts were taken on 2026-11-24 by running the unit files and listing the Playwr
 
 | Layer | What it covers | Count | How to run |
 |---|---|---|---|
-| Unit (Node, no browser) | `tests/features.test.mjs` 24, `stats.test.mjs` 13, `lenses.test.mjs` 238 (risk phrases, lens and bedtime content, backup validation, content review and cache name freshness), `search.test.mjs` 30, `policy.test.mjs` 18, `langlab.test.mjs` 39, `writing.test.mjs` 12 | 374 checks in 7 files | `npm test` (Node 18 or later) |
-| Browser, Chromium | Recording through a fake microphone, main flows, mocked AI API, search, policy, language mirror, calm, writing | 193 tests in 14 spec files, including the three rows below | `npm ci && npx playwright install chromium && npm run test:e2e` |
-| Accessibility | axe-core, WCAG 2.1 A and AA, 20 screens in two settings (`a11y.spec.mjs`) | 40 | part of the browser run |
+| Unit (Node, no browser) | `tests/features.test.mjs` 24, `stats.test.mjs` 13, `lenses.test.mjs` 238 (risk phrases, lens and bedtime content, backup validation, content review and cache name freshness), `search.test.mjs` 30, `policy.test.mjs` 18, `langlab.test.mjs` 55, `writing.test.mjs` 12, `voice-report.test.mjs` 11 | 401 checks in 8 files | `npm test` (Node 18 or later) |
+| Browser, Chromium | Recording through a fake microphone, main flows, mocked AI API, search, policy, language mirror, calm, writing | 234 tests in 15 spec files, including the three rows below | `npm ci && npx playwright install chromium && npm run test:e2e` |
+| Accessibility | axe-core, WCAG 2.1 A and AA, 31 screens in two settings (`a11y.spec.mjs`) | 62 | part of the browser run |
 | Offline | Load, go offline, reload through the service worker (`offline.spec.mjs`) | 1 | part of the browser run; skipped in WebKit |
-| Robustness | Double taps, damaged backups, storage failures, long text, clock changes, back button (`robust.spec.mjs`) | 47, of which 2 are marked `test.fail()` for the open Back-button bug | part of the browser run |
+| Robustness | Double taps, damaged backups, storage failures, long text, clock changes, back button (`robust.spec.mjs`) | 57, all passing (the Back-button bug is fixed in `js/flow-history.js`) | part of the browser run |
 | Browser, WebKit | The same specs without `record.spec.mjs` and `noise.spec.mjs` | 187 tests in 12 files | `npx playwright install webkit && npm run test:webkit` |
 | Lab: eval harness | Schema, statistics, judge parsing, agreement, safety parity with the app, mock end to end | 60 | `python3 -m unittest discover lab/eval/tests` |
 | Lab: bandit and OPE | Spec constants, safety audit, propensities, estimators | 29 | `python3 -m unittest discover lab/rl/tests` (needs NumPy) |
 | Lab: DLATK pipeline | Parsing, grouping, n-grams, lexicon scores, BH, parity with the committed DLATK output | 29 | `python3 -m unittest discover lab/dlatk/tests` |
+| Lab: language validation | Metrics, preregistration lock, scorer bridge | 41 | `python3 -m unittest discover lab/langval/tests` (needs NumPy, SciPy) |
 | Lab: MCP server | Tool outputs against app modules and schemas, read-only checks | 17 | `cd lab/mcp && npm ci && npm test` |
 | Search evaluation | 20 labeled queries; fails below MRR .85 or nDCG@5 .80 | 1 script | `node tests/search-eval.mjs` (not in CI) |
 | Infra | Plan-level tests with a mocked provider | 7 runs | `tofu test` or `terraform test` in `infra/` (not in active CI) |
