@@ -1,0 +1,44 @@
+{
+  "note": "exploratory pilot, not preregistered; two Mandarin clips",
+  "clips": {
+    "zh_cosyvoice": {
+      "sha256": "c7b31d6dbe7cc6a716dded00550db5b50940bf209e424e4ad207b12e657c8ff6",
+      "durationS": 3.48,
+      "bothVoiced": 102,
+      "grossErrorRate": 0.0,
+      "medianFineCents": 10.8,
+      "murmur": {
+        "f0MedianHz": 278.3,
+        "f0SdSt": 3.73,
+        "f0RangeSt": 15.44
+      },
+      "praat": {
+        "f0MedianHz": 262.2,
+        "f0SdSt": 4.12,
+        "f0RangeSt": 16.34
+      }
+    },
+    "zh_f5": {
+      "sha256": "96724a113240d1f82c6ded1334122f0176b96c9226ccd3c919e625bcfd2a3ede",
+      "durationS": 6.76,
+      "bothVoiced": 355,
+      "grossErrorRate": 0.0028,
+      "medianFineCents": 25.6,
+      "murmur": {
+        "f0MedianHz": 256.3,
+        "f0SdSt": 6.67,
+        "f0RangeSt": 20.67
+      },
+      "praat": {
+        "f0MedianHz": 246.1,
+        "f0SdSt": 6.86,
+        "f0RangeSt": 20.97
+      }
+    }
+  },
+  "pooled": {
+    "bothVoiced": 457,
+    "grossErrorRate": 0.0022,
+    "medianFineCents": 21.6
+  }
+}

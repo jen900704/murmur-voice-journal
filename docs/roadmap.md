@@ -30,7 +30,7 @@
 ## Research next
 
 - Collect the owner's own recordings following [`self-study-protocol.md`](self-study-protocol.md). This gives the real day-to-day spread that the "higher or lower than usual" messages depend on, and held-out data for the voicing-threshold question in `validation-results.md`.
-- Recorded Mandarin speech for validation (all human-speech validation so far is English).
+- Recorded Mandarin speech for validation. An exploratory two-clip pilot is in [`mandarin-pilot.md`](mandarin-pilot.md); a real check needs everyday phone recordings from Taiwanese speakers.
 
 ## Idea backlog
 
