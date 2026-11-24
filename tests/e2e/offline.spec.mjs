@@ -5,10 +5,11 @@ test.use({ locale: 'zh-TW', serviceWorkers: 'allow' });
 test('after one visit the app works offline, with every screen from one cached release', async ({ page, context }) => {
   await page.goto('/?sw#today');
   await page.locator('.prompt-text').waitFor();
-  // wait until the worker has installed every file and controls the page
-  await page.waitForFunction(async () => (await caches.keys()).length === 1 && !!navigator.serviceWorker.controller, null, { timeout: 15000 }).catch(async () => {
-    await page.reload();
-    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
+  // wait until the worker has installed every file, is active, and controls the page
+  await page.evaluate(async () => {
+    const reg = await navigator.serviceWorker.ready;
+    if (reg.active.state !== 'activated') await new Promise((res) => reg.active.addEventListener('statechange', () => reg.active.state === 'activated' && res()));
+    if (!navigator.serviceWorker.controller) await new Promise((res) => navigator.serviceWorker.addEventListener('controllerchange', res, { once: true }));
   });
   const names = await page.evaluate(async () => caches.keys());
   expect(names).toHaveLength(1);

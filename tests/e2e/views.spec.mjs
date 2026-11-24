@@ -110,6 +110,8 @@ test.describe('on iPhone Safari', () => {
     });
     await page.reload();
     await page.locator('[data-key="ios-install-ok"]').click();
+    await expect(page.locator('[data-key="ios-install-ok"]')).toHaveCount(0);
+    await page.waitForTimeout(300); // let the setting reach the database
     await page.reload();
     await page.locator('.prompt-text').waitFor();
     await expect(page.locator('[data-key="ios-install-ok"]')).toHaveCount(0);
