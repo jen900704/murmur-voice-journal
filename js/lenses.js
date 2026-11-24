@@ -1,0 +1,496 @@
+// Theory lenses: short, self-guided exercises in the style of major counseling theories.
+// Written in our own words as psychoeducation. Chapter numbers follow Corey, G.,
+// Theory and Practice of Counseling and Psychotherapy (10th ed.). Only techniques that
+// are reasonable to try alone are included; techniques that need a therapist present
+// (for example empty chair, exposure, dream interpretation) are deliberately left out.
+//
+// Step text can quote earlier answers with {1}, {2}, {3}.
+// A step with `scale: true` asks for a 0 to 10 rating instead of text.
+// A step with `rewrite` shows the previous answer transformed, before its question.
+
+export const TOPICS = ['work', 'relationship', 'family', 'self', 'loss', 'other'];
+
+export const LENSES = [
+  {
+    id: 'psychoanalytic',
+    chapter: 4,
+    people: 'Sigmund Freud; later object relations and self psychology',
+    excludeTopics: [],
+    zh: {
+      name: '精神分析取向',
+      idea: '現在的反應，常常帶著過去關係的影子。我們心裡會有互相拉扯的願望和擔心，也會用各種方式保護自己不去感覺太痛的東西。',
+      steps: [
+        { q: '這種感覺熟悉嗎？以前什麼時候、在誰身邊，也有過類似的感覺？', why: '這個取向會注意，現在的反應是不是在重複某個過去的模式。' },
+        { q: '在這件事裡，你的一部分想要什麼？另一部分又在擔心什麼？', why: '它認為內心常同時有想靠近和想保護自己的力量。' },
+        { q: '這種感覺出現時，你通常怎麼讓自己好過一點？例如轉移注意、變得很理性、怪自己或怪別人。', why: '這些保護方式（防衛）不是壞事，它們曾經幫過你，但有時也讓人看不清楚。' },
+      ],
+      noticed: '你說這種感覺和「{1}」有關；你一部分想要、一部分擔心的是「{2}」；它出現時你會「{3}」。這個取向會好奇：這個保護方式以前幫過你什麼，現在是不是還需要用同樣的方式。',
+      experiment: '這週，在這個模式出現的那一刻，只是把它記下來（時間、在誰身邊、你做了什麼），先不急著改變。',
+      concepts: ['潛意識', '防衛機制', '重複的關係模式'],
+      misses: '比較少直接處理眼前能做的事和環境因素。真正的精神分析工作需要長期的治療關係，這裡只借用它的提問方式。',
+    },
+    en: {
+      name: 'Psychoanalytic',
+      idea: 'Present reactions often carry the shape of earlier relationships. We hold wishes and fears that pull against each other, and we protect ourselves from feeling what hurts too much.',
+      steps: [
+        { q: 'Does this feeling seem familiar? When, and around whom, have you felt something like it before?', why: 'This approach looks for ways a present reaction may repeat an older pattern.' },
+        { q: 'In this situation, what does one part of you want, and what is another part afraid of?', why: 'It assumes we often hold a wish to move closer and a wish to stay safe at the same time.' },
+        { q: 'When this feeling shows up, how do you usually make it more bearable? For example: distracting yourself, getting very rational, blaming yourself or someone else.', why: 'These protections (defenses) are not bad; they once helped. Sometimes they also keep us from seeing clearly.' },
+      ],
+      noticed: 'You connected this feeling with "{1}". The pull between wanting and fearing is "{2}". When it shows up, you "{3}". This approach would be curious about what that way of protecting yourself once did for you, and whether you still need it in the same way.',
+      experiment: 'This week, when the pattern shows up, just note it (when, who was there, what you did). No need to change it yet.',
+      concepts: ['the unconscious', 'defense mechanisms', 'repeating relational patterns'],
+      misses: 'It says less about practical next steps and outside circumstances. Real psychoanalytic work happens over a long therapeutic relationship; this only borrows its questions.',
+    },
+  },
+  {
+    id: 'adlerian',
+    chapter: 5,
+    people: 'Alfred Adler; Rudolf Dreikurs',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '阿德勒學派',
+      idea: '行為背後有目標，人最深的需要之一是歸屬與貢獻。我們會帶著一套自己的「私人邏輯」看世界，而鼓勵比批評更能帶來改變。',
+      steps: [
+        { q: '如果這個困擾明天就不見了，你的生活會有什麼不同？你會開始做什麼？', why: '阿德勒學派用這個問題找出困擾背後你真正想要的生活。' },
+        { q: '在這件事裡，你心裡有沒有一句「我必須……才……」？例如「我必須做到最好，才會被接納」。', why: '它把這種句子叫做私人邏輯：很少被說出口，卻影響很多選擇。' },
+        { q: '有沒有一件小事，你可以「彷彿」已經是不被這個困擾綁住的自己，去做做看？', why: '「彷彿」練習讓人先在行動上試穿新的自己，不用等到感覺準備好。' },
+      ],
+      noticed: '沒有這個困擾，你會「{1}」；推著你的可能是「{2}」這樣的私人邏輯。這個學派會把困擾看成：你想要歸屬和貢獻，只是暫時用了一個代價很高的方式。',
+      experiment: '選一天，彷彿你已經是那個自己，去做「{3}」。結束後記下別人的反應，和你自己的感覺。',
+      concepts: ['私人邏輯', '社會興趣', '鼓勵', '彷彿技術'],
+      misses: '比較少處理身體、創傷和環境的壓力。太強調個人選擇時，可能忽略你無法掌控的部分。',
+    },
+    en: {
+      name: 'Adlerian',
+      idea: 'Behavior is aimed at goals, and one of our deepest needs is to belong and contribute. We see the world through a private logic, and encouragement changes more than criticism does.',
+      steps: [
+        { q: 'If this worry were gone tomorrow, what would be different in your life? What would you start doing?', why: 'Adlerians use this question to find the life you actually want underneath the problem.' },
+        { q: 'Is there an "I must ... in order to ..." sentence inside this? For example, "I must be the best in order to be accepted."', why: 'This is called private logic: rarely said out loud, but it steers a lot of choices.' },
+        { q: 'Is there one small thing you could do "as if" you were already the version of you who is not held back by this?', why: 'Acting "as if" lets you try on a new way of being before you feel ready.' },
+      ],
+      noticed: 'Without this worry you would "{1}". A private logic like "{2}" may be pushing you. This approach would see the worry as a way of seeking belonging and contribution that has become expensive.',
+      experiment: 'Pick one day and do "{3}" as if you were already that person. Afterwards, note how others responded and how you felt.',
+      concepts: ['private logic', 'social interest', 'encouragement', 'acting as if'],
+      misses: 'It says less about the body, trauma, and outside pressures. Stressing personal choice can overlook what you cannot control.',
+    },
+  },
+  {
+    id: 'existential',
+    chapter: 6,
+    people: 'Viktor Frankl; Rollo May; Irvin Yalom',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '存在主義取向',
+      idea: '焦慮是活著的一部分，不只是症狀。即使處境有限，我們仍然在選擇自己要如何回應，而意義常常藏在我們在乎的事情裡。',
+      steps: [
+        { q: '這個煩惱透露了你在乎什麼？如果你一點都不在乎，它還會困擾你嗎？', why: '存在取向常從困擾裡找出背後的價值。' },
+        { q: '在這個處境裡，哪些是你沒辦法選的？哪些即使很小，仍然是你可以選的？', why: '它同時承認限制，也提醒我們仍有回應的自由。' },
+        { q: '如果朝你真正在乎的方向走一小步，那一步會是什麼？', why: '意義不只用想的，也在選擇和行動裡被活出來。' },
+      ],
+      noticed: '這個煩惱指向你在乎的「{1}」。你沒辦法選的和還能選的，你是這樣分的：「{2}」。存在取向會說：焦慮也可能是在提醒你，這件事對你很重要。',
+      experiment: '這週做「{3}」，做完後問自己：這一步有沒有比較像我想成為的人？',
+      concepts: ['自由與責任', '意義', '真誠', '存在焦慮'],
+      misses: '比較抽象，需要具體技巧的人可能覺得不夠實際。不適合在急性危機或很深的失落中自己使用。',
+    },
+    en: {
+      name: 'Existential',
+      idea: 'Anxiety is part of being alive, not only a symptom. Even within limits we choose how to respond, and meaning often lives in what we care about.',
+      steps: [
+        { q: 'What does this worry reveal that you care about? If you did not care at all, would it still bother you?', why: 'Existential approaches look for the value underneath a worry.' },
+        { q: 'In this situation, what can you not choose? And what, however small, can you still choose?', why: 'It honours real limits while pointing to the freedom to respond.' },
+        { q: 'If you took one small step in the direction you care about, what would it be?', why: 'Meaning is lived through choices and actions, not only thought about.' },
+      ],
+      noticed: 'This worry points to something you care about: "{1}". You sorted what you can and cannot choose like this: "{2}". An existential view would say the anxiety may also be telling you this matters.',
+      experiment: 'Do "{3}" this week. Afterwards ask: was that step closer to who I want to be?',
+      concepts: ['freedom and responsibility', 'meaning', 'authenticity', 'existential anxiety'],
+      misses: 'It is abstract, and can feel impractical if you want concrete skills. It is not suited to working alone through acute crisis or deep loss.',
+    },
+  },
+  {
+    id: 'person-centered',
+    chapter: 7,
+    people: 'Carl Rogers',
+    excludeTopics: [],
+    zh: {
+      name: '個人中心取向',
+      idea: '每個人都有往成長方向走的力量。當一個人被真誠、準確、不評價地理解時，他通常最知道自己需要什麼。',
+      steps: [
+        { q: '用幾個詞說說你現在的感受，不用合理，也不用解釋。', why: '這個取向從你的經驗出發，不從別人的標準出發。' },
+        { q: '這些感受裡，哪一個是你最少讓別人看見的？', why: '它在意的是你內在經驗和你表現出來的樣子之間的距離。' },
+        { q: '如果有一個真正懂你、不評價你的人在旁邊，你希望他明白你什麼？你現在需要什麼？', why: '被準確理解，常常是改變開始的地方。' },
+      ],
+      noticed: '你現在感到「{1}」，其中「{2}」最少被看見。你希望被明白的是：「{3}」。這個取向相信，你自己最知道方向在哪裡。',
+      experiment: '找一個你信任的人，只說一句：「我其實覺得……」。先說明你不需要建議，只希望他聽。',
+      concepts: ['同理', '無條件的正向關懷', '真誠一致', '自我實現傾向'],
+      misses: '提供的方向和技巧較少，需要結構或具體方法時可能不夠。也要誠實說：這只是軟體，給不了真正的關係，而這個取向認為關係本身才是療癒的核心。',
+    },
+    en: {
+      name: 'Person-centered',
+      idea: 'People have a built-in tendency to grow. When someone is understood genuinely, accurately, and without judgement, they usually know best what they need.',
+      steps: [
+        { q: 'Name a few words for how you feel right now. They do not have to make sense or be explained.', why: 'This approach starts from your experience, not from someone else\'s standards.' },
+        { q: 'Which of those feelings do you show other people the least?', why: 'It pays attention to the gap between what you feel inside and what you show.' },
+        { q: 'If someone who truly understood you, without judging, were here, what would you want them to understand? What do you need right now?', why: 'Being accurately understood is often where change begins.' },
+      ],
+      noticed: 'You feel "{1}", and "{2}" is the part others see least. What you want understood is: "{3}". This approach trusts that you know best where you need to go.',
+      experiment: 'Tell one person you trust a single sentence: "Actually, I feel ...". Say first that you are not asking for advice, only for them to listen.',
+      concepts: ['empathy', 'unconditional positive regard', 'congruence', 'actualizing tendency'],
+      misses: 'It offers little structure or technique, which may not be enough when you need concrete skills. And honestly: this is software and cannot offer a relationship, which this approach sees as the heart of change.',
+    },
+  },
+  {
+    id: 'gestalt',
+    chapter: 8,
+    people: 'Fritz and Laura Perls',
+    excludeTopics: [],
+    zh: {
+      name: '完形取向',
+      idea: '改變從此時此刻的覺察開始。注意你身體正在做什麼、你正在怎麼說話，比解釋「為什麼」更能讓人接觸到自己。',
+      steps: [
+        { q: '先停一下。想到這件事時，你身體哪裡最有感覺？是什麼樣的感覺？', why: '完形取向從當下、從身體開始，而不是從分析開始。' },
+        { q: '寫一句關於這件事的「我必須……」或「我不得不……」。', why: '我們說話的方式，常常反映我們怎麼看待自己的處境。' },
+        { rewrite: true, q: '把它讀成：「我選擇……」。讀起來有什麼不同？是更真實，還是不太對？', why: '換成「我選擇」能讓人看見哪些部分是自己的，哪些其實不是。兩種答案都有意義。' },
+      ],
+      noticed: '這件事在你身體的「{1}」。你寫下「{2}」，改成「我選擇」之後，你注意到：「{3}」。完形取向在意的不是答案，而是你此刻更清楚地接觸到自己。',
+      experiment: '這週每天一次，停下來問自己：「我現在正在做什麼？身體有什麼感覺？」只要注意，不用改變。',
+      concepts: ['此時此刻', '覺察', '「我」的語言', '接觸'],
+      misses: '比較少處理長期模式和環境因素。更深入的完形練習（例如空椅）需要在諮商中有人陪著做，不適合自己操作。',
+    },
+    en: {
+      name: 'Gestalt',
+      idea: 'Change starts with awareness in the here and now. Noticing what your body is doing and how you are speaking brings you closer to yourself than explaining why.',
+      steps: [
+        { q: 'Pause for a moment. Where in your body do you feel this most when you think about it? What is the sensation like?', why: 'Gestalt starts from the present and the body, not from analysis.' },
+        { q: 'Write one sentence about this that begins "I have to ..." or "I must ...".', why: 'How we phrase things often shows how we see our situation.' },
+        { rewrite: true, q: 'Now read it as "I choose ...". What is different? Does it feel truer, or wrong?', why: 'Saying "I choose" can show which parts are yours and which are not. Either answer tells you something.' },
+      ],
+      noticed: 'You feel this in your "{1}". You wrote "{2}", and reading it as "I choose" you noticed: "{3}". Gestalt cares less about the answer than about being in clearer contact with yourself right now.',
+      experiment: 'Once a day this week, stop and ask: "What am I doing right now? What do I feel in my body?" Just notice.',
+      concepts: ['here and now', 'awareness', '"I" language', 'contact'],
+      misses: 'It says less about long-term patterns and circumstances. Deeper Gestalt exercises (such as the empty chair) need a therapist present and are not meant to be done alone.',
+    },
+  },
+  {
+    id: 'behavioral',
+    chapter: 9,
+    people: 'B. F. Skinner; Joseph Wolpe; Albert Bandura; Arnold Lazarus',
+    excludeTopics: [],
+    zh: {
+      name: '行為治療',
+      idea: '行為是在情境中被學會、被維持的。看清楚「之前發生什麼、做了什麼、之後發生什麼」，就能設計小而具體的改變，並且用結果來檢驗。',
+      steps: [
+        { q: '最近一次這個困擾出現時，前面發生了什麼？（時間、地點、和誰、在做什麼）', why: '行為取向先看觸發的情境（A，前因）。' },
+        { q: '那時你做了什麼？做完之後，短時間內發生了什麼？你感覺怎樣？', why: '行為（B）和它帶來的結果（C）會決定這個行為會不會一再出現。' },
+        { q: '下次遇到同樣的情境，有沒有一個小到幾乎不可能失敗的不同做法？', why: '改變從小而具體、可以觀察的步驟開始。' },
+      ],
+      noticed: '觸發的情境是「{1}」；你的反應和結果是「{2}」。短期讓人好過的做法，有時長期反而讓困擾留下來。你想試的新做法是「{3}」。',
+      experiment: '把「{3}」排進行事曆。做之前和做之後各用 0 到 10 記一下心情，一週後比較看看。',
+      concepts: ['前因、行為、後果（ABC）', '增強', '行為實驗', '活動安排'],
+      misses: '比較少探索意義和情緒的內在經驗。比較嚴重的焦慮或創傷（例如需要逐步暴露時）應該由專業人員規劃，不要自己硬撐。',
+    },
+    en: {
+      name: 'Behavior therapy',
+      idea: 'Behavior is learned and maintained in context. Seeing clearly what came before, what you did, and what followed lets you design small, concrete changes and test them by their results.',
+      steps: [
+        { q: 'The last time this worry showed up, what was happening just before? (Time, place, who was there, what you were doing.)', why: 'A behavioral approach starts with the trigger (A, antecedent).' },
+        { q: 'What did you do then? What happened right after, and how did you feel?', why: 'The behavior (B) and its consequences (C) decide whether it keeps happening.' },
+        { q: 'Next time the same situation comes up, is there a different response so small it can hardly fail?', why: 'Change starts with small, concrete, observable steps.' },
+      ],
+      noticed: 'The trigger was "{1}". Your response and what followed: "{2}". What brings relief in the short term sometimes keeps a problem going. The new response you want to try is "{3}".',
+      experiment: 'Put "{3}" in your calendar. Rate your mood 0 to 10 before and after, and compare after a week.',
+      concepts: ['antecedent, behavior, consequence (ABC)', 'reinforcement', 'behavioral experiment', 'activity scheduling'],
+      misses: 'It explores meaning and inner experience less. More serious anxiety or trauma (for example when gradual exposure is needed) should be planned with a professional, not pushed through alone.',
+    },
+  },
+  {
+    id: 'acceptance',
+    chapter: 9,
+    people: 'Jon Kabat-Zinn; Marsha Linehan; Steven Hayes',
+    excludeTopics: [],
+    zh: {
+      name: '正念與接納取向',
+      idea: '和困難的想法、感受爭鬥，常常讓它們更大。練習不帶評價地注意它們，和它們保持一點距離，然後仍然朝自己在乎的方向前進。',
+      steps: [
+        { q: '花三個呼吸的時間，注意現在的感受，不去改變它。然後寫下：這個困擾最常對你說的一句話是什麼？', why: '正念從不評價地注意開始。' },
+        { rewrite: 'defuse', q: '把那句話讀成：「我注意到我有一個想法：……」。這樣看它，你和它的距離有沒有變化？', why: '這叫認知脫鉤：想法還在，但你不一定要照它說的做。' },
+        { q: '就算這個想法和感受還在，今天你仍然想朝什麼重要的方向做一點點？', why: '接納不是放棄，而是把力氣留給你在乎的事。' },
+      ],
+      noticed: '這個困擾常說「{1}」。當你把它看成「一個想法」時，你注意到：「{2}」。即使它還在，你仍想做的是「{3}」。',
+      experiment: '這週每次那句話出現，就在心裡加上「我注意到我有一個想法：……」，再做一件「{3}」方向的小事。',
+      concepts: ['正念', '接納', '認知脫鉤', '價值導向的行動'],
+      misses: '接納不等於忍受不合理或不安全的處境。當問題出在環境或關係裡時，只改變自己和想法的關係是不夠的。',
+    },
+    en: {
+      name: 'Mindfulness and acceptance',
+      idea: 'Fighting difficult thoughts and feelings often makes them bigger. Notice them without judgement, hold them a little more lightly, and keep moving toward what matters to you.',
+      steps: [
+        { q: 'Take three breaths and notice what you feel, without changing it. Then write: what is the sentence this worry says to you most often?', why: 'Mindfulness starts with noticing without judgement.' },
+        { rewrite: 'defuse', q: 'Read it as: "I notice I am having the thought that ...". Does the distance between you and the thought change?', why: 'This is called defusion: the thought is still there, but you do not have to do what it says.' },
+        { q: 'Even with this thought and feeling still here, what small step toward something important do you want to take today?', why: 'Acceptance is not giving up; it frees energy for what you care about.' },
+      ],
+      noticed: 'The worry often says "{1}". Seeing it as "a thought", you noticed: "{2}". Even with it here, you still want to "{3}".',
+      experiment: 'Each time that sentence shows up this week, add "I notice I am having the thought that ..." in your head, then do one small thing toward "{3}".',
+      concepts: ['mindfulness', 'acceptance', 'defusion', 'values-based action'],
+      misses: 'Acceptance does not mean tolerating situations that are unfair or unsafe. When the problem lies in your environment or a relationship, changing how you hold your thoughts is not enough.',
+    },
+  },
+  {
+    id: 'rebt',
+    chapter: 10,
+    people: 'Albert Ellis',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '理情行為治療（REBT）',
+      idea: '讓我們困擾的，常常不只是事件本身，而是我們對事件的信念，特別是那些絕對的「應該」和「必須」。',
+      steps: [
+        { q: '發生了什麼事？只寫事實，像攝影機拍到的那樣。（A，觸發事件）', why: 'REBT 先把事件和我們對事件的解讀分開。' },
+        { q: '關於這件事，你心裡有沒有一個「應該」或「必須」？例如「他應該要……」「我必須……」。（B，信念）', why: '它認為絕對化的要求，常讓合理的失望變成難以承受的痛苦。' },
+        { q: '如果把「必須」換成「我很希望……，但不是一定要」，你的感受（C）會有什麼變化？', why: '這是溫和版本的駁斥：不是否認你想要的，而是放下「一定要」。' },
+      ],
+      noticed: '事件是「{1}」。你帶著的信念是「{2}」。換成偏好而不是要求之後，你感覺到：「{3}」。',
+      experiment: '這週每次發現自己說「應該」或「必須」，就試著在心裡改成「我很希望……」，看看感受有沒有不同。',
+      concepts: ['ABC 模式', '非理性信念', '偏好與要求', '駁斥'],
+      misses: '有時太直接。有些「應該」反映的是真實的不公平，問題不只在想法；這時更需要的是改變處境或找到支持。',
+    },
+    en: {
+      name: 'Rational emotive behavior therapy (REBT)',
+      idea: 'What upsets us is often less the event itself than our beliefs about it, especially absolute "shoulds" and "musts".',
+      steps: [
+        { q: 'What happened? Only the facts, as a camera would have recorded them. (A, the activating event)', why: 'REBT first separates the event from our interpretation of it.' },
+        { q: 'Is there a "should" or "must" in your mind about it? For example, "He should have ...", "I must ...". (B, the belief)', why: 'It holds that absolute demands turn reasonable disappointment into unbearable distress.' },
+        { q: 'If you replaced "must" with "I would really like ..., but it does not have to be", how would your feeling (C) change?', why: 'This is a gentle form of disputing: not denying what you want, just dropping "it has to be".' },
+      ],
+      noticed: 'The event was "{1}". The belief you carried was "{2}". Holding it as a preference rather than a demand, you felt: "{3}".',
+      experiment: 'Whenever you catch yourself saying "should" or "must" this week, try turning it into "I would really like ...", and notice whether the feeling shifts.',
+      concepts: ['the ABC model', 'irrational beliefs', 'preferences versus demands', 'disputing'],
+      misses: 'It can be blunt. Some "shoulds" point to real unfairness, and then the problem is not only in your thinking; changing the situation or finding support matters more.',
+    },
+  },
+  {
+    id: 'cognitive',
+    chapter: 10,
+    people: 'Aaron T. Beck; Judith Beck; Donald Meichenbaum',
+    excludeTopics: [],
+    zh: {
+      name: '認知治療',
+      idea: '我們的感受深受自動冒出來的想法影響。把想法當成可以檢驗的假設，而不是事實，常能找到更平衡的看法。',
+      steps: [
+        { q: '這件事發生時，你腦中第一個冒出來的想法是什麼？', why: '認知治療先抓住「自動化思考」。' },
+        { q: '有什麼證據支持這個想法？又有什麼證據不太符合它？', why: '把想法當成假設，看看兩邊的證據。' },
+        { q: '如果你的好朋友遇到一樣的事、有一樣的想法，你會對他說什麼？', why: '我們對朋友通常比對自己公平，這能幫你找到更平衡的看法。' },
+      ],
+      noticed: '自動冒出來的想法是「{1}」。看過兩邊的證據（「{2}」）之後，一個更平衡的說法可能是：「{3}」。',
+      experiment: '準備三句可以對自己說的話：事前（「我知道這會有點難，我可以一步一步來」）、當下、事後各一句。這是 Meichenbaum 的因應自我對話。',
+      concepts: ['自動化思考', '證據檢驗', '平衡的想法', '因應自我對話'],
+      misses: '不是所有的難受都來自想法「扭曲」。有時你的想法是準確的，問題在處境本身；這時要做的不是改想法，而是處理處境。',
+    },
+    en: {
+      name: 'Cognitive therapy',
+      idea: 'How we feel is shaped by thoughts that pop up automatically. Treating a thought as a hypothesis to test, not a fact, often leads to a more balanced view.',
+      steps: [
+        { q: 'When this happened, what was the first thought that popped into your head?', why: 'Cognitive therapy starts by catching the automatic thought.' },
+        { q: 'What evidence supports that thought? What evidence does not quite fit it?', why: 'Treat the thought as a hypothesis and look at both sides.' },
+        { q: 'If a good friend had the same experience and the same thought, what would you tell them?', why: 'We are usually fairer to friends than to ourselves, which helps find a balanced view.' },
+      ],
+      noticed: 'The automatic thought was "{1}". After weighing the evidence ("{2}"), a more balanced version might be: "{3}".',
+      experiment: 'Prepare three things to say to yourself: one for before ("This will be hard, and I can take it step by step"), one for during, one for after. These are Meichenbaum\'s coping self-statements.',
+      concepts: ['automatic thoughts', 'examining evidence', 'balanced thoughts', 'coping self-statements'],
+      misses: 'Not all distress comes from distorted thinking. Sometimes your thought is accurate and the problem is the situation itself; then the work is changing the situation, not the thought.',
+    },
+  },
+  {
+    id: 'reality',
+    chapter: 11,
+    people: 'William Glasser; Robert Wubbolding',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '現實治療與選擇理論',
+      idea: '我們都在努力滿足歸屬、權力、自由、樂趣和生存的需要。與其停在過去，不如看清楚：我想要什麼、我正在做什麼、這有沒有用、接下來的計畫是什麼。',
+      steps: [
+        { q: '在這件事裡，你真正想要的是什麼？（W，想要）', why: '現實治療從釐清你想要什麼開始。' },
+        { q: '你現在實際上在做什麼？請寫具體的行為，不是感覺。（D，行動）', why: '它把焦點放在你能掌握的行動上。' },
+        { q: '你現在做的事，有讓你更接近想要的嗎？（E，評估）', why: '自我評估是這個取向的核心：由你判斷，不是由別人評價。' },
+        { q: '一個簡單、今天或明天就能做、靠你自己就能完成的計畫是什麼？（P，計畫）', why: '好的計畫要小、具體、立刻可做，而且不依賴別人先改變。' },
+      ],
+      noticed: '你想要「{1}」；你正在做「{2}」；你的評估是「{3}」。你的計畫：「{4}」。',
+      experiment: '做「{4}」。如果沒做到，不用責怪自己，回來把計畫改得更小一點。',
+      concepts: ['WDEP', '五種基本需求', '自我評估', '可控制的行動'],
+      misses: '強調可控制的選擇，可能低估創傷、病痛和社會結構的壓力。它不是在說你的痛苦是你「選」的。',
+    },
+    en: {
+      name: 'Reality therapy and choice theory',
+      idea: 'We are all trying to meet needs for belonging, power, freedom, fun, and survival. Rather than dwelling on the past, look clearly at what you want, what you are doing, whether it works, and what your plan is.',
+      steps: [
+        { q: 'In this situation, what do you really want? (W, wants)', why: 'Reality therapy starts by clarifying what you want.' },
+        { q: 'What are you actually doing right now? Write specific actions, not feelings. (D, doing)', why: 'It focuses on the actions you have control over.' },
+        { q: 'Is what you are doing getting you closer to what you want? (E, evaluation)', why: 'Self-evaluation is the core: you judge, nobody else.' },
+        { q: 'What is a simple plan you can carry out yourself, today or tomorrow? (P, plan)', why: 'Good plans are small, specific, immediate, and do not depend on someone else changing first.' },
+      ],
+      noticed: 'You want "{1}". You are doing "{2}". Your evaluation: "{3}". Your plan: "{4}".',
+      experiment: 'Do "{4}". If it does not happen, no blame: come back and make the plan smaller.',
+      concepts: ['WDEP', 'five basic needs', 'self-evaluation', 'controllable action'],
+      misses: 'Its focus on controllable choices can understate trauma, illness, and structural pressure. It does not mean your pain is something you "chose".',
+    },
+  },
+  {
+    id: 'feminist',
+    chapter: 12,
+    people: 'Jean Baker Miller; Carolyn Zerbe Enns; Laura Brown',
+    excludeTopics: [],
+    zh: {
+      name: '女性主義治療',
+      idea: '個人的困擾，常常和社會角色、性別期待和權力關係有關。分清楚哪些是你的，哪些是別人或社會給的，本身就有力量。',
+      steps: [
+        { q: '這個困擾裡，有沒有一些「應該」是別人或社會給的？例如身為女兒、學生、伴侶、員工「就應該……」。這是誰的規則？', why: '女性主義治療會做性別角色分析：看見那些被視為理所當然的期待。' },
+        { q: '在這個情境中，誰比較有權力決定事情？這個權力差距怎麼影響你？', why: '它也會做權力分析，因為困擾常和不平等的位置有關。' },
+        { q: '哪些部分是你可以處理的？哪些其實不是你一個人的責任？', why: '分清楚個人和結構，可以減少不必要的自責。' },
+      ],
+      noticed: '你背著的規則是「{1}」。權力的位置是「{2}」。你分出來，你能處理的和不是你一個人的責任是：「{3}」。',
+      experiment: '把「不是我一個人的責任」那部分寫下來，這週和一個能理解的人聊聊，看看別人是不是也背著類似的期待。',
+      concepts: ['個人的即是政治的', '性別角色分析', '權力分析', '賦權'],
+      misses: '個人內在的情緒處理談得比較少。分析結構不代表一定要正面衝突，你的安全永遠優先。',
+    },
+    en: {
+      name: 'Feminist therapy',
+      idea: 'Personal distress is often tied to social roles, gender expectations, and power. Sorting out what is yours from what was handed to you is powerful in itself.',
+      steps: [
+        { q: 'Are there "shoulds" in this worry that came from other people or society? For example, a daughter, student, partner, or employee "should ...". Whose rule is it?', why: 'Feminist therapy uses gender-role analysis to make taken-for-granted expectations visible.' },
+        { q: 'In this situation, who has more power to decide things? How does that difference affect you?', why: 'It also uses power analysis, since distress is often tied to unequal positions.' },
+        { q: 'Which parts can you handle? Which parts are not yours alone to carry?', why: 'Separating the personal from the structural can reduce unnecessary self-blame.' },
+      ],
+      noticed: 'The rule you carry is "{1}". The power position is "{2}". What you can handle, and what is not yours alone: "{3}".',
+      experiment: 'Write down the part that is not yours alone. This week, talk about it with someone who might understand, and see whether they carry similar expectations.',
+      concepts: ['the personal is political', 'gender-role analysis', 'power analysis', 'empowerment'],
+      misses: 'It says less about working with inner emotions. Analysing structures does not mean you must confront anyone; your safety always comes first.',
+    },
+  },
+  {
+    id: 'solution-focused',
+    chapter: 13,
+    people: 'Steve de Shazer; Insoo Kim Berg',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '焦點解決取向',
+      idea: '與其深入分析問題，不如找出已經有用的部分。每個人都有資源，也都有困擾比較小的時刻。',
+      steps: [
+        { scale: true, q: '從 0 到 10，10 代表這件事處理得讓你很滿意，你現在在幾分？', why: '評量問句讓抽象的感覺變得可以討論。' },
+        { q: '為什麼是 {1} 分，而不是更低？你做了什麼，讓它沒有更糟？', why: '這是因應問句：先看見你已經在做的努力。' },
+        { q: '最近有沒有哪一刻，這個困擾比較小，或沒有出現？那時有什麼不同？', why: '這是例外問句：答案常常藏在例外裡。' },
+      ],
+      noticed: '你現在在 {1} 分。讓它沒有更糟的，是「{2}」。例外出現時：「{3}」。焦點解決取向會說：你已經在做一些有用的事了。',
+      experiment: '往上一分會是什麼樣子？這週找一個小跡象，並多做一點「{3}」裡有用的部分。',
+      concepts: ['評量問句', '例外問句', '因應問句', '資源'],
+      misses: '專注在未來和資源，有時會讓人覺得自己的痛苦沒有被好好聽見。如果你需要先被理解，個人中心取向可能更適合。',
+    },
+    en: {
+      name: 'Solution-focused',
+      idea: 'Rather than analysing the problem in depth, find what already works. Everyone has resources and moments when the problem is smaller.',
+      steps: [
+        { scale: true, q: 'On a scale from 0 to 10, where 10 means you are satisfied with how this is going, where are you now?', why: 'Scaling questions make a vague feeling something you can talk about.' },
+        { q: 'Why {1} and not lower? What have you been doing that keeps it from being worse?', why: 'This is a coping question: it notices efforts you are already making.' },
+        { q: 'Recently, was there a moment when this worry was smaller or absent? What was different then?', why: 'This is an exception question: the answer often hides in the exceptions.' },
+      ],
+      noticed: 'You are at {1}. What keeps it from being worse: "{2}". When the exception happened: "{3}". A solution-focused view would say you are already doing some things that work.',
+      experiment: 'What would one point higher look like? Look for one small sign this week, and do a little more of what helped in "{3}".',
+      concepts: ['scaling questions', 'exception questions', 'coping questions', 'resources'],
+      misses: 'Its focus on the future and on resources can leave you feeling your pain was not fully heard. If you need to be understood first, the person-centered lens may fit better.',
+    },
+  },
+  {
+    id: 'narrative',
+    chapter: 13,
+    people: 'Michael White; David Epston',
+    excludeTopics: ['loss'],
+    zh: {
+      name: '敘事治療',
+      idea: '人不是問題，問題才是問題。我們活在自己和別人說的故事裡，而故事是可以被重新說的。',
+      steps: [
+        { q: '如果這個困擾是一個角色，你會給它取什麼名字？', why: '敘事治療會把問題外化：把它和「你這個人」分開。' },
+        { q: '「{1}」通常怎麼影響你？它叫你做什麼、相信什麼？', why: '看清楚問題的影響，就能開始看見你和它的關係。' },
+        { q: '有沒有一次，你沒有照「{1}」說的做？那一次透露了你是一個怎樣的人？', why: '這是「獨特結果」：主流故事之外，關於你的另一個故事。' },
+      ],
+      noticed: '你把它叫做「{1}」。它通常要你「{2}」。但有一次，你沒有照它說的做：「{3}」。那可能是另一個故事的開頭。',
+      experiment: '這週每當「{1}」出現，就記下它說了什麼，以及你有沒有哪一次沒聽它的。',
+      concepts: ['外化', '主流故事', '獨特結果', '重寫故事'],
+      misses: '重寫故事需要時間，通常也需要見證的人。外化不適合用在自己對別人造成的傷害上，那需要的是負起責任。',
+    },
+    en: {
+      name: 'Narrative therapy',
+      idea: 'The person is not the problem; the problem is the problem. We live inside stories told by ourselves and others, and stories can be retold.',
+      steps: [
+        { q: 'If this worry were a character, what would you name it?', why: 'Narrative therapy externalizes the problem, separating it from who you are.' },
+        { q: 'How does "{1}" usually affect you? What does it tell you to do or believe?', why: 'Mapping the problem\'s influence makes your relationship with it visible.' },
+        { q: 'Was there a time you did not do what "{1}" told you? What did that time say about who you are?', why: 'This is a "unique outcome": another story about you, outside the dominant one.' },
+      ],
+      noticed: 'You named it "{1}". It usually tells you to "{2}". But once, you did not follow it: "{3}". That may be the start of another story.',
+      experiment: 'Each time "{1}" shows up this week, note what it said, and any time you did not listen to it.',
+      concepts: ['externalizing', 'dominant story', 'unique outcomes', 're-authoring'],
+      misses: 'Retelling a story takes time and usually people to witness it. Externalizing is not for harm you have done to others; that calls for taking responsibility.',
+    },
+  },
+  {
+    id: 'family-systems',
+    chapter: 14,
+    people: 'Murray Bowen; Virginia Satir; Salvador Minuchin',
+    excludeTopics: [],
+    zh: {
+      name: '家族系統取向',
+      idea: '一個人的困擾，常常是一整個關係系統的一部分。看見模式在家人之間怎麼流動、怎麼傳下來，能讓人少一點自責，多一點選擇。',
+      steps: [
+        { q: '家裡（或身邊重要的人）還有誰也背著類似的擔心？這個擔心有沒有一代一代傳下來？', why: '家族系統取向會像畫家系圖一樣，看模式怎麼在世代之間傳遞。' },
+        { q: '壓力大的時候，你們家的人通常怎麼反應？有沒有人常常被夾在中間？', why: '兩個人有張力時，常會把第三個人拉進來，這叫三角關係。' },
+        { q: '在不切斷關係、也不被吞沒的情況下，你可以怎麼說出自己的立場？寫一句以「我」開頭的話。', why: 'Bowen 稱之為自我分化：既保持連結，也保有自己。' },
+      ],
+      noticed: '這份擔心也出現在「{1}」身上。壓力來時的模式是「{2}」。你的「我」立場是：「{3}」。',
+      experiment: '先不用說出口。這週觀察一次家裡的壓力模式，注意自己在裡面的位置；準備好時，再找一個安全的時機說出那句「我……」。',
+      concepts: ['家系圖', '三角關係', '自我分化', '代間傳遞'],
+      misses: '個人的生理和心理因素談得比較少。不建議在沒有支持的情況下直接和家人攤牌或斷絕關係，這類決定值得和專業人員一起想。',
+    },
+    en: {
+      name: 'Family systems',
+      idea: 'A person\'s distress is often part of a wider relationship system. Seeing how patterns move between family members and across generations can bring less self-blame and more choice.',
+      steps: [
+        { q: 'Who else in your family (or among people close to you) carries a similar worry? Has it been passed down?', why: 'Family systems work traces patterns across generations, like drawing a genogram.' },
+        { q: 'When stress is high, how do people in your family usually react? Is someone often caught in the middle?', why: 'When two people are tense, they often pull in a third. This is called triangulation.' },
+        { q: 'Without cutting anyone off or being swallowed up, how could you state your own position? Write one sentence beginning with "I".', why: 'Bowen called this differentiation of self: staying connected while staying yourself.' },
+      ],
+      noticed: 'This worry also shows up in "{1}". Under stress the pattern is "{2}". Your "I" position: "{3}".',
+      experiment: 'No need to say it yet. This week, watch for the stress pattern once and notice where you stand in it. When you are ready, find a safe moment for your "I" sentence.',
+      concepts: ['genogram', 'triangulation', 'differentiation of self', 'intergenerational transmission'],
+      misses: 'It says less about individual biological and psychological factors. Confronting family or cutting off contact without support is not recommended; decisions like that are worth thinking through with a professional.',
+    },
+  },
+];
+
+export function lensById(id) {
+  return LENSES.find((l) => l.id === id);
+}
+
+export function lensesForTopic(topic) {
+  return LENSES.filter((l) => !l.excludeTopics.includes(topic));
+}
+
+// Shorten an answer for quoting back.
+export function quote(text, max = 60) {
+  const s = String(text || '').trim().replace(/\s+/g, ' ');
+  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+}
+
+// Fill {1}, {2}, ... with earlier answers.
+export function fill(template, answers) {
+  return template.replace(/\{(\d)\}/g, (_, i) => quote(answers[Number(i) - 1] ?? ''));
+}
+
+// The transformed sentence shown before a `rewrite` step.
+export function rewriteText(kind, previous, lang) {
+  const p = quote(previous, 120);
+  if (kind === 'defuse') return lang === 'en' ? `I notice I am having the thought that "${p}".` : `我注意到我有一個想法：「${p}」。`;
+  // "I have to / I must" -> "I choose"
+  if (lang === 'en') {
+    const m = p.match(/^\s*i\s+(?:have to|must|need to|should|have got to)\s+(.*)$/i);
+    return m ? `I choose to ${m[1]}` : `I choose: ${p}`;
+  }
+  const m = p.match(/^\s*我?(?:必須|不得不|一定要|應該|得)\s*(.*)$/);
+  return `我選擇${m ? m[1] : p.replace(/^我/, '')}`;
+}

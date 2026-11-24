@@ -1,6 +1,6 @@
 // IndexedDB storage. Everything stays in this browser on this device.
 const DB_NAME = 'murmur';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise;
 
@@ -16,6 +16,7 @@ function open() {
       }
       if (!db.objectStoreNames.contains('audio')) db.createObjectStore('audio');
       if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings');
+      if (!db.objectStoreNames.contains('lensSessions')) db.createObjectStore('lensSessions', { keyPath: 'id' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -85,10 +86,28 @@ export async function deleteAudio(id) {
 }
 
 export async function clearAll() {
-  await tx(['entries', 'audio'], 'readwrite', (t) => {
+  await tx(['entries', 'audio', 'lensSessions', 'settings'], 'readwrite', (t) => {
     t.objectStore('entries').clear();
     t.objectStore('audio').clear();
+    t.objectStore('lensSessions').clear();
+    t.objectStore('settings').delete('lensStats');
   });
+}
+
+// Theory-lens exercises the person chose to save. Kept apart from voice entries and
+// never used in voice baselines, trends, or correlations.
+export async function saveLensSession(session) {
+  await tx('lensSessions', 'readwrite', (t) => t.objectStore('lensSessions').put(session));
+}
+
+export async function listLensSessions() {
+  const db = await open();
+  const all = await req2p(db.transaction('lensSessions').objectStore('lensSessions').getAll());
+  return all.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function deleteLensSession(id) {
+  await tx('lensSessions', 'readwrite', (t) => t.objectStore('lensSessions').delete(id));
 }
 
 export async function getSetting(key, fallback) {

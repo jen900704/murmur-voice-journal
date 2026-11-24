@@ -4,6 +4,7 @@ import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
 import { personalBaseline, baselineK, spearman, fmtR, mad, distinctCount } from './stats.js';
 import { glyph, ringPath, lineChart } from './viz.js';
 import * as db from './db.js';
+import { createLensView } from './lens-view.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -979,7 +980,8 @@ function viewAbout() {
 }
 
 // ---------- shell ----------
-const TABS = ['today', 'journal', 'trends', 'about'];
+const TABS = ['today', 'journal', 'trends', 'lens', 'about'];
+let lensView = null;
 
 function render() {
   // keep keyboard focus on the same control across re-renders
@@ -992,7 +994,8 @@ function render() {
   $('.skip').textContent = t('skip');
   const main = $('#main');
   main.innerHTML = '';
-  const views = { today: viewToday, journal: viewJournal, trends: viewTrends, about: viewAbout };
+  if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db });
+  const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView.view, about: viewAbout };
   main.appendChild(views[state.tab]());
   const nav = $('#tabs');
   nav.setAttribute('aria-label', t('sections'));

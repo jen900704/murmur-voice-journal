@@ -8,6 +8,7 @@ const frames = args.includes('--frames');
 for (const file of args.filter((a) => a !== '--frames')) {
   const buf = readFileSync(file);
   const x = new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
-  const { contour, ...r } = analyze(x, 16000, { returnFrames: frames });
+  const extra = process.env.MURMUR_OPTS ? JSON.parse(process.env.MURMUR_OPTS) : {};
+  const { contour, ...r } = analyze(x, 16000, { returnFrames: frames, ...extra });
   console.log(JSON.stringify({ file, ...r }));
 }
