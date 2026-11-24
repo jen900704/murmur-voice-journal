@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildContent } from '../tools/export-content.mjs';
+import { expectedCache } from '../tools/bump-cache.mjs';
 import { checkRisk, HELP_NUMBER } from '../js/safety.js';
 import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
 
@@ -242,6 +243,11 @@ test('no regex lookbehind in app code (Safari before 16.4 cannot parse it)', () 
 
 test('docs/content-review.md matches the content in the code (run node tools/export-content.mjs)', () => {
   assert.equal(readFileSync(new URL('../docs/content-review.md', import.meta.url), 'utf8'), buildContent());
+});
+
+test('the service worker cache name matches the app files (run node tools/bump-cache.mjs)', () => {
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.equal(sw.match(/const CACHE = '([^']*)';/)[1], expectedCache(sw));
 });
 
 console.log(`\n${passed} passed`);
