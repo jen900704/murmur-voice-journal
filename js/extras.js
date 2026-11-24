@@ -9,11 +9,11 @@ const S = {
     gentleTitle: '今晚來點溫和的',
     gentleNote: '這些是有些人覺得溫和、有陪伴感的作品，不是治療。片單由 Murmur 整理，可能有錯，歡迎回報。',
     all: '全部',
-    types: { film: '電影', series: '影集', book: '書', musical: '音樂劇', opera: '歌劇', music: '音樂' },
+    types: { film: '電影', series: '影集', book: '書', musical: '音樂劇', opera: '歌劇', music: '音樂', short: '短片' },
     tones: { quiet: '安靜', warm: '溫暖', funny: '輕鬆好笑', 'good-cry': '想好好哭一場', companionship: '有人陪的感覺' },
     showHeavy: '也顯示內容較沉重的作品',
     cw: '內容提醒：',
-    cwNames: { death: '死亡', illness: '疾病', abuse: '虐待', violence: '暴力', suicide: '自殺', 'self-harm': '自傷', 'mental illness': '精神疾病', grief: '失落', war: '戰爭', genocide: '大屠殺', bullying: '霸凌', infidelity: '外遇', divorce: '離婚', 'panic attacks': '恐慌發作', 'social anxiety': '社交焦慮', 'sexual content': '性內容' },
+    cwNames: { death: '死亡', illness: '疾病', abuse: '虐待', violence: '暴力', suicide: '自殺', 'self-harm': '自傷', 'mental illness': '精神疾病', grief: '失落', war: '戰爭', genocide: '大屠殺', bullying: '霸凌', infidelity: '外遇', divorce: '離婚', 'panic attacks': '恐慌發作', 'social anxiety': '社交焦慮', 'sexual content': '性內容', 'parent-child conflict': '親子衝突', 'workplace sexism': '職場性別歧視' },
     minutes: (m) => `${m} 分鐘`,
     close: '關閉',
     none: '沒有符合的作品。',
@@ -49,7 +49,7 @@ const S = {
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
-    types: { film: 'Films', series: 'Series', book: 'Books', musical: 'Musicals', opera: 'Opera', music: 'Music' },
+    types: { film: 'Films', series: 'Series', book: 'Books', musical: 'Musicals', opera: 'Opera', music: 'Music', short: 'Short films' },
     tones: { quiet: 'Quiet', warm: 'Warm', funny: 'Light and funny', 'good-cry': 'A good cry', companionship: 'Feels like company' },
     showHeavy: 'Also show works with heavier content',
     cw: 'Content notes: ',
@@ -88,7 +88,7 @@ const S = {
 };
 
 const HEAVY = new Set(['suicide', 'self-harm', 'abuse', 'genocide', 'violence', 'mental illness']);
-const TYPE_HUE = { film: 262, series: 200, book: 28, musical: 340, opera: 300, music: 160 };
+const TYPE_HUE = { film: 262, series: 200, book: 28, musical: 340, opera: 300, music: 160, short: 90 };
 
 export function createExtras({ h, add, getLang, render, toast, db, getState, openSheet, closeSheet, goLens, startRitual }) {
   const L = () => S[getLang()] || S.en;

@@ -37,7 +37,7 @@ Ideas come in over time; each gets reshaped for safety and ease of use before it
 |---|---|---|
 | Theory-based bedtime audio ("murmurs" from each school) | built | Written in the spirit of each approach, never in a real person's voice |
 | Pastel healing postcards | built | Procedural, original motifs |
-| Recommendations: films, books, drama, musicals, opera | built | Short plays not yet included |
+| Recommendations: films, books, drama, musicals, opera, short films | built | Short animated films added; live short plays not included, since what is on stage changes too fast for a static list |
 | Messaging and social connection | design only | Starts with invite-code pairs; see `social-design.md` |
 | Daily writing prompt and partner exchange | built | Exchange by link, no server |
 | "One kind thing I did today", visible to people in a low mood | built privately | Shared version waits for the social design |
