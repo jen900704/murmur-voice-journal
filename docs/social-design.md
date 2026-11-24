@@ -45,4 +45,3 @@ Supabase or Firebase would both work for invite-code pairs with row-level securi
 1. Who is the first audience: partners, close friends, or a class or group you run?
 2. Are you willing to be named as the person responsible for the shared space, and how quickly could you respond to a report?
 3. Is it acceptable that pairs would need a small server (and that the "nothing leaves the device" promise becomes "nothing leaves the device except what you send to your pair")?
-4. Should a supervisor or the program know before it launches, given that the app carries a counseling student's name?

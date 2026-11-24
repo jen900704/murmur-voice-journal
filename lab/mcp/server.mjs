@@ -53,7 +53,7 @@ server.registerTool(
   {
     title: 'Get one theory lens',
     description: 'Get one lens in one language: the core idea, its three or four self-guided questions with the reason for each, a small experiment, key concepts, and what the lens might miss. Psychoeducation, not therapy.',
-    inputSchema: { id: z.string().describe(`Lens id, one of: ${c.LENS_IDS.join(', ')}`), lang },
+    inputSchema: { id: z.enum(c.LENS_IDS).describe('Lens id'), lang },
     outputSchema: {
       ...lensSummary.shape,
       lang: z.string(),

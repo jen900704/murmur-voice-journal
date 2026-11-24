@@ -214,7 +214,7 @@ Two languages, Traditional Chinese (`zh-TW`) and English. `js/i18n.js` holds the
 
 ### ADR 2. On-device only
 
-- Context: voice recordings and private writing about worries, from a counseling student's project with no ethics approval to hold other people's data.
+- Context: voice recordings and private writing about worries. The project has no approval to hold other people's data, and does not need to collect any.
 - Decision: all processing and storage in the browser. No backend, account, analytics or third-party request. The CSP limits connections to the app's origin and the one opt-in API host.
 - Alternatives rejected: a sync server or cloud analysis (creates a data holder and a breach surface); server-side speech models (audio would leave the device).
 - Consequences: the privacy claim is checkable from the source and the CSP. The costs: data lives on one device and Safari may clear it (hence backups and reminders); no cross-device sync; features are limited to what runs in a browser; the AI key is stored unencrypted in IndexedDB.

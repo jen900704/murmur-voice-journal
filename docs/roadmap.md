@@ -21,7 +21,6 @@
 
 - The recommendation list: Taiwan titles, years, and content notes (`data/recs.json`). Seven works have no confirmed Taiwan title; their Chinese title is left blank and the app shows the original title.
 - The theory-lens questions and bedtime scripts, against how the approaches are taught in the program (`js/lenses.js`, `js/bedtime.js`). A faculty member or supervisor reading them before wider sharing would help. All of it, in Chinese with checkboxes, is in [`content-review.md`](content-review.md) (regenerate with `node tools/export-content.mjs`). A one-page English brief for a supervisor is [`reviewer-brief.md`](reviewer-brief.md).
-- Whether to mention the app to the program or site supervisor, since it carries a counseling student's name.
 - Chinese terms to check against the Taiwan edition of Corey before changing them (a reviewer suggested these but could not check the book): REBT's A as 觸發事件 versus 促發事件 or 緣起事件; the coping self-talk experiment in the cognitive lens, which is Meichenbaum's 認知行為矯正 rather than Beck; 真誠 in the existential lens, which collides with Rogers' 真誠一致 (perhaps 活得真實); reality therapy's 權力 (perhaps 權力（成就感）); and 前因 versus 前事 in behavioral ABC.
 
 ## Before sharing widely

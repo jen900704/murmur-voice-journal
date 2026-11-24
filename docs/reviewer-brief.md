@@ -36,5 +36,4 @@ A preregistered comparison with Praat on recorded English speech, a preregistere
 
 1. Do the lens questions and bedtime scripts fit how each approach is taught, and is anything unsafe to do alone? (`content-review.md`)
 2. Is the crisis wording and the help-line list right for Taiwan?
-3. Should the app carry the student's name, and should the program or site supervisor know before it is shared?
-4. Anything that could read as counseling, or that a person might mistake for professional care.
+3. Anything that could read as counseling, or that a person might mistake for professional care.
