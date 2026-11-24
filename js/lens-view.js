@@ -616,16 +616,17 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 answers: st.answers.slice(),
                 rating: st.rating,
               };
-              commitRating();
               try {
                 await db.saveLensSession(session);
                 st.sessions = await db.listLensSessions();
                 toast(L().savedToast);
               } catch (_) {
+                // keep the exercise on screen so nothing is lost; the person can try again
                 toast(L().saveFailed);
-              } finally {
                 st.saving = false;
+                return rerender();
               }
+              st.saving = false;
               finish();
             },
           },
@@ -892,8 +893,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       ai: () => ai.view(rerender),
     };
     // stages that show a lens need one; anything stale falls back to the lens home page
-    const needsLens = ['step', 'summary', 'lensinfo', 'concern-for-lens', 'ai'];
+    const needsLens = ['step', 'summary', 'ai'];
     if (needsLens.includes(st.stage) && !lensById(st.lensId)) st.stage = 'home';
+    if (st.stage === 'concern-for-lens' && !lensById(st.pendingLens)) st.stage = 'home';
     const wrap = h('section', { class: 'view lens' });
     let body;
     try {
@@ -918,7 +920,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     },
     setAiEnabled: (v) => (st.aiEnabled = v),
     // in the middle of an exercise or AI chat (not on the lens home page)
-    active: () => st.stage !== 'home' && st.stage !== 'deck' && st.stage !== 'saved' && st.stage !== 'lensinfo' && st.stage !== 'fit' && st.stage !== 'resources',
+    active: () => {
+      // on the help page, what matters is the page the person came from
+      const stage = st.stage === 'resources' ? st.prevStage || 'home' : st.stage;
+      return !['home', 'deck', 'saved', 'lensinfo', 'fit', 'resources', 'drawn', 'choose', 'pick', 'compare'].includes(stage) || !!st.concern.trim();
+    },
     reload: () => {
       reload();
       st.stage = 'home';

@@ -149,6 +149,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
   const L = () => S[getLang()] || S.en;
 
   function open(lensId, context) {
+    if (st.abort) st.abort.abort();
     Object.assign(st, { chat: (st.chat || 0) + 1, lensId, context, messages: [], busy: false, abort: null, error: '', crisis: false, ended: false, draft: '', pause: false, showHelp: false });
   }
 
@@ -163,9 +164,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
   }
 
   function close() {
-    if (st.abort) st.abort.abort();
-    st.messages = [];
-    st.context = null;
+    abort(); // also marks any request still in flight as belonging to a closed chat
     onClose();
   }
 
@@ -181,15 +180,21 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
       return rerender();
     }
     st.pause = false;
-    const key = await db.getSetting('aiKey', '');
+    let key = '';
+    let stored = MODELS[0].id;
+    try {
+      key = await db.getSetting('aiKey', '');
+      stored = await db.getSetting('aiModel', MODELS[0].id);
+    } catch (_) {
+      /* treated as no key below */
+    }
+    if (chat !== st.chat) return; // the chat was closed or restarted meanwhile
     if (!key) {
       st.busy = false;
       st.error = L().noKey;
       return rerender();
     }
-    const stored = await db.getSetting('aiModel', MODELS[0].id);
     const model = MODELS.some((m) => m.id === stored) ? stored : MODELS[0].id;
-    if (chat !== st.chat) return; // the chat was closed or restarted meanwhile
     st.messages.push({ role: 'user', content: text });
     st.draft = '';
     st.error = '';
@@ -201,6 +206,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
       // the person's earlier notes travel in the first user turn, fenced off as notes
       const sent = st.messages.map((m, i) => (i === 0 ? { role: 'user', content: notesBlock(st.context) + m.content } : m));
       const { text: reply, stopReason } = await callModel({ key, model, system: systemPrompt(lens, getLang(), { last: userTurns >= MAX_USER_TURNS }), messages: sent, signal: st.abort.signal });
+      if (chat !== st.chat) return; // closed while waiting: drop the reply
       if (!reply || stopReason === 'refusal') {
         // an empty or refused reply ends the exercise and shows help, rather than breaking the chat
         st.messages.pop();

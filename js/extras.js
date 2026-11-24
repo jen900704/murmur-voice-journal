@@ -115,6 +115,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   async function loadNights() {
     ex.nights = await db.listNights().catch(() => []);
     ex.loaded = true;
+    ex.jarPickFor = null; // a deleted night's kind thing must not linger on the low-mood card
   }
 
   // ---------- recommendations ----------

@@ -138,6 +138,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
 
   function go(stage) {
+    if (stage !== st.stage) st.helpOpen = false; // the help list closes when the step changes
     st.stage = stage;
     rerender();
     window.scrollTo(0, 0);
@@ -148,6 +149,17 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       hd.focus({ preventScroll: true });
     }
   }
+
+  // "Done for tonight" survives a reload: it is true when a night was saved since this
+  // evening began (after 4 pm, or yesterday after 4 pm if it is past midnight).
+  function markDone(nights) {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(16, 0, 0, 0);
+    if (now.getHours() < 16) start.setDate(start.getDate() - 1);
+    st.doneOn = nights.some((n) => n.createdAt >= start.getTime()) ? now.toDateString() : st.doneOn;
+  }
+  db.listNights().then(markDone, () => {});
 
   // One tap from the card straight to a track, for nights when writing is too much.
   async function listenNow() {
@@ -182,6 +194,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.voiceName = await db.getSetting(`voice-${getLang()}`, null).catch(() => null);
     const nights = await db.listNights().catch(() => []);
     st.jar = nights.map((n) => n.kindness).filter(Boolean);
+    markDone(nights);
     st.finishing = false;
     voicesReady(); // start loading voices early
     if (run !== st.run) return null;
@@ -550,6 +563,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   // A goodnight card for one person, through the phone's own share sheet. Only a fixed line
   // the person picks goes on it; never the worry or the kind thing. No feed, counts, or receipts.
   function sendCard() {
+    if (st.sendLang !== getLang()) {
+      // language changed: the chosen line and its drawn card belong to the old language
+      st.sendLang = getLang();
+      st.sendPick = null;
+      st.sendPng = null;
+    }
     const lines = L().sendLines;
     const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
     const svgFor = (line) => postcardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
@@ -704,6 +723,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     if (st.player) st.player.stop();
     st.player = null;
     if (full) {
+      st.doneOn = null;
       st.worry = '';
       st.kind = '';
       st.theme = null;

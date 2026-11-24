@@ -85,6 +85,9 @@ test('a false alarm in the worry can continue with the text kept', async ({ page
   await page.locator('[data-key="crisis-continue"]').click();
   await expect(page.locator('.crisis')).toHaveCount(0);
   await expect(page.locator('#night-kind')).toBeVisible();
+  // the worry is still there when going back
+  await page.getByRole('button', { name: '上一步' }).click();
+  await expect(page.locator('#night-worry')).toHaveValue('明天簡報，緊張到想死');
 });
 
 test('a shared prompt link opens that prompt by number, and ignores anything else', async ({ page }) => {
@@ -142,16 +145,11 @@ test('leaving the Today tab mid-ritual keeps what was written', async ({ page })
 });
 
 test('just listen goes from the card straight to a track; leave returns to Today', async ({ page }) => {
+  // 10 pm in the pinned time zone, so the evening card is there whenever the test runs
+  await page.clock.setFixedTime(new Date('2026-11-24T22:00:00+08:00'));
   await page.goto('/');
   await skipWelcome(page);
   const listen = page.locator('[data-key="night-listen"]');
-  if (!(await listen.count())) {
-    // daytime: the card is not on Today, so open the ritual and leave it instead
-    await page.locator('[data-key="night-link"]').click();
-    await page.locator('[data-key="night-leave"]').click();
-    await expect(page.locator('.prompt-text')).toBeVisible();
-    return;
-  }
   await listen.click();
   await expect(page.locator('.view.night.playing')).toBeVisible();
   await page.locator('[data-key="night-leave"]').click();
@@ -174,6 +172,10 @@ test('a goodnight card carries only the chosen line, never what was written', as
   await page.locator('[data-key="night-send"]').click();
   await page.locator('[data-key="send-line-0"]').click();
   await expect(page.locator('.send-preview svg')).toBeVisible();
+  // the card shows the chosen line and nothing written tonight
+  await expect(page.locator('.send-preview')).toContainText('晚安。今天辛苦了。');
+  await expect(page.locator('.send-preview')).not.toContainText('吃了一頓好吃的');
+  await expect(page.locator('.send-preview')).not.toContainText('和室友吵架');
   const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="send-share"]').click()]);
   expect(download.suggestedFilename()).toMatch(/^goodnight-.*\.png$/);
 });

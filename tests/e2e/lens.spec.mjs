@@ -79,6 +79,30 @@ test.describe('theory lens', () => {
     await page.locator('[data-key="crisis-continue"]').click();
     await expect(page.locator('.crisis')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /自己選/ })).toBeVisible();
+    await page.getByRole('button', { name: '上一步' }).click();
+    await expect(page.locator('#lens-concern')).toHaveValue('報告被退回，我想死');
+  });
+
+  test('opening help mid-exercise and tapping the tab keeps the exercise', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '主管一直改需求');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('.lens-card .btn').first().click();
+    await page.getByRole('button', { name: '求助專線' }).click();
+    await page.locator('#tabs a[href="#lens"]').click();
+    await page.getByRole('button', { name: '上一步' }).click();
+    await expect(page.locator('.lens-concern-quote')).toContainText('主管一直改需求');
+  });
+
+  test('"Start with this lens" from the card deck opens that lens', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('.lens-link').first().click();
+    await page.locator('.deck-card, .lens-deck button, [data-key^="deck-"]').first().click();
+    await page.getByRole('button', { name: '用這個角度開始' }).click();
+    await expect(page.locator('#lens-concern')).toBeVisible();
   });
 
   test('Next turns on whether the topic or the text comes first', async ({ page }) => {

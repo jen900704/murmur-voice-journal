@@ -10,7 +10,10 @@ async function skipWelcome(page) {
 
 // Accessibility audit (WCAG 2.1 A and AA) of each main screen, light and dark, zh-TW and en.
 const screens = [
-  ['today', async (page) => page.goto('/')],
+  ['today', async (page) => {
+    await page.goto('/');
+    await skipWelcome(page);
+  }],
   ['journal (demo)', async (page) => {
     await page.goto('/#journal');
     await page.locator('.journal .btn').click();

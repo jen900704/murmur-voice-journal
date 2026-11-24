@@ -364,13 +364,14 @@ export function scriptSeconds(script, charsPerSecond) {
 export function pickVoice(lang, preferredName) {
   if (typeof speechSynthesis === 'undefined') return null;
   const voices = speechSynthesis.getVoices().filter((v) => v.localService !== false); // on-device only
-  if (preferredName) {
-    const v = voices.find((x) => x.name === preferredName);
-    if (v) return v;
-  }
   const want = lang === 'en' ? /^en/i : /^(zh[-_](TW|Hant)|cmn[-_]Hant)/i;
   // Mandarin only as a fallback: Cantonese voices (zh-HK, yue) would read the script in another language
   const fallback = lang === 'en' ? /^en/i : /^(zh|cmn)(?![-_](HK|MO))/i;
+  if (preferredName) {
+    // a saved choice counts only if it speaks this language (the setting may be from the other one)
+    const v = voices.find((x) => x.name === preferredName && fallback.test(x.lang));
+    if (v) return v;
+  }
   const ok = (v) => !/yue|HK|MO/i.test(v.lang);
   return (
     voices.find((v) => want.test(v.lang) && ok(v) && /premium|enhanced/i.test(v.name)) ||
