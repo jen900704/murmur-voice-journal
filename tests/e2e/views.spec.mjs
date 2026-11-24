@@ -94,7 +94,7 @@ test('after ten real entries the journal offers a backup, then waits a month', a
 
 test.describe('on iPhone Safari', () => {
   test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' });
-  test('after two real entries, Today says once how to keep data by adding to the Home Screen', async ({ page }) => {
+  test('once past the welcome, Today says once how to move to the Home Screen', async ({ page }) => {
     await page.goto('/');
     await page.locator('.prompt-text').waitFor();
     await page.evaluate(async () => {

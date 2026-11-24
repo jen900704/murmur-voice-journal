@@ -214,7 +214,7 @@ function tick() {
   const timer = $('#timer');
   if (timer) timer.textContent = `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`;
   const hint = $('#rec-hint');
-  if (hint) hint.textContent = secs < MIN_SECONDS ? t('tooShortHint') : t('tapToStop');
+  if (hint) hint.textContent = secs < MIN_SECONDS ? t('tooShortHint') : secs > MAX_SECONDS - 10 ? t('autoStopSoon', Math.ceil(MAX_SECONDS - secs)) : t('tapToStop');
   requestAnimationFrame(tick);
 }
 
@@ -465,7 +465,7 @@ function viewToday() {
       h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
       qualityNote(f),
       h('div', { class: 'rows' }, ['f0MedianHz', 'f0SdSt', 'speechRate', 'pauseRatio', 'periodicityDb'].map((k) => featureRow(k, f))),
-      n < BASELINE_MIN ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : null,
+      n < BASELINE_MIN ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : h('p', { class: 'muted small' }, t('chanceNote')),
       h(
         'div',
         { class: 'checkin' },
@@ -624,7 +624,8 @@ function viewToday() {
 function iosInstallNote() {
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
-  if (!ios || standalone || state.installNoted || state.entries.filter((e) => !e.demo).length < 2) return null;
+  // shown early, before there is much to move, but not on top of the first-visit welcome
+  if (!ios || standalone || state.installNoted || (!state.welcomed && !state.entries.length)) return null;
   const dismiss = () => {
     state.installNoted = true;
     db.setSetting('installNoted', true).catch(() => {});
@@ -912,9 +913,15 @@ function viewTrends() {
 
   const recent = entries.slice(-30);
   const all = entries.map((e) => e.features[info.key]).filter(Number.isFinite);
-  const scaleV = (v) => v * (info.scale || 1);
+  // a missing value stays missing (null * 1 would plot as 0)
+  const scaleV = (v) => (Number.isFinite(v) ? v * (info.scale || 1) : null);
   const med = median(all);
-  const spread = mad(all);
+  let spread = mad(all);
+  if (!(spread > 0) && all.length > 1) {
+    // same fallback as the daily comparison: SD when most values are identical
+    const mean = all.reduce((a, b) => a + b, 0) / all.length;
+    spread = Math.sqrt(all.reduce((a, b) => a + (b - mean) ** 2, 0) / (all.length - 1));
+  }
   const kBand = baselineK(all.length);
   const band = all.length >= BASELINE_MIN && spread > 0 ? [scaleV(med - kBand * spread), scaleV(med + kBand * spread)] : null;
   const name = t('feat')[info.key][0];
@@ -1032,6 +1039,22 @@ function download(name, text, type) {
   }, 60000);
 }
 
+// On phones, the share sheet is the reliable way to keep a file (Save to Files, Drive, mail);
+// a download link often does nothing in an iPhone Home Screen app. Returns false if cancelled.
+async function saveFile(name, text, type) {
+  const file = typeof File === 'function' ? new File([text], name, { type }) : null;
+  if (file && matchMedia('(pointer: coarse)').matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  download(name, text, type);
+  return true;
+}
+
 const localDate = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1075,25 +1098,13 @@ function exportCsv() {
         .join(',')
     );
   }
-  download(`murmur-${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+  saveFile(`murmur-${localDate()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
 }
 
 async function exportJson() {
   const [nights, lensSessions] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => [])]);
   const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions };
-  const name = `murmur-backup-${localDate()}.json`;
-  const text = JSON.stringify(data);
-  // On phones, the share sheet is the reliable way to keep a file (Save to Files, Drive, mail).
-  const file = typeof File === 'function' ? new File([text], name, { type: 'application/json' }) : null;
-  if (file && matchMedia('(pointer: coarse)').matches && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] });
-    } catch (_) {
-      return false; // cancelled: not backed up
-    }
-  } else {
-    download(name, text, 'application/json');
-  }
+  if (!(await saveFile(`murmur-backup-${localDate()}.json`, JSON.stringify(data), 'application/json'))) return false;
   state.lastBackup = Date.now();
   db.setSetting('lastBackup', state.lastBackup).catch(() => {});
   return true;
@@ -1310,6 +1321,11 @@ function viewAbout() {
             nightView.stopAll(true);
             state.welcomed = false;
             state.lastBackup = 0;
+            try {
+              localStorage.removeItem('murmur-region');
+            } catch (_) {
+              /* storage unavailable */
+            }
             await extras.loadNights();
             toast(t('deletedAll'));
             render();

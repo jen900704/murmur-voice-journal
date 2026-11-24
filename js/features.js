@@ -295,7 +295,9 @@ export function analyze(input, sampleRate, opts = {}) {
     flags: [],
   };
   if (clipFraction > o.clipFlagFraction) quality.flags.push('clipping');
-  if (snrDb < o.lowSnrDb) quality.flags.push('noisy');
+  // With almost no silence, the "noise floor" is really quiet speech, so the SNR estimate
+  // means little; do not call such a recording noisy.
+  if (snrDb < o.lowSnrDb && speechFrames / Math.max(nFrames, 1) < 0.9) quality.flags.push('noisy');
 
   // speech must actually contain voicing; noise or breath alone does not count
   if (f0Hz.length < o.minVoicedFrames || voicedFraction < o.minVoicedFraction) {

@@ -11,7 +11,7 @@ export function mad(arr) {
 // How many scaled MADs from the median count as unusual, given n earlier values.
 // With few values the median and MAD are themselves uncertain, so the cut-off widens.
 // Calibrated by simulation on normal data so that about 5% of new values are flagged
-// when nothing has changed (n = 10: 3.02, 20: 2.42, 30: 2.26, 100: 2.04).
+// when nothing has changed (n = 10: 3.02, 20: 2.46, 30: 2.29, 100: 2.06).
 export function baselineK(n) {
   return 1.96 + 9.5 / (n - 1);
 }
