@@ -29,7 +29,10 @@ async function seed(page) {
   await page.locator('[data-key="lens-pick-all"]').click();
   await page.locator('[data-key="pick-family-systems"]').click();
   const answers = ['哥哥也被催過', '我夾在爸爸和媽媽中間', '我想先留在這裡兩年', '再想想'];
-  for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {
+  for (let i = 0; i < 4; i++) {
+    // the next screen may still be drawing (slower in WebKit): wait for a question or the summary
+    await page.locator('#lens-answer, .lens-summary').first().waitFor();
+    if (await page.locator('.lens-summary').count()) break;
     await page.fill('#lens-answer', answers[i]);
     await page.locator('[data-key="lens-next"]').click();
   }

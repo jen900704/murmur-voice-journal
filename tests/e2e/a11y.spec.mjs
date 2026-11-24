@@ -55,6 +55,8 @@ const screens = [
   ['journal (demo)', async (page) => {
     await page.goto('/#journal');
     await page.locator('[data-key="journal-demo"]').click();
+    // loading the demo moves to Trends; let that finish before going back (WebKit interrupts otherwise)
+    await page.waitForURL(/#trends/);
     await page.goto('/#journal');
   }],
   ['trends (demo)', async (page) => {
