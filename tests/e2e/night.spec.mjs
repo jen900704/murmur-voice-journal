@@ -191,3 +191,23 @@ test("the track that fits tonight's worry comes first", async ({ page }) => {
   await page.locator('[data-key="tracks-all"]').click();
   await expect(page.locator('.track')).toHaveCount(10);
 });
+
+test('the journal shows a quiet look back at the last seven days, and nothing when there is nothing', async ({ page }) => {
+  await page.goto('/#journal');
+  await expect(page.locator('.week-card')).toHaveCount(0);
+  await page.evaluate(
+    () =>
+      new Promise((res) => {
+        const q = indexedDB.open('murmur', 3);
+        q.onsuccess = () => {
+          const t = q.result.transaction('nights', 'readwrite');
+          t.objectStore('nights').put({ id: 'w1', createdAt: Date.now() - 86400000, kindness: '散步回家', seed: 's', lang: 'zh-TW' });
+          t.oncomplete = res;
+        };
+      })
+  );
+  await page.reload();
+  await page.locator('.week-card summary').click();
+  await expect(page.locator('.week-card')).toContainText('做了 1 次睡前儀式');
+  await expect(page.locator('.week-card')).toContainText('散步回家');
+});

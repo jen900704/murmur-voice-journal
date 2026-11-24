@@ -7,6 +7,10 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
+    weekTitle: '這七天',
+    weekVoice: (n) => `錄了 ${n} 段聲音`,
+    weekNights: (n) => `做了 ${n} 次睡前儀式`,
+    weekKinds: '你寫下的、對自己好的事：',
     orderNote: '排序會參考現在的時間和你最近記下的心情，只在這個裝置上計算。',
     typeLabel: '想看哪一種',
     toneLabel: '今晚想要的感覺（可不選）',
@@ -63,6 +67,10 @@ const S = {
     toneLabel: 'The feeling you want tonight (optional)',
     more: (n) => `Show ${n} more`,
     orderNote: 'The order takes the time of day and your latest mood check-in into account, worked out on this device.',
+    weekTitle: 'The last seven days',
+    weekVoice: (n) => `${n} voice ${n === 1 ? 'entry' : 'entries'}`,
+    weekNights: (n) => `${n} bedtime ${n === 1 ? 'ritual' : 'rituals'}`,
+    weekKinds: 'Kind things you wrote down:',
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
@@ -440,5 +448,32 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     ]);
   }
 
-  return { openGentle, modeChips, nightsSection, jarSection, lowMoodCard, exchangeBox, loadNights, showHelp };
+  // A quiet look back at the last seven days: what happened, never compared with other weeks,
+  // no streaks, and nothing shown when there is nothing to show.
+  function weekCard() {
+    if (!ex.loaded) {
+      if (!ex.loadingWeek) {
+        ex.loadingWeek = true;
+        loadNights().then(render);
+      }
+      return null;
+    }
+    const since = Date.now() - 7 * 86400000;
+    const entries = ((getState && getState().entries) || []).filter((e) => !e.demo && e.createdAt >= since);
+    const nights = ex.nights.filter((n) => n.createdAt >= since);
+    const kinds = nights.map((n) => n.kindness).filter(Boolean);
+    if (!entries.length && !nights.length) return null;
+    const parts = [];
+    if (entries.length) parts.push(L().weekVoice(entries.length));
+    if (nights.length) parts.push(L().weekNights(nights.length));
+    return h(
+      'details',
+      { class: 'week-card' },
+      h('summary', {}, L().weekTitle),
+      h('p', { class: 'small' }, parts.join(getLang() === 'en' ? ', ' : '、'), getLang() === 'en' ? '.' : '。'),
+      kinds.length ? [h('p', { class: 'small muted' }, L().weekKinds), h('ul', { class: 'plain-list' }, kinds.slice(-5).reverse().map((k) => h('li', {}, k)))] : null
+    );
+  }
+
+  return { openGentle, modeChips, nightsSection, jarSection, lowMoodCard, exchangeBox, loadNights, showHelp, weekCard };
 }

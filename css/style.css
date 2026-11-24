@@ -1767,3 +1767,15 @@ h3.sub {
   padding-top: env(safe-area-inset-top);
   min-height: calc(48px + env(safe-area-inset-top));
 }
+
+.week-card {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+.week-card summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 32px;
+}

@@ -671,7 +671,7 @@ function welcomeCard() {
 
 function viewJournal() {
   const wrap = h('section', { class: 'view journal' });
-  add(wrap, backupNote());
+  add(wrap, backupNote(), extras.weekCard());
   add(wrap, extras.modeChips(state.journalMode, (m) => {
     state.journalMode = m;
     render();
