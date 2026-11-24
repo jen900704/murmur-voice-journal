@@ -241,6 +241,37 @@ export const TRACKS = [
     },
   },
   {
+    // Bowen's differentiation of self, as a bedtime practice: holding one's own share, not everyone's
+    id: 'family-systems',
+    lens: 'family-systems',
+    zh: {
+      name: '把別人的擔子放回去',
+      style: '家族系統取向風格',
+      core: [
+        ['今天，你可能替別人擔心了不少。', 6],
+        ['身邊的人的情緒，有時會像天氣一樣，飄到你身上。', 7],
+        ['試著在心裡分成兩堆：哪些是你的，哪些是別人的。分不清楚也沒關係。', 9],
+        ['別人的那一堆，今晚先放回去給他們。這不是不在乎，是讓每個人拿著自己的那一份。', 9],
+        ['你的那一堆，也不用今晚處理完。', 7],
+        ['你可以關心他們，同時也照顧你自己。兩件事可以一起存在。', 8],
+        ['現在，只剩下你，和你躺著的地方。', 10],
+      ],
+    },
+    en: {
+      name: "Handing back others' loads",
+      style: 'in the spirit of family systems therapy',
+      core: [
+        ['Today you may have worried quite a lot on behalf of other people.', 6],
+        ["Other people's feelings can drift onto you, like weather.", 7],
+        ["Try sorting them into two piles: what is yours, and what is theirs. If you can't tell, that is fine.", 9],
+        ["Tonight, hand their pile back to them. That is not the same as not caring; it lets each person hold their own share.", 9],
+        ['Your own pile does not need to be sorted out tonight either.', 7],
+        ['You can care about them and look after yourself at the same time.', 8],
+        ['Now there is only you, and the place where you are lying.', 10],
+      ],
+    },
+  },
+  {
     id: 'relaxation',
     lens: 'behavioral',
     zh: {
