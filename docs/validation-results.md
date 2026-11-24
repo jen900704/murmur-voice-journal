@@ -61,3 +61,16 @@ On shared frames the two agree within 0.5 Hz. The frames only Praat includes are
 Anything below this line was decided after seeing the results above and is labelled accordingly.
 
 The voicing result suggests trying a more lenient YIN threshold. If that is done, it will be a new feature version, rerun on all of these clips, and reported here as a post hoc change made on the same data, with no held-out test.
+
+### Post hoc: voicing threshold sweep (exploratory, same data)
+
+After seeing the results above, the YIN threshold was varied on the same 36 clips. This is exploration on the evaluation data, with no held-out set, so it cannot justify a change by itself.
+
+| YIN threshold | GPE | Fine error | Voicing disagreement | Median within 0.5 st | SD within 1 st | Range within 1 st | Syllables within 15% |
+|---|---|---|---|---|---|---|---|
+| 0.15 (preregistered, current) | 1.8% | 4.6 c | 13.8% | 29 / 36 | 29 / 36 | 24 / 36 | 17 / 33 |
+| 0.20 | 2.6% | 4.9 c | 11.2% | 31 / 36 | 27 / 36 | 20 / 36 | 19 / 33 |
+| 0.25 | 3.9% | 5.3 c | 9.6% | 31 / 36 | 26 / 36 | 21 / 36 | 23 / 33 |
+| 0.30 | 5.9% | 5.7 c | 8.5% | 31 / 36 | 22 / 36 | 19 / 36 | 23 / 33 |
+
+A more lenient threshold trades voicing coverage for more pitch errors: 0.25 is the only value that meets both pooled thresholds, but per-clip pitch SD and range get worse, mostly through octave errors on low voices. The feature code stays at the preregistered 0.15 for now. A change would need a separate set of recordings to confirm it, ideally the owner's own phone recordings across days.
