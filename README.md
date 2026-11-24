@@ -52,6 +52,9 @@ The app stays small and private. Around it are modules that study it, each with 
 | [`lab/mcp`](lab/mcp/README.md) | A read-only Model Context Protocol server for the vetted content: lenses, help lines, the risk screen, track suggestions, recommendations | 17 tests, including help lines on every risk match |
 | [`infra`](infra/README.md) | Terraform for AWS: an ECS Fargate eval runner with Bedrock-only IAM, encrypted S3 results, a budget alarm, optional S3 and CloudFront hosting, and a GitHub OIDC role | Validated with OpenTofu, tflint and checkov; nothing deployed |
 | [`docs/language-analysis`](docs/language-analysis/DESIGN.md) | Literature, licenses and design for on-device language analysis | LIWC and C-LIWC cannot be bundled; Chinese categories are written from scratch |
+| [`lab/langval`](lab/langval/README.md) | Preregistered construct validity of the language mirror against human emotion labels (GoEmotions, CPED), with a held-out retest after engine fixes | All ten English categories supported (AUC .68 to .94); Chinese: only gratitude so far |
+| [`js/voice-report.js`](js/voice-report.js) | A downloadable voice evidence report: methods, validation status, usual range, mood links with intervals, limits | Generated on the device; notes excluded unless chosen |
+| [`docs/demo`](docs/demo/) | Two-minute silent walkthroughs with captions, in English and Chinese (recorded by `tools/record-demo.mjs`) | |
 
 None of these modules receives anyone's journal. The evaluation and simulation use scripted or synthetic data only.
 

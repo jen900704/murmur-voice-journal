@@ -3,6 +3,8 @@
 // highlighted exactly. URLs, e-mail addresses, @mentions and #hashtags are left out of scoring
 // (they stay in the text that is displayed).
 
+import { ZH_S2T_SAFE, ZH_S2T_VARIANT } from './zh-s2t.js';
+
 const CJK_RUN = '[\\u3400-\\u9fff\\uf900-\\ufaff]+';
 const TOKEN_RE = new RegExp(`[A-Za-z\\u00c0-\\u024f]+(?:['\\u2019][A-Za-z]+)*|\\d+(?:[.,]\\d+)*|${CJK_RUN}`, 'g');
 const MASK_RE = /https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|[\w.+-]+@[\w-]+\.[\w.-]+|@[\w.]*\w|#[\p{L}\p{N}_]+/gu;
@@ -42,7 +44,9 @@ export function detectLanguage(text) {
 }
 
 // A rough check for Simplified Chinese: a few very common characters that Traditional text
-// does not use. The word lists are Traditional, so Simplified text would be undercounted.
+// does not use. The word lists were written for Traditional Chinese. Simplified text is read
+// through a character map (toTraditional below), which covers the list words but not usage
+// that differs between the two (mainland wording that the lists do not have).
 const SIMPLIFIED = /[们这说没为时来个会对还过吗么让给觉现样问题间关东见长门开难车马鸟龙应该爱亲习业专两办边写买卖话语读课谁请让认识记讲计许论设试该调谈谢贝贵费资赶转软轻输边达迁过运进远连选递邮释里钟钱银错长门问间闻闹阳阴队际难须顾风飞饭饮马验鱼鸡]/g;
 export function looksSimplified(text) {
   const s = String(text);
@@ -86,21 +90,80 @@ export function splitSentences(text) {
   return out;
 }
 
-// Longest-match segmentation of a run of Chinese characters. dict: { set, maxLen }.
+// ---------- Simplified to Traditional, for matching only ----------
+const pairMap = (str) => {
+  const m = new Map();
+  const chars = [...str];
+  for (let k = 0; k + 1 < chars.length; k += 2) m.set(chars[k], chars[k + 1]);
+  return m;
+};
+const S2T = pairMap(ZH_S2T_SAFE);
+const VARIANT = pairMap(ZH_S2T_VARIANT);
+const S2T_RE = new RegExp('[' + [...S2T.keys()].join('') + ']', 'g');
+
+// Simplified characters that Traditional text never uses are replaced by the Traditional
+// character the word lists use. One character for one, so positions do not move. Characters
+// that both scripts use with different meanings (后, 里, 干, 准) are left alone here and are
+// handled by alias spellings of whole words (variantSpelling).
+export function toTraditional(text) {
+  return String(text).replace(S2T_RE, (ch) => S2T.get(ch));
+}
+
+// How a list word looks when it was typed in Simplified and has gone through toTraditional:
+// 頭髮 arrives as 頭發, 以後 as 以后, 乾淨 as 干淨. Null when the word does not change.
+export function variantSpelling(word) {
+  let out = '';
+  let changed = false;
+  for (const ch of word) {
+    const v = VARIANT.get(ch);
+    if (v) changed = true;
+    out += v || ch;
+  }
+  return changed ? out : null;
+}
+
+// Longest-match segmentation of a run of Chinese characters.
+// dict: { set, maxLen, guards, heads, alias } from makeDict.
+//
+// A guard is a frequent word with no category (ZH_COMMON). It exists so that a character or a
+// shorter word inside it is not counted (天氣 keeps 氣 from being read alone, 經過 keeps 過世 out
+// of 經過世界). Some guards are only a degree word plus the next character (很難, 很高, 太空, 最後,
+// 一下). Such a guard must not eat the first character of a category word that runs past its
+// end: 很難 + 過 would lose 難過, 很高 + 興 would lose 高興. So when the longest match is a guard
+// that begins with a loose head (ZH_LOOSE_HEADS) and a category word starts right after the head
+// and crosses the end of the guard, the text is cut after the head instead: 很 + 難過.
+// One exception keeps the guard: a word of two or more characters starts right after the guard
+// and reaches further than the crossing word (很難 + 過去, 最後 + 來不及 stay as they are).
+// Guards that do not begin with a loose head always win, as before.
 function segmentCjk(run, offset, dict, out) {
-  const maxLen = dict ? dict.maxLen : 1;
+  if (!dict) {
+    for (let i = 0; i < run.length; i++) out.push({ t: run[i], start: offset + i, end: offset + i + 1, kind: 'z' });
+    return;
+  }
+  const { set, maxLen, guards, heads, alias } = dict;
+  const n = run.length;
+  const canon = (s) => (alias && alias.get(s)) || s;
+  // longest dictionary word starting at i within `limit` characters; lexOnly skips guards
+  const longest = (i, limit, lexOnly) => {
+    for (let L = Math.min(maxLen, limit); L > 1; L--) {
+      const s = run.substr(i, L);
+      if (set.has(s) && !(lexOnly && guards.has(canon(s)))) return L;
+    }
+    return 1;
+  };
   let i = 0;
-  while (i < run.length) {
-    let len = 1;
-    if (dict) {
-      for (let L = Math.min(maxLen, run.length - i); L > 1; L--) {
-        if (dict.set.has(run.substr(i, L))) {
-          len = L;
-          break;
-        }
+  while (i < n) {
+    let len = longest(i, n - i, false);
+    if (len > 1 && heads && guards && heads.has(run[i]) && guards.has(canon(run.substr(i, len)))) {
+      const end = i + len;
+      const cross = longest(i + 1, n - i - 1, true);
+      if (cross > 1 && i + 1 + cross > end) {
+        const next = end < n ? longest(end, n - end, false) : 1;
+        if (!(next > 1 && end + next > i + 1 + cross)) len = 1;
       }
     }
-    out.push({ t: run.substr(i, len), start: offset + i, end: offset + i + len, kind: 'z' });
+    const surface = run.substr(i, len);
+    out.push({ t: canon(surface), start: offset + i, end: offset + i + len, kind: 'z' });
     i += len;
   }
 }
@@ -114,14 +177,18 @@ export function tokenize(text, dict = null) {
   while ((m = TOKEN_RE.exec(s))) {
     const raw = m[0];
     const c = raw.charCodeAt(0);
-    if (c >= 0x3400) segmentCjk(raw, m.index, dict, out);
+    if (c >= 0x3400) segmentCjk(toTraditional(raw), m.index, dict, out);
     else if (c >= 48 && c <= 57) out.push({ t: raw, start: m.index, end: m.index + raw.length, kind: 'n' });
     else out.push({ t: raw.toLowerCase().replace(/’/g, "'"), start: m.index, end: m.index + raw.length, kind: 'w' });
   }
   return out;
 }
 
-export function makeDict(words) {
+// words: every word used for cutting. guards: the ones among them that carry no category.
+// heads: single characters after which a guard may give way (see segmentCjk).
+// Words with a character that Simplified text spells differently also get an alias spelling
+// that points back to the list word; a token always carries the list spelling.
+export function makeDict(words, guards = null, heads = null) {
   const set = new Set();
   let maxLen = 1;
   for (const w of words) {
@@ -129,5 +196,12 @@ export function makeDict(words) {
     set.add(w);
     if (w.length > maxLen) maxLen = w.length;
   }
-  return { set, maxLen };
+  const alias = new Map();
+  for (const w of [...set]) {
+    if (w.length < 2) continue; // one character alone is too ambiguous (干 is 幹, 乾 or 干)
+    const v = variantSpelling(w);
+    if (v && !set.has(v) && !alias.has(v)) alias.set(v, w);
+  }
+  for (const v of alias.keys()) set.add(v);
+  return { set, maxLen, guards: guards ? new Set(guards) : null, heads: heads && guards ? new Set(heads) : null, alias: alias.size ? alias : null };
 }

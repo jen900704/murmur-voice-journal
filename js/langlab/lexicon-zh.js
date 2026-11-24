@@ -7,8 +7,13 @@
 // file (category words plus ZH_COMMON) and falls back to single characters. ZH_COMMON holds
 // frequent words that carry no category but contain a character that does (不錯, 天氣, 手機),
 // so that such a character is not counted by mistake.
+//
+// 2026.11-3 (engine fixes after the lab/langval study, no category word added or removed):
+// guards that are a degree word plus one character no longer swallow the start of an emotion word
+// (ZH_LOOSE_HEADS below), the verb 幹 ("to do") is guarded, and Simplified text is read through a
+// character map (zh-s2t.js). The lists are still written for Traditional Chinese.
 
-export const ZH_VERSION = '2026.11-2';
+export const ZH_VERSION = '2026.11-3';
 
 const w = (s) => s[0].split(/\s+/).filter(Boolean);
 
@@ -209,7 +214,9 @@ export const ZH_COMMON = w`
   錯過 錯誤 做錯 犯錯 沒錯 不錯 錯覺 過錯 受傷 傷心 傷口 傷害 悲傷 哀傷 感傷 憂傷 創傷 辛苦 痛苦 苦笑 苦惱 刻苦 吃苦
   煩惱 麻煩 煩躁 心煩 厭煩 不耐煩 煩死 鬱悶 悶熱 慘烈 悲慘 笨蛋 愚蠢 醜陋 破爛 燦爛 腐爛 報廢 荒廢 廢棄 廢話 噁心 糟糕
   恐怕 哪怕 害怕 可怕 緊急 急診 著急 焦急 急忙 急救 危急 急性 慌張 心慌 驚慌 恐慌
-  幹嘛 幹麻 能幹 幹部 幹勁 骨幹 樹幹 依靠 可靠 靠近 靠山 停靠 吵架 爭吵 吵鬧 罵人 責罵 謾罵 痛恨 憎恨 怨恨 仇恨 悔恨
+  幹嘛 幹麻 幹麼 幹嗎 幹啥 幹什麼 幹甚麼 幹了 幹過 幹完 幹掉 幹得好 幹的好 幹得漂亮 幹練 幹線 幹細胞
+  想幹 要幹 在幹 來幹 去幹 敢幹 肯幹 該幹 沒幹 不幹 怎麼幹 這麼幹 那麼幹 主幹 軀幹 才幹 精幹 苦幹 實幹 蠻幹 硬幹
+  能幹 幹部 幹勁 骨幹 樹幹 依靠 可靠 靠近 靠山 停靠 吵架 爭吵 吵鬧 罵人 責罵 謾罵 痛恨 憎恨 怨恨 仇恨 悔恨
   兇手 行兇 兇猛 嗆聲 哭泣 大哭 痛哭 哭聲 哭笑不得
   經過 過來 過去 通過 過程 超過 太過 難過 度過 渡過 過年 過節 過敏 過度 過分 過於 過後 路過 過世 過期 不過 錯過 過癮 過往
   剛好 剛剛 剛才 剛強 曾經 未曾 不曾 曾祖父 正常 真正 正確 正式 正面 反正 正好 正義 改正 正在 公正 正當
@@ -311,3 +318,9 @@ export const ZH_COMMON = w`
   是不是 不是 還是 就是 可是 但是 只是 而是 或是 總是 老是 也是 都是 真是 正是 於是 要是 算是 是否 是的 是非 凡是 是因為
   也就是說 倒是 硬是 便是 既是 若是 像是 說是 仍是 卻是
 `;
+
+// Degree and "as soon as" words that attach to whatever follows. A guard in ZH_COMMON that begins
+// with one of these (很難, 很高, 很快, 太空, 最後, 好感, 真心, 超過, 一下, 一生) gives way when a category
+// word starts right after it and runs past the end of the guard, so that 很難過, 很高興, 很快樂,
+// 太空虛, 最後悔, 好感動, 真心痛, 超過癮, 一下班 and 一生氣 are counted. See segmentCjk in tokenize.js.
+export const ZH_LOOSE_HEADS = ['很', '太', '最', '好', '真', '超', '一'];

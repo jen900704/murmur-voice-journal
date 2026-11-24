@@ -4,11 +4,11 @@
 // and within-person comparison. Pure functions; runs in the browser and in Node.
 
 import { tokenize, splitSentences, detectLanguage, makeDict, looksSimplified, maskText } from './tokenize.js';
-import { EN_CATEGORIES, EN_FUNCTION_CLASSES, ANALYTIC_WEIGHTS, ANALYTIC_CONSTANT, EN_VERSION } from './lexicon-en.js';
-import { ZH_CATEGORIES, ZH_COMMON, ZH_VERSION } from './lexicon-zh.js';
+import { EN_CATEGORIES, EN_FUNCTION_CLASSES, ANALYTIC_WEIGHTS, ANALYTIC_CONSTANT, EN_VERSION, EN_WILDCARD_EXCEPTIONS } from './lexicon-en.js';
+import { ZH_CATEGORIES, ZH_COMMON, ZH_LOOSE_HEADS, ZH_VERSION } from './lexicon-zh.js';
 import { createVader } from './vader.js';
 
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '1.1.0';
 
 // Below these word counts a score is reported as "not enough text yet".
 // Units are words in English and Chinese characters divided by 1.5 in Chinese (docs/language-analysis/DESIGN.md, section 5).
@@ -114,7 +114,8 @@ export function wilson(hits, n, z = 1.6449) {
 }
 
 // ---------- compiled word lists ----------
-function compile(categories) {
+// exceptions: { stem: [words a wildcard "stem*" must not match; an exception may end in *] }
+function compile(categories, exceptions = null) {
   const exact = new Map(); // word -> [category ids]
   const prefix = new Map(); // stem -> [category ids]
   const phrases = new Map(); // first word -> [{ words, ids }]
@@ -144,15 +145,33 @@ function compile(categories) {
       } else push(exact, entry, id);
     }
   }
-  return { exact, prefix, phrases, minStem, maxStem };
+  const except = new Map(); // stem -> { words: Set, stems: [prefixes] }
+  for (const [stem, list] of Object.entries(exceptions || {})) {
+    if (!prefix.has(stem)) throw new Error(`wildcard exception for "${stem}*", which no category uses`);
+    const e = { words: new Set(), stems: [] };
+    for (const x of list) {
+      const body = x.endsWith('*') ? x.slice(0, -1) : x;
+      if (!body.startsWith(stem) || body === stem) throw new Error(`"${x}" is not a word that "${stem}*" matches`);
+      if (x.endsWith('*')) e.stems.push(body);
+      else e.words.add(x);
+    }
+    except.set(stem, e);
+  }
+  return { exact, prefix, phrases, minStem, maxStem, except };
+}
+
+function excepted(lex, stem, t) {
+  const e = lex.except.get(stem);
+  return !!e && (e.words.has(t) || e.stems.some((p) => t.startsWith(p)));
 }
 
 function lookup(lex, t) {
   let ids = lex.exact.get(t) || null;
   if (lex.prefix.size && t.length >= lex.minStem) {
     for (let L = Math.min(t.length, lex.maxStem); L >= lex.minStem; L--) {
-      const hit = lex.prefix.get(t.slice(0, L));
-      if (hit) ids = ids ? [...new Set([...ids, ...hit])] : hit;
+      const stem = t.slice(0, L);
+      const hit = lex.prefix.get(stem);
+      if (hit && !excepted(lex, stem, t)) ids = ids ? [...new Set([...ids, ...hit])] : hit;
     }
   }
   return ids;
@@ -161,15 +180,18 @@ function lookup(lex, t) {
 let compiled = null;
 function lexica() {
   if (compiled) return compiled;
-  const zhWords = new Set(ZH_COMMON);
-  for (const def of Object.values(ZH_CATEGORIES)) for (const x of def.words) zhWords.add(x);
+  const zhLex = new Set();
+  for (const def of Object.values(ZH_CATEGORIES)) for (const x of def.words) zhLex.add(x);
+  const zhWords = new Set([...ZH_COMMON, ...zhLex]);
+  // guards: words used only for cutting. A word that is also in a category is not a guard.
+  const zhGuards = ZH_COMMON.filter((x) => !zhLex.has(x));
   const fc = {};
   for (const [k, list] of Object.entries(EN_FUNCTION_CLASSES)) fc['fc:' + k] = { words: list };
   compiled = {
-    en: compile(EN_CATEGORIES),
+    en: compile(EN_CATEGORIES, EN_WILDCARD_EXCEPTIONS),
     zh: compile(ZH_CATEGORIES),
     enFunction: compile(fc),
-    zhDict: makeDict(zhWords),
+    zhDict: makeDict(zhWords, zhGuards, ZH_LOOSE_HEADS),
     enNegate: new Set(EN_CATEGORIES.negate.words),
     zhNegate: new Set([...ZH_CATEGORIES.negate.words].filter((x) => !['不知道', '不曉得', '不想', '不敢', '沒辦法', '無法'].includes(x))),
   };
@@ -183,7 +205,7 @@ export function zhDict() {
 export function lexiconInfo(extra = {}) {
   const list = [
     { id: 'murmur-en', name: 'Murmur English category lists', version: EN_VERSION, license: 'MIT', source: 'js/langlab/lexicon-en.js', note: 'Written from scratch for Murmur. Not validated against human ratings. Not LIWC.' },
-    { id: 'murmur-zh', name: 'Murmur 繁體中文類別詞表', version: ZH_VERSION, license: 'MIT', source: 'js/langlab/lexicon-zh.js', note: 'Written from scratch for Murmur. Not validated against human ratings. Not C-LIWC.' },
+    { id: 'murmur-zh', name: 'Murmur 繁體中文類別詞表', version: ZH_VERSION, license: 'MIT', source: 'js/langlab/lexicon-zh.js', note: 'Written from scratch for Murmur, for Traditional Chinese (Taiwan usage). Simplified text is converted character by character before matching (map built with OpenCC, Apache 2.0), so mainland wording the lists do not have is still missed. Not validated against human ratings. Not C-LIWC.' },
   ];
   for (const key of ['vader', 'empath']) {
     const d = extra[key];
@@ -732,5 +754,10 @@ export function categoryWords(lang, id) {
   if (INDICES[id] && id !== 'analytic') return Object.entries(INDICES[id].parts).map(([k, v]) => `${v > 0 ? '+' : '-'} ${k}`);
   if (id === 'analytic') return Object.entries(EN_FUNCTION_CLASSES).map(([k, list]) => `${k} (${ANALYTIC_WEIGHTS[k] > 0 ? '+' : '-'}): ${list.join(' ')}`);
   const def = (lang === 'zh' ? ZH_CATEGORIES : EN_CATEGORIES)[id];
-  return def ? def.words.map((x) => x.replace(/_/g, ' ')) : [];
+  if (!def) return [];
+  // a wildcard is shown with the words it leaves out: "hug* (not huge*, hugh, hugo)"
+  return def.words.map((x) => {
+    const ex = lang !== 'zh' && x.endsWith('*') ? EN_WILDCARD_EXCEPTIONS[x.slice(0, -1)] : null;
+    return ex ? `${x} (not ${ex.join(', ')})` : x.replace(/_/g, ' ');
+  });
 }

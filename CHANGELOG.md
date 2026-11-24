@@ -6,6 +6,10 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Voice evidence report on Trends (HTML and JSON): methods, validation status, usual range, recent values, mood links with Fisher z intervals and the multiple-comparison caveat, limits and references.
+- Language mirror engine 1.1.0: English wildcard exceptions (huge, yellow, health no longer count), Chinese degree-word guards no longer swallow words such as 難過, Simplified characters converted before matching; verdicts unchanged on held-out data (lab/langval/RETEST.md).
+- Demo videos in docs/demo.
+
 - Language mirror: on-device analysis of the person's own writing and of their own social media exports, with word-level evidence, intervals, limits and a downloadable evidence report (js/langlab, js/language-view.js). Literature, licenses and design in docs/language-analysis.
 - "When it gets too much": breathing, grounding and self-compassion phrases in one flow (js/calm.js).
 - "Write it out": writing by weight with Pennebaker-style deep prompts and a closing (js/writing.js); the low-mood note's small action now follows the latest energy rating.

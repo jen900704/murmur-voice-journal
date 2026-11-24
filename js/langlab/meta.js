@@ -231,6 +231,12 @@ export const NOTICE = {
   zh: '這是自我探索用的語言分析，不是專業評估或診斷，也不能判斷一個人的人格、心理狀態或是否說謊。',
 };
 
+// Shown when some of the text looks like Simplified Chinese (analyze().simplifiedItems > 0).
+export const SIMPLIFIED_NOTE = {
+  en: 'Some of the text looks like Simplified Chinese. The categories were written for Traditional Chinese (Taiwan usage). Simplified characters are converted one by one before matching, so wording that differs from Taiwan usage is still missed.',
+  zh: '有些文字看起來是簡體中文。這些類別是照繁體中文（台灣用語）寫的。簡體字會先逐字轉成繁體再比對，所以和台灣用語不同的說法還是會漏掉。',
+};
+
 const GROUP_NOTES = {
   en: {
     core: 'Small, closed sets of words. These counts are the most exact ones here.',

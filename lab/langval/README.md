@@ -8,6 +8,10 @@ labeled short texts with emotions.
 - `PREREG.md`: the plan, written before any corpus text was scored.
 - `RESULTS.md`: the tables, a verdict per category, and word-list suggestions that are
   listed and not applied.
+- `RETEST.md`: a post-fix retest on held-out data. Three engine bugs found by the study
+  (wildcards such as `hug*` matching huge, guard words swallowing 很難過 and 很高興, Simplified
+  text undercounted) were fixed afterwards and checked on the dev splits. No verdict
+  changed. The numbers in this README and in `RESULTS.md` are from before those fixes.
 
 ## Short version
 
@@ -115,6 +119,9 @@ Requirements: node 18 or later, Python 3 with numpy and scipy, and
 | `results/*.json`, `results/*_tables.md` | Full output, including the word tables |
 | `data/sample/` | 200 GoEmotions comments for the offline tests, with notice |
 | `tests/` | `unittest` tests of the metrics, the rule and the pipeline on toy data |
+| `RETEST.md`, `run_retest.py`, `results/retest_*` | Post-fix retest on the held-back dev splits, before and after the engine fixes |
+| `baseline_engine/` | The engine files as they were for `RESULTS.md`, used for the "before" column |
+| `tools/build_zh_s2t.py` | Generates `js/langlab/zh-s2t.js` (Simplified to Traditional character data) with OpenCC |
 
 ## References
 

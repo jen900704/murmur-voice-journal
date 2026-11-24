@@ -98,7 +98,7 @@ const S = {
     minutes: (m) => `${m} min`,
     close: 'Close',
     none: 'Nothing matches.',
-    modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar', words: 'Language mirror' },
+    modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar', words: 'Words' },
     nightsEmpty: 'No nights yet. In the evening, start the bedtime ritual from Today.',
     jarTitle: 'Kindness jar',
     jarIntro: 'Kind things you have done for yourself. On a low day, draw one from here.',

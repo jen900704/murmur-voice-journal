@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { tokenize, splitSentences, detectLanguage, maskSpans, looksSimplified } from '../js/langlab/tokenize.js';
+import { tokenize, splitSentences, detectLanguage, maskSpans, looksSimplified, toTraditional, variantSpelling, makeDict } from '../js/langlab/tokenize.js';
 import { analyze, allScores, findScore, bootstrapRatios, mulberry32, wilson, zhDict, timeSeries, compare, highlightSpans, categoryWords, CATEGORY_IDS, GROUPS, INDICES, MIN_WORDS } from '../js/langlab/score.js';
 import { createVader } from '../js/langlab/vader.js';
 import { fixMojibake, parseFile, parseCSV, parseTime, dedupe, wantedInArchive } from '../js/langlab/importers.js';
 import { readZip } from '../js/langlab/zip.js';
 import { buildReportData, buildReportHtml } from '../js/langlab/report.js';
-import { scoreMeta, groupLabel, groupNote, NOTICE } from '../js/langlab/meta.js';
-import { EN_CATEGORIES } from '../js/langlab/lexicon-en.js';
-import { ZH_CATEGORIES, ZH_COMMON } from '../js/langlab/lexicon-zh.js';
+import { scoreMeta, groupLabel, groupNote, NOTICE, SIMPLIFIED_NOTE } from '../js/langlab/meta.js';
+import { EN_CATEGORIES, EN_WILDCARD_EXCEPTIONS } from '../js/langlab/lexicon-en.js';
+import { ZH_CATEGORIES, ZH_COMMON, ZH_LOOSE_HEADS } from '../js/langlab/lexicon-zh.js';
+import { ZH_S2T_SAFE, ZH_S2T_VARIANT } from '../js/langlab/zh-s2t.js';
 import { checkRisk } from '../js/safety.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -121,6 +122,182 @@ test('Chinese single-character entries with risky look-alikes are not in the lis
   const all = new Set(Object.values(ZH_CATEGORIES).flatMap((c) => c.words));
   for (const ch of ['想', '了', '過', '會', '要', '在', '死', '人', '氣', '手', '頭', '本人']) assert.ok(!all.has(ch), ch);
   assert.ok(ZH_COMMON.includes('不錯') && ZH_COMMON.includes('沒關係'));
+});
+
+// ---------- fixes after the lab/langval study (2026.11-3) ----------
+const hitsOf = (text, lang) => {
+  const res = analyze([{ text, lang }], {}).byLang[lang];
+  return res.hits[0].filter((h) => !h.ids[0].startsWith('fc:')).map((h) => ({ w: h.w, ids: h.ids }));
+};
+const countOf = (text, lang, id) => score(analyze([{ text, lang }], {}).byLang[lang], id).count;
+
+test('English wildcards: hug*, yell*, heal* no longer match huge, yellow, health', () => {
+  assert.deepEqual(hitsOf('A huge yellow sign about health and healthcare for healthy dogs.', 'en'), []);
+  for (const [text, id, n] of [
+    ['We hug, she hugs, they hugged, hugging helps.', 'affil', 4],
+    ['We hug, she hugs, they hugged, hugging helps.', 'posemo', 4],
+    ['They yell, he yells, she yelled, yelling again.', 'anger', 4],
+    ['Wounds heal, time heals, I healed, healing is slow.', 'care', 4],
+    ['Hugely huge.', 'social', 0],
+  ]) assert.equal(countOf(text, 'en', id), n, `${id}: ${text}`);
+});
+test('English wildcards: an excepted word is still counted through another entry', () => {
+  // hostile is kept out of host* (social) and still matched by hostil* (anger, conflict)
+  const h = hitsOf('The host was hostile to every guest.', 'en');
+  assert.deepEqual(h.find((x) => x.w === 'hostile').ids.sort(), ['anger', 'conflict', 'negemo']);
+  assert.ok(h.find((x) => x.w === 'host').ids.includes('social'));
+  // completely is an exact entry of `certain` and no longer an `achieve` hit through complete*
+  assert.deepEqual(h.length && hitsOf('completely', 'en')[0].ids.sort(), ['certain', 'cogproc']);
+});
+test('English wildcards: the audited misfires are out, the real forms stay in', () => {
+  const out = ['sight', 'sighting', 'earnest', 'officer', 'officers', 'neighborhood', 'opposite', 'original', 'originally', 'socialism', 'socialist',
+    'fearless', 'harmless', 'harmony', 'blameless', 'successor', 'treasurer', 'sweater', 'unclear', 'grandmaster', 'scarecrow', 'shoutout',
+    'respective', 'confidential', 'accustomed', 'cheeky', 'adultery', 'compartment', 'complexion', 'joystick', 'trustee', 'wager', 'motherfucker',
+    'progressive', 'projecting', 'punchline', 'reactor', 'relies', 'apologist', 'brainwashed', 'optimise', 'twinkle', 'kneel', 'lunge'];
+  for (const wd of out) assert.deepEqual(hitsOf(wd, 'en'), [], wd);
+  const kept = { sighed: 'sad', earned: 'achieve', offices: 'work', neighbors: 'friend', opposed: 'conflict', origin: 'cause', socially: 'social',
+    fearful: 'anx', harmful: 'negemo', successful: 'posemo', treasures: 'posemo', sweating: 'body', uncles: 'family', grandmas: 'family',
+    scared: 'anx', shouting: 'anger', respected: 'authority', confident: 'posemo', accused: 'conflict', cheeks: 'body', adults: 'social',
+    comparing: 'compare', joyful: 'posemo', trusted: 'affil', wages: 'work', mothers: 'family', progress: 'achieve', projects: 'work',
+    relieved: 'posemo', apologize: 'apology', brains: 'body', optimistic: 'posemo', twins: 'family', knees: 'body', lungs: 'body' };
+  for (const [wd, id] of Object.entries(kept)) assert.ok((hitsOf(wd, 'en')[0] || { ids: [] }).ids.includes(id), `${wd} should count for ${id}`);
+});
+test('English wildcards: every exception belongs to a wildcard that exists and would have matched it', () => {
+  const stems = new Set(Object.values(EN_CATEGORIES).flatMap((c) => c.words).filter((x) => x.endsWith('*')).map((x) => x.slice(0, -1)));
+  for (const [stem, list] of Object.entries(EN_WILDCARD_EXCEPTIONS)) {
+    assert.ok(stems.has(stem), `${stem}* is not a wildcard in any category`);
+    for (const x of list) assert.ok(x.replace(/\*$/, '').startsWith(stem) && x.replace(/\*$/, '') !== stem, `${x} under ${stem}*`);
+  }
+  assert.ok(categoryWords('en', 'affil').includes('hug* (not huge*, hugh, hugo)'));
+});
+
+test('Chinese guards: a degree word plus one character does not swallow the start of an emotion word', () => {
+  for (const [text, word, id] of [
+    ['我很難過', '難過', 'sad'], ['太難過了', '難過', 'sad'], ['真的很難過', '難過', 'sad'], ['很難受', '難受', 'negemo'],
+    ['我很高興', '高興', 'posemo'], ['很快樂', '快樂', 'posemo'], ['太高興了', '高興', 'posemo'], ['最高興的一天', '高興', 'posemo'],
+    ['很低落', '低落', 'sad'], ['太空虛', '空虛', 'lonely'], ['最後悔的事', '後悔', 'negemo'], ['好感動', '感動', 'posemo'],
+    ['真心痛', '心痛', 'sad'], ['超過癮', '過癮', 'posemo'], ['很好吃', '好吃', 'posemo'], ['很小心', '小心', 'risk'],
+    ['一生氣就哭', '生氣', 'anger'], ['一下班就回家', '下班', 'work'],
+  ]) {
+    const h = hitsOf(text, 'zh').find((x) => x.w === word);
+    assert.ok(h && h.ids.includes(id), `${text}: ${word} should count for ${id}`);
+  }
+  assert.deepEqual(words('我很難過'), ['我', '很', '難過']);
+  assert.deepEqual(words('我很高興'), ['我', '很', '高興']);
+});
+test('Chinese guards: the guard still wins where it should', () => {
+  // a longer word right after the guard keeps the old cut
+  assert.deepEqual(words('很難過去'), ['很難', '過去']);
+  assert.deepEqual(words('最後來不及了'), ['最後', '來不及', '了']);
+  assert.deepEqual(words('真正在乎'), ['真正', '在乎']);
+  // nothing crosses: the guard is kept whole
+  assert.deepEqual(words('這題很難'), ['這', '題', '很難']);
+  assert.deepEqual(words('最後我們回家'), ['最後', '我們', '回家']);
+  // guards that do not begin with a loose head never give way (經過 + 世界, not 經 + 過世 + 界)
+  assert.deepEqual(words('經過世界'), ['經過', '世界']);
+  assert.equal(countOf('經過世界', 'zh', 'loss'), 0);
+  assert.deepEqual(words('不得不想'), ['不得不', '想']);
+  assert.equal(countOf('不得不想，不只是這樣', 'zh', 'negate'), 0);
+  assert.deepEqual(words('自然而然'), ['自然', '而', '然']);
+  assert.deepEqual(words('人生'), ['人生']);
+  // negation next to a freed emotion word still works
+  assert.equal(countOf('我不是很難過', 'zh', 'sad'), 0);
+});
+test('Chinese guards: audit of every loose-head guard against every category word', () => {
+  const dict = zhDict();
+  const lex = new Set(Object.values(ZH_CATEGORIES).flatMap((c) => c.words));
+  assert.ok(ZH_LOOSE_HEADS.every((h) => h.length === 1));
+  let freed = 0;
+  for (const g of ZH_COMMON) {
+    if (lex.has(g)) continue;
+    for (const c of lex) {
+      if (c.length < 2 || g.length < 2 || !c.startsWith(g.slice(1)) || c.length <= g.length - 1) continue;
+      // g = head + rest, c begins with rest and runs past the end of g
+      const text = g[0] + c;
+      if (dict.set.has(text)) continue; // 一家人 is a list word of its own
+      const toks = tokenize(text, dict).map((x) => x.t);
+      if (ZH_LOOSE_HEADS.includes(g[0])) {
+        assert.deepEqual(toks, [g[0], c], `${text} should be ${g[0]} + ${c}`);
+        freed++;
+      } else assert.equal(toks[0], g, `${text} should keep the guard ${g}`);
+    }
+  }
+  assert.ok(freed > 100, `only ${freed} pairs checked`);
+});
+test('Chinese: the verb 幹 ("to do") is not counted as anger, the swear word still is', () => {
+  for (const t of ['你在幹什麼', '幹嘛這樣', '你幹麼', '他想幹啥', '幹嗎不說', '你到底幹甚麼', '幹得好', '我不幹了', '他很能幹', '幹部開會', '幹細胞研究', '你干什么', '干吗这样']) {
+    assert.equal(countOf(t, 'zh', 'anger'), 0, t);
+  }
+  for (const t of ['幹，又下雨', '幹！', '真的很幹']) assert.equal(countOf(t, 'zh', 'anger'), 1, t);
+});
+
+test('Simplified Chinese: characters are mapped to the Traditional list words, positions do not move', () => {
+  assert.equal(toTraditional('我们这个时候很难过'), '我們這個時候很難過');
+  assert.equal(toTraditional('我們這個時候很難過'), '我們這個時候很難過');
+  assert.equal(toTraditional('今日は学校 abc 123'), '今日は學校 abc 123');
+  const s = '他们说我很难过，可是我很高兴。';
+  const toks = tokenize(s, zhDict());
+  assert.deepEqual(toks.map((x) => x.t), ['他們', '說', '我', '很', '難過', '可是', '我', '很', '高興']);
+  for (const tk of toks) assert.equal(tk.end - tk.start, tk.t.length);
+  assert.equal(s.slice(toks[4].start, toks[4].end), '难过'); // highlights point at the text as typed
+});
+test('Simplified Chinese: the same counts as the Traditional spelling of the same text', () => {
+  const pairs = [
+    ['我今天很难过，也很担心明天的考试，谢谢你陪我。', '我今天很難過，也很擔心明天的考試，謝謝你陪我。'],
+    ['妈妈说她很高兴，我们一起吃饭，我觉得很幸福。', '媽媽說她很高興，我們一起吃飯，我覺得很幸福。'],
+    ['因为压力太大，我没办法睡觉，头发一直掉。以后再说吧。', '因為壓力太大，我沒辦法睡覺，頭髮一直掉。以後再說吧。'],
+    ['房间很干净，心里很平静，这里的关系也不复杂。', '房間很乾淨，心裡很平靜，這裡的關係也不複雜。'],
+    ['对不起，我后悔了，我们还是朋友吗？', '對不起，我後悔了，我們還是朋友嗎？'],
+  ];
+  for (const [simp, trad] of pairs) {
+    const a = analyze([{ text: simp }], {}).byLang.zh;
+    const b = analyze([{ text: trad }], {}).byLang.zh;
+    assert.equal(a.words, b.words);
+    for (const id of CATEGORY_IDS) assert.equal(score(a, id).count, score(b, id).count, `${id}: ${simp}`);
+    assert.ok(score(b, 'posemo').count + score(b, 'negemo').count > 0, trad);
+    assert.deepEqual(a.hits[0].map((h) => h.w), b.hits[0].map((h) => h.w));
+  }
+  assert.equal(analyze([{ text: '我们这个时候还没说过什么话，没关系的' }], {}).simplifiedItems, 1);
+});
+test('Simplified Chinese: characters that both scripts use are only read through whole words', () => {
+  // 后, 里, 干, 准 are Traditional characters too, so they are never converted alone
+  assert.equal(toTraditional('皇后在公里外干扰批准'), '皇后在公里外干擾批准');
+  assert.equal(variantSpelling('以後'), '以后');
+  assert.equal(variantSpelling('頭髮'), '頭發');
+  assert.equal(variantSpelling('開心'), null);
+  assert.deepEqual(words('以后'), ['以後']);
+  assert.deepEqual(words('头发'), ['頭髮']);
+  assert.deepEqual(words('心里'), ['心裡']);
+  assert.deepEqual(words('干净'), ['乾淨']);
+  assert.deepEqual(words('皇后'), ['皇', '后']);
+  assert.equal(countOf('干扰', 'zh', 'anger'), 0);
+  assert.equal(countOf('不准去', 'zh', 'request'), 1); // 不准 is the Traditional spelling and stays as it is
+  // Traditional text is unchanged by the map: every list word still cuts as itself
+  const dict = zhDict();
+  for (const wd of new Set([...ZH_COMMON, ...Object.values(ZH_CATEGORIES).flatMap((c) => c.words)])) {
+    assert.equal(toTraditional(wd), wd, wd);
+    assert.equal(dict.alias && dict.alias.get(wd), undefined, wd);
+  }
+});
+test('Simplified Chinese: the generated map covers the list characters and nothing else', () => {
+  const safe = [...ZH_S2T_SAFE];
+  const variant = [...ZH_S2T_VARIANT];
+  assert.ok(safe.length % 2 === 0 && variant.length % 2 === 0 && safe.length >= 600);
+  const listChars = new Set([...ZH_COMMON, ...Object.values(ZH_CATEGORIES).flatMap((c) => c.words)].join(''));
+  for (let k = 0; k < safe.length; k += 2) {
+    assert.ok(!listChars.has(safe[k]), `${safe[k]} is used by a list word and must not be converted`);
+    assert.ok(listChars.has(safe[k + 1]), `${safe[k + 1]} is not a list character`);
+  }
+  for (let k = 0; k < variant.length; k += 2) assert.ok(listChars.has(variant[k]), variant[k]);
+  // makeDict without guards behaves as before the fix
+  const plain = makeDict(['很難', '難過']);
+  assert.deepEqual(tokenize('很難過', plain).map((x) => x.t), ['很難', '過']);
+  assert.ok(SIMPLIFIED_NOTE.zh.includes('繁體中文') && SIMPLIFIED_NOTE.en.includes('Traditional Chinese'));
+  for (const lang of ['en', 'zh-TW']) {
+    const zh = analyze([{ text: '我今天很开心。'.repeat(3) }], {});
+    const d = buildReportData(zh, { uiLang: lang, files: [], hash: 'x', generatedAt: '2026-11-24T00:00:00.000Z' });
+    assert.ok(JSON.stringify(d).includes(lang === 'en' ? 'written for Traditional Chinese' : '照繁體中文'), lang);
+  }
 });
 
 // ---------- scores on tiny hand-computed texts ----------

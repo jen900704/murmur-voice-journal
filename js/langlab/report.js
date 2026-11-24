@@ -46,7 +46,7 @@ const T = {
       'Indices here are plain sums and differences of category rates. None of them is a published score, and none can tell whether a statement is true.',
       'Moral themes are shown only as themes in the text. Nothing here infers political or religious views.',
       'Topic, audience and platform change word rates more than most personal differences do.',
-      'Chinese often drops the subject and does not mark tense, so pronoun and time rates run low. English words inside Chinese text are not scored. The lists are Traditional Chinese; Simplified text is undercounted.',
+      'Chinese often drops the subject and does not mark tense, so pronoun and time rates run low. English words inside Chinese text are not scored. The lists were written for Traditional Chinese (Taiwan usage). Simplified text is converted character by character before matching, so wording that differs from Taiwan usage is still missed.',
       'The interval does not include measurement error.',
     ],
     cardText: [
@@ -104,7 +104,7 @@ const T = {
       '這裡的指數只是幾個類別比率的加減，不是任何已發表的分數，也無法判斷一段話是真是假。',
       '道德主題只當成文字裡的主題呈現，不會用來推測政治或宗教立場。',
       '主題、對象和平台對用詞的影響，比多數個人差異還大。',
-      '中文常省略主詞，也沒有時態，所以代名詞和時間詞的比率偏低。中文裡夾的英文不計分。詞表是繁體中文，簡體文字會被低估。',
+      '中文常省略主詞，也沒有時態，所以代名詞和時間詞的比率偏低。中文裡夾的英文不計分。詞表是照繁體中文（台灣用語）寫的。簡體文字會先逐字轉成繁體再比對，所以和台灣用語不同的說法還是會漏掉。',
       '區間不包含測量誤差。',
     ],
     cardText: [

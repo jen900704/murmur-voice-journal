@@ -6,8 +6,12 @@
 // Notation: words are separated by spaces. A trailing * matches any ending ("worr*" matches
 // worry, worried, worries). An underscore joins the words of a phrase ("going_to").
 // One word can sit in several categories.
+//
+// A wildcard also matches words that only share its letters ("hug*" and huge, "heal*" and
+// health). EN_WILDCARD_EXCEPTIONS at the end of this file lists, per wildcard, the words it must
+// not match. 2026.11-3 added that list after the lab/langval study; no category entry changed.
 
-export const EN_VERSION = '2026.11-2';
+export const EN_VERSION = '2026.11-3';
 
 const w = (s) => s[0].split(/\s+/).filter(Boolean);
 
@@ -256,3 +260,90 @@ export const EN_FUNCTION_CLASSES = {
 // index = 30 + article + prep - ppron - ipron - auxverb - conj - adverb - negate (each in percent of words)
 export const ANALYTIC_WEIGHTS = { article: 1, prep: 1, ppron: -1, ipron: -1, auxverb: -1, conj: -1, adverb: -1, negate: -1 };
 export const ANALYTIC_CONSTANT = 30;
+
+// Words a wildcard must not match, keyed by the wildcard without its star. An exception may end
+// in * itself ("health*" covers healthy and healthcare). It applies to that wildcard in every
+// category that uses it, and only to the wildcard: an excepted word is still counted when it is
+// listed as a word of its own or matched by another wildcard (hostile is kept out of "host*" and
+// still matched by "hostil*").
+// How the list was made: every wildcard was run over the vocabulary of the GoEmotions training
+// comments and the keys of the bundled VADER lexicon, and the matches were read. Listed here are
+// words with a different meaning from the stem (yellow, sight, earnest), the opposite meaning
+// (fearless, harmless, blameless), or a different thing altogether (officer, neighborhood,
+// socialism). Words that are forms of the stem are left in even where they are noisy in Reddit
+// comments (supporters, fighters, shitpost): that is a word-list decision, not a matching error.
+export const EN_WILDCARD_EXCEPTIONS = {
+  accus: w`accustom*`,
+  adult: w`adulter*`,
+  apolog: w`apologist* apologetics`,
+  belong: w`belongings`,
+  bitter: w`bittern*`,
+  blame: w`blameless*`,
+  brain: w`brainwash* brainstorm*`,
+  chat: w`chateau*`,
+  cheek: w`cheeky cheekier cheekiest cheekily`,
+  cheer: w`cheerless*`,
+  comfort: w`comfortless*`,
+  command: w`commando*`,
+  compar: w`compartment*`,
+  complete: w`completely`,
+  complex: w`complexion*`,
+  confiden: w`confidential*`,
+  consider: w`considerabl* considerate*`,
+  depress: w`depressuri*`,
+  dread: w`dreadlock* dreadnought*`,
+  earn: w`earnest*`,
+  excit: w`exciton*`,
+  fault: w`faultless*`,
+  fear: w`fearless*`,
+  feud: w`feudal* feudar* feudator*`,
+  gain: w`gainsa*`,
+  grandma: w`grandmaster*`,
+  grave: w`gravel* gravely graven graver gravest`,
+  guilt: w`guiltless*`,
+  harm: w`harmon* harmless*`,
+  heal: w`health*`,
+  host: w`hostil* hostage*`,
+  hug: w`huge* hugh hugo`,
+  hurt: w`hurtl*`,
+  joy: w`joyce joyless* joystick* joyrid* joyrode joypop*`,
+  knee: w`kneel*`,
+  lung: w`lunge lunged lunges lunging`,
+  mother: w`motherfuck* motherboard*`,
+  neighbor: w`neighborhood*`,
+  neighbour: w`neighbourhood*`,
+  offend: w`offender*`,
+  office: w`officer*`,
+  oppos: w`opposite*`,
+  optimis: w`optimise* optimisa* optimising`,
+  origin: w`original*`,
+  panic: w`panicle*`,
+  parent: w`parenthes* parenthetic*`,
+  perk: w`perky perkier perkiest`,
+  progress: w`progressive* progressivism`,
+  project: w`projection* projecting projectile* projector*`,
+  punch: w`punchline* punchy`,
+  rank: w`rankl*`,
+  react: w`reactor* reactionar*`,
+  relie: w`relies relied relier*`,
+  resent: w`resentenc*`,
+  respect: w`respective*`,
+  scare: w`scarecrow*`,
+  shit: w`shitake*`,
+  shout: w`shoutout*`,
+  sigh: w`sight*`,
+  skill: w`skillet*`,
+  slap: w`slapstick* slapshot*`,
+  social: w`socialism* socialist*`,
+  solve: w`solvent* solvency`,
+  success: w`successor* succession* successive*`,
+  sweat: w`sweater* sweatshirt* sweatpant*`,
+  team: w`teamster*`,
+  treasure: w`treasurer*`,
+  trouble: w`troubleshoot*`,
+  trust: w`trustee* trustbust*`,
+  twin: w`twinkl* twinkie* twinge* twine*`,
+  uncle: w`unclear* unclean* unclench*`,
+  wage: w`wager* waged`,
+  yell: w`yellow*`,
+};

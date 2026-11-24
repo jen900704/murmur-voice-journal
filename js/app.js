@@ -976,6 +976,8 @@ function viewTrends() {
   const flaggedNote = flagged ? h('p', { class: 'muted small' }, t('flaggedLeftOut', flagged)) : null;
   if (entries.length < 3) {
     add(wrap, demoBanner(), h('p', { class: 'empty' }, t('trendsEmpty')), flaggedNote, state.entries.length ? null : h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
+    // with no usable recordings (not even demo ones) there is nothing to report
+    if (entries.length) add(wrap, voiceReportBlock(!real));
     return wrap;
   }
   add(wrap, demoBanner());
@@ -1092,8 +1094,43 @@ function viewTrends() {
     add(table, tbody);
     add(links, table, h('p', { class: 'muted small' }, `n = ${rated.length}`, getLang() === 'en' ? '. ' : '。', t('linksCaveat')));
   }
-  add(wrap, links);
+  add(wrap, links, voiceReportBlock(!real));
   return wrap;
+}
+
+// The voice evidence report: an HTML page and a JSON file made on the device from the same
+// entries as this view. Notes go in only when the box is ticked; audio never does.
+async function saveVoiceReport(kind, includeNotes) {
+  let m;
+  try {
+    m = await import('./voice-report.js');
+  } catch (_) {
+    toast(t('loadFailed'));
+    return;
+  }
+  const lang = getLang();
+  const data = m.buildVoiceReportData(state.entries, { uiLang: lang, strings: { ...STRINGS.en, ...STRINGS[lang] }, includeNotes: includeNotes === true });
+  const names = m.voiceReportFileNames(localDate(), data.synthetic);
+  if (kind === 'json') saveFile(names.json, JSON.stringify(data, null, 2), 'application/json');
+  else saveFile(names.html, m.buildVoiceReportHtml(data), 'text/html');
+}
+
+function voiceReportBlock(synthetic) {
+  const notes = h('input', { type: 'checkbox', 'data-key': 'voice-report-notes' });
+  return h(
+    'div',
+    { class: 'voice-report' },
+    h('h2', {}, t('voiceReportTitle')),
+    h('p', { class: 'small' }, t('voiceReportAbout')),
+    synthetic ? h('p', { class: 'muted small', 'data-key': 'voice-report-demo' }, t('voiceReportDemo')) : null,
+    h('label', { class: 'toggle' }, notes, h('span', {}, t('voiceReportNotes'))),
+    h(
+      'div',
+      { class: 'voice-report-actions' },
+      h('button', { type: 'button', class: 'btn', 'data-key': 'voice-report-html', onclick: () => saveVoiceReport('html', notes.checked) }, t('voiceReportHtml')),
+      h('button', { type: 'button', class: 'btn ghost', 'data-key': 'voice-report-json', onclick: () => saveVoiceReport('json', notes.checked) }, t('voiceReportJson'))
+    )
+  );
 }
 
 // A daily calendar reminder for the bedtime ritual. There is no server for notifications,
