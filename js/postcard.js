@@ -30,15 +30,11 @@ export function wrap(text, maxUnits) {
   const isCjk = /[　-鿿＀-￯]/.test(s);
   const lines = [];
   if (isCjk) {
-    let line = '';
-    for (const ch of s) {
-      line += ch;
-      if (line.length >= maxUnits) {
-        lines.push(line);
-        line = '';
-      }
-    }
-    if (line) lines.push(line);
+    // even line lengths, so a line never ends with a single character on its own
+    const chars = [...s];
+    const n = Math.ceil(chars.length / maxUnits);
+    const per = Math.ceil(chars.length / n);
+    for (let i = 0; i < chars.length; i += per) lines.push(chars.slice(i, i + per).join(''));
   } else {
     let line = '';
     for (const w of s.split(/\s+/)) {
