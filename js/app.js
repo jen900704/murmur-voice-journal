@@ -1263,6 +1263,7 @@ const extras = createExtras({
   closeSheet,
   goLens,
   startRitual: () => nightView.begin(),
+  openBreathe: () => openSheet(breatheSheet({ h, getLang })),
 });
 const nightView = createNightView({
   h,

@@ -104,6 +104,7 @@ test('a low mood check-in shows things that helped before', async ({ page }) => 
   );
   await page.reload();
   await expect(page.locator('.low-card')).toContainText('早點睡');
+  await expect(page.locator('.low-card .plain-list').nth(1).locator('li')).toHaveCount(3);
 });
 
 test('gentle recommendations open from the lens tab and hide heavy works by default', async ({ page }) => {
