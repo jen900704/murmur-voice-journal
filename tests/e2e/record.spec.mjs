@@ -62,7 +62,7 @@ test('CSV export escapes formula-like notes', async ({ page }) => {
   expect(row).toContain(`"'=HYPERLINK(""x"")"`);
 });
 
-test('a note with risk language is not stored, and help is shown', async ({ page }) => {
+test('a note with risk language is kept, and help is shown', async ({ page }) => {
   await page.goto('/');
   await record(page);
   await page.fill('#note', 'I want to die');
@@ -70,5 +70,5 @@ test('a note with risk language is not stored, and help is shown', async ({ page
   await expect(page.locator('#sheet a[href="tel:988"]')).toBeVisible();
   const entries = await storedEntries(page);
   expect(entries).toHaveLength(1);
-  expect(entries[0].note).toBe('');
+  expect(entries[0].note).toBe('I want to die');
 });

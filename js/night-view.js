@@ -43,9 +43,10 @@ const S = {
     next: '下一步',
     back: '上一步',
     crisisTitle: '先停一下',
-    crisisBody: '你寫的內容聽起來可能比一般的心事更沉重。今晚比起睡前引導，你更值得和一個真人說說話。',
-    crisisNotSaved: '剛剛寫的內容沒有被儲存。',
-    crisisBack: '回到今天',
+    crisisBody: '你寫的內容裡，有些字詞可能代表你現在很辛苦。如果是這樣，今晚比起睡前引導，你更值得和一個真人說說話。',
+    crisisKept: '你寫的內容還在，沒有被刪掉。如果這不是你的意思，可以繼續。',
+    crisisContinue: '我沒事，這是別的意思，繼續',
+    crisisBack: '回到今天（不儲存）',
     shared: '已分享',
     downloaded: '已存成圖片',
   },
@@ -87,9 +88,10 @@ const S = {
     next: 'Next',
     back: 'Back',
     crisisTitle: 'Let us pause here',
-    crisisBody: 'What you wrote sounds like it may be heavier than an everyday worry. Tonight you deserve to talk with a real person, more than a wind-down track.',
-    crisisNotSaved: 'Nothing you just wrote has been saved.',
-    crisisBack: 'Back to Today',
+    crisisBody: 'Some words in what you wrote can mean things are very hard right now. If so, tonight you deserve to talk with a real person, more than a wind-down track.',
+    crisisKept: 'What you wrote is still here; nothing was deleted. If this is not what you meant, you can carry on.',
+    crisisContinue: 'I am okay, I meant something else. Continue',
+    crisisBack: 'Back to Today (nothing saved)',
     shared: 'Shared',
     downloaded: 'Image saved',
   },
@@ -131,10 +133,10 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     go('worry');
   }
 
-  function guard(text) {
+  // Pause with help instead of deleting; the person can carry on if it was something else.
+  function guard(text, onContinue) {
     if (checkRisk(text).risk) {
-      st.worry = '';
-      st.kind = '';
+      st.onContinue = onContinue;
       go('crisis');
       return false;
     }
@@ -207,7 +209,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         h('span', {}, L().keep)
       ),
       nav(() => {
-        if (guard(st.worry)) go('kind');
+        if (guard(st.worry, () => go('kind'))) go('kind');
       }, { back: () => { st.stage = 'card'; onExit(); } }),
     ];
   }
@@ -221,7 +223,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       input,
       ideas.length ? h('div', { class: 'jar-ideas' }, h('p', { class: 'muted small' }, L().kindIdeas), h('ul', { class: 'plain-list' }, ideas.map((k) => h('li', {}, k)))) : null,
       nav(() => {
-        if (guard(st.kind)) go('tone');
+        if (guard(st.kind, () => go('tone'))) go('tone');
       }, { back: () => go('worry') }),
     ];
   }
@@ -449,17 +451,36 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         h('h2', {}, L().crisisTitle),
         h('p', {}, L().crisisBody),
         h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null))),
-        h('p', { class: 'muted small' }, L().crisisNotSaved)
+        h('p', { class: 'muted small' }, L().crisisKept)
       ),
       h(
         'div',
-        { class: 'actions left' },
+        { class: 'actions left wrap' },
+        st.onContinue
+          ? h(
+              'button',
+              {
+                type: 'button',
+                class: 'btn',
+                'data-key': 'crisis-continue',
+                onclick: () => {
+                  const next = st.onContinue;
+                  st.onContinue = null;
+                  next();
+                },
+              },
+              L().crisisContinue
+            )
+          : null,
         h(
           'button',
           {
             type: 'button',
             class: 'btn ghost',
             onclick: () => {
+              st.onContinue = null;
+              st.worry = '';
+              st.kind = '';
               st.stage = 'card';
               onExit();
             },

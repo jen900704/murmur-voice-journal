@@ -48,12 +48,15 @@ test('with a key, the conversation uses the lens and sends only what it should',
   await expect(page.locator('.ai-msg.assistant')).toContainText('第一個想法');
   expect(bodies).toHaveLength(1);
   expect(bodies[0].system).toContain('Cognitive therapy');
-  expect(bodies[0].system).toContain('報告一直拖著沒寫');
   expect(bodies[0].system).toContain('Never use:');
-  expect(bodies[0].messages).toEqual([{ role: 'user', content: '我覺得自己很爛' }]);
+  expect(bodies[0].system).not.toContain('報告一直拖著沒寫');
+  expect(bodies[0].messages).toHaveLength(1);
+  expect(bodies[0].messages[0].content).toContain('<person_notes>');
+  expect(bodies[0].messages[0].content).toContain('報告一直拖著沒寫');
+  expect(bodies[0].messages[0].content.endsWith('我覺得自己很爛')).toBe(true);
 });
 
-test('risk language in the message never reaches the API', async ({ page }) => {
+test('risk language pauses with help before anything is sent', async ({ page }) => {
   let calls = 0;
   await page.route('https://api.anthropic.com/**', (route) => {
     calls++;
@@ -64,8 +67,47 @@ test('risk language in the message never reaches the API', async ({ page }) => {
   await page.locator('[data-key="ai-open"]').click();
   await page.fill('#ai-input', '其實我最近一直想死');
   await page.locator('[data-key="ai-send"]').click();
-  await expect(page.locator('.crisis')).toBeVisible();
+  await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
   expect(calls).toBe(0);
+});
+
+test('a reply that gives help lines ends the chat and shows tappable numbers; 1988 does not count', async ({ page }) => {
+  let n = 0;
+  await page.route('https://api.anthropic.com/**', (route) => {
+    n++;
+    const text = n === 1 ? '你說你 1988 年就開始這樣了。那時候發生了什麼？' : '這比這個練習能承接的更沉重。請現在打 1925 或 988 找人聊聊。';
+    route.fulfill({ json: { content: [{ type: 'text', text }], stop_reason: 'end_turn' } });
+  });
+  await enableAi(page);
+  await finishLens(page);
+  await page.locator('[data-key="ai-open"]').click();
+  await page.fill('#ai-input', '一直都很累');
+  await page.locator('[data-key="ai-send"]').click();
+  await expect(page.locator('.ai-msg.assistant')).toHaveCount(1);
+  await expect(page.locator('#ai-input')).toBeVisible();
+  await page.fill('#ai-input', '說不清楚');
+  await page.locator('[data-key="ai-send"]').click();
+  await expect(page.locator('.resource-list a[href="tel:1925"]')).toBeVisible();
+  await expect(page.locator('#ai-input')).toHaveCount(0);
+});
+
+test('an empty or refused reply ends the exercise with help instead of breaking', async ({ page }) => {
+  await page.route('https://api.anthropic.com/**', (route) => route.fulfill({ json: { content: [], stop_reason: 'refusal' } }));
+  await enableAi(page);
+  await finishLens(page);
+  await page.locator('[data-key="ai-open"]').click();
+  await page.fill('#ai-input', '嗯');
+  await page.locator('[data-key="ai-send"]').click();
+  await expect(page.locator('.resource-list a[href="tel:1925"]')).toBeVisible();
+  await expect(page.locator('.ai-msg')).toHaveCount(0);
+});
+
+test('delete all data also removes the API key', async ({ page }) => {
+  await enableAi(page);
+  page.once('dialog', (d) => d.accept());
+  await page.locator('.data-actions .btn.danger').click();
+  const key = await page.evaluate(() => new Promise((r) => { const q = indexedDB.open('murmur'); q.onsuccess = () => { const g = q.result.transaction('settings').objectStore('settings').get('aiKey'); g.onsuccess = () => r(g.result); }; }));
+  expect(key).toBeUndefined();
 });
 
 test('a risky reply without help lines is replaced by the help screen', async ({ page }) => {

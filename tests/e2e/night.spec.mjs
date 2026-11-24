@@ -68,6 +68,16 @@ test('risk language in the worry stops the ritual and shows help', async ({ page
   await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
 });
 
+test('a false alarm in the worry can continue with the text kept', async ({ page }) => {
+  await startRitual(page);
+  await page.fill('#night-worry', '明天簡報，緊張到想死');
+  await page.locator('[data-key="night-next"]').click();
+  await expect(page.locator('.crisis')).toBeVisible();
+  await page.locator('[data-key="crisis-continue"]').click();
+  await expect(page.locator('.crisis')).toHaveCount(0);
+  await expect(page.locator('#night-kind')).toBeVisible();
+});
+
 test('a shared prompt link opens that prompt by number, and ignores anything else', async ({ page }) => {
   await page.goto('/#ask=0');
   await expect(page.locator('.prompt-text')).toHaveText('今天有什麼小事讓你注意到了？');

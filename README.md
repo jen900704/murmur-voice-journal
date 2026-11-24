@@ -42,7 +42,7 @@ It is meant for self-reflection and for people curious about speech measurement.
 
 - Audio is decoded and analyzed in the browser, in a Web Worker. Nothing is uploaded.
 - Entries, recordings, theory-lens exercises you choose to save, bedtime notes, and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
-- The one exception is an experimental AI conversation that continues a theory-lens exercise. It is off by default, needs your own Anthropic API key (stored unencrypted in this browser), and sends only that conversation, the worry, and your answers in that exercise to Anthropic. Voice entries and bedtime notes are never sent, and the conversation is not saved.
+- The one exception is an experimental AI conversation that continues a theory-lens exercise. It is off by default, needs your own Anthropic API key (stored unencrypted in this browser), and sends only that conversation, the worry, and your answers in that exercise to Anthropic. Voice entries and bedtime notes are never sent. The conversation is not saved on this device; Anthropic handles what it receives under its API data policy.
 - You can keep only the measurements and not the audio (a setting), export everything as CSV or JSON, and delete everything at any time.
 
 ## What it measures

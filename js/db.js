@@ -101,7 +101,7 @@ export async function clearAll() {
     t.objectStore('audio').clear();
     t.objectStore('lensSessions').clear();
     t.objectStore('nights').clear();
-    t.objectStore('settings').delete('lensStats');
+    for (const k of ['lensStats', 'aiKey', 'aiEnabled', 'aiModel', 'nightKeep']) t.objectStore('settings').delete(k);
   });
 }
 

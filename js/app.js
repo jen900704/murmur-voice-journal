@@ -248,7 +248,7 @@ async function savePending() {
   savePending.busy = true;
   const p = state.pending;
   const prompts = DAILY[getLang()] || DAILY.en;
-  // a note that suggests risk is not stored; help is shown instead
+  // a note that suggests risk is kept (it is the person's own journal), and help is shown
   const noteRisk = checkRisk(p.note).risk;
   const entry = {
     id: uid(),
@@ -257,7 +257,7 @@ async function savePending() {
     lang: getLang(),
     mood: p.mood,
     energy: p.energy,
-    note: noteRisk ? '' : p.note.trim(),
+    note: p.note.trim(),
     features: p.features,
     featureVersion: FEATURE_VERSION,
     capture: p.capture || null,
@@ -1027,8 +1027,8 @@ function viewAbout() {
           h('input', {
             id: 'ai-key',
             type: 'password',
-            autocomplete: 'off',
             spellcheck: 'false',
+            autocomplete: 'new-password',
             placeholder: state.aiKeySet ? t('aiKeySaved') : 'sk-ant-…',
             onchange: async (e) => {
               const v = e.target.value.trim();
@@ -1140,6 +1140,9 @@ function viewAbout() {
             if (!confirm(t('confirmDeleteAll'))) return;
             await db.clearAll();
             state.entries = [];
+            state.aiKeySet = false;
+            state.aiEnabled = false;
+            if (lensView) lensView.setAiEnabled(false);
             await extras.loadNights();
             toast(t('deletedAll'));
             render();

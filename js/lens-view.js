@@ -62,10 +62,11 @@ const S = {
     helpOpen: '查看求助資源',
     crisisTitle: '先停一下',
     crisisBody:
-      '你寫的內容聽起來可能比一般的煩惱更沉重。這個練習不適合在這種時候用，比起換個角度，你更值得現在就和一個真人說說話。',
+      '你寫的內容裡，有些字詞可能代表你現在很辛苦。如果是這樣，這個練習不適合現在用；比起換個角度，你更值得現在就和一個真人說說話。',
     crisisCall: '你可以現在打給：',
-    crisisNotSaved: '剛剛寫的內容沒有被儲存。',
-    crisisBack: '回到理論透鏡首頁',
+    crisisKept: '你寫的內容還在，沒有被刪掉。如果這不是你的意思，可以繼續。',
+    crisisContinue: '我沒事，這是別的意思，繼續',
+    crisisBack: '結束這個練習（不儲存）',
     resourcesTitle: '求助資源',
     resourcesBody: '如果你或身邊的人有立即的危險，請直接打緊急電話。',
     topicHidden: '有些學派不適合用來看這類煩惱，所以沒有列出。',
@@ -127,10 +128,11 @@ const S = {
     helpOpen: 'See where to get help',
     crisisTitle: 'Let us pause here',
     crisisBody:
-      'What you wrote sounds like it may be heavier than an everyday worry. This exercise is not the right tool for that. You deserve to talk with a real person now, more than to look at things from a new angle.',
+      'Some words in what you wrote can mean things are very hard right now. If so, this exercise is not the right tool; you deserve to talk with a real person now, more than to look at things from a new angle.',
     crisisCall: 'You can reach:',
-    crisisNotSaved: 'Nothing you just wrote has been saved.',
-    crisisBack: 'Back to theory lens',
+    crisisKept: 'What you wrote is still here; nothing was deleted. If this is not what you meant, you can carry on.',
+    crisisContinue: 'I am okay, I meant something else. Continue',
+    crisisBack: 'End this exercise (nothing saved)',
     resourcesTitle: 'Where to get help',
     resourcesBody: 'If you or someone near you is in immediate danger, call your emergency number.',
     topicHidden: 'Some schools are not suited to this kind of worry, so they are not listed.',
@@ -178,6 +180,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   function reset() {
+    ai.abort();
     st.concern = '';
     st.topic = null;
     st.lensId = null;
@@ -187,10 +190,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.rating = null;
   }
 
-  // Any text that suggests risk stops the exercise.
-  function guard(text) {
+  // Text that suggests risk pauses the exercise and shows help. Nothing is deleted: if it
+  // was something else (the check also matches some ordinary phrases), the person can go on.
+  function guard(text, onContinue) {
     if (checkRisk(text).risk) {
-      reset();
+      st.crisisFrom = st.stage;
+      st.onContinue = onContinue;
       go('crisis');
       return false;
     }
@@ -332,9 +337,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             class: 'btn primary',
             disabled: !st.concern.trim() || !st.topic,
             onclick: () => {
-              if (!guard(st.concern)) return;
-              if (onNext) onNext();
-              else go('choose');
+              const next = () => (onNext ? onNext() : go('choose'));
+              if (guard(st.concern, next)) next();
             },
           },
           L().next
@@ -403,14 +407,17 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const advance = () => {
       const a = st.answers[st.step];
       if (a === undefined || a === null || String(a).trim() === '') return;
-      if (!guard(String(a))) return;
-      if (isLast) go('summary');
-      else {
-        st.step++;
-        rerender();
-        const f = document.getElementById('lens-answer');
-        if (f) f.focus();
-      }
+      const proceed = () => {
+        st.stage = 'step';
+        if (isLast) go('summary');
+        else {
+          st.step++;
+          rerender();
+          const f = document.getElementById('lens-answer');
+          if (f) f.focus();
+        }
+      };
+      if (guard(String(a), proceed)) proceed();
     };
     let field;
     if (s.scale) {
@@ -737,8 +744,41 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   function crisis() {
     return [
-      h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().crisisBody), h('p', { class: 'lens-label' }, L().crisisCall), resourceList(), h('p', { class: 'muted small' }, L().crisisNotSaved)),
-      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('home') }, L().crisisBack)),
+      h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().crisisBody), h('p', { class: 'lens-label' }, L().crisisCall), resourceList(), h('p', { class: 'muted small' }, L().crisisKept)),
+      h(
+        'div',
+        { class: 'actions left wrap' },
+        st.onContinue
+          ? h(
+              'button',
+              {
+                type: 'button',
+                class: 'btn',
+                'data-key': 'crisis-continue',
+                onclick: () => {
+                  const next = st.onContinue;
+                  st.onContinue = null;
+                  st.stage = st.crisisFrom || 'home';
+                  next();
+                },
+              },
+              L().crisisContinue
+            )
+          : null,
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'btn ghost',
+            onclick: () => {
+              reset();
+              st.onContinue = null;
+              go('home');
+            },
+          },
+          L().crisisBack
+        )
+      ),
     ];
   }
 

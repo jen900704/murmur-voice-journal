@@ -69,6 +69,18 @@ test.describe('theory lens', () => {
     await expect(page.locator('.crisis')).toBeVisible();
   });
 
+  test('a false alarm can continue with the text kept', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '報告被退回，我想死');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.getByRole('button', { name: '下一步' }).click();
+    await expect(page.locator('.crisis')).toBeVisible();
+    await page.locator('[data-key="crisis-continue"]').click();
+    await expect(page.locator('.crisis')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /自己選/ })).toBeVisible();
+  });
+
   test('loss topic hides lenses unsuited to grief', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
