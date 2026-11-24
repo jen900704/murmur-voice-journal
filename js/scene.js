@@ -9,8 +9,8 @@
 // plain calm one (lamp, stars). The object list only holds everyday, harmless things.
 //
 // sceneSvg() draws it. Original motifs only. With animate: true the SVG carries its own
-// small animation (clouds drift aside, the companion hops, a few sparkles), wrapped in
-// prefers-reduced-motion so it stays still for people who asked for less motion.
+// small animation (the pieces come in on the grid, the sun grows, Mumu hops once), wrapped
+// in prefers-reduced-motion so it stays still for people who asked for less motion.
 
 import { checkRisk } from './safety.js';
 
@@ -191,43 +191,38 @@ export function coverage() {
 
 // ---------- drawing ----------
 //
-// A flat print. Paper, two spot inks per card and their overprint colour, the way a riso
-// print looks: shapes are circles, half-circles and bands with no outlines, gradients or
-// see-through shading; where the two inks cross, the crossing is a fixed third colour; one
-// ink layer sits a couple of pixels off, like a print that slipped. Ink is only for small
-// line details and the words. The words lead: the person's line large on the right, the
-// card's name small and vertical by a hairline at the edge, like the spine of a book.
+// 丙「圓方」: a small poster built from circles, half-circles and square blocks in flat
+// colour. The left of the card is the picture, drawn on an 80-unit grid (two columns, three
+// rows): a ground colour picked by the weather, a second colour square top right holding
+// the sun or moon, the weather as ink bars top left, a ground plane along the bottom, an
+// ink hill, the things the person named as chunky pictograms, and Mumu sitting on the
+// plane. The right is a white panel with the person's line large, the approach name and
+// the date small. No gradients, shadows or outlines; ink is only for small details.
 
-const PAPER = '#F5F6F1';
-const INK = '#1B1F3B';
-const NIGHT = '#14172B';
-const AO = '#2747C7'; // 群青
-const MOMO = '#FF7A8A'; // 桃
-const EGG = '#FFC83D'; // 蛋黃
-const MOSS = '#2E9C7E'; // 青苔
+const INK = '#151515';
+const WHITE = '#FFFFFF';
+const MUTED = '#5C5A55';
+const JADE = '#0E7C66'; // 玉
+const RED = '#EA4B2D'; // 朱
+const SUN = '#F2B91D'; // 黃
+const PINK = '#F4A7B9'; // 粉
+const NAVY = '#12173A'; // 夜
 
-const rgbOf = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
-const hexOf = (a) => '#' + a.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
-// a flat screen of an ink on paper (t = how much ink)
-const tint = (c, t, base = PAPER) => hexOf(rgbOf(base).map((v, i) => v + (rgbOf(c)[i] - v) * t));
-
-// Each card: paper, ink for lines and words, a sky screen, ink a (land, and the
-// accents of things) and ink b (the sun, and the bodies of things), c where they cross.
+// Each card: ground (the whole picture), cell (the square behind the sun), orb (sun or
+// moon), plane (what Mumu sits on), hill, mark (weather bars) and acc (the second colour of
+// things; things are white first).
 const PRINT = {
-  clear: { a: AO, b: EGG, c: MOSS, sky: tint(AO, 0.13) },
-  sunny: { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.12) },
-  mixed: { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(MOSS, 0.12) },
-  cloudy: { a: AO, b: MOMO, c: '#5B3B9E', sky: tint(AO, 0.12) },
-  rain: { a: AO, b: MOSS, c: '#1D3F86', sky: tint(AO, 0.16) },
-  wind: { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(EGG, 0.16) },
-  fog: { paper: '#E9EAE4', a: tint(AO, 0.4, '#E9EAE4'), b: AO, c: '#2A3F9A', sky: tint(AO, 0.1, '#E9EAE4'), sun: '#F7F8F4' },
-  dusk: { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.16) },
-  night: { paper: NIGHT, ink: PAPER, a: MOSS, b: EGG, c: '#8AB84A', sky: '#20264A' },
+  clear: { ground: JADE, cell: SUN, orb: RED, plane: PINK, acc: SUN },
+  sunny: { ground: PINK, cell: SUN, orb: RED, plane: JADE, acc: RED },
+  mixed: { ground: SUN, cell: JADE, orb: RED, plane: PINK, acc: RED },
+  cloudy: { ground: PINK, cell: JADE, orb: WHITE, plane: SUN, acc: RED },
+  rain: { ground: JADE, cell: PINK, orb: WHITE, plane: SUN, acc: SUN },
+  wind: { ground: SUN, cell: PINK, orb: RED, plane: JADE, acc: RED },
+  fog: { ground: PINK, cell: JADE, orb: SUN, plane: JADE, acc: RED, mark: WHITE },
+  dusk: { ground: RED, cell: PINK, orb: SUN, plane: JADE, acc: SUN },
+  night: { ground: NAVY, cell: NAVY, orb: SUN, plane: JADE, hill: RED, acc: SUN, mark: PINK, night: true },
 };
-const pal = (w) => ({ paper: PAPER, ink: INK, ...PRINT.clear, ...(PRINT[w] || {}) });
-
-// the slipped layer
-const OFF = [2.5, -2];
+const pal = (w) => ({ hill: INK, mark: INK, night: false, ...(PRINT[w] || PRINT.clear) });
 
 function rng(seed) {
   let s = 7;
@@ -242,404 +237,273 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
-// geometry, no fill: the layer decides the colour
+// shapes, each with its flat fill
 const n = (v) => +(+v).toFixed(1);
-const circ = (cx, cy, r) => `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}"/>`;
-const box = (x, y, w, h, rx = 0) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}"${rx ? ` rx="${n(rx)}"` : ''}/>`;
+const circ = (cx, cy, r, c) => `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${c}"/>`;
+const box = (x, y, w, h, c) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="${c}"/>`;
 // a half-circle with its flat side on (cx, cy): up, down, left or right
-function half(cx, cy, r, dir = 'up') {
-  if (dir === 'up') return `<path d="M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 1 ${n(cx + r)} ${n(cy)}Z"/>`;
-  if (dir === 'down') return `<path d="M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 0 ${n(cx + r)} ${n(cy)}Z"/>`;
-  if (dir === 'left') return `<path d="M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 0 ${n(cx)} ${n(cy + r)}Z"/>`;
-  return `<path d="M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 1 ${n(cx)} ${n(cy + r)}Z"/>`;
+function half(cx, cy, r, dir, c) {
+  const d =
+    dir === 'down' ? `M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 0 ${n(cx + r)} ${n(cy)}Z`
+    : dir === 'left' ? `M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 0 ${n(cx)} ${n(cy + r)}Z`
+    : dir === 'right' ? `M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 1 ${n(cx)} ${n(cy + r)}Z`
+    : `M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 1 ${n(cx + r)} ${n(cy)}Z`;
+  return `<path d="${d}" fill="${c}"/>`;
 }
-const poly = (...pts) => `<path d="M${pts.map(([x, y]) => `${n(x)} ${n(y)}`).join(' L')}Z"/>`;
-const fillWith = (c, g) => (g ? `<g fill="${c}">${g}</g>` : '');
-// ink line details
-const line = (p, d, w = 2.2) => `<path d="${d}" fill="none" stroke="${p.ink}" stroke-width="${n(w)}" stroke-linecap="round" stroke-linejoin="round"/>`;
-const dot = (p, x, y, r) => `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${p.ink}"/>`;
-// a small face: two dot eyes and a soft smile
-const face = (p, x, y, s) => dot(p, x - s, y, s * 0.24) + dot(p, x + s, y, s * 0.24) + line(p, `M${n(x - s * 0.32)} ${n(y + s * 0.42)} q${n(s * 0.32)} ${n(s * 0.3)} ${n(s * 0.64)} 0`, Math.max(1.4, s * 0.18));
-// a cloud of stacked half-circles, flat along the bottom
-const cloudShape = (x, y, s) => half(x, y, s * 0.62) + half(x - s * 0.78, y, s * 0.4) + half(x + s * 0.74, y, s * 0.46);
+const poly = (c, ...pts) => `<path d="M${pts.map(([x, y]) => `${n(x)} ${n(y)}`).join(' L')}Z" fill="${c}"/>`;
+// a cloud: three half-circles on one flat line
+const cloudShape = (x, y, s, c) => half(x, y, s * 0.6, 'up', c) + half(x - s * 0.74, y, s * 0.38, 'up', c) + half(x + s * 0.72, y, s * 0.44, 'up', c);
+// a crescent: the ground takes a bite out of the moon
+const crescent = (x, y, r, c, ground) => circ(x, y, r, c) + circ(x - r * 0.4, y - r * 0.3, r * 0.88, ground);
 
-// Objects, drawn at (x, y) = where they stand, size r. Each returns its parts:
-// a and b for the two ink layers, k for paper cut out of the inks, l for ink lines.
+// Things, as pictograms of two or three flat pieces. Each is drawn in its own 60 x 60
+// square, standing on (0, 0) with x from -30 to 30 and y going up to -60. W is white, A the
+// card's accent, B its second colour, K ink.
 const OBJ = {
-  cat: (p, x, y, r) => ({
-    b: half(x + r * 0.1, y, r * 0.55) + circ(x - r * 0.38, y - r * 0.52, r * 0.3) + poly([x - r * 0.66, y - r * 0.62], [x - r * 0.6, y - r * 0.98], [x - r * 0.38, y - r * 0.8]) + poly([x - r * 0.1, y - r * 0.62], [x - r * 0.16, y - r * 0.98], [x - r * 0.38, y - r * 0.8]),
-    a: half(x + r * 0.62, y, r * 0.2),
-    l: face(p, x - r * 0.38, y - r * 0.52, r * 0.1),
-  }),
-  dog: (p, x, y, r) => ({
-    b: half(x + r * 0.1, y, r * 0.55) + circ(x - r * 0.35, y - r * 0.55, r * 0.32),
-    a: box(x - r * 0.72, y - r * 0.78, r * 0.18, r * 0.36, r * 0.09) + box(x - r * 0.16, y - r * 0.78, r * 0.18, r * 0.36, r * 0.09),
-    l: face(p, x - r * 0.35, y - r * 0.52, r * 0.1),
-  }),
-  coffee: (p, x, y, r) => ({
-    b: box(x - r * 0.4, y - r * 0.84, r * 0.8, r * 0.84, r * 0.1),
-    a: box(x - r * 0.5, y - r * 0.56, r * 1.0, r * 0.26),
-    l: line(p, `M${n(x + r * 0.4)} ${n(y - r * 0.66)} h${n(r * 0.14)} a${n(r * 0.14)} ${n(r * 0.14)} 0 0 1 0 ${n(r * 0.36)} h${n(-r * 0.14)}`) + line(p, `M${n(x - r * 0.1)} ${n(y - r * 1.02)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)} M${n(x + r * 0.14)} ${n(y - r * 1.02)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)}`),
-  }),
-  tea: (p, x, y, r) => ({
-    b: half(x, y - r * 0.62, r * 0.62, 'down'),
-    a: box(x - r * 0.7, y - r * 0.68, r * 1.4, r * 0.16, r * 0.08) + box(x - r * 0.5, y - r * 0.06, r * 1.0, r * 0.06),
-    l: line(p, `M${n(x + r * 0.56)} ${n(y - r * 0.5)} a${n(r * 0.16)} ${n(r * 0.16)} 0 0 1 ${n(-r * 0.1)} ${n(r * 0.3)}`) + line(p, `M${n(x - r * 0.12)} ${n(y - r * 0.86)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)} M${n(x + r * 0.14)} ${n(y - r * 0.86)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)}`),
-  }),
-  book: (p, x, y, r) => ({
-    b: box(x - r * 0.62, y - r * 0.26, r * 1.24, r * 0.26, r * 0.04) + box(x - r * 0.46, y - r * 0.8, r * 0.92, r * 0.26, r * 0.04),
-    a: box(x - r * 0.54, y - r * 0.5, r * 1.04, r * 0.28, r * 0.04),
-    l: line(p, `M${n(x - r * 0.48)} ${n(y - r * 0.13)} h${n(r * 0.7)} M${n(x - r * 0.3)} ${n(y - r * 0.67)} h${n(r * 0.5)}`, 1.6),
-  }),
-  laptop: (p, x, y, r) => ({
-    b: box(x - r * 0.56, y - r * 0.92, r * 1.12, r * 0.76, r * 0.06),
-    a: box(x - r * 0.78, y - r * 0.2, r * 1.56, r * 0.2, r * 0.06),
-    k: fillWith(p.paper, box(x - r * 0.44, y - r * 0.8, r * 0.88, r * 0.52, r * 0.03)),
-    l: face(p, x, y - r * 0.56, r * 0.1),
-  }),
-  phone: (p, x, y, r) => ({
-    b: box(x - r * 0.32, y - r * 1.04, r * 0.64, r * 1.04, r * 0.12),
-    a: box(x - r * 0.06, y - r * 0.86, r * 0.56, r * 0.26, r * 0.13) + box(x - r * 0.46, y - r * 0.5, r * 0.5, r * 0.22, r * 0.11),
-    k: fillWith(p.paper, box(x - r * 0.22, y - r * 0.92, r * 0.44, r * 0.78, r * 0.04)),
-  }),
-  clock: (p, x, y, r) => ({
-    b: circ(x, y - r * 0.5, r * 0.5),
-    a: half(x - r * 0.36, y - r * 0.9, r * 0.17) + half(x + r * 0.36, y - r * 0.9, r * 0.17) + box(x - r * 0.4, y - r * 0.08, r * 0.8, r * 0.08),
-    k: fillWith(p.paper, circ(x, y - r * 0.5, r * 0.36)),
-    l: line(p, `M${n(x)} ${n(y - r * 0.5)} v${n(-r * 0.24)} M${n(x)} ${n(y - r * 0.5)} h${n(r * 0.18)}`),
-  }),
-  house: (p, x, y, r) => ({
-    b: box(x - r * 0.52, y - r * 0.62, r * 1.04, r * 0.62),
-    a: poly([x - r * 0.7, y - r * 0.5], [x, y - r * 1.1], [x + r * 0.7, y - r * 0.5]),
-    k: fillWith(p.paper, half(x, y, r * 0.18, 'up') + box(x - r * 0.18, y - r * 0.2, r * 0.36, r * 0.2)),
-  }),
-  plant: (p, x, y, r) => ({
-    a: poly([x - r * 0.34, y - r * 0.44], [x + r * 0.34, y - r * 0.44], [x + r * 0.26, y], [x - r * 0.26, y]),
-    b: circ(x, y - r * 1.0, r * 0.22) + half(x - r * 0.02, y - r * 0.56, r * 0.26, 'left') + half(x + r * 0.02, y - r * 0.7, r * 0.22, 'right'),
-    l: line(p, `M${n(x)} ${n(y - r * 0.44)} V${n(y - r * 0.86)}`),
-  }),
-  letter: (p, x, y, r) => ({
-    b: box(x - r * 0.62, y - r * 0.78, r * 1.24, r * 0.78, r * 0.05),
-    a: circ(x, y - r * 0.36, r * 0.14) + box(x + r * 0.3, y - r * 0.9, r * 0.26, r * 0.3),
-    l: line(p, `M${n(x - r * 0.62)} ${n(y - r * 0.78)} L${n(x)} ${n(y - r * 0.36)} L${n(x + r * 0.62)} ${n(y - r * 0.78)}`, 1.8),
-  }),
-  music: (p, x, y, r) => ({
-    b: circ(x - r * 0.38, y - r * 0.2, r * 0.18) + circ(x + r * 0.3, y - r * 0.34, r * 0.18),
-    a: poly([x - r * 0.24, y - r * 0.98], [x + r * 0.46, y - r * 1.12], [x + r * 0.46, y - r * 0.96], [x - r * 0.24, y - r * 0.82]),
-    l: line(p, `M${n(x - r * 0.22)} ${n(y - r * 0.22)} V${n(y - r * 0.92)} M${n(x + r * 0.46)} ${n(y - r * 0.36)} V${n(y - r * 1.06)}`),
-  }),
-  food: (p, x, y, r) => ({
-    b: half(x, y - r * 0.5, r * 0.62, 'down'),
-    a: circ(x + r * 0.22, y - r * 0.68, r * 0.13) + box(x - r * 0.3, y - r * 0.06, r * 0.6, r * 0.06),
-    k: fillWith(p.paper, half(x - r * 0.04, y - r * 0.5, r * 0.46, 'up')),
-    l: line(p, `M${n(x + r * 0.1)} ${n(y - r * 0.62)} l${n(r * 0.5)} ${n(-r * 0.5)} M${n(x + r * 0.26)} ${n(y - r * 0.56)} l${n(r * 0.5)} ${n(-r * 0.5)}`, 1.8),
-  }),
-  bed: (p, x, y, r) => ({
-    b: box(x - r * 0.72, y - r * 0.5, r * 1.44, r * 0.5, r * 0.25),
-    a: half(x + r * 0.72, y, r * 0.3, 'up') + box(x - r * 0.1, y - r * 0.24, r * 0.82, r * 0.24),
-    l: line(p, `M${n(x + r * 0.44)} ${n(y - r * 0.98)} h${n(r * 0.18)} l${n(-r * 0.18)} ${n(r * 0.2)} h${n(r * 0.18)}`, 1.8),
-  }),
-  bus: (p, x, y, r) => ({
-    b: box(x - r * 0.76, y - r * 0.9, r * 1.52, r * 0.74, r * 0.16),
-    a: circ(x - r * 0.42, y - r * 0.16, r * 0.15) + circ(x + r * 0.42, y - r * 0.16, r * 0.15),
-    k: fillWith(p.paper, box(x - r * 0.62, y - r * 0.78, r * 0.52, r * 0.26, r * 0.05) + box(x + r * 0.06, y - r * 0.78, r * 0.52, r * 0.26, r * 0.05)),
-  }),
-  // a band of water with paper wave lines and a strip of shore
-  sea: (p, x, y, r) => ({
-    b: box(x - r * 0.9, y - r * 0.56, r * 1.8, r * 0.56, r * 0.06),
-    a: box(x - r * 0.9, y - r * 0.12, r * 1.8, r * 0.12),
-    k: `<g fill="none" stroke="${p.paper}" stroke-width="${n(r * 0.07)}" stroke-linecap="round">` + [0.4, 0.2].map((dy, i) => `<path d="M${n(x - r * (0.7 - i * 0.2))} ${n(y - r * dy)} q${n(r * 0.15)} ${n(-r * 0.12)} ${n(r * 0.3)} 0 t${n(r * 0.3)} 0 t${n(r * 0.3)} 0${i ? '' : ` t${n(r * 0.3)} 0`}"/>`).join('') + '</g>',
-  }),
-  mountain: (p, x, y, r) => ({
-    a: poly([x - r * 0.9, y], [x - r * 0.3, y - r * 0.96], [x + r * 0.3, y]),
-    b: poly([x - r * 0.3, y], [x + r * 0.3, y - r * 0.7], [x + r * 0.9, y]),
-    k: fillWith(p.paper, poly([x - r * 0.42, y - r * 0.77], [x - r * 0.3, y - r * 0.96], [x - r * 0.18, y - r * 0.77])),
-  }),
-  heart: (p, x, y, r) => {
-    const hp = (cx, cy, s) => `<path d="M${n(cx)} ${n(cy)} L${n(cx - s)} ${n(cy - s)} A${n(s * 0.5)} ${n(s * 0.5)} 0 0 1 ${n(cx)} ${n(cy - s * 1.5)} A${n(s * 0.5)} ${n(s * 0.5)} 0 0 1 ${n(cx + s)} ${n(cy - s)}Z"/>`;
-    return { b: hp(x - r * 0.12, y - r * 0.04, r * 0.5), a: hp(x + r * 0.34, y - r * 0.4, r * 0.26) };
-  },
-  gift: (p, x, y, r) => ({
-    b: box(x - r * 0.48, y - r * 0.7, r * 0.96, r * 0.7),
-    a: box(x - r * 0.09, y - r * 0.7, r * 0.18, r * 0.7) + circ(x - r * 0.17, y - r * 0.82, r * 0.13) + circ(x + r * 0.17, y - r * 0.82, r * 0.13),
-  }),
-  friends: (p, x, y, r) => ({
-    b: box(x - r * 0.74, y - r * 0.72, r * 0.6, r * 0.72, r * 0.08),
-    a: box(x - r * 0.24, y - r * 0.58, r * 0.6, r * 0.58, r * 0.08),
-    l: face(p, x - r * 0.48, y - r * 0.44, r * 0.08) + face(p, x + r * 0.08, y - r * 0.3, r * 0.08),
-  }),
-  money: (p, x, y, r) => ({
-    b: half(x, y - r * 0.12, r * 0.56) + box(x - r * 0.4, y - r * 0.12, r * 0.8, r * 0.12),
-    a: circ(x + r * 0.08, y - r * 0.66, r * 0.17) + poly([x + r * 0.34, y - r * 0.5], [x + r * 0.62, y - r * 0.6], [x + r * 0.54, y - r * 0.3]),
-    l: line(p, `M${n(x - r * 0.14)} ${n(y - r * 0.52)} h${n(r * 0.3)}`, 1.8) + dot(p, x - r * 0.3, y - r * 0.3, r * 0.04),
-  }),
-  game: (p, x, y, r) => ({
-    b: box(x - r * 0.72, y - r * 0.64, r * 1.44, r * 0.6, r * 0.3),
-    a: circ(x + r * 0.3, y - r * 0.4, r * 0.09) + circ(x + r * 0.48, y - r * 0.28, r * 0.09),
-    l: line(p, `M${n(x - r * 0.5)} ${n(y - r * 0.34)} h${n(r * 0.26)} M${n(x - r * 0.37)} ${n(y - r * 0.47)} v${n(r * 0.26)}`, 2),
-  }),
-  suitcase: (p, x, y, r) => ({
-    b: box(x - r * 0.52, y - r * 0.86, r * 1.04, r * 0.8, r * 0.12),
-    a: box(x - r * 0.3, y - r * 0.86, r * 0.14, r * 0.8) + box(x + r * 0.16, y - r * 0.86, r * 0.14, r * 0.8),
-    l: line(p, `M${n(x - r * 0.18)} ${n(y - r * 0.86)} v${n(-r * 0.14)} h${n(r * 0.36)} v${n(r * 0.14)}`) + dot(p, x - r * 0.34, y - r * 0.02, r * 0.06) + dot(p, x + r * 0.34, y - r * 0.02, r * 0.06),
-  }),
-  bike: (p, x, y, r) => ({
-    a: circ(x - r * 0.48, y - r * 0.28, r * 0.28) + circ(x + r * 0.48, y - r * 0.28, r * 0.28),
-    b: box(x - r * 0.2, y - r * 0.86, r * 0.32, r * 0.1, r * 0.05) + half(x + r * 0.36, y - r * 0.74, r * 0.12, 'right'),
-    k: fillWith(p.paper, circ(x - r * 0.48, y - r * 0.28, r * 0.08) + circ(x + r * 0.48, y - r * 0.28, r * 0.08)),
-    l: line(p, `M${n(x - r * 0.48)} ${n(y - r * 0.28)} L${n(x - r * 0.08)} ${n(y - r * 0.76)} H${n(x + r * 0.32)} L${n(x + r * 0.48)} ${n(y - r * 0.28)} M${n(x - r * 0.08)} ${n(y - r * 0.76)} L${n(x + r * 0.08)} ${n(y - r * 0.28)} L${n(x - r * 0.48)} ${n(y - r * 0.28)}`, 1.8),
-  }),
+  cat: ({ W, A, K }) => half(6, 0, 22, 'up', W) + circ(-12, -28, 14, W) + poly(W, [-26, -30], [-24, -50], [-12, -40]) + poly(W, [2, -30], [0, -50], [-12, -40]) + circ(-17, -29, 2.4, K) + circ(-7, -29, 2.4, K) + box(22, -22, 6, 22, A),
+  dog: ({ W, A, K }) => half(6, 0, 22, 'up', W) + circ(-12, -28, 14, W) + box(-30, -40, 9, 22, A) + box(-3, -40, 9, 22, A) + circ(-17, -30, 2.4, K) + circ(-7, -30, 2.4, K) + circ(-12, -22, 3, K),
+  coffee: ({ W, A, K }) => half(14, -20, 14, 'right', A) + box(-18, -40, 34, 40, W) + box(-10, -56, 5, 11, W) + box(2, -56, 5, 11, W),
+  tea: ({ W, A, K }) => half(0, -32, 24, 'down', W) + box(-28, -8, 56, 8, A) + box(-8, -50, 5, 12, W) + box(4, -50, 5, 12, W),
+  book: ({ W, A, B }) => box(-28, -14, 56, 14, A) + box(-20, -28, 46, 14, W) + box(-26, -42, 42, 14, B),
+  laptop: ({ W, A }) => box(-22, -40, 44, 30, W) + box(-30, -10, 60, 10, A),
+  phone: ({ W, A, K }) => box(-15, -54, 30, 54, W) + box(-10, -47, 20, 32, A) + circ(0, -8, 3.2, K),
+  clock: ({ W, A, K }) => circ(0, -28, 27, W) + box(-2.5, -47, 5, 21, K) + box(-2.5, -30.5, 17, 5, K) + circ(0, -28, 4.5, A),
+  house: ({ W, A, K }) => poly(A, [-30, -30], [0, -58], [30, -30]) + box(-22, -30, 44, 30, W) + box(-6, -18, 12, 18, K),
+  plant: ({ W, A }) => box(-2.5, -42, 5, 22, W) + half(-2, -40, 15, 'left', W) + half(2, -46, 12, 'right', W) + box(-15, -22, 30, 22, A),
+  letter: ({ W, A }) => box(-28, -38, 56, 38, W) + poly(A, [-28, -38], [0, -15], [28, -38]),
+  music: ({ W, A }) => circ(-14, -10, 10, W) + circ(16, -15, 10, W) + box(-9, -50, 5, 40, W) + box(21, -55, 5, 40, W) + poly(A, [-9, -52], [26, -58], [26, -47], [-9, -41]),
+  food: ({ W, A, K }) => half(0, -30, 19, 'up', A) + half(0, -30, 27, 'down', W) + poly(W, [8, -40], [26, -58], [29, -55], [11, -37]) + poly(W, [16, -38], [34, -56], [37, -53], [19, -35]),
+  bed: ({ W, A, B }) => box(-30, -42, 8, 42, W) + box(-22, -18, 52, 18, W) + box(-20, -29, 20, 11, B) + box(4, -26, 26, 26, A),
+  bus: ({ W, A, K }) => box(-30, -46, 60, 36, W) + box(-24, -40, 21, 14, K) + box(3, -40, 21, 14, K) + circ(-16, -9, 9, A) + circ(16, -9, 9, A),
+  // three curling crests over a band of water
+  sea: ({ W, A, G }) => [-20, 0, 20].map((x) => circ(x, -20, 10, W) + circ(x + 5, -24, 8, G)).join('') + box(-30, -20, 60, 8, W) + box(-30, -12, 60, 12, A),
+  mountain: ({ W, A }) => poly(W, [-30, 0], [-6, -50], [18, 0]) + poly(A, [-2, 0], [14, -30], [30, 0]),
+  heart: ({ W, A }) => circ(-10, -34, 12, A) + circ(10, -34, 12, A) + poly(A, [-20.4, -27.5], [0, -4], [20.4, -27.5], [0, -36]) + circ(22, -52, 6, W),
+  gift: ({ W, A }) => box(-22, -34, 44, 34, W) + box(-5, -34, 10, 34, A) + circ(-9, -41, 8, A) + circ(9, -41, 8, A),
+  bike: ({ W, A, K }) => circ(-17, -14, 14, W) + circ(17, -14, 14, W) + `<path d="M-17 -14 L-5 -38 H12 L17 -14 M-5 -38 L4 -14 H-17" fill="none" stroke="${A}" stroke-width="4" stroke-linejoin="miter"/>` + box(-12, -46, 14, 5, W) + circ(-17, -14, 3.4, K) + circ(17, -14, 3.4, K),
+  friends: ({ W, A, K }) => box(-26, -36, 24, 36, W) + box(2, -28, 24, 28, A) + box(-16, -48, 4, 9, W) + box(12, -40, 4, 9, A),
+  money: ({ W, A, K }) => box(-19, -38, 38, 38, W) + box(-22, -46, 44, 8, A) + circ(0, -18, 10, A) + box(-1.5, -24, 3, 12, K),
+  game: ({ W, A, K }) => circ(-18, -18, 14, W) + circ(18, -18, 14, W) + box(-18, -32, 36, 22, W) + box(-25, -24, 14, 4.5, K) + box(-20.2, -28.8, 4.5, 14, K) + circ(14, -25, 4, A) + circ(22, -17, 4, A),
+  suitcase: ({ W, A }) => box(-10, -50, 4, 12, W) + box(6, -50, 4, 12, W) + box(-10, -50, 20, 4, W) + box(-23, -40, 46, 40, A) + box(-23, -26, 46, 7, W),
 };
+// one thing standing on (x, y), w wide
+const thing = (name, p, x, y, w) => `<g transform="translate(${n(x)} ${n(y)}) scale(${n4(w / 60)})">${OBJ[name]({ W: WHITE, A: p.acc, B: p.night ? PINK : p.cell, K: INK, G: p.ground })}</g>`;
+const n4 = (v) => +(+v).toFixed(4);
 
-// Companions: paper-white with a thin ink outline and pink cheeks, standing at (x, y).
-const outline = (p, d, w) => `<path d="${d}" fill="${p.paper === NIGHT ? '#F5F6F1' : '#FFFFFF'}" stroke="${p.paper === NIGHT ? '#F5F6F1' : p.ink}" stroke-width="${n(w)}" stroke-linejoin="round"/>`;
-const cheeks = (x, y, s) => `<ellipse cx="${n(x - s)}" cy="${n(y)}" rx="${n(s * 0.24)}" ry="${n(s * 0.14)}" fill="${MOMO}"/><ellipse cx="${n(x + s)}" cy="${n(y)}" rx="${n(s * 0.24)}" ry="${n(s * 0.14)}" fill="${MOMO}"/>`;
-const sprout = (x, y, s, ink) => `<path d="M${n(x)} ${n(y)} v${n(-s * 0.3)}" stroke="${ink}" stroke-width="${n(s * 0.06)}" stroke-linecap="round"/>` + `<g fill="${MOSS}">${half(x - s * 0.17, y - s * 0.3, s * 0.17)}${half(x + s * 0.17, y - s * 0.36, s * 0.17)}</g>`;
-// ink on the paper-white body is always dark, even at night
-const kp = (p) => ({ ...p, ink: INK });
-const PAL_CREATURE = {
-  // a small cloud, round and soft, with a sprout: Murmur's own companion
-  cloudlet: (p, x, y, r) => {
-    const s = r / 40;
-    const T = (px, py) => `${n(x + (px - 52) * s)} ${n(y + (py - 80) * s)}`;
-    const d = `M${T(18, 70)} C${T(10, 70)} ${T(8, 56)} ${T(17, 51)} C${T(14, 36)} ${T(30, 24)} ${T(42, 29)} C${T(48, 19)} ${T(66, 19)} ${T(71, 30)} C${T(84, 26)} ${T(96, 38)} ${T(90, 51)} C${T(99, 56)} ${T(96, 71)} ${T(86, 71)} C${T(80, 84)} ${T(26, 84)} ${T(18, 70)}Z`;
-    return sprout(x, y - r * 1.38, r, INK) + outline(p, d, r * 0.06) + cheeks(x, y - r * 0.4, r * 0.46) + face(kp(p), x, y - r * 0.6, r * 0.28);
-  },
-  bun: (p, x, y, r) => outline(p, `M${n(x - r * 0.95)} ${n(y)} C${n(x - r)} ${n(y - r * 0.75)} ${n(x - r * 0.45)} ${n(y - r * 1.2)} ${n(x)} ${n(y - r * 1.2)} C${n(x + r * 0.45)} ${n(y - r * 1.2)} ${n(x + r)} ${n(y - r * 0.75)} ${n(x + r * 0.95)} ${n(y)}Z`, r * 0.06) + line(kp(p), `M${n(x - r * 0.22)} ${n(y - r * 1.02)} q${n(r * 0.22)} ${n(r * 0.14)} ${n(r * 0.44)} 0`, r * 0.05) + cheeks(x, y - r * 0.36, r * 0.5) + face(kp(p), x, y - r * 0.56, r * 0.26),
-  cat: (p, x, y, r) => `<path d="M${n(x + r * 0.7)} ${n(y - r * 0.2)} q${n(r * 0.55)} ${n(-r * 0.05)} ${n(r * 0.42)} ${n(-r * 0.62)}" stroke="${p.b}" stroke-width="${n(r * 0.18)}" fill="none" stroke-linecap="round"/>` + outline(p, `M${n(x - r * 0.85)} ${n(y)} C${n(x - r * 0.9)} ${n(y - r * 0.6)} ${n(x - r * 0.8)} ${n(y - r * 0.9)} ${n(x - r * 0.72)} ${n(y - r * 1.0)} L${n(x - r * 0.66)} ${n(y - r * 1.36)} L${n(x - r * 0.34)} ${n(y - r * 1.1)} Q${n(x)} ${n(y - r * 1.18)} ${n(x + r * 0.34)} ${n(y - r * 1.1)} L${n(x + r * 0.66)} ${n(y - r * 1.36)} L${n(x + r * 0.72)} ${n(y - r * 1.0)} C${n(x + r * 0.8)} ${n(y - r * 0.9)} ${n(x + r * 0.9)} ${n(y - r * 0.6)} ${n(x + r * 0.85)} ${n(y)}Z`, r * 0.06) + cheeks(x, y - r * 0.5, r * 0.5) + face(kp(p), x, y - r * 0.7, r * 0.26),
-  dog: (p, x, y, r) => outline(p, `M${n(x - r * 0.82)} ${n(y)} C${n(x - r * 0.9)} ${n(y - r * 0.9)} ${n(x - r * 0.5)} ${n(y - r * 1.2)} ${n(x)} ${n(y - r * 1.2)} C${n(x + r * 0.5)} ${n(y - r * 1.2)} ${n(x + r * 0.9)} ${n(y - r * 0.9)} ${n(x + r * 0.82)} ${n(y)}Z`, r * 0.06) + `<g fill="${p.b}">${box(x - r * 0.96, y - r * 1.02, r * 0.3, r * 0.6, r * 0.15)}${box(x + r * 0.66, y - r * 1.02, r * 0.3, r * 0.6, r * 0.15)}</g>` + cheeks(x, y - r * 0.42, r * 0.48) + face(kp(p), x, y - r * 0.64, r * 0.26),
-  bird: (p, x, y, r) => outline(p, `M${n(x - r * 0.8)} ${n(y - r * 0.12)} C${n(x - r * 0.84)} ${n(y - r * 0.9)} ${n(x - r * 0.3)} ${n(y - r * 1.16)} ${n(x + r * 0.1)} ${n(y - r * 1.12)} C${n(x + r * 0.6)} ${n(y - r * 1.08)} ${n(x + r * 0.84)} ${n(y - r * 0.6)} ${n(x + r * 0.8)} ${n(y - r * 0.12)}Z`, r * 0.06) + `<g fill="${p.b}">${half(x - r * 0.16, y - r * 0.46, r * 0.36, 'down')}</g>` + `<path d="M${n(x + r * 0.78)} ${n(y - r * 0.78)} l${n(r * 0.3)} ${n(r * 0.1)} l${n(-r * 0.3)} ${n(r * 0.12)}Z" fill="${EGG}"/>` + line(kp(p), `M${n(x - r * 0.2)} ${n(y - r * 0.1)} v${n(r * 0.1)} M${n(x + r * 0.2)} ${n(y - r * 0.1)} v${n(r * 0.1)}`, r * 0.06) + dot(kp(p), x + r * 0.36, y - r * 0.8, r * 0.07) + `<ellipse cx="${n(x + r * 0.5)}" cy="${n(y - r * 0.6)}" rx="${n(r * 0.1)}" ry="${n(r * 0.06)}" fill="${MOMO}"/>`,
-  sprout: (p, x, y, r) => sprout(x, y - r * 0.86, r * 1.3, INK) + outline(p, `M${n(x - r * 0.72)} ${n(y - r * 0.86)} H${n(x + r * 0.72)} L${n(x + r * 0.56)} ${n(y)} H${n(x - r * 0.56)}Z`, r * 0.06) + cheeks(x, y - r * 0.34, r * 0.42) + face(kp(p), x, y - r * 0.52, r * 0.22),
-  lamp: (p, x, y, r) => `<g fill="${p.b}">${half(x, y - r * 0.8, r * 0.62)}${box(x - r * 0.36, y - r * 0.08, r * 0.72, r * 0.08, r * 0.04)}</g>` + `<path d="M${n(x)} ${n(y - r * 0.8)} V${n(y - r * 0.08)}" stroke="${p.ink}" stroke-width="${n(r * 0.06)}" stroke-linecap="round"/>` + dot(kp(p), x - r * 0.18, y - r * 0.98, r * 0.05) + dot(kp(p), x + r * 0.18, y - r * 0.98, r * 0.05),
-};
-
-// Small mark for the lens the person looked through, in ink.
-const GLYPH = {
-  iceberg: (c) => `<path d="M-9 1 l5 -8 l4 4 l3 -2 l6 6z" fill="${c}"/><path d="M-11 4 h22 l-5 8 h-12z" fill="none" stroke="${c}" stroke-width="1.4"/>`,
-  bridge: (c) => `<path d="M-11 5 q11 -14 22 0" stroke="${c}" stroke-width="2" fill="none"/><path d="M-11 5 h22" stroke="${c}" stroke-width="1.6"/>`,
-  star: (c) => `<path d="M0 -10 l3 7 l7 1 l-5 5 l1 7 l-6 -3 l-6 3 l1 -7 l-5 -5 l7 -1z" fill="${c}"/>`,
-  sun: (c) => `<circle r="5" fill="${c}"/>${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<path d="M${(Math.cos((a * Math.PI) / 180) * 8).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 8).toFixed(1)} L${(Math.cos((a * Math.PI) / 180) * 11).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 11).toFixed(1)}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`).join('')}`,
-  chair: (c) => `<path d="M-6 -10 v18 M-6 0 h12 v8 M6 0 v-2" stroke="${c}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-  steps: (c) => `<path d="M-10 8 h6 v-6 h6 v-6 h6 v-6" stroke="${c}" stroke-width="2" fill="none" stroke-linejoin="round"/>`,
-  leaf: (c) => `<path d="M-8 8 C -8 -6, 4 -10, 10 -10 C 10 -2, 4 8, -8 8z" fill="${c}"/>`,
-  scale: (c) => `<path d="M0 -9 v17 M-9 -5 h18 M-9 -5 l-3 7 h6z M9 -5 l-3 7 h6z" stroke="${c}" stroke-width="1.6" fill="none" stroke-linejoin="round"/>`,
-  lens: (c) => `<circle cx="-2" cy="-2" r="6" stroke="${c}" stroke-width="2" fill="none"/><path d="M3 3 l6 6" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/>`,
-  compass: (c) => `<circle r="9" stroke="${c}" stroke-width="1.6" fill="none"/><path d="M0 -6 l3 6 l-3 6 l-3 -6z" fill="${c}"/>`,
-  circle: (c) => `${[0, 90, 180, 270].map((a) => `<circle cx="${(Math.cos((a * Math.PI) / 180) * 6).toFixed(1)}" cy="${(Math.sin((a * Math.PI) / 180) * 6).toFixed(1)}" r="3.5" fill="${c}"/>`).join('')}`,
-  ladder: (c) => `<path d="M-5 10 v-20 M5 10 v-20 M-5 5 h10 M-5 0 h10 M-5 -5 h10" stroke="${c}" stroke-width="1.6" fill="none"/>`,
-  book: (c) => `<path d="M0 6 q-5 -3 -10 0 v-12 q5 -3 10 0z M0 6 q5 -3 10 0 v-12 q-5 -3 -10 0z" fill="${c}"/>`,
-  knots: (c) => `<circle cx="-6" cy="3" r="4" fill="${c}"/><circle cx="6" cy="3" r="4" fill="${c}"/><circle cx="0" cy="-6" r="4" fill="${c}"/><path d="M-6 3 L0 -6 L6 3z" stroke="${c}" stroke-width="1.4" fill="none"/>`,
-};
-
-// The picture sits in an arch on the left; the words take the right.
-const ARCH = { x: 32, y: 32, w: 232, b: 368 };
-const G = 300; // where things stand
-const archPath = () => {
-  const r = ARCH.w / 2;
-  return `M${ARCH.x} ${ARCH.b} V${ARCH.y + r} A${r} ${r} 0 0 1 ${ARCH.x + ARCH.w} ${ARCH.y + r} V${ARCH.b}Z`;
-};
-
-// The ground and what stands behind the things, by topic. Returns layer parts.
-function backdrop(setting, p, count = 0) {
-  const L = ARCH.x;
-  const R = ARCH.x + ARCH.w;
-  const ground = box(L - 4, G, ARCH.w + 8, ARCH.b - G + 4);
-  switch (setting) {
-    case 'desk':
-      // a small window
-      return { a: ground, k: fillWith(p.paper, box(L + 30, 190, 56, 46, 3)), l: line(p, `M${L + 58} 190 v46 M${L + 30} 213 h56`, 1) };
-    case 'bench':
-      return { a: ground + box(L + 30, G - 30, 172, 8, 4) + box(L + 44, G - 26, 7, 26) + box(L + 182, G - 26, 7, 26) };
-    case 'roof':
-      if (count > 1) return { a: ground };
-      // a house far off on the ground
-      return { a: ground + box(R - 66, G - 40, 46, 40) + poly([R - 74, G - 38], [R - 43, G - 64], [R - 12, G - 38]), k: fillWith(p.sky, box(R - 50, G - 30, 14, 14, 1)) };
-    case 'path':
-      return { a: ground + half(L + 60, G, 64) };
-    case 'candle':
-      if (count > 1) return { a: ground };
-      return { a: ground, b: box(R - 40, G - 44, 14, 44, 2) + circ(R - 33, G - 54, 6) + poly([R - 39, G - 55], [R - 33, G - 70], [R - 27, G - 55]) };
-    default:
-      return { a: ground + half(R - 26, G, 58) };
-  }
+// Mumu, solid: white body, big red cheeks, ink features, a sprout. Drawn in her own
+// 124 x 92 box (see docs: viewBox 0 -12 124 104); the caller places and scales her.
+function mumu(state, leaf) {
+  const rot = state === 'sleepy' ? -38 : 6;
+  const faceOf =
+    state === 'sleepy'
+      ? box(44, 59, 10, 3, INK) + box(68, 59, 10, 3, INK) + circ(61, 69, 2, INK)
+      : `<path d="M44 62 a5 5 0 0 1 10 0z M68 62 a5 5 0 0 1 10 0z M54 66 a7 7 0 0 0 14 0z" fill="${INK}"/>`;
+  return (
+    `<g transform="rotate(${rot} 62 20)" fill="${leaf}"><path d="M62 20 A15 15 0 0 1 47 5 A15 15 0 0 1 62 20Z"/><path d="M62 20 A12 12 0 0 0 74 8 A12 12 0 0 0 62 20Z"/></g>` +
+    `<g fill="${WHITE}"><circle cx="36" cy="54" r="20"/><circle cx="61" cy="43" r="24"/><circle cx="88" cy="56" r="19"/><rect x="16" y="54" width="91" height="29" rx="14.5"/></g>` +
+    circ(38, 69, 6, RED) + circ(84, 69, 6, RED) + faceOf
+  );
 }
 
-// The sky: sun or moon in ink b, and the weather on top (clouds of paper, rain and wind
-// in ink a, fog as bands of paper).
-function sky(weather, p, rand, uid, count = 0) {
-  const out = { b: '', k: '', top: '' };
-  const cloud = (x, y, s, cls) => `<g class="${cls}" fill="${p.paper}">${cloudShape(x, y, s)}</g>`;
-  const sunAt = { sunny: [192, 112, 44], clear: [196, 110, 34], mixed: [178, 128, 38], cloudy: [200, 110, 26], rain: [204, 104, 22], wind: [196, 104, 28], fog: [150, 132, 40], dusk: [158, G, 56], night: [196, 104, 28] }[weather] || [196, 110, 34];
-  let [sx, sy, sr] = sunAt;
-  // the low dusk sun sets in the gap between things, or stays up when there is none
-  if (weather === 'dusk') [sx, sy, sr] = [[196, G, 52], [196, G, 52], [146, G, 40], [150, 196, 38]][Math.min(3, count)];
-  if (weather === 'fog') out.k += `<g class="${uid}-sun" fill="${p.sun}">${circ(sx, sy, sr)}</g>`;
-  else out.b += circ(sx, sy, sr);
-  if (weather === 'night') {
-    // a crescent: the sky takes a bite out of the moon, and a few small stars
-    out.k += fillWith(p.sky, circ(sx + sr * 0.46, sy - sr * 0.3, sr * 0.86));
-    for (let i = 0; i < 7; i++) out.b += circ(48 + rand() * 120, 70 + rand() * 120, 1.6 + rand() * 1.8);
-  }
+// Small friends beside Mumu, standing on (0, 0) in a 60-wide square like the things.
+// Mumu herself is the companion on every card; bun, sprout and cloudlet are her alone.
+const FRIEND = {
+  cat: () => half(0, 0, 25, 'up', WHITE) + poly(WHITE, [-24, -8], [-22, -42], [-4, -23]) + poly(WHITE, [24, -8], [22, -42], [4, -23]) + circ(-8, -13, 3, INK) + circ(8, -13, 3, INK) + circ(-16, -6, 4, RED) + circ(16, -6, 4, RED) + `<path d="M-3 -9 a3 3 0 0 0 6 0z" fill="${INK}"/>`,
+  dog: () => box(-28, -38, 12, 26, INK) + box(16, -38, 12, 26, INK) + box(-20, -22, 40, 22, WHITE) + half(0, -22, 20, 'up', WHITE) + circ(-8, -24, 3, INK) + circ(8, -24, 3, INK) + circ(-13, -9, 4.4, RED) + circ(13, -9, 4.4, RED) + circ(0, -14, 3.6, INK),
+  bird: (p) => box(-9, -7, 5, 7, INK) + box(4, -7, 5, 7, INK) + circ(0, -27, 22, WHITE) + poly(p.acc === RED ? SUN : p.acc, [19, -36], [36, -28], [19, -20]) + circ(7, -32, 3.4, INK) + circ(3, -18, 5, RED),
+  lamp: () => box(-2.5, -40, 5, 36, WHITE) + box(-13, -5, 26, 5, WHITE) + half(0, -34, 19, 'up', SUN),
+};
+
+// The picture is drawn in units of 160 x 240 and scaled to the card's left part.
+const ART = { w: 160, h: 240, k: 5 / 3 };
+const LINE = 160; // where the plane starts: things stand on it
+
+// Weather marks in the top left cell, and the sun or moon in the top right one.
+function sky(weather, p, uid) {
+  let cell = p.cell === p.ground ? '' : box(80, 0, 80, 80, p.cell);
+  let orb = '';
+  let mark = '';
   switch (weather) {
+    case 'night':
+      orb = crescent(122, 40, 27, p.orb, p.ground);
+      mark = circ(26, 52, 3.4, PINK) + box(46, 24, 6.5, 6.5, SUN) + circ(64, 60, 2.6, WHITE);
+      break;
+    case 'dusk':
+      // the sun going down behind the edge of its square
+      orb = half(120, 80, 30, 'up', p.orb);
+      break;
+    case 'sunny':
+      orb = circ(120, 40, 31, p.orb);
+      break;
     case 'mixed':
-      out.top += cloud(150, 158, 46, `${uid}-cloud`);
+      orb = circ(124, 36, 26, p.orb);
+      mark = `<g class="${uid}-cloud">${cloudShape(82, 66, 40, WHITE)}</g>`;
       break;
     case 'cloudy':
-      out.top += cloud(112, 128, 44, `${uid}-cloud`) + cloud(206, 150, 34, `${uid}-cloud2`);
+      orb = circ(120, 40, 26, p.orb);
+      mark = `<g class="${uid}-cloud">${cloudShape(40, 62, 38, WHITE)}</g>`;
       break;
-    case 'rain': {
-      let d = '';
-      for (let i = 0; i < 10; i++) {
-        const x = 52 + rand() * 180;
-        const y = 150 + rand() * 90;
-        d += box(x, y, 3, 11, 1.5);
-      }
-      out.top += `<g class="${uid}-rain" fill="${p.a}">${d}</g>` + cloud(110, 128, 46, `${uid}-cloud`) + cloud(214, 112, 30, `${uid}-cloud2`);
+    case 'rain':
+      orb = circ(120, 40, 26, p.orb);
+      mark = `<g class="${uid}-rain">${[[16, 14], [36, 22], [56, 14], [16, 40], [36, 48], [56, 40]].map(([x, y]) => box(x, y, 6, 16, p.mark)).join('')}</g>`;
       break;
-    }
-    case 'wind': {
-      let w = '';
-      for (let i = 0; i < 3; i++) {
-        const y = 140 + i * 24;
-        const x = 70 + i * 16 + rand() * 12;
-        w += `<path d="M${n(x)} ${n(y)} h${n(100 + rand() * 30)} a10 10 0 1 0 -10 -10" stroke="${p.a}" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="150 60"/>`;
-      }
-      out.top += `<g class="${uid}-wind">${w}</g>`;
+    case 'wind':
+      orb = circ(120, 40, 26, p.orb);
+      mark = `<g class="${uid}-wind">${box(14, 26, 52, 6, p.mark)}${box(14, 42, 36, 6, p.mark)}${box(14, 58, 44, 6, p.mark)}</g>`;
       break;
-    }
-    case 'fog': {
-      let f = '';
-      for (let i = 0; i < 4; i++) f += box(ARCH.x - 10 + (i % 2) * 40 + rand() * 20, 150 + i * 40, 150 + rand() * 50, 12, 6);
-      out.top += `<g class="${uid}-fog" fill="${p.paper}">${f}</g>`;
-      break;
-    }
-    case 'dusk':
-      out.top += cloud(96, 118, 34, `${uid}-cloud`);
+    case 'fog':
+      orb = circ(120, 40, 26, p.orb);
+      // long pale bands lying across the sky and the sun
+      mark = `<g class="${uid}-fog">${box(0, 22, 66, 7, p.mark)}${box(24, 38, 112, 7, p.mark)}${box(0, 54, 92, 7, p.mark)}${box(52, 70, 108, 7, p.mark)}</g>`;
       break;
     default:
+      orb = circ(120, 40, 26, p.orb);
   }
-  return out;
+  return { cell, orb, mark };
 }
 
-// The animation, scoped to this card. Clouds slide aside, rain eases, the companion hops
-// twice, sparkles twinkle. Nothing moves when reduced motion is asked for.
+// What stands at the right of the ground line when the person named nothing: one piece
+// for the place the topic suggests.
+function prop(setting, p) {
+  const B = p.night ? PINK : p.cell;
+  switch (setting) {
+    case 'desk':
+      return box(104, 126, 56, 34, B) + box(116, 110, 26, 16, WHITE);
+    case 'bench':
+      return box(96, 142, 64, 18, B) + box(104, 124, 48, 8, WHITE);
+    case 'roof':
+      return thing('house', p, 124, LINE, 54);
+    default:
+      return `<path d="M160 160 V104 A56 56 0 0 0 104 160Z" fill="${B}"/>`;
+  }
+}
+
+// The animation, scoped to this card: the pieces come in on the grid in reading order, the
+// sun grows, Mumu hops once, then the card is still. When the person felt lighter after the
+// exercise, the weather marks leave. Nothing moves when reduced motion is asked for.
 function motionCss(uid, scene) {
   const clear = scene.clearing || scene.weather === 'sunny' || scene.weather === 'mixed';
+  const marks = ['wind', 'rain', 'fog', 'cloud'];
+  const inn = (cls, kf, i, from) => `.${uid}-${cls}{animation:${uid}${kf} .16s steps(4,end) ${(0.06 * i).toFixed(2)}s both;transform-box:fill-box;transform-origin:${from}}`;
   return `<style>@media (prefers-reduced-motion: no-preference){
-  .${uid}-pal{animation:${uid}hop 1.1s cubic-bezier(.3,1.6,.5,1) .5s 2 both;transform-box:fill-box;transform-origin:50% 100%}
-  .${uid}-spark{animation:${uid}tw 1.6s ease-in-out .9s 3 both;transform-box:fill-box;transform-origin:center}
-  ${clear ? `.${uid}-wind{animation:${uid}fade 2s ease .4s both}.${uid}-fog{animation:${uid}fade 2.4s ease .3s both}.${uid}-cloud{animation:${uid}drift 2.4s ease-in-out .3s both}.${uid}-cloud2{animation:${uid}drift2 2.4s ease-in-out .3s both}.${uid}-rain{animation:${uid}fade 1.8s ease .4s both}.${uid}-sun{animation:${uid}rise 2.4s ease .6s both}` : `.${uid}-cloud{animation:${uid}sway 6s ease-in-out infinite alternate}.${uid}-cloud2{animation:${uid}sway 7s ease-in-out -2s infinite alternate-reverse}.${uid}-rain{animation:${uid}fall 1.2s linear infinite}.${uid}-wind path{animation:${uid}blow 2.2s linear infinite}`}
-  @keyframes ${uid}hop{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-14px) scale(.95,1.06)}60%{transform:translateY(0) scale(1.06,.94)}}
-  @keyframes ${uid}tw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
-  @keyframes ${uid}drift{to{transform:translateX(-90px)}}
-  @keyframes ${uid}drift2{to{transform:translateX(80px)}}
-  @keyframes ${uid}sway{from{transform:translateX(-6px)}to{transform:translateX(8px)}}
-  @keyframes ${uid}fade{to{opacity:0}}
-  @keyframes ${uid}blow{to{stroke-dashoffset:-210}}
-  @keyframes ${uid}rise{from{transform:translateY(10px)}to{transform:translateY(0)}}
-  @keyframes ${uid}fall{0%{transform:translateY(-6px)}100%{transform:translateY(8px)}}
+  ${clear ? marks.map((m) => `.${uid}-${m}{animation:${uid}away .9s steps(6,end) 1.2s both;transform-box:fill-box}`).join('') : marks.map((m) => inn(m, 'wx', 1, '0 50%')).join('')}
+  ${inn('cell', 'wx', 2, '0 50%')}${inn('hill', 'wy', 3, '50% 100%')}${inn('things', 'wy', 4, '50% 100%')}${inn('plane', 'wx', 5, '0 50%')}
+  .${uid}-orb{animation:${uid}orb .32s steps(6,end) .5s both;transform-box:fill-box;transform-origin:center}
+  .${uid}-pal{animation:${uid}hop .52s cubic-bezier(.34,1.56,.64,1) .9s 1 both;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes ${uid}wx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes ${uid}wy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes ${uid}orb{from{transform:scale(0)}to{transform:scale(1)}}
+  @keyframes ${uid}hop{0%{transform:translateY(0) scale(1,1)}45%{transform:translateY(-8px) scale(1,1)}80%{transform:translateY(0) scale(1.06,.94)}100%{transform:translateY(0) scale(1,1)}}
+  @keyframes ${uid}away{from{transform:translateX(0);opacity:1}to{transform:translateX(-60px);opacity:0}}
 }</style>`;
 }
 
-const FONT = `'Murmur Round', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
+// The person's line: Murmur Black where the bundled subset has the glyph, then the
+// system's heaviest sans. The small print: the app's display face, and Bricolage for the date.
+const FONT_LINE = `'Murmur Black', 'PingFang TC', 'Noto Sans TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', ui-sans-serif, system-ui, -apple-system, sans-serif`;
+const FONT_LABEL = FONT_LINE;
+const FONT_NUM = `'Bricolage', 'Murmur Black', ui-sans-serif, system-ui, -apple-system, sans-serif`;
 const isCjk = (s) => /[　-鿿＀-￯]/.test(s);
 
-// The words: the line large on the right, the name small and vertical along a hairline at
-// the right edge with a small English caption under it, the date and "Murmur" small.
-function words(p, { line: text, label, caption, date, brand, glyph, fitText }) {
-  const out = [];
-  const X = 300;
-  const fit = fitText ? fitText(text) : { lines: [text], size: 20, lh: 28 };
-  const top = 60 + fit.size;
-  fit.lines.forEach((l, i) => out.push(`<text x="${X}" y="${top + i * fit.lh}" font-size="${fit.size}" font-weight="600" fill="${p.ink}" font-family="${FONT}">${esc(l)}</text>`));
-  // the spine
-  const SX = 548;
-  out.push(`<path d="M${SX} 32 V368" stroke="${p.ink}" stroke-width="0.75"/>`);
-  const cx = 570;
-  let y = 40;
-  const lab = String(label || '').trim();
-  if (lab && isCjk(lab)) {
-    const chars = [...lab];
-    const step = Math.min(17, 236 / chars.length);
-    const size = Math.min(14, step - 1);
-    out.push(`<text font-size="${n(size)}" fill="${p.ink}" text-anchor="middle" font-family="${FONT}" letter-spacing="0">${chars.map((ch, i) => `<tspan x="${cx}" y="${n(y + size + i * step)}">${esc(ch)}</tspan>`).join('')}</text>`);
-    y += size + chars.length * step + 6;
-  } else if (lab) {
-    const size = Math.min(12, 250 / Math.max(1, lab.length * 0.56));
-    out.push(`<text transform="translate(${cx - size * 0.36} ${y}) rotate(90)" font-size="${n(size)}" fill="${p.ink}" font-family="${FONT}" letter-spacing=".04em">${esc(lab)}</text>`);
-    y += lab.length * size * 0.6 + 12;
+// The white panel: x 267 to 600, 30 of padding. TEXT.w is what fitText (js/postcard.js)
+// wraps to; keep the two in step.
+const PANEL = { x: 267, pad: 30, w: 276 };
+
+// the approach name: one line when it fits, shrunk a little, else two lines
+function labelLines(lab) {
+  const cjk = isCjk(lab);
+  const wide = (s, size) => [...s].reduce((sum, ch) => sum + (/[　-鿿＀-￯]/.test(ch) ? 1.06 : /[A-Z]/.test(ch) ? 0.74 : /[\s.,:;'|!iljtf()]/.test(ch) ? 0.36 : 0.62), 0) * size;
+  for (const size of [20, 18, 16]) if (wide(lab, size) <= PANEL.w) return { size, lines: [lab] };
+  const size = 16;
+  const lines = [''];
+  for (const piece of cjk ? [...lab] : lab.split(/(?=\s)/)) {
+    const cur = lines[lines.length - 1];
+    if (cur && wide(cur + piece, size) > PANEL.w) lines.push(piece.trimStart());
+    else lines[lines.length - 1] = cur + piece;
   }
-  if (caption && y < 300) out.push(`<text transform="translate(${cx - 3} ${n(y + 4)}) rotate(90)" font-size="8" fill="${p.ink}" font-family="${FONT}" letter-spacing=".16em">${esc(caption.toUpperCase())}</text>`);
-  if (glyph) out.push(`<g transform="translate(${cx} 350) scale(.8)">${glyph}</g>`);
-  out.push(`<text x="${X}" y="364" font-size="12" fill="${p.ink}" font-family="${FONT}" letter-spacing=".04em">${esc(date || '')}</text>`);
-  out.push(`<text x="528" y="364" font-size="11" fill="${p.ink}" text-anchor="end" font-family="${FONT}" letter-spacing=".08em">${esc(brand || '')}</text>`);
+  if (lines.length > 2) {
+    lines.length = 2;
+    let last = lines[1];
+    while (last && wide(last + '…', size) > PANEL.w) last = [...last].slice(0, -1).join('');
+    lines[1] = last.trimEnd() + '…';
+  }
+  return { size, lines };
+}
+
+// The words: the line large at the top of the white panel, the name and the date small at
+// its foot. Nothing else.
+function words(p, { line: text, label, date, brand, fitText }) {
+  const out = [];
+  const X = PANEL.x + PANEL.pad;
+  const fit = fitText ? fitText(text) : { lines: [text], size: 20, lh: 28 };
+  const top = PANEL.pad + Math.round(fit.size * 0.9);
+  // one text element, so the line reads as one string
+  out.push(`<text font-size="${fit.size}" font-weight="900" fill="${INK}" font-family="${FONT_LINE}">${fit.lines.map((l, i) => `<tspan x="${X}" y="${top + i * fit.lh}">${esc(l)}</tspan>`).join('')}</text>`);
+  const lab = String(label || '').trim();
+  if (lab) {
+    const L = labelLines(lab);
+    L.lines.forEach((l, i) => out.push(`<text x="${X}" y="${346 - (L.lines.length - 1 - i) * (L.size + 5)}" font-size="${L.size}" font-weight="700" fill="${MUTED}" font-family="${FONT_LABEL}" letter-spacing="${isCjk(lab) ? '.06em' : '.01em'}">${esc(l)}</text>`));
+  }
+  const foot = [date, brand].filter(Boolean).join(' · ');
+  out.push(`<text x="${X}" y="374" font-size="19" font-weight="600" fill="${MUTED}" font-family="${FONT_NUM}" letter-spacing=".05em">${esc(foot)}</text>`);
   return out.join('');
 }
 
-// Put the parts together as a print: ink a, ink b slipped by OFF, their crossing in c,
-// paper cut-outs, then ink lines. passes: lists of parts { a, b, k, l } printed one over the
-// other (the land and sky first, then the things), so a thing covers the land behind it.
-// top: weather over the inks; front: the companion, not clipped by the arch.
-export function printCard(p, { uid, passes, top = '', front = '', css = '', words: w, img = true }) {
-  const off = `translate(${OFF[0]} ${OFF[1]})`;
-  const defs = [];
-  const body = passes.map((parts, i) => {
-    const A = parts.map((x) => x.a || '').join('');
-    const B = parts.map((x) => x.b || '').join('');
-    const K = parts.map((x) => x.k || '').join('');
-    const Ln = parts.map((x) => x.l || '').join('');
-    if (A && B) defs.push(`<clipPath id="${uid}ov${i}" transform="${off}">${B}</clipPath>`);
-    return `${fillWith(p.a, A)}${B ? `<g transform="${off}" fill="${p.b}">${B}</g>` : ''}${A && B ? `<g fill="${p.c}" clip-path="url(#${uid}ov${i})">${A}</g>` : ''}${K ? `<g transform="${off}">${K}</g>` : ''}${Ln}`;
-  });
+// Put a card together: the picture (markup in 160 x 240 units, clipped to its part of the
+// card and scaled), the white panel and the words. Square corners, no border.
+// art: the picture; css: optional animation; img: false when the card sits beside its own
+// text and should not be announced as a picture.
+export function printCard(p, { uid, art = '', css = '', words: w = '', img = true }) {
   const W = 600;
   const H = 400;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"${img ? ' role="img"' : ''}>
-  <defs><clipPath id="${uid}card"><rect width="${W}" height="${H}" rx="22"/></clipPath><clipPath id="${uid}arch"><path d="${archPath()}"/></clipPath>${defs.join('')}</defs>
+  <defs><clipPath id="${uid}art"><rect width="${ART.w}" height="${ART.h}"/></clipPath></defs>
   ${css}
-  <g clip-path="url(#${uid}card)"><rect width="${W}" height="${H}" fill="${p.paper}"/>
-  <g clip-path="url(#${uid}arch)"><rect x="0" y="0" width="300" height="${H}" fill="${p.sky}"/>
-  ${body[0] || ''}${top}${body.slice(1).join('')}</g>
-  ${front}${w}</g>
+  <rect width="${W}" height="${H}" fill="${WHITE}"/>
+  <g transform="scale(${n4(ART.k)})" clip-path="url(#${uid}art)"><rect width="${ART.w}" height="${ART.h}" fill="${p.ground}"/>${art}</g>
+  ${w}
 </svg>`;
 }
-
-const CAPTION = { clear: 'clear sky', sunny: 'sunny', mixed: 'sun and cloud', cloudy: 'cloudy', rain: 'rain', wind: 'wind', fog: 'mist', dusk: 'dusk', night: 'quiet night' };
 
 // Draw the card. line: the main text; label: a small heading; date; animate: add motion.
 export function sceneSvg(scene, { seed = 'm', line = '', label = '', date = '', brand = 'Murmur', animate = false, fitText = null } = {}) {
   const rand = rng(seed + JSON.stringify(scene.objects) + scene.weather);
   const uid = 'sc' + Math.floor(rand() * 1e9).toString(36);
   const p = pal(scene.weather);
-  const back = backdrop(scene.setting, p, scene.objects.length);
-  const s = sky(scene.weather, p, rand, uid, scene.objects.length);
-  // things stand along the ground, spread by how many there are
-  const xs = [[96], [84, 208], [72, 150, 226]][Math.max(0, scene.objects.length - 1)];
-  const r = [44, 42, 36][Math.max(0, scene.objects.length - 1)];
-  const things = scene.objects.filter((o) => OBJ[o]).map((o, i) => OBJ[o](p, xs[i], G, r));
-  const draw = PAL_CREATURE[scene.companion] || PAL_CREATURE.cloudlet;
-  const front = `<g class="${uid}-pal">${draw(p, 148, 362, scene.companion === 'lamp' ? 56 : 34)}</g>`;
-  // sparkles: small four-point stars in ink b, just above the arch
-  let sp = '';
-  for (let i = 0; i < 4; i++) {
-    const x = 92 + rand() * 120;
-    const y = 64 + rand() * 60;
-    const k = 4 + rand() * 3;
-    sp += `<path class="${uid}-spark" style="animation-delay:${(0.9 + i * 0.25).toFixed(2)}s" d="M${n(x)} ${n(y - k)} L${n(x + k * 0.28)} ${n(y - k * 0.28)} L${n(x + k)} ${n(y)} L${n(x + k * 0.28)} ${n(y + k * 0.28)} L${n(x)} ${n(y + k)} L${n(x - k * 0.28)} ${n(y + k * 0.28)} L${n(x - k)} ${n(y)} L${n(x - k * 0.28)} ${n(y - k * 0.28)}Z" fill="${p.b}"/>`;
-  }
-  const caption = scene.calm ? 'quiet night' : scene.clearing ? 'clearing' : CAPTION[scene.weather] || '';
-  const glyph = scene.lensGlyph && GLYPH[scene.lensGlyph] ? GLYPH[scene.lensGlyph](p.ink) : '';
+  const s = sky(scene.weather, p, uid);
+  const objs = scene.objects.filter((o) => OBJ[o]).slice(0, 3);
+  const count = objs.length;
+  // the hill, and the things along the ground line, spread by how many there are
+  const hillAt = [[60, 60], [60, 60], [80, 46], [80, 54]][count];
+  const slots = [[], [[124, 58]], [[32, 50], [128, 50]], [[26, 42], [80, 46], [134, 42]]][count];
+  const hill = half(hillAt[0], LINE, hillAt[1], 'up', p.hill);
+  let things = objs.map((o, i) => thing(o, p, slots[i][0], LINE, slots[i][1])).join('');
+  if (!count) things = prop(scene.setting, p);
+  // a candle on the hill for someone who is missed
+  if (scene.setting === 'candle' && count < 3) things += box(hillAt[0] - 4, LINE - hillAt[1] - 17, 8, 18, WHITE) + circ(hillAt[0], LINE - hillAt[1] - 23, 5.5, p.acc === RED || p.ground === SUN ? RED : SUN);
+  // Mumu sits on the plane; a pet the person named (or the lamp of a quiet night) sits beside her
+  const friend = FRIEND[scene.companion];
+  const mx = friend ? 6 : 36;
+  const my = count === 3 ? 166 : 150;
+  // her sprout shows against the hill, or against the plane when there is no hill behind it
+  const behind = count === 3 ? p.plane : p.hill;
+  const leaf = behind === SUN || behind === PINK || behind === WHITE ? JADE : SUN;
+  const pal_ = `<g class="${uid}-pal"><g transform="translate(${mx} ${my}) scale(.72)">${mumu(p.night ? 'sleepy' : 'happy', leaf)}</g></g>`;
+  const mate = friend ? `<g transform="translate(126 ${n(my + 60)}) scale(${scene.companion === 'lamp' ? 0.9 : 0.8})">${friend(p)}</g>` : '';
+  const art =
+    `<g class="${uid}-cell">${s.cell}</g><g class="${uid}-orb">${s.orb}</g>${s.mark}` +
+    `<g class="${uid}-plane">${box(0, LINE, ART.w, ART.h - LINE, p.plane)}</g>` +
+    `<g class="${uid}-hill">${hill}</g><g class="${uid}-things">${things}</g>${mate}${pal_}`;
   return printCard(p, {
     uid,
-    passes: [[back, { b: s.b, k: s.k }], things],
-    top: s.top + `<g>${sp}</g>`,
-    front,
+    art,
     css: animate ? motionCss(uid, scene) : '',
-    words: words(p, { line, label, caption, date, brand, glyph, fitText }),
+    words: words(p, { line, label, date, brand, fitText }),
   });
 }
 
-// For the postcard (js/postcard.js): the same print, with its own picture.
-export const print = { PAPER, INK, NIGHT, AO, MOMO, EGG, MOSS, tint, circ, box, half, poly, line, dot, face, fillWith, cloudShape, OBJ, PAL_CREATURE, G, ARCH, words, n, esc };
+// For the postcard (js/postcard.js): the same pieces, with its own picture.
+export const print = { INK, WHITE, MUTED, JADE, RED, SUN, PINK, NAVY, circ, box, half, poly, cloudShape, crescent, thing, mumu, FRIEND, PANEL, words, n, esc };
 
 // What a model may choose from when it picks the card's picture (js/lens-llm.js).
 export const CHOICES = {

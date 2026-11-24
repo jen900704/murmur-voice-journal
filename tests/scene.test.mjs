@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readScene, sceneSvg, sceneNotes, coverage } from '../js/scene.js';
-import { fitText } from '../js/postcard.js';
+import { fitText, postcardSvg } from '../js/postcard.js';
 
 let passed = 0;
 function test(name, fn) {
@@ -69,6 +69,32 @@ test('no NaN or undefined in any drawing', () => {
       assert.ok(!/NaN|undefined/.test(svg), c.el + ' ' + weather);
     }
   }
+});
+test('cards are flat: no gradients, filters, shadows or rounded card corners, and the line is set in Murmur Black', () => {
+  const s = readScene({ texts: ['報告一直拖著，我好焦慮'], topics: ['work'] });
+  for (const svg of [sceneSvg(s, { line: '先寫標題就好', label: '認知取向', date: '2026.11.24', animate: true, fitText }), postcardSvg({ seed: 'n1', line: '晚安', label: '晚安', date: '2026.11.24' })]) {
+    assert.ok(!/Gradient|<filter|opacity=|drop-shadow|<image/.test(svg));
+    assert.ok(svg.includes("font-family=\"'Murmur Black'"));
+    assert.ok(svg.includes('2026.11.24 · Murmur'));
+  }
+  // every weather keeps to the 丙 colours
+  const allowed = ['#151515', '#FFFFFF', '#5C5A55', '#0E7C66', '#EA4B2D', '#F2B91D', '#F4A7B9', '#12173A'];
+  for (const weather of ['rain', 'wind', 'fog', 'dusk', 'mixed', 'sunny', 'clear', 'night', 'cloudy']) {
+    const svg = sceneSvg({ ...s, weather, objects: ['sea', 'bed', 'bike'], companion: 'dog' }, { fitText });
+    for (const c of svg.match(/#[0-9A-Fa-f]{6}/g)) assert.ok(allowed.includes(c), weather + ' ' + c);
+  }
+});
+test('a 120-character line is shown whole, and a short one is set large', () => {
+  const zh = Array.from({ length: 118 }, (_, i) => '一二三四五六七八九十'[i % 10]).join('') + '結尾';
+  const en = ('kind words to myself tonight '.repeat(5)).slice(0, 117) + 'end';
+  for (const t of [zh, en]) {
+    const f = fitText(t);
+    assert.ok(f.lines.length <= f.maxLines && !f.lines.join('').includes('…'), t.slice(0, 8));
+    assert.ok(f.lines[f.lines.length - 1].endsWith(t.slice(-2)));
+    assert.ok(30 + f.size * 0.9 + (f.lines.length - 1) * f.lh < 310);
+  }
+  assert.equal(fitText('先寫標題就好').size, 44);
+  assert.ok(postcardSvg({ seed: 'x', line: zh, label: '晚安', date: '' }).includes('結尾'));
 });
 console.log(`scene: ${passed} passed`);
 

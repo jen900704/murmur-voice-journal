@@ -5,6 +5,7 @@ import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
 import { createFlowHistory } from './flow-history.js';
 import { mascot } from './mascot.js';
+import { blockArt } from './icons.js';
 
 // The suggested-track policy (js/policy.js) is optional and off by default; loaded on its own
 // so the ritual still works if that one file cannot be fetched.
@@ -267,7 +268,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       // Mumu, dozing: the bedtime card is where the companion sits in the evening
-      mascot(isEvening() ? 'sleepy' : 'idle', { size: 64 }),
+      isEvening() ? h('div', { class: 'cblock cblock--night night-card-block' }, blockArt('nightcard'), mascot('sleepy', { size: 96, variant: 'solid' })) : mascot('idle', { size: 64 }),
       h('div', {}, h('h2', {}, done ? L().cardDoneTitle : L().cardTitle), h('p', {}, done ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, done ? L().cardAgain : L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
@@ -279,7 +280,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     } });
     ta.value = st.worry;
     return [
-      h('div', { class: 'night-mumu' }, mascot('sleepy', { size: 88 })),
+      h('div', { class: 'night-mumu cblock cblock--night' }, blockArt('night'), mascot('sleepy', { size: 168, variant: 'solid' })),
       ...stepHead(1, L().worryTitle, L().worryHelp),
       ta,
       h('p', { class: 'lens-label', id: 'night-theme' }, L().themeLabel),
@@ -658,7 +659,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     holder.innerHTML = st.postcard;
     // Mumu is glad, quietly: one slow hop (css "Night, Mumu"), no words
     return [
-      h('div', { class: 'night-mumu night-mumu--done' }, mascot('happy', { size: 72 })),
+      h('div', { class: 'night-mumu night-mumu--done' }, h('span', { class: 'mumu-seat' }, mascot('happy', { size: 76, variant: 'solid' }))),
       h('h2', {}, isEvening() ? L().cardDone : L().cardDoneDay),
       holder,
       h(

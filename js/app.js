@@ -1,4 +1,4 @@
-import { icon } from './icons.js';
+import { icon, blockArt } from './icons.js';
 import { t, setLang, getLang, detectLang, STRINGS } from './i18n.js';
 import { Recorder, decodeToMono16k, isSupported, TARGET_SR } from './recorder.js';
 import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
@@ -342,7 +342,7 @@ function celebrate() {
   }
   const old = document.querySelector('.mumu-pop');
   if (old) old.remove();
-  const pop = h('div', { class: 'mumu-pop', 'aria-hidden': 'true' }, mascot('happy', { size: 84 }));
+  const pop = h('div', { class: 'mumu-pop', 'aria-hidden': 'true' }, mascot('happy', { size: 84, variant: 'solid' }));
   document.body.appendChild(pop);
   setTimeout(() => pop.classList.add('out'), 1800);
   setTimeout(() => pop.remove(), 2300);
@@ -587,7 +587,8 @@ function lensHero(withMumu) {
   return h(
     'div',
     { class: 'lens-hero' + (withMumu ? '' : ' no-mumu') },
-    withMumu ? mascot(mood, { size: 104 }) : null,
+    // the day's colour block: 玉, with the solid Mumu sitting among a circle, a half circle and a square
+    withMumu ? h('div', { class: 'cblock cblock--jade hero-block' }, blockArt('today'), mascot(mood, { size: 200, variant: 'solid' })) : null,
     h('h2', { class: 'hero-title' }, t('heroTitle')),
     h('button', { type: 'button', class: 'btn primary hero-btn', 'data-key': 'hero-lens', onclick: startLens }, t('heroStart')),
     h('details', { class: 'hero-what' }, h('summary', { 'data-key': 'hero-what' }, t('heroWhat')), h('p', {}, t('heroWhatBody')))
@@ -1870,6 +1871,8 @@ function render() {
   document.title = t('appName');
   $('#brand-name').textContent = t('appName');
   $('#brand-tag').textContent = t('tagline');
+  const help = $('#brand-help');
+  if (help) help.textContent = t('helpLink');
   $('.skip').textContent = t('skip');
   const main = $('#main');
   main.innerHTML = '';
@@ -1901,7 +1904,7 @@ function render() {
           },
           'aria-current': state.tab === tab ? 'page' : null,
         },
-        h('span', { class: `tab-icon icon-${tab}`, 'aria-hidden': 'true' }),
+        h('span', { class: 'tab-icon', 'aria-hidden': 'true' }, icon(tab === 'lens' ? 'lens' : tab, { size: 24 })),
         h('span', { class: 'tab-label' }, t('tab' + tab[0].toUpperCase() + tab.slice(1)))
       )
     );

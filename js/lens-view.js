@@ -1,6 +1,6 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
-import { icon } from './icons.js';
+import { icon, blockArt } from './icons.js';
 import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText, quote, isNonAnswer } from './lenses.js';
 import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { readScene, sceneNotes } from './scene.js';
@@ -517,7 +517,6 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const layer = (cls, shapes, shift) => {
       const g = document.createElementNS(ns, 'g');
       g.setAttribute('class', cls);
-      if (shift) g.setAttribute('transform', 'translate(2 2)');
       for (const [tag, attrs] of shapes) {
         const el = document.createElementNS(ns, tag);
         for (const k in attrs) el.setAttribute(k, attrs[k]);
@@ -579,7 +578,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h(
         'div',
         { class: 'lens-hero' },
-        mascot('idle', { size: 112 }),
+        h('div', { class: 'cblock cblock--pink hero-block' }, blockArt('lens'), mascot('idle', { size: 150, variant: 'solid' })),
         h('h2', { class: 'lens-hero-line' }, L().homeLine),
         h('button', { type: 'button', class: 'btn primary lens-hero-btn', 'data-key': 'lens-start', onclick: () => {
           st.cstep = 0;
@@ -1162,7 +1161,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const fq = (t) => fill(t, st.answers, { inQuestion: true });
     const fixedQ = fq(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q);
     const adapted = adaptedFor(st.step, s);
-    const m = mascot('idle', { size: 48 });
+    const m = mascot('idle', { size: 132, variant: 'solid' });
+    const blockHue = ['sun', 'pink', 'jade'][st.step % 3];
     let field;
     if (s.scale) {
       field = h(
@@ -1220,11 +1220,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return [
       h(
         'div',
-        { class: 'lens-step-head' },
-        lensMark(lens, 36),
-        h('div', { class: 'lens-step-title' }, h('p', { class: 'lens-name' }, c.name), progress(st.step + 1, n, { dots: true, label: L().stepOf(st.step + 1, n) })),
+        // the header block: a big numeral, the dots, and the solid Mumu listening; its colour turns with each question
+        { class: `lens-step-head cblock cblock--${blockHue}` },
+        blockArt(`step-${blockHue}`),
+        h('div', { class: 'lens-step-title' }, h('span', { class: 'lens-bignum', 'aria-hidden': 'true' }, String(st.step + 1), h('small', {}, ` / ${n}`)), progress(st.step + 1, n, { dots: true, label: L().stepOf(st.step + 1, n) })),
         m
       ),
+      h('p', { class: 'lens-name' }, lensMark(lens, 20), c.name),
       st.step === 0 ? h('blockquote', { class: 'lens-concern-quote' }, st.concern) : null,
       s.rewrite && prevAnswer ? h('p', { class: 'lens-rewrite' }, rewriteText(s.rewrite, prevAnswer, getLang())) : null,
       h('p', { class: 'lens-q', id: 'lens-q' }, adapted ? fq(adapted) : fixedQ),
@@ -1607,11 +1609,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     // the high point of the exercise: Mumu and the card, with a few sparkles the first time
     const title = h('div', { class: 'lens-celebrate-title' }, h('h2', {}, c.name), h('p', { class: 'lens-celebrate-line' }, loading ? L().llmLoading : L().doneLine));
     const top = loading
-      ? h('section', { class: 'lens-celebrate thinking', style: hue, 'aria-busy': 'true', 'data-key': 'lens-llm-loading' }, h('div', { class: 'lens-celebrate-head' }, mascot('think', { size: 64 }), title))
+      ? h('section', { class: 'lens-celebrate thinking', style: hue, 'aria-busy': 'true', 'data-key': 'lens-llm-loading' }, h('div', { class: 'lens-celebrate-head' }, h('span', { class: 'mumu-seat' }, mascot('think', { size: 76, variant: 'solid' })), title))
       : h(
           'section',
           { class: 'lens-celebrate' + (fresh ? ' fresh' : ''), style: hue },
-          h('div', { class: 'lens-celebrate-head' }, mascot('happy', { size: 64 }), title),
+          h('div', { class: 'lens-celebrate-head' }, h('span', { class: 'mumu-seat' }, mascot('happy', { size: 76, variant: 'solid' })), title),
           parts
             ? h(
                 'div',

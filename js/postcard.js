@@ -1,18 +1,19 @@
-// Bedtime postcards, drawn procedurally so every night looks a little different: a flat
-// print in two spot inks on paper (or on night paper), with the same layout as the scene card.
+// Bedtime postcards, drawn procedurally so every night looks a little different: a 丙 poster
+// of circles, half-circles and blocks on a night ground, with the same layout as the scene card.
 import { readScene, sceneSvg, printCard, print } from './scene.js';
 
-// Original motifs only (sleepy moon, cloud, sprout, teacup, stars, bun, cat, lamp). Exported as PNG.
-const { PAPER, NIGHT, AO, MOMO, EGG, MOSS, tint, circ, box, half, line, fillWith, OBJ, PAL_CREATURE, G, ARCH, words, n } = print;
+// Original motifs only (moon, cloud, sprout, teacup, stars, bun, cat, lamp). Exported as PNG.
+const { INK, WHITE, JADE, RED, SUN, PINK, NAVY, circ, box, half, cloudShape, crescent, thing, mumu, FRIEND, PANEL, words } = print;
 
+// ground, the half-circle Mumu sleeps on, the quarter circle at the left, the block at the
+// right, and the second colour of the small things
 const PALETTES = [
-  { a: AO, b: EGG, c: MOSS, sky: tint(AO, 0.13) },
-  { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.12) },
-  { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(MOSS, 0.12) },
-  { a: AO, b: MOMO, c: '#5B3B9E', sky: tint(MOMO, 0.1) },
-  { paper: NIGHT, ink: PAPER, a: MOSS, b: EGG, c: '#8AB84A', sky: '#20264A' },
-  { paper: NIGHT, ink: PAPER, a: MOMO, b: EGG, c: '#FF6A3D', sky: '#20264A' },
-].map((x) => ({ paper: PAPER, ink: '#1B1F3B', ...x }));
+  { ground: NAVY, hill: RED, side: JADE, block: PINK, acc: SUN },
+  { ground: NAVY, hill: JADE, side: PINK, block: RED, acc: SUN },
+  { ground: NAVY, hill: PINK, side: RED, block: JADE, acc: SUN },
+  { ground: NAVY, hill: RED, side: PINK, block: JADE, acc: SUN },
+  { ground: JADE, hill: INK, side: PINK, block: RED, acc: SUN },
+].map((x) => ({ ...x, cell: x.side, night: true }));
 
 function rng(seed) {
   let s = 0;
@@ -23,10 +24,10 @@ function rng(seed) {
   };
 }
 
-// Rough width of Latin text in ems at weight 600 (a CJK character is one em).
+// Rough width of Latin text in ems at the card's heavy weight (a CJK character is one em).
 function ems(str) {
   let sum = 0;
-  for (const ch of str) sum += /[MW@%mw]/.test(ch) ? 0.95 : /[A-Z0-9]/.test(ch) ? 0.7 : /[\s.,:;'|!iljtf]/.test(ch) ? 0.34 : 0.58;
+  for (const ch of str) sum += /[MW@%mw]/.test(ch) ? 0.98 : /[A-Z0-9]/.test(ch) ? 0.7 : /[\s.,:;'|!iljtf]/.test(ch) ? 0.36 : 0.6;
   return sum;
 }
 
@@ -94,33 +95,33 @@ export function wrap(text, maxUnits) {
   return lines;
 }
 
-// The text column is 228 wide and has room for 280 of height from the first baseline down.
-// Font sizes to try, largest first; each comes with its line height.
+// The white panel gives the line PANEL.w of width and 250 of height from the first baseline
+// down. Font sizes to try, largest first; each comes with its line height and the most lines
+// that still look right at that size (the largest is a title: two lines).
 const FIT = [
-  { size: 28, lh: 40 },
-  { size: 24, lh: 34 },
-  { size: 21, lh: 30 },
-  { size: 18, lh: 26 },
-  { size: 16, lh: 23 },
-  { size: 14, lh: 20 },
+  { size: 44, lh: 56, most: 2 },
+  { size: 38, lh: 49, most: 3 },
+  { size: 32, lh: 42, most: 4 },
+  { size: 27, lh: 36, most: 6 },
+  { size: 23, lh: 31, most: 7 },
+  { size: 20, lh: 27, most: 9 },
+  { size: 17, lh: 24, most: 10 },
+  { size: 15, lh: 21, most: 12 },
 ];
-const TEXT_W = 228;
-const TEXT_H = 280;
+const TEXT_W = PANEL.w;
+const TEXT_H = 250;
 
 // Pick the largest font at which the whole text fits the card (the kind-thing field allows
 // 120 characters). Only when even the smallest does not fit is the text cut, with an ellipsis.
 export function fitText(text) {
   let fit = null;
-  const at = (f) => {
-    const lines = wrap(text, Math.floor(TEXT_W / f.size));
-    return { ...f, lines, maxLines: Math.floor((TEXT_H - f.size) / f.lh) + 1 };
-  };
-  for (let i = 0; i < FIT.length; i++) {
-    fit = at(FIT[i]);
-    if (fit.lines.length > fit.maxLines) continue;
-    // one size down is fine when it saves a line, as long as the type stays large
-    const next = FIT[i + 1] && FIT[i + 1].size >= 21 ? at(FIT[i + 1]) : null;
-    return next && next.lines.length < fit.lines.length ? next : fit;
+  for (const f of FIT) {
+    const units = Math.floor(TEXT_W / f.size);
+    let lines = wrap(text, units);
+    // a comma kept at the end of a full line would hang over the edge: wrap one shorter
+    if (lines.some((l) => /[　-鿿＀-￯]/.test(l) && [...l].length > units)) lines = wrap(text, units - 1);
+    fit = { size: f.size, lh: f.lh, lines, maxLines: Math.min(f.most, Math.floor((TEXT_H - f.size) / f.lh) + 1) };
+    if (lines.length <= fit.maxLines) return fit;
   }
   const last = [...fit.lines[fit.maxLines - 1]];
   fit.lines = fit.lines.slice(0, fit.maxLines);
@@ -128,34 +129,23 @@ export function fitText(text) {
   return fit;
 }
 
-const sleepyEyes = (p, x, y, s) => line(p, `M${n(x - s * 1.3)} ${n(y)} q${n(s * 0.3)} ${n(s * 0.3)} ${n(s * 0.6)} 0 M${n(x + s * 0.7)} ${n(y)} q${n(s * 0.3)} ${n(s * 0.3)} ${n(s * 0.6)} 0`, Math.max(1.6, s * 0.2));
-const star4 = (x, y, k) => `<path d="M${n(x)} ${n(y - k)} L${n(x + k * 0.28)} ${n(y - k * 0.28)} L${n(x + k)} ${n(y)} L${n(x + k * 0.28)} ${n(y + k * 0.28)} L${n(x)} ${n(y + k)} L${n(x - k * 0.28)} ${n(y + k * 0.28)} L${n(x - k)} ${n(y)} L${n(x - k * 0.28)} ${n(y - k * 0.28)}Z"/>`;
-const ink = (p) => (p.paper === NIGHT ? { ...p, ink: '#1B1F3B' } : p);
-
-// Each motif returns { parts (for the print), front (drawn over it) } around the ground line.
+// What changes from night to night: the size of the moon, and one small thing on the block
+// beside Mumu. Each motif returns { moon: [x, y, r], sky, item } in picture units (160 x 240).
+const small = [120, 50, 34];
 const MOTIFS = {
-  moon: (p) => ({
-    parts: [{ b: circ(150, 190, 70), k: fillWith(p.sky, circ(186, 160, 60)) }],
-    front: sleepyEyes(ink(p), 112, 218, 8) + `<g fill="${p.ink}" font-family="sans-serif"><text x="212" y="236" font-size="20">z</text><text x="230" y="216" font-size="14">z</text></g>`,
-  }),
-  cloud: (p) => ({ parts: [], front: PAL_CREATURE.cloudlet(p, 148, 352, 64) }),
-  sprout: (p) => ({ parts: [], front: PAL_CREATURE.sprout(p, 148, 352, 58) }),
-  teacup: (p) => {
-    const t = OBJ.tea(p, 148, G, 104);
-    return { parts: [t], front: sleepyEyes(ink(p), 148, G - 38, 9) };
-  },
-  stars: (p) => ({
-    parts: [{ b: star4(148, 196, 62) + star4(226, 122, 18) + star4(70, 140, 14) }],
-    front: sleepyEyes(ink(p), 148, 200, 7),
-  }),
-  bun: (p) => ({ parts: [], front: PAL_CREATURE.bun(p, 148, 352, 62) }),
-  cat: (p) => ({ parts: [], front: PAL_CREATURE.cat(p, 148, 352, 60) }),
-  lamp: (p) => ({ parts: [], front: PAL_CREATURE.lamp(p, 148, 352, 104) }),
+  moon: () => ({ moon: [112, 66, 44] }),
+  stars: () => ({ moon: small, sky: box(22, 30, 12, 12, SUN) + circ(66, 60, 7, PINK) + circ(40, 96, 5, WHITE) + box(96, 92, 8, 8, PINK) + circ(134, 112, 4, SUN) }),
+  cloud: () => ({ moon: small, sky: cloudShape(46, 104, 44, WHITE) }),
+  teacup: (p) => ({ moon: small, item: thing('tea', p, 142, 204, 32) }),
+  sprout: (p) => ({ moon: small, item: thing('plant', p, 142, 204, 34) }),
+  bun: () => ({ moon: small, item: half(142, 204, 15, 'up', WHITE) + box(135, 196, 5, 2.2, INK) + box(144, 196, 5, 2.2, INK) + circ(132, 200.5, 2.4, RED) + circ(152, 200.5, 2.4, RED) }),
+  cat: (p) => ({ moon: small, item: `<g transform="translate(142 204) scale(.56)">${FRIEND.cat(p)}</g>` }),
+  lamp: (p) => ({ moon: small, item: `<g transform="translate(142 204) scale(.74)">${FRIEND.lamp(p)}</g>` }),
 };
 
 // Build the postcard SVG.
 // line: the main text (usually the person's own "kind thing" or a closing line)
-// label: a small heading beside it; date: shown at the bottom
+// label: a small heading under it; date: shown at the bottom
 export function postcardSvg({ seed, line: text, label, date, brand = 'Murmur' }) {
   const r = rng(seed);
   // ids must be unique when several postcards are inline on one page
@@ -164,22 +154,28 @@ export function postcardSvg({ seed, line: text, label, date, brand = 'Murmur' })
   const motifNames = Object.keys(MOTIFS);
   const motif = motifNames[Math.floor(r() * motifNames.length)];
   const m = MOTIFS[motif](p);
-  const L = ARCH.x;
-  // the land, a small moon unless the moon is the picture, and a few stars
-  const land = { a: box(L - 4, G, ARCH.w + 8, ARCH.b - G + 4) + half(L + 54, G, 64) };
-  const sky = { b: '', k: '' };
-  if (motif !== 'moon') {
-    sky.b += circ(222, 92, 20);
-    sky.k += fillWith(p.sky, circ(231, 85, 17));
+  const [mx, my, mr] = m.moon;
+  // a few small dots and squares in the sky, away from the moon
+  let dots = '';
+  if (!m.sky) {
+    const marks = [(x, y) => circ(x, y, 3.4, PINK), (x, y) => box(x - 3.2, y - 3.2, 6.5, 6.5, SUN), (x, y) => circ(x, y, 2.6, WHITE)];
+    marks.forEach((draw, i) => (dots += draw(16 + i * 22 + r() * 14, 96 + ((i * 37) % 50) + r() * 14)));
   }
-  for (let i = 0; i < 5; i++) sky.b += circ(52 + r() * 150, 70 + r() * 90, 1.6 + r() * 1.6);
+  const tall = !!m.item;
+  const art =
+    crescent(mx, my, mr, SUN, p.ground) + (m.sky || '') + dots +
+    `<path d="M0 240 V208 A32 32 0 0 1 32 240Z" fill="${p.side}"/>` +
+    half(78, 240, 46, 'up', p.hill) +
+    box(124, tall ? 204 : 212, 36, 36, p.block) +
+    (m.item || '') +
+    // Mumu asleep on the half-circle, her sprout in yellow against the night
+    `<g transform="translate(37 151) scale(.66)">${mumu('sleepy', SUN)}</g>`;
   return printCard(p, {
     uid,
-    passes: [[land, sky, ...m.parts]],
-    front: m.front,
+    art,
     // the postcard sits beside its own text in the app, so it is not announced as a picture
     img: false,
-    words: words(p, { line: text, label, caption: 'good night', date, brand, fitText }),
+    words: words(p, { line: text, label, date, brand, fitText }),
   });
 }
 

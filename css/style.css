@@ -15,74 +15,94 @@
   font-display: swap;
 }
 
+@font-face {
+  /* Noto Sans TC Black (Google and Adobe, SIL OFL 1.1), cut down to the app's own text by
+     tools/subset-font.py and renamed; fonts/OFL-noto-sans-tc.txt. Titles, buttons, labels. */
+  font-family: 'Murmur Black';
+  src: url('../fonts/murmur-black.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
-  /* Flat, riso-printed: paper, one ink, one primary (群青), and three spot inks used only as
-     fills (桃, 蛋黃, 青苔), never as text on paper. No shadows, gradients, blur or translucency. */
-  --bg: #f5f6f1; /* paper */
+  /* 圓方 (circle and square): paper, ink, and four spot colours used as large flat fields.
+     Text is ink on paper, 黃 and 粉; white on ink and 玉. 朱 never carries small text.
+     No shadows, gradients, blur, translucency or texture. */
+  --bg: #f6f3ec; /* 紙 */
   --surface: #ffffff;
-  --ink: #1b1f3b;
-  --muted: #5b6078;
-  --line: #d6d8ce; /* hairline */
-  --accent: #2747c7; /* 群青, white text on it */
+  --ink: #151515; /* 墨 */
+  --muted: #5c5a55;
+  --line: #d8d3c6; /* quiet rule for chart grids only; boxes use no line */
+  --accent: #151515; /* primary actions are ink */
   --accent-ink: #ffffff;
-  --accent-soft: #e4e8f6; /* a flat tint of 群青 for quiet fills */
-  --pink: #ff7a8a; /* 桃 */
-  --yolk: #ffc83d; /* 蛋黃 */
-  --moss: #2e9c7e; /* 青苔 */
-  --ink-spot: var(--yolk); /* the offset spot shape behind icons; a context may set 桃 or 青苔 */
-  --on-spot: #1b1f3b; /* text on a spot-ink fill, in both themes */
-  --amber: #ffc83d; /* kept for older rules: always a fill, never text */
-  --danger: #b3364a;
-  --display: 'Murmur Round', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --accent-soft: #ece7db; /* a quiet paper tint for selected rows */
+  --jade: #0e7c66; /* 玉: white text on it, never ink text */
+  --jade-line: #0e7c66; /* 玉 as a line or small mark on the page */
+  --red: #ea4b2d; /* 朱: fills and marks only */
+  --red-text: #a8321b; /* 朱 dark enough for text on paper */
+  --sun: #f2b91d; /* 黃 */
+  --pink: #f4a7b9; /* 粉 */
+  --yolk: var(--sun); /* older names, kept so every rule follows the new palette */
+  --moss: var(--jade);
+  --amber: var(--sun);
+  --ink-spot: var(--sun);
+  --on-spot: #151515; /* text on 黃 and 粉, in both themes */
+  --danger: #a8321b;
+  --display: 'Murmur Black', 'PingFang TC', 'Noto Sans TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
+  --num: 'Bricolage', 'Murmur Black', ui-sans-serif, system-ui, sans-serif;
   --body: 'Murmur Round', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
-  --tabs-h: 64px;
-  /* one 8px grid (4 for hairline adjustments), two radii: 4px for cards, inputs and sheets, a full pill for chips and buttons */
+  --tabs-h: 76px;
+  --brand-h: 60px;
+  /* one 8px grid (4 for small adjustments) */
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
   --s4: 16px;
   --s5: 24px;
   --s6: 32px;
-  --r-s: 4px;
-  --r-m: 4px;
-  --r-l: 4px;
+  /* exactly two corners: square, and the full circle */
+  --r-s: 0px;
+  --r-m: 0px;
+  --r-l: 0px;
   --pill: 999px;
-  --hair: 1px;
-  --outline: 1.5px;
-  /* the bedtime card keeps its own night colors in both themes */
-  --night: #1f2340;
-  --night-ink: #f1f2ec;
-  --moon: #ffc83d;
+  --hair: 2.5px;
+  --outline: 2.5px;
+  /* the bedtime ritual keeps its own night colours in both themes */
+  --night: #12173a;
+  --night-ink: #f6f3ec;
+  --moon: #f2b91d;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14172b;
-    --surface: #1f2340;
-    --ink: #f1f2ec;
-    --muted: #a6abc2;
-    --line: #363b60;
-    --accent: #8fa5ff;
-    --accent-ink: #14172b;
-    --accent-soft: #262c52;
-    --moss: #4fc2a2;
-    --danger: #ff7d90;
+    --bg: #12173a;
+    --surface: #1d2452;
+    --ink: #f6f3ec;
+    --muted: #b4b8d4;
+    --line: #343b6e;
+    --accent: #f2b91d;
+    --accent-ink: #151515;
+    --accent-soft: #1d2452;
+    --jade-line: #2fa88e;
+    --red-text: #ff8a70;
+    --danger: #ff8a70;
   }
 }
 
 /* during the bedtime ritual, the dark palette regardless of the system theme */
 :root.night-mode {
-  --bg: #14172b;
-  --surface: #1f2340;
-  --ink: #f1f2ec;
-  --muted: #a6abc2;
-  --line: #363b60;
-  --accent: #8fa5ff;
-  --accent-ink: #14172b;
-  --accent-soft: #262c52;
-  --moss: #4fc2a2;
-  --danger: #ff7d90;
+  --bg: #12173a;
+  --surface: #1d2452;
+  --ink: #f6f3ec;
+  --muted: #b4b8d4;
+  --line: #343b6e;
+  --accent: #f2b91d;
+  --accent-ink: #151515;
+  --accent-soft: #1d2452;
+  --jade-line: #2fa88e;
+  --red-text: #ff8a70;
+  --danger: #ff8a70;
   color-scheme: dark;
 }
 
@@ -5087,3 +5107,759 @@ blockquote, .lens-answer, .lens-concern-quote, .note, .entry-note, .silent-list 
 .search-hit, .search-hit *, .night-worry-text, .jar-list li, .ll-text, .ll-evidence, .writing-page, .ai-msg {
   font-family: var(--own);
 }
+
+/* ==========================================================================
+   圓方 pass (circle and square). These rules come last and override everything
+   above. Three shapes only: the full circle, the half or quarter circle, and
+   the square-cornered block. Colour in large flat fields that bleed to the
+   screen edge; one heavy black face for titles; no radius between square and
+   full circle; no hairlines, shadows, gradients, blur or tilt.
+   Loud pages carry one colour block with the solid Mumu; quiet pages are plain
+   paper with the line Mumu.
+   ========================================================================== */
+
+/* ---------- type ---------- */
+h1, h2, h3, .btn, .tab-label, .toast, .timer, .heavy-val {
+  font-family: var(--display);
+  font-weight: 900;
+}
+h2 {
+  font-size: 24px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  margin: var(--s5) 0 var(--s2);
+}
+h3 {
+  font-size: 17px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+:lang(en) h2 { letter-spacing: 0; }
+a, .link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.link { font-family: var(--display); font-weight: 900; font-size: 15px; }
+.link.muted-link, .lens-skip-row .link { color: var(--muted); }
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 0;
+}
+.tabs :focus-visible, .cblock--jade :focus-visible, .cblock--night :focus-visible { outline-color: var(--sun); }
+
+/* ---------- header: the wordmark at the left, the help line at the right, on every screen ---------- */
+.brand {
+  position: relative;
+  z-index: 3;
+  min-height: var(--brand-h);
+  padding: 0 24px;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s4);
+}
+.brand h1 {
+  font: 900 17px/1.2 var(--display);
+  letter-spacing: 0.08em;
+}
+:lang(en) .brand h1 { letter-spacing: 0.02em; }
+.brand-help {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 900 14px/1 var(--display);
+  color: inherit;
+  white-space: nowrap;
+}
+main { padding: 8px 24px; }
+
+/* ---------- colour blocks ---------- */
+.cblock {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -24px;
+  --ic-ground: currentColor;
+}
+.cblock--jade { background: var(--jade); color: #fff; --mumu-leaf: var(--sun); --mumu-on: #f6f3ec; }
+.cblock--sun { background: var(--sun); color: #151515; --mumu-acc: var(--red); }
+.cblock--pink { background: var(--pink); color: #151515; --mumu-soft: #fff; }
+.cblock--night { background: var(--night); color: var(--night-ink); --mumu-leaf: var(--sun); --mumu-on: #f6f3ec; }
+.cblock-art { position: absolute; inset: 0; pointer-events: none; }
+.cblock-art svg { display: block; width: 100%; height: 100%; }
+.cblock > .mumu { position: absolute; z-index: 1; }
+/* a block that opens the page runs up under the header, to the top edge of the screen */
+@supports selector(:has(*)) {
+  .view > .lens-hero:first-child > .hero-block,
+  .view > .lens-step-head.cblock:first-child {
+    margin-top: calc(-8px - var(--brand-h) - env(safe-area-inset-top));
+    padding-top: calc(var(--brand-h) + env(safe-area-inset-top));
+    box-sizing: content-box;
+  }
+  body:has(.view > .lens-hero:first-child > .cblock--jade) .brand { color: #fff; }
+  body:has(.view > .lens-hero:first-child > .cblock--pink) .brand,
+  body:has(.view > .lens-step-head.cblock--sun:first-child) .brand,
+  body:has(.view > .lens-step-head.cblock--pink:first-child) .brand { color: #151515; }
+  body:has(.view > .lens-step-head.cblock--jade:first-child) .brand { color: #fff; }
+  body:has(.view > .lens-hero:first-child > .cblock) .brand :focus-visible,
+  body:has(.view > .lens-step-head.cblock:first-child) .brand :focus-visible { outline-color: currentColor; }
+}
+
+/* ---------- Mumu: two drawings (js/mascot.js) ---------- */
+.mumu { height: calc(var(--mumu-size, 72px) * 0.84); }
+.mumu-svg .mumu-eyes { fill: var(--ink); stroke: none; }
+.mumu-svg .mumu-leaf { stroke: none; }
+/* line: one even ink line, one 朱 dot */
+.mumu-v-line .mm-stroke { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mumu-v-line .mm-body { fill: var(--mumu-ground, var(--bg)); }
+.mumu-v-line .mumu-leaf { fill: var(--mumu-ground, var(--bg)); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.mumu-v-line .mm-ink { fill: var(--ink); }
+.mumu-v-line .mumu-eyes.mm-stroke { fill: none; stroke: var(--ink); }
+.mumu-v-line .mm-cheek { fill: var(--red); }
+.sheet .mumu-v-line, .lens-sheet .mumu-v-line { --mumu-ground: var(--surface); }
+/* solid: white body, big 朱 cheeks, ink face; the same in both themes because it always sits on a colour */
+.mumu-v-solid .mm-body { fill: #fff; }
+.mumu-v-solid .mm-cheek { fill: var(--red); }
+.mumu-v-solid .mumu-eyes, .mumu-v-solid .mm-ink { fill: #151515; }
+.mumu-v-solid .mumu-leaf { fill: var(--mumu-leaf, var(--jade)); }
+.mumu-v-solid .mm-sun { fill: var(--mumu-acc, var(--sun)); }
+.mumu-v-solid .mm-pink { fill: var(--mumu-soft, var(--pink)); }
+.mumu-v-solid .mm-on { fill: var(--mumu-on, #151515); }
+.mumu-v-solid .mumu-arcs path { fill: none; stroke-width: 4; }
+.mumu-v-solid .mm-arc-a { stroke: var(--mumu-on, #151515); }
+.mumu-v-solid .mm-arc-b { stroke: var(--mumu-acc, var(--sun)); }
+/* the solid Mumu off a block sits on a 黃 circle */
+.mumu-seat {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: var(--sun);
+  --mumu-acc: var(--red);
+}
+.mumu-seat .mumu { margin-top: -4px; }
+.mumu-pop {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--sun);
+  --mumu-acc: var(--red);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mumu--think .mumu-dots > * { animation: mumu-dot 1.2s steps(3, end) infinite; }
+  .mumu--think .mumu-dots > :nth-child(2) { animation-delay: 0.2s; }
+  .mumu--think .mumu-dots > :nth-child(3) { animation-delay: 0.4s; }
+  .mumu--sleepy .mumu-z path { animation: mumu-float 3s ease-in-out infinite; }
+  .mumu--sleepy .mumu-z path:nth-child(2) { animation-delay: 1s; }
+  .mumu--listen .mumu-arcs path { animation: mumu-arc 1.2s steps(2, end) infinite; }
+  .mumu--listen .mumu-arcs path:nth-child(2) { animation-delay: 0.3s; }
+  .mumu--happy .mumu-sparks path { animation-iteration-count: 2; animation-fill-mode: forwards; }
+}
+@keyframes mumu-arc { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ---------- icons (js/icons.js): a solid mass, knock-outs in the ground colour, one accent dot ---------- */
+.ic { fill: none; stroke: none; overflow: visible; }
+.ic .m { fill: currentColor; stroke: none; }
+.ic .k { fill: none; stroke: var(--ic-ground, var(--bg)); stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
+.ic .kf { fill: var(--ic-ground, var(--bg)); stroke: none; }
+.ic .o { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: square; stroke-linejoin: miter; }
+.ic .d { fill: var(--ic-dot, var(--sun)); stroke: none; }
+.sheet, .lens-sheet-body, .tile { --ic-ground: var(--surface); }
+.lens-stays::before { display: none; }
+/* lens marks: a flat spot shape under one heavy square-capped ink line */
+.lens-mark .mark-spot { fill: var(--mark-ink, var(--sun)); }
+.lens-mark .mark-line { fill: none; stroke: currentColor; stroke-width: 2.5px; stroke-linecap: square; stroke-linejoin: miter; }
+
+/* ---------- buttons, links, chips ---------- */
+.btn {
+  border: var(--outline) solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  min-height: 48px;
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  min-height: 56px;
+}
+.btn.primary:disabled,
+.btn.primary[disabled] {
+  background: #8a8780;
+  border-color: #8a8780;
+  color: #fff;
+  opacity: 1;
+}
+.btn.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.btn:not(:disabled):active { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn.primary:not(:disabled):active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); padding-left: 26px; }
+.btn.ghost:not(:disabled):active { background: transparent; border-color: transparent; color: var(--ink); }
+/* the one way forward on a screen: the label at the left, an arrow in a 黃 circle at the right */
+.hero-btn,
+.lens-hero-btn,
+.lens-nav .btn.primary,
+.view.night [data-key='night-next'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  text-align: left;
+  min-height: 62px !important;
+  padding: 0 10px 0 22px;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+}
+.hero-btn::after,
+.lens-hero-btn::after,
+.lens-nav .btn.primary::after,
+.view.night [data-key='night-next']::after {
+  content: '';
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f2b91d url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h13M12.5 6l6 6-6 6' fill='none' stroke='%23151515' stroke-width='2.6' stroke-linecap='square'/%3E%3C/svg%3E") center / 24px no-repeat;
+}
+.lens-nav .btn.primary:disabled::after { display: none; }
+.chip {
+  border: var(--outline) solid var(--ink);
+  border-radius: var(--pill);
+  background: transparent;
+  color: var(--ink);
+  min-height: 46px;
+}
+.chip.on,
+.view.lens .topic-chips .chip.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  --ic-ground: var(--ink);
+}
+.chip.on::before {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--sun);
+}
+.view.lens .topic-chips .chip.on::before { display: none; }
+.chip:not(.on):active { background: var(--ink); color: var(--bg); }
+.seg { border: var(--outline) solid var(--ink); border-radius: 0; padding: 0; overflow: hidden; }
+.seg-btn { border-radius: 0; color: var(--ink); }
+.seg-btn.on { background: var(--ink); color: var(--bg); border-radius: 0; }
+.tag { border: 0; border-radius: 0; background: var(--ink); color: var(--bg); }
+
+/* ---------- fields: white, one ink outline, square ---------- */
+.view textarea,
+.view input[type='text'],
+.view input[type='search'],
+.view input[type='number'],
+.view input[type='time'],
+.view input[type='password'],
+.view select,
+.sheet textarea,
+.sheet input[type='text'],
+#note,
+.search-row input,
+.ai-settings input,
+.ai-settings select,
+.reminder input[type='time'],
+.lens-plan input {
+  border: var(--outline) solid var(--ink);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
+}
+.view textarea { font-size: 19px; line-height: 1.6; padding: 16px 18px; }
+.view textarea:focus-visible,
+.view input:focus-visible { outline-offset: 0; outline-width: 2px; }
+::placeholder { color: #77757a; opacity: 1; }
+@media (prefers-color-scheme: dark) { ::placeholder { color: #a9add0; } }
+.night-mode ::placeholder { color: #a9add0; }
+
+/* ---------- boxes: no outlined cards; space, or a flat block ---------- */
+.checkin,
+.welcome,
+.help,
+.fit-list,
+.send-card,
+.week-card,
+.chart-wrap,
+.lens-help,
+.demo-banner,
+.quality-note,
+.low-card,
+.rec,
+.lens-card,
+.lens-suggest,
+.ai-msg.assistant,
+.deck-card,
+.night-card:not(.evening) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.help, .demo-banner, .quality-note, .low-card, .send-card, .week-card, .checkin { padding-left: 0; padding-right: 0; }
+.crisis, .tile, .rec-tile, .jar-pick, .lens-rewrite, .ai-msg.user { border-radius: 0; }
+.lens-rewrite, .jar-pick, .ai-msg.user { background: var(--pink); color: var(--on-spot); }
+.deck-card { background: var(--surface); }
+.deck-card.used { background: var(--sun); color: var(--on-spot); }
+.lens-card-head { background: var(--surface); }
+.lens-card, .lens-summary.compact { border-top: 0; }
+.detail-note { border-left: 0; padding-left: 0; }
+.search-snippet mark, .lens-because mark, .search-hit .search-snippet mark { background: var(--sun); color: var(--on-spot); padding: 1px 3px; }
+
+/* ---------- tab bar: an ink bar; the current tab sits on a 黃 circle ---------- */
+.tabs {
+  background: #151515;
+  border-top: 0;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  --ic-ground: #151515;
+}
+@media (prefers-color-scheme: dark) { .tabs { background: #0b0f29; --ic-ground: #0b0f29; } }
+.night-mode .tabs { background: #0b0f29; --ic-ground: #0b0f29; }
+.tab {
+  gap: 3px;
+  padding: 2px 0;
+  min-height: 60px;
+  justify-content: center;
+  color: #f6f3ec;
+  font-size: 11px;
+  text-decoration: none;
+  border-radius: 0;
+}
+.tab-label { letter-spacing: 0.04em; }
+.tab-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+}
+.tab.on { color: var(--sun); font-weight: 900; }
+.tab.on .tab-icon { background: var(--sun); color: #151515; --ic-ground: var(--sun); --ic-dot: var(--red); }
+.tab.on::before { display: none; }
+
+/* ---------- toast and sheets ---------- */
+.toast { border-radius: 0; background: var(--ink); color: var(--bg); }
+.sheet-body, .lens-sheet-body { border-radius: 0; border-top: var(--outline) solid var(--ink); }
+.lens-sheet-body::before { width: 44px; height: 5px; border-radius: 0; background: var(--ink); }
+.lens-sheet-close { border: 0; border-radius: 50%; background: var(--ink); color: var(--bg); }
+
+/* ---------- Today (loud): the 玉 block, the title, one way in, four square tiles, the voice row ---------- */
+.view.today > .lens-hero {
+  display: block;
+  padding: 0;
+}
+.hero-block { height: 258px; }
+.view.today > .lens-hero .mumu {
+  --mumu-size: 204px !important;
+  left: 46px;
+  bottom: 30px;
+  margin: 0;
+}
+.view.today > .lens-hero .hero-title {
+  font: 900 34px/1.24 var(--display);
+  letter-spacing: 0.02em;
+  margin: 18px 0 16px;
+  max-width: 9em;
+  text-wrap: balance;
+}
+:lang(en) .view.today > .lens-hero .hero-title { font-size: 30px; max-width: 12em; letter-spacing: 0; }
+.view.today > .lens-hero .hero-btn { width: 100%; margin-top: 0; }
+.view.today > .lens-hero .hero-what summary { font-family: var(--body); color: var(--muted); }
+.view.today > .tool-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border-top: 0;
+  margin-top: var(--s4);
+  padding: 0 0 var(--s4);
+}
+.tool-tile { gap: 8px; font-size: 14px; text-decoration: none; }
+.tool-icon {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 0;
+  background: var(--sun);
+  color: #151515;
+  --ic-ground: var(--sun);
+  --ic-dot: #fff;
+}
+.tool-icon .ic { width: 38px; height: 38px; }
+[data-key='calm-link'] .tool-icon { background: var(--pink); --ic-ground: var(--pink); }
+[data-key='writing-link'] .tool-icon { background: var(--red); --ic-ground: var(--red); }
+[data-key='night-link'] .tool-icon { background: var(--jade); color: #fff; --ic-ground: var(--jade); --ic-dot: var(--sun); }
+.tool-tile:active .tool-icon { background: var(--ink); color: var(--bg); --ic-ground: var(--ink); }
+.voice-card { border-top: 0; padding: var(--s2) 0; }
+.voice-title { font: 900 13px/1.4 var(--display); letter-spacing: 0.1em; }
+.voice-dot { background: var(--red); }
+.voice-card .prompt-text,
+.view.today .voice-card .prompt-text { font: 400 18px/1.55 var(--body); }
+/* the record button: one 朱 circle; while recording, an ink square with the circle inside */
+.stage::before, .stage::after { display: none; }
+.ring path, .stage.is-recording .ring path { stroke: none; fill: none; }
+.rec-btn { background: var(--red); border-radius: 50%; }
+.rec-icon { background: #151515; }
+.rec-btn:active { background: var(--red); }
+.stage.is-recording .rec-btn { background: var(--ink); border-radius: 0; }
+.stage.is-recording .rec-icon { background: var(--red); border-radius: 50%; width: 36%; }
+.today-links .link, .low-links .link { border: 0; background: transparent; }
+.welcome .welcome-door, .welcome-door { border: 0; border-radius: 0; background: var(--surface); }
+.welcome .welcome-door:first-child { background: var(--sun); color: var(--on-spot); --ic-ground: var(--sun); --ic-dot: #fff; }
+.welcome .welcome-door:first-child .welcome-door-body { color: var(--on-spot); }
+.welcome-door { --ic-ground: var(--surface); }
+/* the evening card: a flat block of night with the sleeping Mumu on a 朱 half circle */
+.night-card.evening {
+  display: block;
+  background: var(--night);
+  color: var(--night-ink);
+  border: 0;
+  border-radius: 0;
+  margin: 0 -24px;
+  padding: 0 24px 20px;
+}
+.night-card-block { height: 150px; margin: 0 -24px 12px; }
+.night-card-block .mumu { right: 22px; bottom: 6px; --mumu-size: 96px; }
+.night-card.evening .btn.primary { background: var(--moon); border-color: var(--moon); color: #151515; }
+.night-card.evening .btn.ghost { color: var(--night-ink); }
+
+/* ---------- 換角度: home (loud): a 粉 block ---------- */
+.view.lens .lens-hero,
+.view.lens > .lens-hero {
+  display: block;
+  padding: 0;
+}
+.view.lens > .lens-hero::before,
+.view.lens > .lens-hero::after,
+.view.lens .lens-summary-body::before,
+.view.lens .lens-summary-body::after { content: none; }
+.view.lens .lens-hero .hero-block { height: 190px; }
+.view.lens .lens-hero .mumu { --mumu-size: 156px !important; left: 96px; bottom: 22px; margin: 0; }
+.view.lens .lens-hero-line {
+  font: 900 30px/1.3 var(--display);
+  margin: 18px 0 16px;
+  text-wrap: balance;
+}
+:lang(en) .view.lens .lens-hero-line { font-size: 26px; }
+.view.lens .lens-hero-btn { width: 100%; margin-top: 0; }
+.view.lens .lens-tiles { gap: var(--s4) var(--s4); margin: var(--s5) 0 var(--s3); }
+.view.lens .lens-tile {
+  border: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  text-decoration: none;
+}
+.view.lens .lens-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+  background: var(--sun);
+  color: #151515;
+  --ic-ground: var(--sun);
+  --ic-dot: #fff;
+}
+.view.lens .lens-tile:nth-child(2) .lens-tile-icon { background: var(--jade); color: #fff; --ic-ground: var(--jade); --ic-dot: var(--sun); }
+.view.lens .lens-tile:nth-child(3) .lens-tile-icon { background: var(--pink); --ic-ground: var(--pink); }
+.view.lens .lens-tile:nth-child(4) .lens-tile-icon { background: var(--red); --ic-ground: var(--red); }
+.view.lens .lens-tile strong { font: 900 16px/1.4 var(--display); }
+.view.lens .lens-tile:active { background: transparent; color: var(--ink); }
+.view.lens .lens-tile:active strong, .view.lens .lens-tile:active .lens-tile-meta { color: var(--ink); text-decoration: underline; }
+.lens-link, .lens-option { border: 0; border-radius: 0; background: transparent; }
+.lens-option {
+  font: 900 15px/1.3 var(--display);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  min-height: 44px;
+}
+.lens-option.on { background: var(--sun); color: var(--on-spot); }
+
+/* ---------- 換角度: the worry (quiet) ---------- */
+.lens-progress { gap: 8px; align-items: center; }
+.lens-progress-seg,
+.lens-progress.dots .lens-progress-seg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: var(--outline) solid var(--ink);
+  outline: 0;
+}
+.lens-progress-seg.on,
+.lens-progress.dots .lens-progress-seg.on,
+.lens-progress.dots .lens-progress-seg.now {
+  width: 18px;
+  background: var(--ink);
+  outline: 0;
+}
+.view.lens .lens-ask h2,
+.view.lens.lens-flow > h2 { font: 900 24px/1.4 var(--display); }
+.view.lens .topic-chips .chip { min-height: 56px; border-radius: var(--pill); font-size: 15px; }
+.view.lens .lens-nav .btn.primary { min-width: 176px; }
+.heavy-val { font: 800 44px/1 var(--num); }
+.heavy-range::-webkit-slider-runnable-track { height: 12px; border: 0; border-radius: 0; background: var(--ink); }
+.heavy-range::-moz-range-track { height: 12px; border: 0; border-radius: 0; background: var(--ink); }
+.heavy-range::-webkit-slider-thumb,
+.heavy-range.unset::-webkit-slider-thumb {
+  width: 40px;
+  height: 40px;
+  margin-top: -14px;
+  border-radius: 50%;
+  background: var(--sun);
+  border: var(--outline) solid var(--ink);
+}
+.heavy-range::-moz-range-thumb,
+.heavy-range.unset::-moz-range-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sun);
+  border: var(--outline) solid var(--ink);
+}
+.heavy-range.unset::-webkit-slider-thumb { background: var(--bg); }
+.heavy-range.unset::-moz-range-thumb { background: var(--bg); }
+.heavy-range:focus-visible { outline: 3px solid var(--ink); outline-offset: 14px; }
+.lens-help { padding: var(--s3) 0; color: var(--muted); }
+
+/* ---------- 換角度: choose (quiet): a colour square with the mark, the name, one line ---------- */
+.lens-pick-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  gap: var(--s4);
+  min-height: 72px;
+  align-items: flex-start;
+  text-decoration: none;
+}
+.lens-pick-card:active { background: transparent; color: var(--ink); }
+.lens-pick-card:active .lens-because { color: var(--muted); }
+.lens-pick-card:active .lens-pick-name { text-decoration: underline; }
+.lens-pick-mark {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  flex: none;
+  background: var(--sun);
+  color: #151515;
+}
+.lens-suggest > :nth-child(3n + 2) .lens-pick-mark { background: var(--pink); }
+.lens-suggest > :nth-child(3n + 3) .lens-pick-mark { background: var(--jade); color: #fff; }
+.lens-pick-mark .mark-spot { fill: #fff; }
+.lens-suggest > :nth-child(3n + 3) .lens-pick-mark .mark-spot { fill: var(--sun); }
+.lens-pick-name { font: 900 18px/1.4 var(--display); }
+.view.lens .lens-suggest { gap: var(--s5); }
+.lens-rows { gap: 0; border-bottom: 0; }
+.lens-row { border: 0; border-radius: 0; background: transparent; padding: var(--s3) 0; }
+.lens-row:active { background: transparent; color: var(--ink); }
+.lens-row:active .lens-row-idea { color: var(--muted); }
+[data-key='policy-featured'] .lens-row { border: 0; background: var(--sun); color: var(--on-spot); padding: var(--s3) var(--s4); }
+
+/* ---------- 換角度: a question: the header block with a big numeral, then plain paper ---------- */
+.lens-step-head.cblock {
+  display: block;
+  height: 190px;
+  padding: 0;
+  margin-bottom: 0;
+}
+.lens-step-head .lens-step-title {
+  position: absolute;
+  left: 24px;
+  bottom: 18px;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+}
+.lens-bignum {
+  display: block;
+  font: 800 128px/0.86 var(--num);
+  letter-spacing: -0.04em;
+  color: inherit;
+}
+.lens-bignum small { font-size: 32px; letter-spacing: 0; margin-left: 6px; }
+.lens-step-head .lens-progress-seg { border-color: currentColor; }
+.lens-step-head .lens-progress-seg.on,
+.lens-step-head .lens-progress.dots .lens-progress-seg.now { background: currentColor; }
+.lens-step-head .lens-progress-num { display: none; }
+.lens-step-head.cblock > .mumu { --mumu-size: 138px; right: 34px; bottom: 16px; }
+.view.lens .lens-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 10px;
+  padding: 5px 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font: 900 13px/1.5 var(--display);
+  letter-spacing: 0.08em;
+}
+.lens-concern-quote { border-left: 0; padding-left: 0; margin-left: 0; font-size: 15px; color: var(--muted); }
+.view.lens .lens-q {
+  font: 900 24px/1.45 var(--display);
+  font-synthesis-weight: auto;
+  text-wrap: pretty;
+}
+:lang(zh-TW) .view.lens .lens-q { line-height: 1.5; }
+:lang(en) .view.lens .lens-q { font-size: 22px; }
+.scale-num { border: var(--outline) solid var(--ink); border-radius: 50%; }
+.scale-num.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.scale-dot::before { border: var(--outline) solid var(--ink); }
+.scale-dot.on::before { background: var(--ink); border-color: var(--ink); }
+
+/* ---------- 換角度: summary: Mumu on a 黃 circle, the card, the words, one 粉 block to try ---------- */
+.lens-celebrate-head { justify-content: space-between; flex-direction: row-reverse; align-items: center; gap: var(--s3); }
+.lens-celebrate-title { min-width: 0; flex: 1; }
+.view.lens .lens-celebrate-title h2 {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 5px 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font: 900 13px/1.5 var(--display);
+  letter-spacing: 0.08em;
+}
+.lens-celebrate-line { font: 900 28px/1.3 var(--display); color: var(--ink); margin: 0; text-wrap: balance; }
+:lang(en) .lens-celebrate-line { font-size: 24px; }
+.lens-card-art { border: 0; border-radius: 0; }
+.view.lens .lens-summary-body { border-top: 0; padding: var(--s3) 0 var(--s2); }
+.view.lens .lens-summary-body h3 { font: 400 13px/1.4 var(--body); letter-spacing: 0.1em; color: var(--muted); margin-top: var(--s5); }
+.lens-answer {
+  display: inline;
+  border-left: 0;
+  padding: 3px 6px;
+  margin: 0;
+  background: var(--sun);
+  color: var(--on-spot);
+  font-size: 19px;
+  line-height: 1.9;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+[data-key='lens-try'] {
+  position: relative;
+  margin: 0 -24px var(--s4);
+  padding: 20px 24px 20px 84px;
+  min-height: 84px;
+  background: var(--pink);
+  color: var(--on-spot);
+  font: 900 18px/1.5 var(--display);
+  font-synthesis-weight: auto;
+}
+[data-key='lens-try']::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #151515;
+}
+.lens-confetti i { border-radius: 50%; }
+.lens-confetti i:nth-child(3n + 1) { border-radius: 0; }
+.lens-face { border: var(--outline) solid transparent; border-radius: 50%; background: transparent; }
+.lens-face.on { background: var(--sun); border-color: var(--ink); color: #151515; --ic-ground: var(--sun); --ic-dot: var(--red); }
+.view.lens .lens-summary-actions .btn.primary { min-height: 62px; font-size: 19px; }
+
+/* ---------- journal, about, settings (quiet) ---------- */
+.empty-state { --grid: rgba(21, 21, 21, 0.1); }
+@media (prefers-color-scheme: dark) { .empty-state { --grid: rgba(246, 243, 236, 0.12); } }
+/* the journal's empty page is a sheet of 稿紙: squares only, no live text sits in them */
+.view.journal .empty-state {
+  margin: var(--s4) -24px 0;
+  padding: 34px 24px;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 34px 34px;
+  background-position: -1px -1px;
+}
+.view.journal .empty-state .empty { color: var(--ink); background: var(--bg); padding: 2px 6px; }
+.about-intro { align-items: center; }
+.about-intro h2 { font-size: 28px; margin-top: 0; }
+.help-title { font: 900 17px/1.4 var(--display); }
+.track { border: var(--outline) solid var(--ink); border-radius: 0; background: transparent; }
+.track.suggested { background: var(--sun); border-color: var(--sun); color: var(--on-spot); }
+.track.suggested span, .track.suggested .track-tag { color: var(--on-spot); }
+.track:active { background: var(--ink); color: var(--bg); }
+#journal-search-hint { border-radius: 0; }
+.legend-band::before, .legend-mood::before { border-radius: 0; }
+
+/* ---------- bedtime ritual (night): a crescent from two circles, Mumu asleep on a 朱 half circle ---------- */
+.night-mumu.cblock { display: block; height: 230px; margin: 0 -24px 8px; }
+.night-mumu.cblock > .mumu { --mumu-size: 150px; left: calc(50% - 86px); bottom: 34px; }
+.night-mumu--done { justify-content: center; }
+.view.night h2 { font: 900 26px/1.35 var(--display); }
+.night-step[data-step]::after { height: 6px; border-radius: 0; }
+.view.night.playing .breath::before { display: none; }
+.view.night.playing .breath::after { background: var(--moon); }
+html:root body .breathe-circle,
+html:root body .calm-flow .breathe-flow.compact::before { background: var(--sun) !important; border: var(--outline) solid var(--ink); }
+html:root body .ground-num { background: var(--sun); color: var(--on-spot); border: 0; border-radius: 50%; }
+html:root body .policy-optin { border-radius: 0; }
+
+@media (max-width: 359px) {
+  .view.today > .lens-hero .mumu { --mumu-size: 170px !important; left: 24px; }
+  .lens-bignum { font-size: 104px; }
+}
+
+/* 圓方: fixes after looking at it on a phone */
+.mumu-v-solid .mumu-sprout path.mumu-leaf { fill: var(--mumu-leaf, var(--jade)); stroke: none; }
+.cblock--night .mumu-z { display: none; }
+.lens-pick-mark { border-radius: 0; }
+.view.lens .lens-name, .view.lens .lens-celebrate-title h2 { width: fit-content; max-width: 100%; }
+.view.lens .lens-q { font-size: 22px; }
+:lang(en) .view.lens .lens-q { font-size: 21px; }
+.lens-answer { display: block; width: fit-content; max-width: 100%; }
+.lens-celebrate-line { font-size: 26px; }
+.view.journal .empty-state { max-width: none; width: auto; }
+.view > .lens-hero:first-child { margin-top: 0; }
+/* the hero's block bleeds by widening the hero itself, so nothing spills out of it */
+.view.today > .lens-hero,
+.view.lens > .lens-hero { margin-inline: -24px; }
+.view.today > .lens-hero > :not(.cblock),
+.view.lens > .lens-hero > :not(.cblock) { margin-inline: 24px; }
+.view.today > .lens-hero .hero-btn,
+.view.lens .lens-hero-btn { width: calc(100% - 48px); }
+.lens-hero > .hero-block { margin-inline: 0; }
+.conf { background: var(--ink); color: var(--bg); border-radius: 0; }
+.ai-msg.user .ai-who { color: var(--on-spot); }
+/* the summary stays short enough that Save is within reach */
+.mumu-seat { width: 88px; height: 88px; }
+.mumu-seat .mumu { --mumu-size: 64px !important; }
+.view.lens .lens-summary-body h3 { margin-top: var(--s4); }
+[data-key='lens-try'] { font-size: 17px; line-height: 1.45; padding-top: 16px; padding-bottom: 16px; min-height: 76px; margin-bottom: var(--s3); }
+[data-key='lens-try']::before { top: 16px; }
+.lens-answer { font-size: 18px; line-height: 1.7; }
+.lens-celebrate-line { font-size: 24px; }
+.view.lens .lens-summary-body h3 { margin-top: var(--s3); }
+.view.lens .lens-summary-body { padding-top: 0; }
+[data-key='lens-try'] { font-size: 16px; padding: 14px 24px 14px 76px; min-height: 68px; }
+[data-key='lens-try']::before { top: 14px; width: 40px; height: 40px; }
