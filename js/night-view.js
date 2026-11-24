@@ -9,6 +9,10 @@ const S = {
     cardTitle: '睡前儀式',
     cardBody: '放下今天的心事，聽一段三到五分鐘的睡前引導，收一張小明信片。',
     cardStart: '開始',
+    cardListen: '只想聽一段',
+    leave: '離開睡前儀式',
+    helpBar: '需要現在就找人說說話？',
+    helpOpen: '求助專線',
     step: (i, n) => `${i} / ${n}`,
     worryTitle: '把今天的心事放下來',
     worryHelp: '寫幾句也好，不寫也可以。這些字只存在你的手機上。',
@@ -54,6 +58,10 @@ const S = {
     cardTitle: 'Bedtime ritual',
     cardBody: 'Set down today\'s worry, listen to a three to five minute wind-down, and get a small postcard.',
     cardStart: 'Start',
+    cardListen: 'Just listen',
+    leave: 'Leave the ritual',
+    helpBar: 'Need to talk to someone now?',
+    helpOpen: 'Help lines',
     step: (i, n) => `${i} of ${n}`,
     worryTitle: 'Set down what is on your mind',
     worryHelp: 'A few lines, or nothing at all. What you write stays on this phone.',
@@ -119,7 +127,15 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     }
   }
 
-  async function begin() {
+  // One tap from the card straight to a track, for nights when writing is too much.
+  async function listenNow() {
+    unlockSpeech(); // must run inside the tap, before any await
+    await begin({ stay: true });
+    await play(chooseFor());
+  }
+
+  async function begin({ stay = false } = {}) {
+    st.helpOpen = false;
     st.worry = '';
     st.theme = null;
     st.kind = '';
@@ -130,7 +146,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.jar = nights.map((n) => n.kindness).filter(Boolean);
     st.finishing = false;
     voicesReady(); // start loading voices early
-    go('worry');
+    if (!stay) go('worry');
   }
 
   // Pause with help instead of deleting; the person can carry on if it was something else.
@@ -147,13 +163,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     return [h('p', { class: 'muted small night-step' }, L().step(i, 4)), h('h2', {}, title), help ? h('p', { class: 'muted small' }, help) : null];
   }
 
-  function nav(onNext, { skip = true, back = null, nextLabel } = {}) {
+  function nav(onNext, { back = null, nextLabel } = {}) {
     return h(
       'div',
       { class: 'actions left' },
       h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-next', onclick: onNext }, nextLabel || L().next),
-      back ? h('button', { type: 'button', class: 'btn ghost', onclick: back }, L().back) : null,
-      skip ? null : null
+      back ? h('button', { type: 'button', class: 'btn ghost', onclick: back }, L().back) : null
     );
   }
 
@@ -162,7 +177,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
-      h('div', {}, h('h2', {}, L().cardTitle), h('p', {}, L().cardBody), h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: begin }, L().cardStart))
+      h('div', {}, h('h2', {}, L().cardTitle), h('p', {}, L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', onclick: listenNow }, L().cardListen)))
     );
   }
 
@@ -455,7 +470,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           L().done
         )
       ),
-      openGentle ? h('button', { type: 'button', class: 'link', onclick: () => openGentle({ night: true }) }, L().gentle) : null,
+      openGentle ? h('button', { type: 'button', class: 'link', onclick: () => openGentle() }, L().gentle) : null,
     ];
   }
 
@@ -510,7 +525,30 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function view() {
     const stages = { worry, kind, tone, play: playView, postcard, crisis };
     const wrap = h('section', { class: 'view night' + (st.stage === 'play' ? ' playing' : '') });
+    if (st.stage !== 'postcard')
+      add(
+        wrap,
+        h('button', { type: 'button', class: 'link night-leave', 'data-key': 'night-leave', onclick: () => {
+          stopAll(true);
+          onExit();
+        } }, L().leave)
+      );
     add(wrap, (stages[st.stage] || worry)());
+    // help lines one tap away on every step, as in the lens exercise (playback stays uncluttered)
+    if (st.stage !== 'crisis' && st.stage !== 'play')
+      add(
+        wrap,
+        h(
+          'div',
+          { class: 'lens-help' },
+          h('span', {}, L().helpBar),
+          h('button', { type: 'button', class: 'link', 'aria-expanded': st.helpOpen ? 'true' : 'false', 'data-key': 'night-help', onclick: () => {
+            st.helpOpen = !st.helpOpen;
+            rerender();
+          } }, L().helpOpen)
+        ),
+        st.helpOpen ? helpList(h, getLang()) : null
+      );
     return wrap;
   }
 

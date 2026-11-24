@@ -126,3 +126,25 @@ test('leaving the Today tab mid-ritual keeps what was written', async ({ page })
   await page.goto('/#today');
   await expect(page.locator('#night-kind')).toHaveValue('早點洗澡');
 });
+
+test('just listen goes from the card straight to a track; leave returns to Today', async ({ page }) => {
+  await page.goto('/');
+  const listen = page.locator('[data-key="night-listen"]');
+  if (!(await listen.count())) {
+    // daytime: the card is not on Today, so open the ritual and leave it instead
+    await page.locator('[data-key="night-link"]').click();
+    await page.locator('[data-key="night-leave"]').click();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    return;
+  }
+  await listen.click();
+  await expect(page.locator('.view.night.playing')).toBeVisible();
+  await page.locator('[data-key="night-leave"]').click();
+  await expect(page.locator('.view.night')).toHaveCount(0);
+});
+
+test('help lines are one tap away during the ritual', async ({ page }) => {
+  await startRitual(page);
+  await page.locator('[data-key="night-help"]').click();
+  await expect(page.locator('.view.night a[href="tel:1925"]')).toBeVisible();
+});

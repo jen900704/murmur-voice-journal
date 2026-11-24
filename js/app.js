@@ -546,16 +546,19 @@ function viewToday() {
           { class: 'recent', role: 'list', 'aria-label': t('recentLabel') },
           recent.map((e) =>
             h(
-              'button',
-              {
-                type: 'button',
-                role: 'listitem',
-                class: 'recent-item',
-                'data-key': `recent-${e.id}`,
-                'aria-label': fmtDate(e.createdAt, { dateStyle: 'medium', timeStyle: 'short' }),
-                onclick: (ev) => openDetail(e.id, ev.currentTarget),
-              },
-              glyph(e.features, 60, { width: 40 })
+              'div',
+              { role: 'listitem' },
+              h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'recent-item',
+                  'data-key': `recent-${e.id}`,
+                  'aria-label': fmtDate(e.createdAt, { dateStyle: 'medium', timeStyle: 'short' }),
+                  onclick: (ev) => openDetail(e.id, ev.currentTarget),
+                },
+                glyph(e.features, 60, { width: 40 })
+              )
             )
           )
         )
@@ -668,6 +671,12 @@ function renderSheet() {
   setBackgroundInert(true);
   const body = h('div', { class: 'sheet-body', role: 'dialog', 'aria-modal': 'true' }, h('button', { type: 'button', class: 'link back', onclick: closeSheet }, t('back')));
   add(body, state.sheetFn(renderSheet));
+  // name the dialog after its first heading
+  const head = body.querySelector('h2');
+  if (head) {
+    head.id = head.id || 'sheet-title';
+    body.setAttribute('aria-labelledby', head.id);
+  }
   sheet.appendChild(body);
   body.querySelector('.back').focus();
   sheet.onkeydown = null;

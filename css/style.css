@@ -1552,3 +1552,9 @@ h3.sub {
   min-height: 36px;
   font-size: 0.9rem;
 }
+
+.night-leave {
+  display: block;
+  margin: 0 0 6px auto;
+  font-size: 0.9rem;
+}
