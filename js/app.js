@@ -491,6 +491,7 @@ function viewToday() {
   const idle = state.phase === 'idle' || state.phase === 'error';
   if (idle && !state.welcomed && !state.entries.length) add(wrap, welcomeCard());
   if (idle) add(wrap, extras.lowMoodCard(latestRated()));
+  if (idle) add(wrap, iosInstallNote());
   const welcoming = idle && !state.welcomed && !state.entries.length;
   if (idle && isEvening() && !welcoming) add(wrap, nightView.card());
   add(wrap, 
@@ -599,6 +600,20 @@ function viewToday() {
     }
   }
   return wrap;
+}
+
+// Safari on iPhone may clear a site's data after about a week without a visit; a home-screen
+// app is kept. After a couple of real entries, say so once, with the steps.
+function iosInstallNote() {
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  if (!ios || standalone || state.installNoted || state.entries.filter((e) => !e.demo).length < 2) return null;
+  const dismiss = () => {
+    state.installNoted = true;
+    db.setSetting('installNoted', true).catch(() => {});
+    render();
+  };
+  return h('div', { class: 'demo-banner', role: 'note' }, h('span', {}, t('iosInstall')), h('button', { type: 'button', class: 'link', 'data-key': 'ios-install-ok', onclick: dismiss }, t('gotIt')));
 }
 
 // First visit only: three ways in, and what the app is not. Dismissed for good with one tap.
@@ -1406,6 +1421,7 @@ async function init() {
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
   state.welcomed = (await db.getSetting('welcomed', false).catch(() => false)) === true;
   state.lastBackup = await db.getSetting('lastBackup', 0).catch(() => 0);
+  state.installNoted = (await db.getSetting('installNoted', false).catch(() => false)) === true;
   state.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
   state.aiKeySet = !!(await db.getSetting('aiKey', '').catch(() => ''));
   state.aiModel = await db.getSetting('aiModel', AI_MODELS[0].id).catch(() => AI_MODELS[0].id);

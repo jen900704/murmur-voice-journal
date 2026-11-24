@@ -91,3 +91,27 @@ test('after ten real entries the journal offers a backup, then waits a month', a
   expect(download.suggestedFilename()).toMatch(/^murmur-backup-/);
   await expect(page.locator('[data-key="backup-now"]')).toHaveCount(0);
 });
+
+test.describe('on iPhone Safari', () => {
+  test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' });
+  test('after two real entries, Today says once how to keep data by adding to the Home Screen', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.prompt-text').waitFor();
+    await page.evaluate(async () => {
+      const data = await fetch('./demo/demo-data.json').then((r) => r.json());
+      await new Promise((res) => {
+        const q = indexedDB.open('murmur', 3);
+        q.onsuccess = () => {
+          const t = q.result.transaction('entries', 'readwrite');
+          data.entries.slice(0, 2).forEach((e, i) => t.objectStore('entries').put({ ...e, id: 'i' + i, demo: false, hasAudio: false, createdAt: Date.now() - i * 86400000 }));
+          t.oncomplete = res;
+        };
+      });
+    });
+    await page.reload();
+    await page.locator('[data-key="ios-install-ok"]').click();
+    await page.reload();
+    await page.locator('.prompt-text').waitFor();
+    await expect(page.locator('[data-key="ios-install-ok"]')).toHaveCount(0);
+  });
+});
