@@ -244,7 +244,9 @@ test('day count: the same deep prompt saved on an earlier day shows 第 2 天, w
   await expect(key(page, 'writing-day')).toHaveText('第 2 天');
 });
 
-test('copy puts the text on the clipboard', async ({ page, context }) => {
+test('copy puts the text on the clipboard', async ({ page, context, browserName }) => {
+  // Playwright WebKit has no clipboard permissions to grant; Chromium covers this path
+  test.skip(browserName === 'webkit', 'clipboard permissions are Chromium-only in Playwright');
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await open(page);
   await key(page, 'writing-prompt-l-value').click();
