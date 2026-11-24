@@ -272,7 +272,8 @@ async function savePending() {
   const entry = {
     id: uid(),
     createdAt: Date.now(),
-    prompt: prompts[(state.askIndex ?? state.promptIndex) % prompts.length],
+    // a silent check-in does not answer the day's prompt, so it neither stores nor uses it up
+    prompt: p.silent ? '' : prompts[(state.askIndex ?? state.promptIndex) % prompts.length],
     lang: getLang(),
     mood: p.mood,
     energy: p.energy,
@@ -288,6 +289,7 @@ async function savePending() {
     savePending.busy = false;
     state.pending = null;
     state.phase = 'idle';
+    toast(t('silentEmpty'));
     return render();
   }
   let message = t('saved');
@@ -307,12 +309,14 @@ async function savePending() {
     return;
   }
   savePending.busy = false;
-  state.askIndex = null;
+  if (!p.silent) {
+    state.askIndex = null;
+    state.promptIndex = (state.promptIndex + 1) % prompts.length;
+  }
   state.entries.push(entry);
   db.requestPersistence();
   state.pending = null;
   state.phase = 'idle';
-  state.promptIndex = (state.promptIndex + 1) % prompts.length;
   toast(message);
   render();
   if (noteRisk) extras.showHelp();
@@ -472,7 +476,7 @@ function viewToday() {
     };
     add(wrap, 
       // a silent check-in has no voice to show: just the check-in itself
-      p.silent ? h('h2', {}, t('silentTitle')) : null,
+      p.silent ? h('h2', { tabindex: '-1', 'data-key': 'silent-title' }, t('silentTitle')) : null,
       p.silent ? h('p', { class: 'muted small' }, t('silentBody')) : null,
       p.silent ? null : h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
       p.silent ? null : qualityNote(f),
@@ -481,8 +485,8 @@ function viewToday() {
       h(
         'div',
         { class: 'checkin' },
-        h('h3', {}, t('checkIn')),
-        h('p', { class: 'muted small' }, t('checkInOptional')),
+        p.silent ? null : h('h3', {}, t('checkIn')),
+        p.silent ? null : h('p', { class: 'muted small' }, t('checkInOptional')),
         scale7('mood', p.mood, t('moodLow'), t('moodHigh'), pick('mood')),
         scale7('energy', p.energy, t('energyLow'), t('energyHigh'), pick('energy')),
         h('label', { class: 'note-label', for: 'note' }, t('note')),
@@ -595,8 +599,12 @@ function viewToday() {
       h('button', { type: 'button', class: 'link center', 'data-key': 'silent-checkin', onclick: () => {
         state.pending = { silent: true, features: null, mood: null, energy: null, note: '' };
         state.phase = 'result';
+        // choosing a way in counts as having seen the welcome
+        state.welcomed = true;
+        db.setSetting('welcomed', true).catch(() => {});
         render();
         window.scrollTo(0, 0);
+        focusKey('silent-title');
       } }, t('silentLink'))
     );
     if (!state.entries.length) {
@@ -701,7 +709,8 @@ function viewJournal() {
   if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
-    add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')), silentSection());
+    const silentOnly = state.entries.some((e) => e.silent);
+    add(wrap, h('p', { class: 'empty' }, t(silentOnly ? 'journalEmptyVoice' : 'journalEmpty')), silentOnly ? null : h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')), silentSection());
     return wrap;
   }
   add(wrap, demoBanner(), h('p', { class: 'muted' }, t('entries', entries.length)));
@@ -741,7 +750,7 @@ function viewJournal() {
 
 // Check-ins saved without a recording, newest first, each removable on its own.
 function silentSection() {
-  const list = state.entries.filter((e) => e.silent).slice(-30).reverse();
+  const list = state.entries.filter((e) => e.silent).reverse();
   if (!list.length) return null;
   const rating = (label, v) => (Number.isFinite(v) ? `${label} ${v}/7` : null);
   return [
@@ -1358,7 +1367,7 @@ function viewAbout() {
     h(
       'div',
       { class: 'data-actions' },
-      h('button', { type: 'button', class: 'btn', onclick: exportCsv, disabled: !state.entries.length }, t('exportCsv')),
+      h('button', { type: 'button', class: 'btn', onclick: exportCsv, disabled: !state.entries.some((e) => e.features) }, t('exportCsv')),
       h('button', { type: 'button', class: 'btn', onclick: exportJson }, t('exportJson')),
       h('button', { type: 'button', class: 'btn', onclick: () => fileInput.click() }, t('importJson')),
       fileInput,

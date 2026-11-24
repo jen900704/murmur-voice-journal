@@ -151,12 +151,20 @@ test('a silent check-in saves mood without a recording and shows in the journal,
   await page.locator('.prompt-text').waitFor();
   const w = page.locator('[data-key="welcome-close"]');
   if (await w.count()) await w.click();
+  const promptBefore = await page.locator('.prompt-text').textContent();
+  // saving with nothing filled in keeps nothing
+  await page.locator('[data-key="silent-checkin"]').click();
+  await expect(page.locator('[data-key="silent-title"]')).toBeFocused();
+  await page.locator('[data-key="save"]').click();
+  await expect(page.locator('.prompt-text')).toBeVisible();
   await page.locator('[data-key="silent-checkin"]').click();
   await page.locator('[data-key="mood-2"]').click();
   await page.fill('#note', 'roommate asleep');
   await page.locator('[data-key="save"]').click();
-  await expect(page.locator('.prompt-text')).toBeVisible();
+  // a silent check-in does not use up the day's prompt
+  await expect(page.locator('.prompt-text')).toHaveText(promptBefore);
   await page.goto('/#journal');
+  await expect(page.locator('.silent-list li')).toHaveCount(1);
   await expect(page.locator('.silent-list')).toContainText('roommate asleep');
   await page.goto('/#trends');
   await expect(page.locator('.chart')).toHaveCount(0);

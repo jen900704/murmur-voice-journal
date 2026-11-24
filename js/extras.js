@@ -9,6 +9,7 @@ const S = {
     gentleTitle: '今晚來點溫柔的',
     weekTitle: '這七天',
     weekVoice: (n) => `錄了 ${n} 段聲音`,
+    weekSilent: (n) => `沒錄音記了 ${n} 次心情`,
     weekNights: (n) => `做了 ${n} 次睡前儀式`,
     weekKinds: '你寫下的、對自己好的事：',
     orderNote: '排序會參考現在的時間和你最近記下的心情，只在這個裝置上計算。',
@@ -69,6 +70,7 @@ const S = {
     orderNote: 'The order takes the time of day and your latest mood check-in into account, worked out on this device.',
     weekTitle: 'The last seven days',
     weekVoice: (n) => `${n} voice ${n === 1 ? 'entry' : 'entries'}`,
+    weekSilent: (n) => `${n} mood ${n === 1 ? 'check-in' : 'check-ins'} without a recording`,
     weekNights: (n) => `${n} bedtime ${n === 1 ? 'ritual' : 'rituals'}`,
     weekKinds: 'Kind things you wrote down:',
     gentleTitle: 'Something gentle for tonight',
@@ -460,11 +462,13 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     }
     const since = Date.now() - 7 * 86400000;
     const entries = ((getState && getState().entries) || []).filter((e) => !e.demo && e.features && e.createdAt >= since);
+    const silent = ((getState && getState().entries) || []).filter((e) => !e.demo && e.silent && e.createdAt >= since);
     const nights = ex.nights.filter((n) => n.createdAt >= since);
     const kinds = nights.map((n) => n.kindness).filter(Boolean);
-    if (!entries.length && !nights.length) return null;
+    if (!entries.length && !silent.length && !nights.length) return null;
     const parts = [];
     if (entries.length) parts.push(L().weekVoice(entries.length));
+    if (silent.length) parts.push(L().weekSilent(silent.length));
     if (nights.length) parts.push(L().weekNights(nights.length));
     return h(
       'details',
