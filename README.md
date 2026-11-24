@@ -98,6 +98,7 @@ The unit tests (`npm test`) cover YIN on harmonic tones from 90 to 380 Hz, rejec
 - Phone microphones, distance, background noise, and colds all change these numbers. Recording in a similar place and position each time helps.
 - Browsers differ in how much audio processing they let an app turn off. Some iPhone models may still apply processing.
 - Speaking rate is an estimate based on intensity peaks, not a transcript.
+- Lexical tones in Mandarin (and other tone languages) raise pitch movement and pitch range by themselves. The usual range is only meaningful if recordings are in the same language.
 - The correlations are descriptive and based on one person's data. They are leads to be curious about, not findings.
 - If you speak with almost no silence at all, the noise floor is estimated from speech, which can make a recording look noisy or be rejected. Leaving a short pause at the start helps.
 - Music, singing, or a TV in the background can pass the voicing check and produce numbers that are not about your speech.
@@ -184,7 +185,7 @@ Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天�
 
 **和自己比的規則。** 累積 10 筆可用的紀錄後，每筆新的數值會和你之前的紀錄比較（中位數加減 k 個標準化的 MAD）。紀錄少的時候中位數本身也不準，所以 k 會隨筆數調整：10 筆時是 3.02，100 筆時是 2.04。這個公式是用模擬校正的，在什麼都沒變的情況下，不論累積幾筆，大約都只有 5% 的數值會被標成「明顯比平常高或低」。爆音或背景噪音太大的錄音會保留，但不會拿來算平常範圍。聲音和心情的相關要等到有 20 筆標記後才顯示，並且會清楚說明同時看了很多個相關、每天的紀錄彼此不獨立，所以只能當作線索。
 
-**它不是什麼。** Murmur 不是醫療器材，不做診斷。手機麥克風、距離、環境噪音、感冒都會影響數字，每次在差不多的地方、用差不多的姿勢錄，結果會比較穩定。
+**它不是什麼。** Murmur 不是醫療器材，不做診斷。手機麥克風、距離、環境噪音、感冒都會影響數字，每次在差不多的地方、用差不多的姿勢錄，結果會比較穩定。中文的聲調本身會讓音高起伏和音域變大，所以最好每次都用同一種語言錄。
 
 **驗證。** 先公開登錄分析計畫，再用 36 段真人英文錄音和 Praat 比較：音高很接近（嚴重音高錯誤 1.8%，細部誤差中位數 4.6 cents），停頓偵測在 30 組數字串中有 29 組完全正確。有聲段覆蓋率、部分說話者的音高中位數、音高範圍和音節數沒有達到事先訂的標準，原因寫在 `docs/validation-results.md`。另一個登錄過的研究測試了壓縮、音量、自動增益、噪音、回音和電話音質：64 kbit/s 以上的壓縮、±6 dB 音量和自動增益幾乎沒有影響，背景噪音則會影響響度起伏、聲音規律度和時間相關的特徵。中文真人錄音還沒有驗證。
 

@@ -154,7 +154,7 @@ export const STRINGS = {
     },
     feat: {
       f0MedianHz: ['音高', '說話時聲音的中間高度。感冒、疲倦或情緒都會讓它移動。'],
-      f0SdSt: ['音高起伏', '音高變化有多大，單位是半音。數字越小，聲音聽起來越平。'],
+      f0SdSt: ['音高起伏', '音高變化有多大，單位是半音。數字越小，聲音聽起來越平。中文的聲調本身就會讓這個數字比較大，所以每次用同一種語言錄，比較才有意義。'],
       f0RangeSt: ['音域寬度', '這段話裡較高和較低音高的距離（第 5 到第 95 百分位），單位是半音。'],
       speechRate: ['語速', '每秒大約幾個音節，包含停頓的時間。'],
       articulationRate: ['發音速度', '每秒大約幾個音節，不算停頓。'],
@@ -338,7 +338,7 @@ export const STRINGS = {
     },
     feat: {
       f0MedianHz: ['Pitch', 'The middle height of your voice while speaking. Colds, tiredness, and emotion can shift it.'],
-      f0SdSt: ['Pitch movement', 'How much your pitch varies, in semitones. Lower numbers sound flatter.'],
+      f0SdSt: ['Pitch movement', 'How much your pitch varies, in semitones. Lower numbers sound flatter. Tones in Mandarin raise this number by themselves, so compare recordings made in the same language.'],
       f0RangeSt: ['Pitch range', 'Distance between your higher and lower pitches (5th to 95th percentile), in semitones.'],
       speechRate: ['Speaking rate', 'Approximate syllables per second, including pauses.'],
       articulationRate: ['Articulation rate', 'Approximate syllables per second, excluding pauses.'],
