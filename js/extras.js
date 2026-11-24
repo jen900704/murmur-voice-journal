@@ -7,6 +7,9 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
+    typeLabel: '想看哪一種',
+    toneLabel: '今晚想要的感覺（可不選）',
+    more: (n) => `再看 ${n} 個`,
     exchangeHow: '寫下你的回答，用手機的分享功能傳給一個人。對方會收到你的回答，和一個連結，可以回答同一題再傳回給你。Murmur 不會經手或保存。',
     cancel: '取消',
     recsFailed: '片單沒有載入成功，請連上網路後再試一次。',
@@ -55,6 +58,9 @@ const S = {
     recsFailed: 'The list did not load. Please try again when you are online.',
     exchangeHow: 'Write your answer and send it to one person with your phone\'s share sheet. They get your answer and a link to answer the same prompt and send it back. Murmur does not pass it on or keep it.',
     cancel: 'Cancel',
+    typeLabel: 'What kind',
+    toneLabel: 'The feeling you want tonight (optional)',
+    more: (n) => `Show ${n} more`,
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
@@ -132,14 +138,17 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     return [
       h('h2', {}, L().gentleTitle),
       h('p', { class: 'muted small' }, L().gentleNote),
-      h('div', { class: 'chips wrap' }, chip(ex.type === 'all', L().all, () => ((ex.type = 'all'), rerender())), Object.keys(L().types).map((k) => chip(ex.type === k, L().types[k], () => ((ex.type = k), rerender())))),
-      h('div', { class: 'chips wrap' }, Object.keys(L().tones).map((k) => chip(ex.tone === k, L().tones[k], () => ((ex.tone = ex.tone === k ? null : k), rerender())))),
-      h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: ex.heavy, onchange: (e) => ((ex.heavy = e.target.checked), rerender()) }), h('span', {}, L().showHeavy)),
+      h('p', { class: 'lens-label', id: 'recs-type' }, L().typeLabel),
+      h('div', { class: 'chips wrap', role: 'group', 'aria-labelledby': 'recs-type' }, chip(ex.type === 'all', L().all, () => ((ex.type = 'all'), (ex.showAll = false), rerender())), Object.keys(L().types).map((k) => chip(ex.type === k, L().types[k], () => ((ex.type = k), (ex.showAll = false), rerender())))),
+      h('p', { class: 'lens-label', id: 'recs-tone' }, L().toneLabel),
+      h('div', { class: 'chips wrap', role: 'group', 'aria-labelledby': 'recs-tone' }, Object.keys(L().tones).map((k) => chip(ex.tone === k, L().tones[k], () => ((ex.tone = ex.tone === k ? null : k), (ex.showAll = false), rerender())))),
+      h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: ex.heavy, onchange: (e) => ((ex.heavy = e.target.checked), (ex.showAll = false), rerender()) }), h('span', {}, L().showHeavy)),
       items.length ? null : h('p', { class: 'empty' }, L().none),
       h(
         'div',
         { class: 'recs' },
-        items.map((it) => {
+        // a short list first; the rest on request, so the sheet is not endless at bedtime
+        (ex.showAll ? items : items.slice(0, 6)).map((it) => {
           const main = (lang === 'en' ? it.title.en : it.title.zh) || it.title.orig || it.title.en;
           const sub = [it.title.orig !== main ? it.title.orig : null, it.creator, it.year].filter(Boolean).join(' · ');
           const cwNames = it.cw.map((c) => L().cwNames[c] || c);
@@ -158,6 +167,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
           );
         })
       ),
+      !ex.showAll && items.length > 6 ? h('button', { type: 'button', class: 'btn', 'data-key': 'recs-more', onclick: () => ((ex.showAll = true), rerender()) }, L().more(items.length - 6)) : null,
       h('button', { type: 'button', class: 'btn', onclick: closeSheet }, L().close),
     ];
   }

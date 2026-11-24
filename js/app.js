@@ -961,7 +961,7 @@ function viewTrends() {
   if (rated.length < LINKS_MIN) {
     add(links, h('p', { class: 'muted' }, t('linksNeedMore', LINKS_MIN, rated.length)));
   } else {
-    add(links, h('p', { class: 'muted small' }, t('linksIntro')));
+    add(links, h('p', { class: 'small' }, t('linksPlain')), h('details', { class: 'lens-more' }, h('summary', {}, t('linksHow')), h('p', { class: 'muted small' }, t('linksIntro'))));
     const table = h('table', { class: 'links-table' });
     add(table, 
       h(

@@ -1726,3 +1726,16 @@ h3.sub {
   display: inline;
   margin: 0;
 }
+/* the sheet's Back stays reachable while scrolling, with a full-size target */
+.sheet-body > .link.back {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  margin-left: -14px;
+  background: var(--bg);
+  border-radius: 0 0 12px 0;
+}

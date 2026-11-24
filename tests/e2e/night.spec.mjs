@@ -120,10 +120,14 @@ test('gentle recommendations open from the lens tab and hide heavy works by defa
   await page.goto('/#lens');
   await page.getByRole('button', { name: /溫柔的作品推薦/ }).click();
   await expect(page.locator('.rec').first()).toBeVisible();
+  // six at first, the rest on request
+  expect(await page.locator('.rec').count()).toBe(6);
+  await page.locator('[data-key="recs-more"]').click();
   const light = await page.locator('.rec').count();
   expect(light).toBeGreaterThan(15);
   await expect(page.locator('#sheet')).not.toContainText('精神病房也會迎來清晨');
   await page.getByText('也顯示內容較沉重的作品').click();
+  await page.locator('[data-key="recs-more"]').click();
   expect(await page.locator('.rec').count()).toBeGreaterThan(light);
 });
 
