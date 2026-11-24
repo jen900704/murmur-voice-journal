@@ -665,7 +665,7 @@ function welcomeCard() {
       })
     ),
     h('p', { class: 'muted small' }, t('welcomeNote')),
-    h('button', { type: 'button', class: 'link', 'data-key': 'welcome-close', onclick: () => { dismiss(); render(); } }, t('welcomeClose'))
+    h('button', { type: 'button', class: 'link', 'data-key': 'welcome-close', onclick: () => { dismiss(); render(); window.scrollTo(0, 0); } }, t('welcomeClose'))
   );
 }
 

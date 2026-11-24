@@ -1125,6 +1125,13 @@ h3.sub {
   border-color: #f3efff;
   color: #2b2752;
 }
+.night-card.evening .btn.ghost {
+  color: #f3efff;
+  border-color: rgba(243, 239, 255, 0.45);
+}
+.night-card.evening .btn.ghost:disabled {
+  color: #d9d3f5;
+}
 .night-moon {
   flex: none;
   width: 44px;

@@ -70,6 +70,13 @@ const screens = [
     await page.locator('[data-key="breathe-start"]').click();
     await page.locator('.breathe-phase').filter({ hasText: /./ }).waitFor();
   }],
+  ['evening card', async (page) => {
+    // 10 pm in the pinned time zone, so the evening card shows whenever the test runs
+    await page.clock.setFixedTime(new Date('2026-11-24T22:00:00+08:00'));
+    await page.goto('/');
+    await skipWelcome(page);
+    await page.locator('.night-card.evening').waitFor();
+  }],
   ['welcome', async (page) => {
     await page.goto('/');
     await page.locator('.welcome').waitFor();
