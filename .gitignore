@@ -5,3 +5,4 @@ node_modules/
 validation-audio/
 test-results/
 playwright-report/
+!tests/fixtures/*.wav
