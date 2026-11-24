@@ -6,6 +6,8 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Theory lens: the pick list is compact rows, with the lenses often used for the chosen kind of worry first. Answers like "not sure" are never quoted back in summaries; when most were left open, the summary says so plainly. The note on finding someone to talk to sits under the buttons, and is no longer repeated inside two lenses. Several lines reworded (Gestalt body sentence and the long "I choose" question, the family-systems first question, the rating scale's low end).
+
 - Until there are enough recordings for a usual range, the result screen shows the voice shape and the check-in first, with the raw numbers folded under "See the numbers".
 
 - Evening Today is calmer: the bedtime card comes first; after a low check-in, a short note follows with one kind thing, one small action, breathing and help. The whole bedtime ritual uses the dark palette, header and tabs included.

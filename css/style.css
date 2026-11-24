@@ -1820,3 +1820,47 @@ h3.sub {
   font-size: 0.85rem;
   min-height: 32px;
 }
+
+/* the pick list: compact rows so all lenses fit in about two screens */
+.lens-rows {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+.lens-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.lens-row .lens-mark,
+.lens-row svg {
+  flex: none;
+}
+.lens-row-text {
+  display: grid;
+  gap: 2px;
+}
+.lens-row-name {
+  font-weight: 600;
+}
+.lens-row-idea {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.lens-group {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 18px 0 0;
+}

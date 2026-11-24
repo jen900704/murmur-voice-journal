@@ -10,7 +10,7 @@ async function finishLens(page) {
   await page.locator('.actions .btn.primary').click();
   await page.locator('.lens-option').nth(2).click();
   // pick the cognitive lens explicitly
-  await page.locator('.lens-card', { hasText: '認知治療' }).locator('.btn').click();
+  await page.locator('.lens-row', { hasText: '認知治療' }).click();
   for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {
     await page.fill('#lens-answer', `回答 ${i + 1}`);
     await page.locator('[data-key="lens-next"]').click();

@@ -151,9 +151,9 @@ export const LENSES = [
       steps: [
         { q: '先停一下。想到這件事時，你身體哪裡最有感覺？是什麼樣的感覺？', why: '完形取向從當下、從身體開始，而不是從分析開始。' },
         { q: '寫一句關於這件事的「我必須……」或「我不得不……」。', why: '我們說話的方式，常常反映我們怎麼看待自己的處境。' },
-        { rewrite: true, q: '把它讀成：「我選擇……」。讀起來有什麼不同？是更真實，還是不太對？如果這件事是別人加在你身上的，它就不是你的選擇，可以直接寫「不是我選的」。也可能是「這是我的責任，我願意扛」，或「我不想，但放不下」，照實寫就好。', why: '換成「我選擇」能讓人看見哪些部分是自己的，哪些其實不是。兩種答案都有意義。' },
+        { rewrite: true, q: '把它讀成「我選擇……」，讀起來有什麼不同？照實寫就好，也可以寫「不是我選的」。', why: '換成「我選擇」能讓人看見哪些部分是自己的，哪些其實不是。如果這件事是別人加在你身上的，它就不是你的選擇；也可能是「這是我的責任，我願意扛」，或「我不想，但放不下」。兩種答案都有意義。' },
       ],
-      noticed: '這件事在你身體的「{1}」。你寫下「{2}」，改成「我選擇」之後，你注意到：「{3}」。完形取向在意的不是答案，而是你此刻更清楚地接觸到自己。',
+      noticed: '想到這件事時，你身體的感覺是：「{1}」。你寫下「{2}」，改成「我選擇」之後，你注意到：「{3}」。完形取向在意的不是答案，而是你此刻更清楚地接觸到自己。',
       experiment: '這週每天一次，停下來問自己：「我現在正在做什麼？身體有什麼感覺？」只要注意，不用改變。',
       concepts: ['此時此刻', '覺察', '「我」的語言', '接觸'],
       misses: '比較少處理長期模式和環境因素。更深入的完形練習（例如空椅法）需要在諮商中有人陪著做，不適合自己一個人做。',
@@ -164,9 +164,9 @@ export const LENSES = [
       steps: [
         { q: 'Pause for a moment. Where in your body do you feel this most when you think about it? What is the sensation like?', why: 'Gestalt starts from the present and the body, not from analysis.' },
         { q: 'Write one sentence about this that begins "I have to ..." or "I must ...".', why: 'How we phrase things often shows how we see our situation.' },
-        { rewrite: true, q: 'Now read it as "I choose ...". What is different? Does it feel more true, or not quite right? If this is being done to you, it is not your choice; you can simply write "I did not choose this". It might also be "this is my responsibility and I am willing to carry it", or "I do not want to, but I cannot let it go". Write it as it is.', why: 'Saying "I choose" can show which parts are yours and which are not. Either answer tells you something.' },
+        { rewrite: true, q: 'Now read it as "I choose ...". What is different? Write it as it is, or simply "I did not choose this".', why: 'Saying "I choose" can show which parts are yours and which are not. If this is being done to you, it is not your choice; it might also be "this is my responsibility and I am willing to carry it", or "I do not want to, but I cannot let it go". Either answer tells you something.' },
       ],
-      noticed: 'You feel this in your "{1}". You wrote "{2}", and reading it as "I choose" you noticed: "{3}". Gestalt cares less about the answer than about being in clearer contact with yourself right now.',
+      noticed: 'When you think about it, your body feels: "{1}". You wrote "{2}", and reading it as "I choose" you noticed: "{3}". Gestalt cares less about the answer than about being in clearer contact with yourself right now.',
       experiment: 'Once a day this week, stop and ask: "What am I doing right now? What do I feel in my body?" Just notice. You do not need to change anything.',
       concepts: ['here and now', 'awareness', '"I" language', 'contact'],
       misses: 'It says less about long-term patterns and circumstances. Deeper Gestalt exercises (such as the empty chair) need a therapist present and are not meant to be done alone.',
@@ -188,7 +188,7 @@ export const LENSES = [
       noticed: '觸發的情境是「{1}」；你的反應和結果是「{2}」。短期讓人好過的做法，有時長期反而讓困擾留下來。你想試的新做法是「{3}」。',
       experiment: '把「{3}」排進行事曆。做之前和做之後各用 0 到 10 記一下心情，一週後比較看看。',
       concepts: ['前因、行為、後果（ABC）', '增強', '行為實驗', '活動安排'],
-      misses: '比較少探索意義和情緒的內在經驗。比較嚴重的焦慮或創傷（例如需要逐步暴露時）可以和心理師或醫師一起規劃，不要自己硬撐。找人談不代表你有病；各縣市的社區心理衛生中心、學校輔導中心和有些公司的員工協助方案，都有免費或低價的諮商。',
+      misses: '比較少探索意義和情緒的內在經驗。比較嚴重的焦慮或創傷（例如需要逐步暴露時）可以和心理師或醫師一起規劃，不要自己硬撐。',
     },
     en: {
       name: 'Behavior therapy',
@@ -201,7 +201,7 @@ export const LENSES = [
       noticed: 'The trigger was "{1}". Your response and what followed: "{2}". What brings relief in the short term sometimes keeps a problem going. The new response you want to try is "{3}".',
       experiment: 'Put "{3}" on your calendar. Rate your mood 0 to 10 before and after, and compare after a week.',
       concepts: ['antecedent, behavior, consequence (ABC)', 'reinforcement', 'behavioral experiment', 'activity scheduling'],
-      misses: 'It explores meaning and inner experience less. More serious anxiety or trauma (for example when gradual exposure is needed) is best planned with a therapist or doctor, not pushed through alone. Seeing someone does not mean something is wrong with you. Community mental health centers, campus counseling centers, and many employee assistance programs (EAPs) offer free or low-cost counseling.',
+      misses: 'It explores meaning and inner experience less. More serious anxiety or trauma (for example when gradual exposure is needed) is best planned with a therapist or doctor, not pushed through alone.',
     },
   },
   {
@@ -441,27 +441,27 @@ export const LENSES = [
       name: '家族系統取向',
       idea: '一個人的困擾，常常是一整個關係系統的一部分。看見模式在家人之間怎麼流動、怎麼傳下來，能讓人少一點自責，多一點選擇。',
       steps: [
-        { q: '家裡或身邊重要的人，還有誰也有類似的擔心？想到哪裡算哪裡。這只寫給你自己看，不是在說家人的不是；太沉重就寫「先跳過」。', why: '家族系統取向會像畫家系圖一樣，看模式怎麼在世代之間傳遞。' },
+        { q: '家裡或身邊重要的人，有誰也經歷過類似的事，或有類似的擔心？想到哪裡算哪裡。這只寫給你自己看，不是在說家人的不是；太沉重就寫「先跳過」。', why: '家族系統取向會像畫家系圖一樣，看模式怎麼在世代之間傳遞。' },
         { q: '壓力大的時候，你們家的人通常怎麼反應？有沒有人常常被夾在中間？', why: '兩個人關係緊張時，常會把第三個人拉進來，這叫三角關係。' },
         { q: '先不用說出口。在這件事上，你自己的想法是什麼？寫一句以「我」開頭的話，寫給自己看就好。', why: 'Bowen 稱之為自我分化：既保持連結，也保有自己。' },
       ],
       noticed: '你寫到的家人或重要的人：「{1}」。壓力來時的模式是「{2}」。你自己的想法是：「{3}」。看見模式，是為了少一點自責，不是要怪誰。',
       experiment: '這週觀察一次家裡的壓力模式，注意自己在裡面的位置。要不要說、對誰說、用什麼方式（當面、傳訊息、請家裡比較好講話的人轉達），都由你決定。不說，也不代表你沒有立場。',
       concepts: ['家系圖', '三角關係', '自我分化', '代間傳遞'],
-      misses: '個人的生理和心理因素談得比較少。直接和家人攤牌或斷絕關係，一個人做會很辛苦，這類決定值得和心理師一起想。如果家裡不安全，你的安全優先，可以打 113 保護專線。找人談不代表你有病；各縣市的社區心理衛生中心、學校輔導中心和有些公司的員工協助方案，都有免費或低價的諮商。',
+      misses: '個人的生理和心理因素談得比較少。直接和家人攤牌或斷絕關係，一個人做會很辛苦，這類決定值得和心理師一起想。如果家裡不安全，你的安全優先，可以打 113 保護專線。',
     },
     en: {
       name: 'Family systems',
       idea: 'A person\'s distress is often part of a wider relationship system. Seeing how patterns move between family members and across generations can bring less self-blame and more choice.',
       steps: [
-        { q: 'Who else in your family or among people close to you has a similar worry? Write whatever comes. This is only for you, not a criticism of your family; if it is too heavy, write "skip for now".', why: 'Family systems work traces patterns across generations, like drawing a genogram.' },
+        { q: 'Who in your family or among people close to you has been through something similar, or has a similar worry? Write whatever comes. This is only for you, not a criticism of your family; if it is too heavy, write "skip for now".', why: 'Family systems work traces patterns across generations, like drawing a genogram.' },
         { q: 'When stress is high, how do people in your family usually react? Is someone often caught in the middle?', why: 'When two people are tense, they often pull in a third. This is called triangulation.' },
         { q: 'No need to say it to anyone. What is your own view on this? Write one sentence beginning with "I", just for you.', why: 'Bowen called this differentiation of self: staying connected while staying yourself.' },
       ],
       noticed: 'The people you wrote about: "{1}". Under stress the pattern is "{2}". What you yourself think: "{3}". The point of seeing a pattern is to blame yourself less, not to blame anyone else.',
       experiment: 'This week, watch for the stress pattern once and notice where you stand in it. Whether to say anything, to whom, and how (in person, by text, through a family member who is easier to talk to) is up to you. Staying quiet does not mean you do not have a view.',
       concepts: ['genogram', 'triangulation', 'differentiation of self', 'intergenerational transmission'],
-      misses: 'It says less about individual biological and psychological factors. A big confrontation or cutting off contact is hard to do alone; decisions like that are worth thinking through with a therapist. If home is not safe, your safety comes first. Seeing someone does not mean something is wrong with you; community mental health centers, campus counseling centers, and many EAPs offer free or low-cost counseling.',
+      misses: 'It says less about individual biological and psychological factors. A big confrontation or cutting off contact is hard to do alone; decisions like that are worth thinking through with a therapist. If home is not safe, your safety comes first.',
     },
   },
 ];
@@ -474,6 +474,16 @@ export function lensesForTopic(topic) {
   return LENSES.filter((l) => !l.excludeTopics.includes(topic));
 }
 
+// Approaches often reached for with each kind of worry, listed first on the pick screen. A
+// reading aid, not a recommendation: every suitable lens stays one tap away.
+export const TOPIC_COMMON = {
+  work: ['cognitive', 'rebt', 'solution-focused', 'behavioral', 'acceptance'],
+  relationship: ['person-centered', 'adlerian', 'family-systems', 'feminist', 'narrative'],
+  family: ['family-systems', 'adlerian', 'feminist', 'narrative', 'person-centered'],
+  self: ['person-centered', 'existential', 'cognitive', 'narrative', 'acceptance'],
+  loss: ['person-centered', 'acceptance', 'family-systems', 'psychoanalytic'],
+};
+
 // Shorten an answer for quoting back.
 export function quote(text, max = 60) {
   const s = String(text || '').trim().replace(/\s+/g, ' ');
@@ -485,20 +495,35 @@ export function quote(text, max = 60) {
   return cut + '…';
 }
 
-// Fill {1}, {2}, ... with earlier answers.
+// Answers that mean "nothing to say here" (the answer hint invites them). They are never quoted
+// back as if they were content: "you wrote 'not sure'" reads like being graded.
+const NON_ANSWER = /^(不知道|不曉得|不確定|不清楚|不知|想不到|沒想法|先跳過|跳過|略過|先不寫|i\s*don'?t\s*know|idk|dunno|not\s*sure|no\s*idea|skip|skip\s*for\s*now|pass)$/i;
+export function isNonAnswer(text) {
+  const s = String(text ?? '').trim().replace(/[\s。.!！?？~～…、,，「」"'“”]+$/g, '').replace(/^[「"“]+/, '');
+  return !s || NON_ANSWER.test(s);
+}
+
+// Fill {1}, {2}, ... with earlier answers. A blank or "not sure" answer becomes an ellipsis,
+// with the quotation marks around it dropped.
 export function fill(template, answers) {
-  return template.replace(/\{(\d)\}/g, (_, i) => quote(answers[Number(i) - 1] ?? ''));
+  const zh = /[\u4e00-\u9fff]/.test(template);
+  return template.replace(/([「"“]?)\{(\d)\}([」"”]?)/g, (_, open, i, close) => {
+    const a = answers[Number(i) - 1];
+    if (isNonAnswer(a)) return zh ? '……' : '…';
+    return open + quote(a) + close;
+  });
 }
 
 // The transformed sentence shown before a `rewrite` step.
 export function rewriteText(kind, previous, lang) {
+  if (isNonAnswer(previous)) return lang === 'en' ? 'You left the last one open. This one can stay open too.' : '上一題你先留白了，這一題也可以留白。';
   const p = quote(previous, 120);
   if (kind === 'defuse') return lang === 'en' ? `I notice I am having the thought that "${p}".` : `我注意到我有一個想法：「${p}」。`;
   // "I have to / I must" -> "I choose"
   if (lang === 'en') {
     const m = p.match(/^\s*i\s+(?:have to|must|need to|should|have got to)\s+(.*)$/i);
-    return m ? `I choose to ${m[1]}` : `"${p}" (if part of this feels like "I have to", try reading that part as "I choose"; if it is not yours to choose, leave it as it is)`;
+    return m ? `I choose to ${m[1]}` : `"${p}" (read any "I have to" part as "I choose"; if it is not yours to choose, leave it)`;
   }
   const m = p.match(/^\s*我(?:必須|不得不|一定要|應該|得(?![了到過知獎病罪]))\s*(.*)$/);
-  return m ? `我選擇${m[1]}` : `「${p}」（如果裡面有你覺得「不得不」的部分，試著把那部分讀成「我選擇……」；如果那不是你能選的，就不用改）`;
+  return m ? `我選擇${m[1]}` : `「${p}」（覺得「不得不」的部分，試著讀成「我選擇……」；不是你能選的就不用改）`;
 }

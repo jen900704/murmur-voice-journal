@@ -32,7 +32,7 @@ const screens = [
     await page.locator('[data-key="topic-work"]').click();
     await page.locator('.actions .btn.primary').click();
     await page.locator('.lens-option').nth(2).click();
-    await page.locator('.lens-card .btn').first().click();
+    await page.locator('.lens-row').first().click();
   }],
   ['ritual worry', async (page) => {
     await page.goto('/');
@@ -86,7 +86,7 @@ const screens = [
     await page.locator('[data-key="topic-work"]').click();
     await page.locator('[data-key="lens-concern-next"]').click();
     await page.locator('.lens-option').nth(2).click();
-    await page.locator('.lens-card .btn').first().click();
+    await page.locator('.lens-row').first().click();
     for (let i = 0; i < 5 && !(await page.locator('.lens-summary').count()); i++) {
       if (await page.locator('.scale-11').count()) await page.locator('[data-key="scale-3"]').click();
       else await page.fill('#lens-answer', 'something');

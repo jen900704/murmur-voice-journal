@@ -59,7 +59,7 @@ test.describe('theory lens', () => {
     await page.locator('[data-key="topic-work"]').click();
     await page.getByRole('button', { name: '下一步' }).click();
     await page.getByRole('button', { name: /自己選/ }).click();
-    await page.locator('.lens-card .btn').first().click();
+    await page.locator('.lens-row').first().click();
     if (await page.locator('.scale-11').count()) {
       await page.locator('[data-key="scale-2"]').click();
       await page.locator('[data-key="lens-next"]').click();
@@ -90,7 +90,7 @@ test.describe('theory lens', () => {
     await page.locator('[data-key="topic-work"]').click();
     await page.locator('[data-key="lens-concern-next"]').click();
     await page.getByRole('button', { name: /自己選/ }).click();
-    await page.locator('.lens-card .btn').first().click();
+    await page.locator('.lens-row').first().click();
     await page.getByRole('button', { name: '求助專線' }).click();
     await page.locator('#tabs a[href="#lens"]').click();
     await page.getByRole('button', { name: '上一步' }).click();
@@ -148,15 +148,45 @@ test.describe('theory lens', () => {
     await page.locator('[data-key="topic-loss"]').click();
     await page.getByRole('button', { name: '下一步' }).click();
     await page.getByRole('button', { name: /自己選/ }).click();
-    const names = await page.locator('.lens-card h3').allInnerTexts();
+    const names = await page.locator('.lens-row-name').allInnerTexts();
     expect(names).not.toContain('存在主義取向');
     expect(names).not.toContain('焦點解決取向');
     expect(names).toContain('個人中心取向');
+  });
+
+  test('the pick list puts lenses often used for the topic first, in compact rows', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '爸媽一直催我回家工作');
+    await page.locator('[data-key="topic-family"]').click();
+    await page.getByRole('button', { name: '下一步' }).click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await expect(page.locator('.lens-row').first()).toContainText('家族系統取向');
+    await expect(page.locator('.lens-row')).toHaveCount(14);
+    await page.locator('[data-key="pick-family-systems"]').click();
+    await expect(page.locator('.lens-name')).toHaveText('家族系統取向');
   });
 
   test('help resources are always reachable', async ({ page }) => {
     await page.goto('/#lens');
     await page.getByRole('button', { name: '求助專線' }).click();
     await expect(page.locator('.resource-list a[href="tel:113"]')).toBeVisible();
+  });
+  test('answering "不知道" everywhere is never quoted back, and saving is in reach', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '爸媽一直催我回家工作');
+    await page.locator('[data-key="topic-family"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="pick-family-systems"]').click();
+    for (let i = 0; i < 3; i++) {
+      await page.fill('#lens-answer', '不知道');
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await expect(page.locator('.lens-summary')).toBeVisible();
+    await expect(page.locator('.lens-summary')).not.toContainText('不知道');
+    await expect(page.locator('.lens-summary')).toContainText('先留白');
+    await expect(page.locator('[data-key="lens-save"]')).toBeInViewport();
   });
 });

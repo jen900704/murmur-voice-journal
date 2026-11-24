@@ -101,6 +101,8 @@ test('a shared prompt link opens that prompt by number, and ignores anything els
 });
 
 test('a low mood check-in shows things that helped before', async ({ page }) => {
+  // daytime: in the evening the note is shortened to one item of each
+  await page.clock.install({ time: new Date('2026-11-24T14:00:00+08:00') });
   await page.goto('/');
   await page.evaluate(
     () =>

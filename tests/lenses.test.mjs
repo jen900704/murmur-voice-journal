@@ -215,6 +215,26 @@ test('fill quotes and shortens answers', () => {
   assert.ok(fill('{1}', ['x'.repeat(200)]).length <= 60);
 });
 
+test('"not sure" and blank answers are never quoted back in any summary', () => {
+  assert.equal(fill('你寫下「{1}」。', ['不知道']), '你寫下……。');
+  assert.equal(fill('You wrote "{1}".', ['Not sure.']), 'You wrote ….');
+  assert.equal(fill('想法是「{1}」', ['先跳過']), '想法是……');
+  // a real answer that merely contains the words is kept
+  assert.equal(fill('「{1}」', ['我不知道該怎麼辦']), '「我不知道該怎麼辦」');
+  assert.equal(fill('「{1}」', ['0']), '「0」');
+  assert.ok(!rewriteText(true, '不知道', 'zh').includes('不知道'));
+  for (const lens of LENSES) {
+    for (const lang of ['zh', 'en']) {
+      const c = lens[lang];
+      for (const tpl of [c.noticed, c.experiment].filter(Boolean)) {
+        const out = fill(tpl, ['不知道', 'not sure', '先跳過', 'skip']);
+        assert.ok(!/不知道|not sure/i.test(out), `${lens.id} ${lang}`);
+        assert.ok(!/「」|""/.test(out), `${lens.id} ${lang} left empty quotes`);
+      }
+    }
+  }
+});
+
 test('rewrite turns "I have to" into "I choose"', () => {
   assert.equal(rewriteText(true, '我必須每天加班', 'zh'), '我選擇每天加班');
   assert.ok(!rewriteText(true, '他們逼我加班', 'zh').startsWith('我選擇他們'));

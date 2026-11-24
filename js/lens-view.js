@@ -1,6 +1,6 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
-import { LENSES, TOPICS, lensById, lensesForTopic, fill, rewriteText } from './lenses.js';
+import { LENSES, TOPICS, TOPIC_COMMON, lensById, lensesForTopic, fill, rewriteText, isNonAnswer } from './lenses.js';
 import { checkRisk, helpList } from './safety.js';
 import { createAiChat } from './ai-chat.js';
 
@@ -40,6 +40,9 @@ const S = {
     compareWhy: '看三個學派各自會先問什麼，再選一個',
     pick: '自己選',
     pickTitle: '選一個角度',
+    mostlyOpen: '這次的問題你大多先留白了，沒關係。下面的小練習一樣可以試。',
+    pickCommon: '常用來看這類煩惱的',
+    pickOthers: '其他角度',
     pickWhy: '從全部適合的學派裡挑',
     useThis: '用這個角度',
     stepOf: (i, n) => `第 ${i} 題，共 ${n} 題`,
@@ -52,9 +55,9 @@ const S = {
     misses: '這個角度可能忽略的',
     reading: (ch) => `想多了解：Corey《Theory and Practice of Counseling and Psychotherapy》原文第 10 版第 ${ch} 章（中譯本章節可能不同）`,
     people: '代表人物',
-    talk: '這個練習可以幫你換個角度，但它取代不了和一個人好好談談。如果這件事已經讓你辛苦了一段時間，學校的諮商中心、公司的員工協助方案，或各縣市的社區心理衛生中心，都是很好的起點。',
+    talk: '這個練習可以幫你換個角度，但它取代不了和一個人好好談談。如果這件事已經讓你辛苦了一段時間，學校的諮商中心、公司的員工協助方案，或各縣市的社區心理衛生中心，都是很好的起點，很多是免費或低價的。',
     rateQ: '這個角度對你有幫助嗎？',
-    rateLabels: ['沒有', '', '普通', '', '很有幫助'],
+    rateLabels: ['沒什麼幫助', '', '普通', '', '很有幫助'],
     anotherLens: '換一個角度看同一件事',
     save: '儲存到這個裝置',
     savedToast: '已儲存，只存在這個裝置上',
@@ -117,6 +120,9 @@ const S = {
     compareWhy: 'See what three schools would ask first, then pick one',
     pick: 'Choose myself',
     pickTitle: 'Choose a lens',
+    mostlyOpen: 'You left most of these open this time, and that is fine. The small experiment below still works.',
+    pickCommon: 'Often used for this kind of worry',
+    pickOthers: 'Other lenses',
     pickWhy: 'Pick from every school that fits',
     useThis: 'Use this lens',
     stepOf: (i, n) => `Question ${i} of ${n}`,
@@ -129,7 +135,7 @@ const S = {
     misses: 'What this lens might miss',
     reading: (ch) => `To read more: Corey, Theory and Practice of Counseling and Psychotherapy (10th ed.), chapter ${ch}`,
     people: 'Associated with',
-    talk: 'This can help you see things differently, but it does not replace talking with a person. If this keeps weighing on you, a campus or workplace counseling service is a good place to start.',
+    talk: 'This can help you see things differently, but it does not replace talking with a person. If this keeps weighing on you, campus counseling, an employee assistance program, or a community mental health center is a good place to start; many are free or low cost.',
     rateQ: 'Was this lens helpful?',
     rateLabels: ['Not at all', '', 'Somewhat', '', 'Very helpful'],
     anotherLens: 'Look at the same worry through another lens',
@@ -433,10 +439,28 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // one compact row per lens (mark, name, first sentence of its idea); tapping starts it
+  function lensRow(lens) {
+    const c = lens[lk()];
+    // first sentence (no lookbehind: older Safari cannot parse it)
+    const m = c.idea.match(lk() === 'en' ? /^.*?\.(?=\s|$)/ : /^.*?。/);
+    const first = m ? m[0] : c.idea;
+    return h(
+      'button',
+      { type: 'button', class: 'lens-row', 'data-key': `pick-${lens.id}`, style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}`, onclick: () => startLens(lens.id) },
+      lensMark(lens, 32),
+      h('span', { class: 'lens-row-text' }, h('span', { class: 'lens-row-name' }, c.name), h('span', { class: 'lens-row-idea' }, first))
+    );
+  }
+
   function pick() {
+    const all = lensesForTopic(st.topic);
+    const common = (TOPIC_COMMON[st.topic] || []).map(lensById).filter((l) => l && all.includes(l));
+    const rest = all.filter((l) => !common.includes(l));
     return [
       h('h2', {}, L().pickTitle),
-      lensesForTopic(st.topic).map((l) => lensCard(l, { action: () => startLens(l.id) })),
+      common.length ? [h('h3', { class: 'lens-group' }, L().pickCommon), h('div', { class: 'lens-rows' }, common.map(lensRow)), h('h3', { class: 'lens-group' }, L().pickOthers)] : null,
+      h('div', { class: 'lens-rows' }, rest.map(lensRow)),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('choose') }, L().back)),
     ];
   }
@@ -539,6 +563,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // when most written answers were left blank or "not sure", a sentence of dots helps no one
+  function mostlyOpen(c, answers) {
+    const typed = c.steps.map((s, i) => (s.scale ? null : answers[i])).filter((a) => a !== null);
+    return typed.length > 0 && typed.filter(isNonAnswer).length * 2 > typed.length;
+  }
+
   function summary() {
     const lens = lensById(st.lensId);
     const c = lens[lk()];
@@ -552,7 +582,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         { class: 'lens-summary', style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}` },
         h('div', { class: 'lens-card-head' }, lensMark(lens), h('h2', {}, c.name)),
         h('h3', {}, L().noticed),
-        h('p', {}, fill(c.noticed, st.answers)),
+        h('p', {}, mostlyOpen(c, st.answers) ? L().mostlyOpen : fill(c.noticed, st.answers)),
         h('h3', {}, L().experiment),
         h('p', {}, fill(c.experiment, st.answers)),
         h('h3', {}, L().misses),
@@ -568,7 +598,6 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('p', { class: 'muted small' }, L().reading(lens.chapter))
         )
       ),
-      h('p', { class: 'lens-talk' }, L().talk),
       h(
         'div',
         { class: 'lens-rate' },
@@ -664,6 +693,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             L().aiContinue
           )
         : null,
+      // what this exercise is not, right under the buttons rather than between the summary and them
+      h('p', { class: 'lens-talk' }, L().talk),
     ];
   }
 
@@ -793,7 +824,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('div', { class: 'lens-card-head' }, lensMark(l, 32), h('h3', {}, c.name)),
           h('p', { class: 'muted small' }, new Intl.DateTimeFormat(getLang(), { dateStyle: 'medium' }).format(new Date(s.createdAt))),
           h('blockquote', { class: 'lens-concern-quote' }, s.concern),
-          h('p', {}, fill(c.noticed, s.answers)),
+          h('p', {}, mostlyOpen(c, s.answers) ? L().mostlyOpen : fill(c.noticed, s.answers)),
           h(
             'details',
             { class: 'lens-more' },
