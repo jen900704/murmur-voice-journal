@@ -91,6 +91,20 @@ test.describe('theory lens', () => {
     await expect(next).toBeEnabled();
   });
 
+  test('help lines switch region and remember it', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '最近真的不想活了');
+    await page.locator('[data-key="topic-self"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
+    await expect(page.locator('.crisis a[href="tel:988"]')).toHaveCount(0);
+    await page.locator('[data-key="region-US"]').click();
+    await expect(page.locator('.crisis a[href="tel:988"]')).toBeVisible();
+    await expect(page.locator('.crisis a[href="tel:1925"]')).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem('murmur-region'))).toBe('US');
+  });
+
   test('loss topic hides lenses unsuited to grief', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();

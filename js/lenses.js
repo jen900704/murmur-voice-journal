@@ -52,11 +52,11 @@ export const LENSES = [
       name: '阿德勒學派',
       idea: '行為背後有目標，人最深的需要之一是歸屬與貢獻。我們會帶著一套自己的「私人邏輯」看世界，而鼓勵比批評更能帶來改變。',
       steps: [
-        { q: '如果這個困擾明天就不見了，你的生活會有什麼不同？你會開始做什麼？', why: '阿德勒學派用這個問題看見兩件事：你想要的生活，以及這個困擾可能讓你暫時不用面對什麼。' },
+        { q: '如果這個困擾明天就不見了，你的生活會有什麼不同？你會開始做什麼？', why: '阿德勒學派用這個問題看見你想要的生活，以及在這個困擾底下，你真正想靠近的是什麼。' },
         { q: '在這件事裡，你心裡有沒有一句「我必須……才……」？例如「我必須做到最好，才會被接納」。', why: '它把這種句子叫做私人邏輯：很少被說出口，卻影響很多選擇。' },
         { q: '有沒有一件小事，你可以「彷彿」已經是不被這個困擾綁住的自己，去做做看？', why: '「彷彿」練習讓人先在行動上試穿新的自己，不用等到感覺準備好。' },
       ],
-      noticed: '沒有這個困擾，你會「{1}」；推著你的可能是「{2}」這樣的私人邏輯。這個學派會把困擾看成：你想要歸屬和貢獻，只是暫時用了一個代價很高的方式。',
+      noticed: '沒有這個困擾，你會「{1}」；推著你的可能是「{2}」這樣的私人邏輯。這個學派會問：在這件事底下，你想要的是不是歸屬、被看重、能有所貢獻？如果是環境或別人讓你受傷，那不是你的方式出了問題。',
       experiment: '選一天，彷彿你已經是那個自己，去做「{3}」。結束後記下別人的反應，和你自己的感覺。',
       concepts: ['私人邏輯', '社會興趣', '鼓勵', '彷彿技術'],
       misses: '比較少處理身體、創傷和環境的壓力。太強調個人選擇時，可能忽略你無法掌控的部分。',
@@ -65,11 +65,11 @@ export const LENSES = [
       name: 'Adlerian',
       idea: 'Behavior is aimed at goals, and one of our deepest needs is to belong and contribute. We see the world through a private logic, and encouragement changes more than criticism does.',
       steps: [
-        { q: 'If this worry were gone tomorrow, what would be different in your life? What would you start doing?', why: 'Adlerians use this question to see two things: the life you want, and what the problem may be letting you avoid for now.' },
+        { q: 'If this worry were gone tomorrow, what would be different in your life? What would you start doing?', why: 'Adlerians use this question to see the life you want, and what you are reaching for underneath this worry.' },
         { q: 'Is there an "I must ... in order to ..." sentence inside this? For example, "I must be the best in order to be accepted."', why: 'This is called private logic: rarely said out loud, but it steers a lot of choices.' },
         { q: 'Is there one small thing you could do "as if" you were already the version of you who is not held back by this?', why: 'Acting "as if" lets you try on a new way of being before you feel ready.' },
       ],
-      noticed: 'Without this worry you would "{1}". A private logic like "{2}" may be pushing you. This approach would see the worry as a way of seeking belonging and contribution that has become expensive.',
+      noticed: 'Without this worry you would "{1}". A private logic like "{2}" may be pushing you. This approach would ask whether, underneath this, you are reaching for belonging, being valued, or contributing. If your surroundings or other people are hurting you, that is not a flaw in how you cope.',
       experiment: 'Pick one day and do "{3}" as if you were already that person. Afterwards, note how others responded and how you felt.',
       concepts: ['private logic', 'social interest', 'encouragement', 'acting as if'],
       misses: 'It says less about the body, trauma, and outside pressures. Stressing personal choice can overlook what you cannot control.',
@@ -150,7 +150,7 @@ export const LENSES = [
       steps: [
         { q: '先停一下。想到這件事時，你身體哪裡最有感覺？是什麼樣的感覺？', why: '完形取向從當下、從身體開始，而不是從分析開始。' },
         { q: '寫一句關於這件事的「我必須……」或「我不得不……」。', why: '我們說話的方式，常常反映我們怎麼看待自己的處境。' },
-        { rewrite: true, q: '把它讀成：「我選擇……」。讀起來有什麼不同？是更真實，還是不太對？', why: '換成「我選擇」能讓人看見哪些部分是自己的，哪些其實不是。兩種答案都有意義。' },
+        { rewrite: true, q: '把它讀成：「我選擇……」。讀起來有什麼不同？是更真實，還是不太對？如果這件事是別人加在你身上的，它就不是你的選擇，可以直接寫「不是我選的」。', why: '換成「我選擇」能讓人看見哪些部分是自己的，哪些其實不是。兩種答案都有意義。' },
       ],
       noticed: '這件事在你身體的「{1}」。你寫下「{2}」，改成「我選擇」之後，你注意到：「{3}」。完形取向在意的不是答案，而是你此刻更清楚地接觸到自己。',
       experiment: '這週每天一次，停下來問自己：「我現在正在做什麼？身體有什麼感覺？」只要注意，不用改變。',
@@ -163,7 +163,7 @@ export const LENSES = [
       steps: [
         { q: 'Pause for a moment. Where in your body do you feel this most when you think about it? What is the sensation like?', why: 'Gestalt starts from the present and the body, not from analysis.' },
         { q: 'Write one sentence about this that begins "I have to ..." or "I must ...".', why: 'How we phrase things often shows how we see our situation.' },
-        { rewrite: true, q: 'Now read it as "I choose ...". What is different? Does it feel truer, or wrong?', why: 'Saying "I choose" can show which parts are yours and which are not. Either answer tells you something.' },
+        { rewrite: true, q: 'Now read it as "I choose ...". What is different? Does it feel truer, or wrong? If this is being done to you, it is not your choice; you can simply write "not mine to choose".', why: 'Saying "I choose" can show which parts are yours and which are not. Either answer tells you something.' },
       ],
       noticed: 'You feel this in your "{1}". You wrote "{2}", and reading it as "I choose" you noticed: "{3}". Gestalt cares less about the answer than about being in clearer contact with yourself right now.',
       experiment: 'Once a day this week, stop and ask: "What am I doing right now? What do I feel in my body?" Just notice.',
@@ -175,7 +175,7 @@ export const LENSES = [
     id: 'behavioral',
     chapter: 9,
     people: 'B. F. Skinner; Joseph Wolpe; Albert Bandura; Arnold Lazarus',
-    excludeTopics: [],
+    excludeTopics: ['loss'],
     zh: {
       name: '行為治療',
       idea: '行為是在情境中被學會、被維持的。看清楚「之前發生什麼、做了什麼、之後發生什麼」，就能設計小而具體的改變，並且用結果來檢驗。',
@@ -273,7 +273,7 @@ export const LENSES = [
     id: 'cognitive',
     chapter: 10,
     people: 'Aaron T. Beck; Judith Beck; Donald Meichenbaum',
-    excludeTopics: [],
+    excludeTopics: ['loss'],
     zh: {
       name: '認知治療',
       idea: '我們的感受深受自動冒出來的想法影響。把想法當成可以檢驗的假設，而不是事實，常能找到更平衡的看法。',
@@ -491,8 +491,8 @@ export function rewriteText(kind, previous, lang) {
   // "I have to / I must" -> "I choose"
   if (lang === 'en') {
     const m = p.match(/^\s*i\s+(?:have to|must|need to|should|have got to)\s+(.*)$/i);
-    return m ? `I choose to ${m[1]}` : `"${p}" (try reading it as a sentence that starts with "I choose")`;
+    return m ? `I choose to ${m[1]}` : `"${p}" (if part of this feels like "I have to", try reading that part as "I choose"; if it is not yours to choose, leave it as it is)`;
   }
-  const m = p.match(/^\s*我(?:必須|不得不|一定要|應該|得)\s*(.*)$/);
-  return m ? `我選擇${m[1]}` : `「${p}」（試著把它讀成一句以「我選擇」開頭的話）`;
+  const m = p.match(/^\s*我(?:必須|不得不|一定要|應該|得(?![了到過知獎病罪]))\s*(.*)$/);
+  return m ? `我選擇${m[1]}` : `「${p}」（如果裡面有你覺得「不得不」的部分，試著把那部分讀成「我選擇……」；如果那不是你能選的，就不用改）`;
 }

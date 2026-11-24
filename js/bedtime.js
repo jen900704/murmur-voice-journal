@@ -190,7 +190,7 @@ export const TRACKS = [
       core: [
         ['回想今天，有沒有一件事雖然很小，但還算順利？想不到也沒關係。', 6],
         ['也許是好好吃了一餐、回了一則訊息，或撐過了一段難熬的時間。', 6],
-        ['你是怎麼做到的？', 6],
+        ['不管那是什麼，它是你做到的。', 6],
         ['不用回答得很完整，只要讓那個畫面停留一下。', 8],
         ['這些你已經會做的事，明天也還在。', 6],
         ['今晚，讓身體休息，把力氣留給明天。', 8],
@@ -202,7 +202,7 @@ export const TRACKS = [
       core: [
         ['Think back over today. Was there one thing, however small, that went reasonably well? If nothing comes to mind, that is fine.', 6],
         ['Maybe eating a proper meal, answering a message, or getting through a hard stretch of time.', 6],
-        ['How did you manage it?', 6],
+        ['Whatever it was, you were the one who did it.', 6],
         ['You do not need a full answer. Just let that picture stay for a moment.', 8],
         ['The things you already know how to do will still be there tomorrow.', 6],
         ['Tonight, let your body rest, and save your strength for tomorrow.', 8],
@@ -248,8 +248,8 @@ export const TRACKS = [
       name: '一點鼓勵',
       style: '阿德勒學派風格',
       core: [
-        ['今天，你有沒有讓誰的一天好過一點點？', 6],
-        ['也許只是一句謝謝，或好好聽一個人說完話。想不到也沒關係。', 6],
+        ['今天你做的某些事，可能讓別人好過了一點點，即使你沒有看到。', 6],
+        ['也許只是一句謝謝，或好好聽一個人說完話。', 6],
         ['今天你花的力氣，不管結果怎樣，都是真的。', 6],
         ['你不需要很完美，也一樣屬於這裡。', 6],
         ['明天，也許可以再為別人或自己做一件小事。', 6],
@@ -260,8 +260,8 @@ export const TRACKS = [
       name: 'A little encouragement',
       style: 'in the spirit of Adlerian therapy',
       core: [
-        ['Today, did you make someone\'s day a little easier?', 6],
-        ['Maybe just a thank-you, or listening to someone all the way through. If nothing comes to mind, that is fine.', 6],
+        ['Something you did today may have made someone\'s day a little easier, even if you did not see it.', 6],
+        ['Maybe just a thank-you, or listening to someone all the way through.', 6],
         ['The effort you put in today was real, whatever came of it.', 6],
         ['You do not have to be perfect to belong here.', 6],
         ['Tomorrow, maybe one more small thing for someone else, or for yourself.', 6],

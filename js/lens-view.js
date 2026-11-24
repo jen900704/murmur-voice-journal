@@ -1,7 +1,7 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
 import { LENSES, TOPICS, lensById, lensesForTopic, fill, rewriteText } from './lenses.js';
-import { checkRisk, RESOURCES } from './safety.js';
+import { checkRisk, helpList } from './safety.js';
 import { createAiChat } from './ai-chat.js';
 
 const S = {
@@ -266,19 +266,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   function resourceList() {
-    const list = RESOURCES[getLang()] || RESOURCES.en;
-    return h(
-      'ul',
-      { class: 'resource-list' },
-      list.map((r) =>
-        h(
-          'li',
-          {},
-          h('span', {}, r.label),
-          r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null
-        )
-      )
-    );
+    return helpList(h, getLang());
   }
 
   // ----- stages -----

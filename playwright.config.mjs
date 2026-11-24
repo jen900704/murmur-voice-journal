@@ -18,6 +18,8 @@ export default defineConfig({
     baseURL: 'http://localhost:8787/',
     viewport: { width: 390, height: 844 },
     permissions: ['microphone'],
+    // help lines follow the time zone; pin it so tests do not depend on where they run
+    timezoneId: 'Asia/Taipei',
     launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
   },
 });

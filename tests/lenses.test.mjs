@@ -207,6 +207,7 @@ test('rewrite turns "I have to" into "I choose"', () => {
   assert.ok(!rewriteText(true, '他們逼我加班', 'zh').startsWith('我選擇他們'));
   assert.equal(rewriteText(true, 'I have to answer every email', 'en'), 'I choose to answer every email');
   assert.ok(rewriteText('defuse', '我不夠好', 'zh').includes('我注意到我有一個想法'));
+  assert.ok(!rewriteText(true, '我得了憂鬱症', 'zh').startsWith('我選擇'));
 });
 
 test('lenses unsuited to loss are excluded for that topic', () => {

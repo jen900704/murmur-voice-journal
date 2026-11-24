@@ -108,23 +108,120 @@ export function checkRisk(text) {
 // Help lines given in model replies, as whole numbers (not inside 1988 or 2113, not 113 年).
 export const HELP_NUMBER = /(?:^|[^\d/])(?:1925|1995|1980|113|988|911)(?![\d/]|\s*年)/;
 
-export const RESOURCES = {
-  'zh-TW': [
-    { label: '安心專線（24 小時，免付費）', number: '1925' },
-    { label: '生命線', number: '1995' },
-    { label: '張老師專線', number: '1980' },
-    { label: '保護專線：家暴、性侵、兒少保護（24 小時）', number: '113' },
-    { label: '在台灣有立即危險：警察 110、救護 119', number: '110' },
-    { label: '在美國：自殺與危機專線（可打電話或傳簡訊）', number: '988' },
-    { label: '在美國：全國家暴求助專線', number: '18007997233', display: '1-800-799-7233' },
-    { label: '在美國有立即危險', number: '911' },
+// Help lines by region. Shown for the region the person picks (a guess from the time zone
+// at first), so a person in Taiwan does not have to read past US numbers in a hard moment.
+const LINES = {
+  TW: [
+    { zh: '安心專線（24 小時，免付費）', en: '1925 mental health line (24 hours, free)', number: '1925' },
+    { zh: '生命線（24 小時）', en: 'Lifeline (24 hours)', number: '1995' },
+    { zh: '保護專線：家暴、性侵、兒少保護（24 小時）', en: '113 protection line: domestic violence, sexual assault, child protection (24 hours)', number: '113' },
+    { zh: '有立即危險：警察', en: 'Immediate danger: police', number: '110' },
+    { zh: '有立即危險：救護車', en: 'Immediate danger: ambulance', number: '119' },
+    { zh: '張老師專線（非 24 小時）', en: 'Teacher Chang line (not 24 hours)', number: '1980' },
   ],
-  en: [
-    { label: 'US: 988 Suicide & Crisis Lifeline (call or text)', number: '988' },
-    { label: 'US: National Domestic Violence Hotline', number: '18007997233', display: '1-800-799-7233' },
-    { label: 'US: immediate danger', number: '911' },
-    { label: 'Taiwan: 1925 mental health line (24 hours)', number: '1925' },
-    { label: 'Taiwan: 113 protection line (domestic violence, sexual assault, child protection)', number: '113' },
-    { label: 'Elsewhere: your local emergency number', number: '' },
+  US: [
+    { zh: '自殺與危機專線（可打電話或傳簡訊，24 小時）', en: '988 Suicide & Crisis Lifeline (call or text, 24 hours)', number: '988' },
+    { zh: '全國家暴求助專線（24 小時）', en: 'National Domestic Violence Hotline (24 hours)', number: '18007997233', display: '1-800-799-7233' },
+    { zh: '有立即危險', en: 'Immediate danger', number: '911' },
+  ],
+  other: [
+    { zh: '有立即危險：打當地的緊急電話', en: 'Immediate danger: call your local emergency number', number: '' },
+    { zh: '找你所在國家的免費求助專線', en: 'Find a free helpline in your country', href: 'https://findahelpline.com', display: 'findahelpline.com' },
   ],
 };
+export const REGIONS = ['TW', 'US', 'other'];
+
+function guessRegion(lang) {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz === 'Asia/Taipei') return 'TW';
+    if (/^America\/(?:New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Indiana|Kentucky|Boise|Juneau|Adak|Menominee|Nome|Sitka|Yakutat|North_Dakota)|^Pacific\/Honolulu$/.test(tz)) return 'US';
+  } catch (_) {
+    /* fall through */
+  }
+  return lang === 'en' ? 'US' : 'TW';
+}
+
+export function getRegion(lang) {
+  try {
+    const r = localStorage.getItem('murmur-region');
+    if (REGIONS.includes(r)) return r;
+  } catch (_) {
+    /* storage can be unavailable */
+  }
+  return guessRegion(lang);
+}
+
+export function setRegion(r) {
+  try {
+    localStorage.setItem('murmur-region', r);
+  } catch (_) {
+    /* the choice just will not be remembered */
+  }
+}
+
+export function resourcesFor(lang, region = getRegion(lang)) {
+  const k = lang === 'en' ? 'en' : 'zh';
+  return (LINES[region] || LINES.other).map((r) => ({ label: r[k], number: r.number || '', display: r.display, href: r.href }));
+}
+
+// RESOURCES[lang] is the list for the current region (kept for older callers and tests).
+export const RESOURCES = {
+  get 'zh-TW'() {
+    return resourcesFor('zh-TW');
+  },
+  get en() {
+    return resourcesFor('en');
+  },
+};
+
+const REGION_LABEL = {
+  zh: { title: '地區', TW: '台灣', US: '美國', other: '其他地方' },
+  en: { title: 'Region', TW: 'Taiwan', US: 'US', other: 'Elsewhere' },
+};
+
+// The help list with a small region switch. h is the app's element helper.
+export function helpList(h, lang) {
+  const k = lang === 'en' ? 'en' : 'zh';
+  const ul = h('ul', { class: 'resource-list' });
+  const fill = (region) => {
+    ul.replaceChildren(
+      ...resourcesFor(lang, region).map((r) =>
+        h(
+          'li',
+          {},
+          h('span', {}, r.label),
+          r.number
+            ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number)
+            : r.href
+              ? h('a', { class: 'btn call', href: r.href, target: '_blank', rel: 'noopener' }, r.display || r.href)
+              : null
+        )
+      )
+    );
+  };
+  const current = getRegion(lang);
+  const chips = REGIONS.map((r) =>
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'chip small' + (r === current ? ' on' : ''),
+        'aria-pressed': r === current ? 'true' : 'false',
+        'data-key': `region-${r}`,
+        onclick: (e) => {
+          setRegion(r);
+          for (const c of e.currentTarget.parentNode.children) {
+            const on = c === e.currentTarget;
+            c.classList.toggle('on', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          }
+          fill(r);
+        },
+      },
+      REGION_LABEL[k][r]
+    )
+  );
+  fill(current);
+  return h('div', { class: 'help-lines' }, h('div', { class: 'chips wrap region-chips', role: 'group', 'aria-label': REGION_LABEL[k].title }, chips), ul);
+}

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { fakeMic, record, storedEntries } from './helpers.mjs';
 
-test.use({ locale: 'en-US', launchOptions: fakeMic('speech.wav') });
+test.use({ locale: 'en-US', timezoneId: 'America/New_York', launchOptions: fakeMic('speech.wav') });
 
 test('records, analyzes, and saves an entry with a check-in', async ({ page }) => {
   const errors = [];

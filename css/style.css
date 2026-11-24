@@ -1542,3 +1542,13 @@ h3.sub {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* help lines: region switch */
+.help-lines .region-chips {
+  margin: 4px 0 8px;
+}
+.chip.small {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: 0.9rem;
+}

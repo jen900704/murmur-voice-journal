@@ -2,7 +2,7 @@
 // jar in the Journal, a low-mood card on Today, and exchanging today's prompt with someone.
 import { postcardSvg } from './postcard.js';
 import { trackById } from './bedtime.js';
-import { checkRisk, RESOURCES } from './safety.js';
+import { checkRisk, helpList } from './safety.js';
 
 const S = {
   'zh-TW': {
@@ -333,11 +333,10 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   }
 
   function showHelp({ sharing = false } = {}) {
-    const list = RESOURCES[getLang()] || RESOURCES.en;
     openSheet(() => [
       h('h2', {}, L().helpTitle),
       h('p', {}, sharing ? L().helpBodyShare : L().helpBody),
-      h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null))),
+      helpList(h, getLang()),
       h('button', { type: 'button', class: 'btn', onclick: closeSheet }, L().close),
     ]);
   }

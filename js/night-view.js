@@ -2,7 +2,7 @@
 // track, and get a postcard. Every step can be skipped. No streaks, no reminders of missed days.
 import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
-import { checkRisk, RESOURCES } from './safety.js';
+import { checkRisk, helpList } from './safety.js';
 
 const S = {
   'zh-TW': {
@@ -460,14 +460,13 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function crisis() {
-    const list = RESOURCES[getLang()] || RESOURCES.en;
     return [
       h(
         'div',
         { class: 'crisis', role: 'alert' },
         h('h2', {}, L().crisisTitle),
         h('p', {}, L().crisisBody),
-        h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null))),
+        helpList(h, getLang()),
         h('p', { class: 'muted small' }, L().crisisKept)
       ),
       h(

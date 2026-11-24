@@ -3,7 +3,7 @@
 // and it sends the conversation text to Anthropic. Voice entries and bedtime notes are never sent.
 // Nothing from the conversation is stored.
 import { lensById } from './lenses.js';
-import { checkRisk, RESOURCES, HELP_NUMBER } from './safety.js';
+import { checkRisk, helpList as regionHelpList, HELP_NUMBER } from './safety.js';
 
 export const MODELS = [
   { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5' },
@@ -234,9 +234,8 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
     const lens = lensById(st.lensId);
     const name = lens[getLang() === 'en' ? 'en' : 'zh'].name;
     if (st.crisis) {
-      const list = RESOURCES[getLang()] || RESOURCES.en;
       return [
-        h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().crisisBody), h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null)))),
+        h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().crisisBody), regionHelpList(h, getLang())),
         h(
           'div',
           { class: 'actions left wrap' },
@@ -245,8 +244,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         ),
       ];
     }
-    const list = RESOURCES[getLang()] || RESOURCES.en;
-    const helpList = () => h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null)));
+    const helpList = () => regionHelpList(h, getLang());
     if (st.pause) {
       return [
         h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().pauseBody), helpList()),
