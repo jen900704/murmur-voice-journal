@@ -33,7 +33,7 @@ for (const l of LENSES) {
   out.push(`- 關鍵概念：${z.concepts.join('、')}`);
   out.push('');
 }
-out.push('## 睡前引導（7 段）');
+out.push(`## 睡前引導（${TRACKS.length} 段）`);
 out.push('');
 out.push('每段都由開頭、放下心事、主體、結尾組成；下面是不選主題時的完整稿。數字是每句後的停頓秒數。');
 out.push('');

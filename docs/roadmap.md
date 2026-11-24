@@ -6,7 +6,7 @@
 - Preregistered validation against Praat on human speech, and a robustness study (codecs, gain, AGC, noise, reverberation, telephone band, Chrome's own recording path)
 - Confidence label for each feature, and a CSV codebook
 - Theory lens: 14 counseling approaches, compare mode, lens cards, "which lens fits me"
-- Bedtime ritual: set a worry down, one kind thing, a wind-down track in the style of seven approaches, pastel postcard
+- Bedtime ritual: set a worry down, one kind thing, a wind-down track in the style of eight approaches (including a psychoanalytic "murmur": letting images drift up without interpreting them), pastel postcard
 - Kindness jar, low-mood card, daily prompt exchange by link, calendar reminder, goodnight card to one person
 - First-visit welcome with three ways in; help lines by region (Taiwan, US, elsewhere)
 - Gentle recommendations with content notes

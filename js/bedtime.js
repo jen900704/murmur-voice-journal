@@ -210,6 +210,37 @@ export const TRACKS = [
     },
   },
   {
+    // "a murmur from Freud": free association turned into a bedtime practice, without interpreting
+    id: 'drift',
+    lens: 'psychoanalytic',
+    zh: {
+      name: '讓畫面自己浮現',
+      style: '精神分析取向風格',
+      core: [
+        ['今晚不用分析什麼。讓今天的畫面，自己慢慢浮上來。', 6],
+        ['也許是一張臉、一句話、一個房間。出現什麼都可以，不需要有道理。', 8],
+        ['如果某個畫面帶著比較強的感覺，就讓它待一下，不用追問為什麼。如果它太重，就換回呼吸，或停下來。', 8],
+        ['心裡想要的，和心裡擔心的，常常同時存在。今晚兩個都可以先放著。', 8],
+        ['有些感覺，可能比今天更早就認識你了。今晚不用把它想清楚。', 8],
+        ['睡著以後，心會用它自己的方式整理今天。你不用幫它。', 8],
+        ['如果明天醒來還記得一點夢，可以寫下來看看。忘了也沒關係。', 10],
+      ],
+    },
+    en: {
+      name: 'Letting images drift up',
+      style: 'in the spirit of psychoanalytic therapy',
+      core: [
+        ['Tonight there is nothing to analyze. Let pictures from today drift up on their own.', 6],
+        ['Maybe a face, a sentence, a room. Whatever comes is fine; it does not have to make sense.', 8],
+        ['If one picture carries a strong feeling, let it stay a moment without asking why. If it is too heavy, go back to your breath, or stop.', 8],
+        ['What part of you wants and what part of you fears often sit side by side. Tonight both can wait.', 8],
+        ['Some feelings may have known you since long before today. Tonight you do not need to work them out.', 8],
+        ['Once you are asleep, your mind will sort the day in its own way. You do not have to help it.', 8],
+        ['If you wake remembering a bit of a dream, you could write it down. If you forget, that is fine too.', 10],
+      ],
+    },
+  },
+  {
     id: 'relaxation',
     lens: 'behavioral',
     zh: {
