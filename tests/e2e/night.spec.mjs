@@ -68,10 +68,14 @@ test('risk language in the worry stops the ritual and shows help', async ({ page
   await expect(page.locator('.crisis a[href="tel:1925"]')).toBeVisible();
 });
 
-test('a shared prompt link opens that prompt with an exchange box', async ({ page }) => {
-  await page.goto('/#ask=' + encodeURIComponent('今天有什麼小事讓你注意到了？'));
+test('a shared prompt link opens that prompt by number, and ignores anything else', async ({ page }) => {
+  await page.goto('/#ask=0');
   await expect(page.locator('.prompt-text')).toHaveText('今天有什麼小事讓你注意到了？');
   await expect(page.locator('.exchange-from')).toBeVisible();
+  await page.goto('/#ask=%E4%BD%A0%E5%A5%BD%');
+  await page.reload();
+  await expect(page.locator('.rec-btn')).toBeVisible();
+  await expect(page.locator('.exchange-from')).toHaveCount(0);
 });
 
 test('a low mood check-in shows things that helped before', async ({ page }) => {

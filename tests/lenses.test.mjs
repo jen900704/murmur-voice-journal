@@ -35,6 +35,33 @@ const shouldFlag = [
   ['家裡有家暴', 'abuse'],
   ['my partner hits me', 'abuse'],
   ['I was sexually assaulted', 'abuse'],
+  ['I don\u2019t want to live anymore', 'self'],
+  ['我 想 死', 'self'],
+  ['我想去死', 'self'],
+  ['真的好想死一死算了', 'self'],
+  ['活著好累', 'self'],
+  ['活著有什麼意義', 'self'],
+  ['沒有我大家會比較好', 'self'],
+  ['想離開這個世界', 'self'],
+  ['乾脆一了百了', 'self'],
+  ['昨天吞了一堆安眠藥', 'self'],
+  ['想從頂樓跳下去', 'self'],
+  ['拿刀割自己', 'self'],
+  ['如果我不在了會怎樣', 'self'],
+  ['不想再醒過來', 'self'],
+  ['I wish I were dead', 'self'],
+  ['everyone would be better off without me', 'self'],
+  ['there is no point in living', 'self'],
+  ['life is not worth living', 'self'],
+  ['I want to take my own life', 'self'],
+  ["I don't want to be here anymore", 'self'],
+  ['他喝醉會掐我', 'abuse'],
+  ['昨天又被他揍', 'abuse'],
+  ['他一直摸我', 'abuse'],
+  ['he keeps hitting me', 'abuse'],
+  ['he choked me', 'abuse'],
+  ['she slapped me', 'abuse'],
+  ['he forced me to stay', 'abuse'],
 ];
 
 const shouldNotFlag = [
@@ -50,6 +77,16 @@ const shouldNotFlag = [
   '我很擔心期末考',
   'I feel stuck at work and my boss ignores me',
   '和媽媽吵架了，覺得她不懂我',
+  '提案又被打槍了',
+  '開會一直被打斷',
+  '不好意思被打擾到你',
+  '下午打我電話就好',
+  '如果這份報告消失就好了',
+  '老闆砍了他們的預算',
+  "I don't want to hurt her feelings",
+  'it hurts me that she did not call',
+  'I need to cut myself some slack',
+  '想死你了，快回來',
 ];
 
 for (const [text, kind] of shouldFlag) {
@@ -96,13 +133,14 @@ test('fill quotes and shortens answers', () => {
 
 test('rewrite turns "I have to" into "I choose"', () => {
   assert.equal(rewriteText(true, '我必須每天加班', 'zh'), '我選擇每天加班');
+  assert.ok(!rewriteText(true, '他們逼我加班', 'zh').startsWith('我選擇他們'));
   assert.equal(rewriteText(true, 'I have to answer every email', 'en'), 'I choose to answer every email');
   assert.ok(rewriteText('defuse', '我不夠好', 'zh').includes('我注意到我有一個想法'));
 });
 
 test('lenses unsuited to loss are excluded for that topic', () => {
   const ids = lensesForTopic('loss').map((l) => l.id);
-  for (const bad of ['existential', 'solution-focused', 'rebt', 'narrative', 'adlerian', 'reality']) assert.ok(!ids.includes(bad), bad);
+  for (const bad of ['existential', 'solution-focused', 'rebt', 'narrative', 'adlerian', 'reality', 'gestalt']) assert.ok(!ids.includes(bad), bad);
   assert.ok(ids.includes('person-centered'));
   for (const t of TOPICS) assert.ok(lensesForTopic(t).length >= 5, t);
 });

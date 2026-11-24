@@ -61,3 +61,14 @@ test('CSV export escapes formula-like notes', async ({ page }) => {
   const row = readFileSync(file, 'utf8').replace(/^﻿/, '').split('\n')[1];
   expect(row).toContain(`"'=HYPERLINK(""x"")"`);
 });
+
+test('a note with risk language is not stored, and help is shown', async ({ page }) => {
+  await page.goto('/');
+  await record(page);
+  await page.fill('#note', 'I want to die');
+  await page.click('[data-key="save"]');
+  await expect(page.locator('#sheet a[href="tel:988"]')).toBeVisible();
+  const entries = await storedEntries(page);
+  expect(entries).toHaveLength(1);
+  expect(entries[0].note).toBe('');
+});

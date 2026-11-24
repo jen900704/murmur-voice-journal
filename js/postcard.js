@@ -59,9 +59,9 @@ const face = (cx, cy, r, ink, blush) => `
   <ellipse cx="${cx + r * 0.42}" cy="${cy + r * 0.22}" rx="${r * 0.12}" ry="${r * 0.07}" fill="${blush}" opacity=".7"/>`;
 
 const MOTIFS = {
-  moon: (p, x, y, r) => `
-    <mask id="crescent"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + r * 0.55}" cy="${y - r * 0.35}" r="${r * 0.82}" fill="#000"/></mask>
-    <circle cx="${x}" cy="${y}" r="${r}" fill="${p.soft}" mask="url(#crescent)"/>
+  moon: (p, x, y, r, uid = '') => `
+    <mask id="${uid}crescent"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + r * 0.55}" cy="${y - r * 0.35}" r="${r * 0.82}" fill="#000"/></mask>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="${p.soft}" mask="url(#${uid}crescent)"/>
     ${face(x - r * 0.42, y + r * 0.28, r * 0.6, p.ink, p.accent)}
     <text x="${x + r * 0.75}" y="${y - r * 0.75}" font-size="${r * 0.35}" fill="${p.ink}" opacity=".6" font-family="sans-serif">z</text>
     <text x="${x + r * 1.0}" y="${y - r * 1.05}" font-size="${r * 0.25}" fill="${p.ink}" opacity=".5" font-family="sans-serif">z</text>`,
@@ -97,6 +97,8 @@ const MOTIFS = {
 // label: a small heading above it; date: shown at the bottom
 export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
   const r = rng(seed);
+  // ids must be unique when several postcards are inline on one page
+  const uid = 'pc' + Math.floor(r() * 1e9).toString(36);
   const p = PALETTES[Math.floor(r() * PALETTES.length)];
   const motifNames = Object.keys(MOTIFS);
   const motif = motifNames[Math.floor(r() * motifNames.length)];
@@ -119,11 +121,11 @@ export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
   const text = lines.map((l, i) => `<text x="300" y="${textY + i * 34}" font-size="24" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p.bg[0]}"/><stop offset="1" stop-color="${p.bg[1]}"/></linearGradient>
+    <linearGradient id="${uid}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p.bg[0]}"/><stop offset="1" stop-color="${p.bg[1]}"/></linearGradient>
   </defs>
-  <rect width="${W}" height="${H}" rx="28" fill="url(#bg)"/>
+  <rect width="${W}" height="${H}" rx="28" fill="url(#${uid}bg)"/>
   ${blobs}${dots}
-  <g>${MOTIFS[motif](p, 150, 210, 78)}</g>
+  <g>${MOTIFS[motif](p, 150, 210, 78, uid)}</g>
   <rect x="268" y="40" width="300" height="320" rx="22" fill="#fff" opacity=".42"/>
   ${label ? `<text x="300" y="90" font-size="17" fill="${p.ink}" opacity=".75" font-family="${fontStack}">${esc(label)}</text>` : ''}
   ${text}

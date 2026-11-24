@@ -7,6 +7,7 @@ import * as db from './db.js';
 import { createLensView } from './lens-view.js';
 import { createNightView, isEvening } from './night-view.js';
 import { createExtras } from './extras.js';
+import { checkRisk } from './safety.js';
 import { DAILY, promptOfDay } from './prompts.js';
 
 const MIN_SECONDS = 5;
@@ -34,7 +35,7 @@ const state = {
   detailUrl: null,
   sheetFn: null,
   journalMode: 'voice',
-  askPrompt: null,
+  askIndex: null,
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -246,14 +247,16 @@ async function savePending() {
   savePending.busy = true;
   const p = state.pending;
   const prompts = DAILY[getLang()] || DAILY.en;
+  // a note that suggests risk is not stored; help is shown instead
+  const noteRisk = checkRisk(p.note).risk;
   const entry = {
     id: uid(),
     createdAt: Date.now(),
-    prompt: state.askPrompt || prompts[state.promptIndex % prompts.length],
+    prompt: prompts[(state.askIndex ?? state.promptIndex) % prompts.length],
     lang: getLang(),
     mood: p.mood,
     energy: p.energy,
-    note: p.note.trim(),
+    note: noteRisk ? '' : p.note.trim(),
     features: p.features,
     featureVersion: FEATURE_VERSION,
     capture: p.capture || null,
@@ -276,6 +279,7 @@ async function savePending() {
     return;
   }
   savePending.busy = false;
+  state.askIndex = null;
   state.entries.push(entry);
   db.requestPersistence();
   state.pending = null;
@@ -283,6 +287,7 @@ async function savePending() {
   state.promptIndex = (state.promptIndex + 1) % prompts.length;
   toast(message);
   render();
+  if (noteRisk) extras.showHelp();
 }
 
 // ---------- demo data ----------
@@ -402,7 +407,8 @@ function latestRated() {
 function viewToday() {
   if (nightView.active()) return nightView.view();
   const prompts = DAILY[getLang()] || DAILY.en;
-  const prompt = state.askPrompt || prompts[state.promptIndex % prompts.length];
+  const promptIdx = (state.askIndex ?? state.promptIndex) % prompts.length;
+  const prompt = prompts[promptIdx];
   const wrap = h('section', { class: 'view today' });
 
   if (state.phase === 'result' && state.pending) {
@@ -474,7 +480,7 @@ function viewToday() {
               class: 'link',
               'data-key': 'new-prompt',
               onclick: () => {
-                state.askPrompt = null;
+                state.askIndex = null;
                 state.promptIndex = (state.promptIndex + 1) % prompts.length;
                 render();
               },
@@ -482,7 +488,7 @@ function viewToday() {
             t('newPrompt')
           )
         : null,
-      state.phase === 'idle' || state.phase === 'error' ? extras.exchangeBox(prompt, !!state.askPrompt) : null
+      state.phase === 'idle' || state.phase === 'error' ? extras.exchangeBox(prompt, promptIdx, state.askIndex !== null) : null
     )
   );
 
@@ -651,6 +657,7 @@ function setBackgroundInert(on) {
 function closeDetailUI() {
   const sheet = $('#sheet');
   if (sheet.hidden) return;
+  state.sheetFn = null;
   sheet.hidden = true;
   sheet.innerHTML = '';
   setBackgroundInert(false);
@@ -916,8 +923,9 @@ function exportCsv() {
   download(`murmur-${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + lines.join('\n'), 'text/csv');
 }
 
-function exportJson() {
-  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries };
+async function exportJson() {
+  const [nights, lensSessions] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => [])]);
+  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions };
   download(`murmur-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data), 'application/json');
 }
 
@@ -1008,7 +1016,7 @@ function viewAbout() {
       'div',
       { class: 'data-actions' },
       h('button', { type: 'button', class: 'btn', onclick: exportCsv, disabled: !state.entries.length }, t('exportCsv')),
-      h('button', { type: 'button', class: 'btn', onclick: exportJson, disabled: !state.entries.length }, t('exportJson')),
+      h('button', { type: 'button', class: 'btn', onclick: exportJson }, t('exportJson')),
       h('button', { type: 'button', class: 'btn', onclick: () => fileInput.click() }, t('importJson')),
       fileInput,
       hasDemo
@@ -1021,11 +1029,11 @@ function viewAbout() {
         {
           type: 'button',
           class: 'btn danger',
-          disabled: !state.entries.length,
           onclick: async () => {
             if (!confirm(t('confirmDeleteAll'))) return;
             await db.clearAll();
             state.entries = [];
+            await extras.loadNights();
             toast(t('deletedAll'));
             render();
           },
@@ -1108,10 +1116,17 @@ function render() {
   if (focusedKey) focusKey(focusedKey);
 }
 
+// A shared prompt link carries only the prompt's number, never free text.
+function parseAsk(tab) {
+  const n = Number.parseInt(tab.slice(4), 10);
+  const len = (DAILY[getLang()] || DAILY.en).length;
+  return Number.isInteger(n) && n >= 0 && n < len ? n : null;
+}
+
 function onHash() {
   const tab = location.hash.replace('#', '');
   if (tab.startsWith('ask=')) {
-    state.askPrompt = decodeURIComponent(tab.slice(4)).slice(0, 200);
+    state.askIndex = parseAsk(tab);
     history.replaceState(null, '', '#today');
     state.tab = 'today';
     render();
@@ -1142,13 +1157,16 @@ async function init() {
   const savedLang = await db.getSetting('lang', null).catch(() => null);
   setLang(savedLang || detectLang());
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
-  state.entries = await db.listEntries().catch(() => []);
+  state.entries = await db.listEntries().catch((e) => {
+    if (e && e.message === 'blocked') setTimeout(() => toast(t('dbBlocked')), 300);
+    return [];
+  });
   state.promptIndex = promptOfDay(getLang()).index;
   const tab = location.hash.replace('#', '');
   state.tab = TABS.includes(tab) ? tab : 'today';
   if (tab === 'entry') history.replaceState(null, '', '#today');
   if (tab.startsWith('ask=')) {
-    state.askPrompt = decodeURIComponent(tab.slice(4)).slice(0, 200);
+    state.askIndex = parseAsk(tab);
     state.tab = 'today';
     history.replaceState(null, '', '#today');
   }

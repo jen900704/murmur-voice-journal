@@ -231,7 +231,7 @@
    },
    "creator": "Giuseppe Tornatore",
    "year": 1988,
-   "minutes": 155,
+   "minutes": 124,
    "tones": [
     "good-cry",
     "warm"
@@ -260,7 +260,9 @@
     "warm"
    ],
    "cw": [
-    "sexual content"
+    "sexual content",
+    "death",
+    "suicide"
    ],
    "why": {
     "zh": "一個害羞的人，用小小的善意改變身邊的人。",
@@ -283,7 +285,9 @@
    ],
    "cw": [
     "illness",
-    "infidelity"
+    "infidelity",
+    "death",
+    "violence"
    ],
    "why": {
     "zh": "台北一家人的一年，安靜地看見每個人的孤單。",
@@ -322,7 +326,7 @@
     "en": "Midnight Diner",
     "orig": "深夜食堂"
    },
-   "creator": "Joji Matsuoka",
+   "creator": "Joji Matsuoka (based on the manga by Yaro Abe)",
    "year": 2009,
    "minutes": 25,
    "tones": [
@@ -377,7 +381,8 @@
    ],
    "cw": [
     "panic attacks",
-    "divorce"
+    "divorce",
+    "suicide"
    ],
    "why": {
     "zh": "一個樂觀的教練，後來也學會面對自己的焦慮和求助。",
@@ -401,7 +406,8 @@
    "cw": [
     "death",
     "violence",
-    "bullying"
+    "bullying",
+    "suicide"
    ],
    "why": {
     "zh": "台灣穿越劇，關於想念和被理解。劇情較重。",
@@ -449,8 +455,8 @@
    "cw": [],
    "lens": "adlerian",
    "why": {
-    "zh": "用對話的方式介紹阿德勒心理學，好讀。",
-    "en": "An accessible dialogue introducing Adlerian psychology."
+    "zh": "用對話的方式介紹阿德勒心理學，好讀。書中「創傷並不存在」的說法有爭議，讀的時候可以保留自己的判斷。",
+    "en": "An accessible dialogue introducing Adlerian psychology. Its claim that \"trauma does not exist\" is disputed; read it with your own judgement."
    }
   },
   {
@@ -494,7 +500,8 @@
    ],
    "cw": [
     "illness",
-    "death"
+    "death",
+    "suicide"
    ],
    "why": {
     "zh": "一位治療師自己也去接受治療的故事，讓諮商變得不那麼陌生。",
@@ -581,7 +588,10 @@
     "warm",
     "companionship"
    ],
-   "cw": [],
+   "cw": [
+    "death",
+    "suicide"
+   ],
    "why": {
     "zh": "寫信給雜貨店問煩惱的人，和回信的人。",
     "en": "People who write to a shop about their worries, and the replies they get."
@@ -592,7 +602,7 @@
    "type": "book",
    "title": {
     "zh": "情緒勒索",
-    "en": "Emotional Blackmail (Chinese)",
+    "en": "Emotional Blackmail (Taiwanese book by Chou Mu-tzu)",
     "orig": "情緒勒索"
    },
    "creator": "周慕姿",
@@ -759,7 +769,9 @@
     "funny",
     "warm"
    ],
-   "cw": [],
+   "cw": [
+    "suicide"
+   ],
    "why": {
     "zh": "童話般的歌劇，很適合第一次看歌劇。",
     "en": "A fairy-tale opera; a good first opera."

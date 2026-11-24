@@ -37,7 +37,7 @@ const S = {
     experiment: '一個小練習',
     concepts: '關鍵概念',
     misses: '這個透鏡可能忽略的',
-    reading: (ch) => `想多了解：Corey《諮商與心理治療：理論與實務》第 ${ch} 章（第 10 版）`,
+    reading: (ch) => `想多了解：Corey《Theory and Practice of Counseling and Psychotherapy》原文第 10 版第 ${ch} 章（中譯本章節可能不同）`,
     people: '代表人物',
     talk: '這個練習可以幫你換個角度，但它取代不了和一個人好好談談。如果這件事讓你持續很辛苦，學校或公司的諮商中心是很好的起點。',
     rateQ: '這個透鏡對你有幫助嗎？',
@@ -165,6 +165,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.stage = stage;
     rerender();
     window.scrollTo(0, 0);
+    const hd = document.querySelector('.view.lens h2, .view.lens .lens-q');
+    if (hd) {
+      hd.setAttribute('tabindex', '-1');
+      hd.focus({ preventScroll: true });
+    }
   }
 
   function reset() {
@@ -444,7 +449,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('div', { class: 'lens-step-head' }, lensMark(lens, 36), h('div', {}, h('p', { class: 'lens-name' }, c.name), h('p', { class: 'muted small' }, L().stepOf(st.step + 1, n)))),
       st.step === 0 ? h('blockquote', { class: 'lens-concern-quote' }, st.concern) : null,
       s.rewrite && prevAnswer ? h('p', { class: 'lens-rewrite' }, rewriteText(s.rewrite, prevAnswer, getLang())) : null,
-      h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.q, st.answers)),
+      h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q, st.answers)),
       h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
       field,
       h(

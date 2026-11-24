@@ -1403,3 +1403,18 @@ h3.sub {
   margin-top: 2px;
   font-size: 13px;
 }
+
+.muted-link {
+  color: var(--muted);
+}
+
+.view.night.playing {
+  --accent: #a092ff;
+  color-scheme: dark;
+}
+.view.night.playing :focus-visible {
+  outline-color: #c7bdff;
+}
+.rec-cw {
+  color: color-mix(in srgb, var(--amber) 70%, var(--ink));
+}

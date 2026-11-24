@@ -2,7 +2,7 @@
 
 Protocol: [`validation-protocol.md`](validation-protocol.md), Part B, committed before analysis. Code: feature version 2. Reproduce with `python3 -I tools/robustness.py validation-audio validation-out` after running Part A. Full numbers: [`results/robustness-v2.json`](results/robustness-v2.json).
 
-Eleven clips (jfk, lj, three LibriSpeech readers, and the first digit sequence of each of six speakers) were analyzed clean and under 21 conditions. The Chrome recording path (condition 2 in the protocol) was not run in this pass; it is listed under "not done" below.
+Eleven clips (jfk, lj, three LibriSpeech readers, and the first digit sequence of each of six speakers) were analyzed clean and under 21 conditions. The Chrome recording path (condition 2) was run afterwards for the five sentence clips; see the section below.
 
 ## A problem with the preregistered reference spread
 
@@ -55,7 +55,9 @@ Each LibriSpeech clip (14 to 17 s) was split into halves of about 7 s. Median pi
 - Loudness movement, voice regularity, and the timing features are described as comparable only between recordings made in similar, quiet conditions.
 - The noise flag threshold is not changed: changing it based on these results would be a post hoc decision, and the right threshold depends on real phone recordings.
 
-## Not done
+## Chrome's own recording path
 
-- The Chrome recording path (fake microphone into the app's MediaRecorder and browser decoding).
+Each sentence clip was played into Chrome's fake microphone, recorded by the app's own code (WebM/Opus, browser processing reported off), decoded by the browser, and analyzed in the app (`tools/chrome_path.py`). Four of five clips came out essentially unchanged: median pitch within 0.4 Hz (lj 2.2 Hz), pitch movement and range within 0.05 semitones, timing and voice regularity within a few hundredths. The fifth, jfk (a 1961 broadcast recording that is already band-limited), shifted median pitch by 4 Hz and inflated pitch movement from 2.2 to 6.2 and range from 7.1 to 19.5 semitones through octave errors after the browser's resampling. Old or telephone-quality audio is where the pitch spread measures are least trustworthy.
+
+## Not done
 - Repeated recordings of real people across days, which is the denominator that actually matters for "higher or lower than usual". Until that exists, every ratio above uses a proxy.

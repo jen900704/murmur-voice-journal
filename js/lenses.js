@@ -52,7 +52,7 @@ export const LENSES = [
       name: '阿德勒學派',
       idea: '行為背後有目標，人最深的需要之一是歸屬與貢獻。我們會帶著一套自己的「私人邏輯」看世界，而鼓勵比批評更能帶來改變。',
       steps: [
-        { q: '如果這個困擾明天就不見了，你的生活會有什麼不同？你會開始做什麼？', why: '阿德勒學派用這個問題找出困擾背後你真正想要的生活。' },
+        { q: '如果這個困擾明天就不見了，你的生活會有什麼不同？你會開始做什麼？', why: '阿德勒學派用這個問題看見兩件事：你想要的生活，以及這個困擾可能讓你暫時不用面對什麼。' },
         { q: '在這件事裡，你心裡有沒有一句「我必須……才……」？例如「我必須做到最好，才會被接納」。', why: '它把這種句子叫做私人邏輯：很少被說出口，卻影響很多選擇。' },
         { q: '有沒有一件小事，你可以「彷彿」已經是不被這個困擾綁住的自己，去做做看？', why: '「彷彿」練習讓人先在行動上試穿新的自己，不用等到感覺準備好。' },
       ],
@@ -65,7 +65,7 @@ export const LENSES = [
       name: 'Adlerian',
       idea: 'Behavior is aimed at goals, and one of our deepest needs is to belong and contribute. We see the world through a private logic, and encouragement changes more than criticism does.',
       steps: [
-        { q: 'If this worry were gone tomorrow, what would be different in your life? What would you start doing?', why: 'Adlerians use this question to find the life you actually want underneath the problem.' },
+        { q: 'If this worry were gone tomorrow, what would be different in your life? What would you start doing?', why: 'Adlerians use this question to see two things: the life you want, and what the problem may be letting you avoid for now.' },
         { q: 'Is there an "I must ... in order to ..." sentence inside this? For example, "I must be the best in order to be accepted."', why: 'This is called private logic: rarely said out loud, but it steers a lot of choices.' },
         { q: 'Is there one small thing you could do "as if" you were already the version of you who is not held back by this?', why: 'Acting "as if" lets you try on a new way of being before you feel ready.' },
       ],
@@ -143,7 +143,7 @@ export const LENSES = [
     id: 'gestalt',
     chapter: 8,
     people: 'Fritz and Laura Perls',
-    excludeTopics: [],
+    excludeTopics: ['loss'],
     zh: {
       name: '完形取向',
       idea: '改變從此時此刻的覺察開始。注意你身體正在做什麼、你正在怎麼說話，比解釋「為什麼」更能讓人接觸到自己。',
@@ -246,9 +246,10 @@ export const LENSES = [
       steps: [
         { q: '發生了什麼事？只寫事實，像攝影機拍到的那樣。（A，觸發事件）', why: 'REBT 先把事件和我們對事件的解讀分開。' },
         { q: '關於這件事，你心裡有沒有一個「應該」或「必須」？例如「他應該要……」「我必須……」。（B，信念）', why: '它認為絕對化的要求，常讓合理的失望變成難以承受的痛苦。' },
-        { q: '如果把「必須」換成「我很希望……，但不是一定要」，你的感受（C）會有什麼變化？', why: '這是溫和版本的駁斥：不是否認你想要的，而是放下「一定要」。' },
+        { q: '帶著這個信念，你的感受和反應是什麼？（C，結果）', why: 'REBT 認為感受主要來自 B，而不只是 A。' },
+        { q: '如果把「必須」換成「我很希望……，但不是一定要」，你的感受會有什麼變化？（D，駁斥；E，新的效果）', why: '這是溫和版本的駁斥：不是否認你想要的，而是放下「一定要」。' },
       ],
-      noticed: '事件是「{1}」。你帶著的信念是「{2}」。換成偏好而不是要求之後，你感覺到：「{3}」。',
+      noticed: '事件是「{1}」。你帶著的信念是「{2}」，結果是「{3}」。換成偏好而不是要求之後，你感覺到：「{4}」。',
       experiment: '這週每次發現自己說「應該」或「必須」，就試著在心裡改成「我很希望……」，看看感受有沒有不同。',
       concepts: ['ABC 模式', '非理性信念', '偏好與要求', '駁斥'],
       misses: '有時太直接。有些「應該」反映的是真實的不公平，問題不只在想法；這時更需要的是改變處境或找到支持。',
@@ -259,9 +260,10 @@ export const LENSES = [
       steps: [
         { q: 'What happened? Only the facts, as a camera would have recorded them. (A, the activating event)', why: 'REBT first separates the event from our interpretation of it.' },
         { q: 'Is there a "should" or "must" in your mind about it? For example, "He should have ...", "I must ...". (B, the belief)', why: 'It holds that absolute demands turn reasonable disappointment into unbearable distress.' },
-        { q: 'If you replaced "must" with "I would really like ..., but it does not have to be", how would your feeling (C) change?', why: 'This is a gentle form of disputing: not denying what you want, just dropping "it has to be".' },
+        { q: 'Holding that belief, how did you feel and react? (C, the consequence)', why: 'REBT holds that feelings come mainly from B, not only from A.' },
+        { q: 'If you replaced "must" with "I would really like ..., but it does not have to be", how would your feeling change? (D, disputing; E, the new effect)', why: 'This is a gentle form of disputing: not denying what you want, just dropping "it has to be".' },
       ],
-      noticed: 'The event was "{1}". The belief you carried was "{2}". Holding it as a preference rather than a demand, you felt: "{3}".',
+      noticed: 'The event was "{1}". The belief you carried was "{2}", and the result was "{3}". Holding it as a preference rather than a demand, you felt: "{4}".',
       experiment: 'Whenever you catch yourself saying "should" or "must" this week, try turning it into "I would really like ...", and notice whether the feeling shifts.',
       concepts: ['the ABC model', 'irrational beliefs', 'preferences versus demands', 'disputing'],
       misses: 'It can be blunt. Some "shoulds" point to real unfairness, and then the problem is not only in your thinking; changing the situation or finding support matters more.',
@@ -375,10 +377,10 @@ export const LENSES = [
       idea: '與其深入分析問題，不如找出已經有用的部分。每個人都有資源，也都有困擾比較小的時刻。',
       steps: [
         { scale: true, q: '從 0 到 10，10 代表這件事處理得讓你很滿意，你現在在幾分？', why: '評量問句讓抽象的感覺變得可以討論。' },
-        { q: '為什麼是 {1} 分，而不是更低？你做了什麼，讓它沒有更糟？', why: '這是因應問句：先看見你已經在做的努力。' },
+        { q: '為什麼是 {1} 分，而不是更低？你做了什麼，讓它沒有更糟？', qZero: '在 0 分的時候，你是怎麼撐到現在的？', why: '這是因應問句：先看見你已經在做的努力。' },
         { q: '最近有沒有哪一刻，這個困擾比較小，或沒有出現？那時有什麼不同？', why: '這是例外問句：答案常常藏在例外裡。' },
       ],
-      noticed: '你現在在 {1} 分。讓它沒有更糟的，是「{2}」。例外出現時：「{3}」。焦點解決取向會說：你已經在做一些有用的事了。',
+      noticed: '你現在在 {1} 分。你提到撐住自己的是「{2}」。例外出現時：「{3}」。焦點解決取向會在這些地方，找你已經在做、而且有用的事。',
       experiment: '往上一分會是什麼樣子？這週找一個小跡象，並多做一點「{3}」裡有用的部分。',
       concepts: ['評量問句', '例外問句', '因應問句', '資源'],
       misses: '專注在未來和資源，有時會讓人覺得自己的痛苦沒有被好好聽見。如果你需要先被理解，個人中心取向可能更適合。',
@@ -388,10 +390,10 @@ export const LENSES = [
       idea: 'Rather than analysing the problem in depth, find what already works. Everyone has resources and moments when the problem is smaller.',
       steps: [
         { scale: true, q: 'On a scale from 0 to 10, where 10 means you are satisfied with how this is going, where are you now?', why: 'Scaling questions make a vague feeling something you can talk about.' },
-        { q: 'Why {1} and not lower? What have you been doing that keeps it from being worse?', why: 'This is a coping question: it notices efforts you are already making.' },
+        { q: 'Why {1} and not lower? What have you been doing that keeps it from being worse?', qZero: 'At 0, how have you kept going until now?', why: 'This is a coping question: it notices efforts you are already making.' },
         { q: 'Recently, was there a moment when this worry was smaller or absent? What was different then?', why: 'This is an exception question: the answer often hides in the exceptions.' },
       ],
-      noticed: 'You are at {1}. What keeps it from being worse: "{2}". When the exception happened: "{3}". A solution-focused view would say you are already doing some things that work.',
+      noticed: 'You are at {1}. What you said keeps you going: "{2}". When the exception happened: "{3}". A solution-focused view would look in these places for things you already do that help.',
       experiment: 'What would one point higher look like? Look for one small sign this week, and do a little more of what helped in "{3}".',
       concepts: ['scaling questions', 'exception questions', 'coping questions', 'resources'],
       misses: 'Its focus on the future and on resources can leave you feeling your pain was not fully heard. If you need to be understood first, the person-centered lens may fit better.',
@@ -489,8 +491,8 @@ export function rewriteText(kind, previous, lang) {
   // "I have to / I must" -> "I choose"
   if (lang === 'en') {
     const m = p.match(/^\s*i\s+(?:have to|must|need to|should|have got to)\s+(.*)$/i);
-    return m ? `I choose to ${m[1]}` : `I choose: ${p}`;
+    return m ? `I choose to ${m[1]}` : `"${p}" (try reading it as a sentence that starts with "I choose")`;
   }
-  const m = p.match(/^\s*我?(?:必須|不得不|一定要|應該|得)\s*(.*)$/);
-  return `我選擇${m ? m[1] : p.replace(/^我/, '')}`;
+  const m = p.match(/^\s*我(?:必須|不得不|一定要|應該|得)\s*(.*)$/);
+  return m ? `我選擇${m[1]}` : `「${p}」（試著把它讀成一句以「我選擇」開頭的話）`;
 }

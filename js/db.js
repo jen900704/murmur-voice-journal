@@ -19,8 +19,17 @@ function open() {
       if (!db.objectStoreNames.contains('lensSessions')) db.createObjectStore('lensSessions', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('nights')) db.createObjectStore('nights', { keyPath: 'id' });
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const db = req.result;
+      // let a newer version of the app (in another tab) upgrade the database
+      db.onversionchange = () => db.close();
+      resolve(db);
+    };
     req.onerror = () => reject(req.error);
+    req.onblocked = () => {
+      dbPromise = null;
+      reject(new Error('blocked'));
+    };
   });
   return dbPromise;
 }

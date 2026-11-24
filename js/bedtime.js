@@ -19,13 +19,21 @@ const OPEN = {
     ['如果你願意，可以閉上眼睛，或讓目光輕輕落在前面。', 3],
     ['吸一口氣，慢慢吐出來。', 6],
     ['再一次。吸氣，然後吐氣。', 7],
+    ['如果過程中你覺得更緊繃，隨時可以停下來，睜開眼睛。', 3],
   ],
   en: [
     ['Find a position that feels comfortable.', 3],
     ['If you like, close your eyes, or let your gaze rest softly ahead of you.', 3],
     ['Breathe in, and slowly breathe out.', 6],
     ['Once more. In, and out.', 7],
+    ['If you feel more tense at any point, you can stop and open your eyes.', 3],
   ],
+};
+
+// Used when nothing was set down tonight.
+const SET_DOWN_GENERIC = {
+  'zh-TW': [['如果今天有什麼放不下的事，可以想像把它放在床邊的桌上。明天早上它還會在那裡。', 6]],
+  en: [['If anything from today is still with you, imagine placing it on the table beside your bed. It will still be there in the morning.', 6]],
 };
 
 const SET_DOWN = {
@@ -119,24 +127,24 @@ export const TRACKS = [
     id: 'existential',
     lens: 'existential',
     zh: {
-      name: '今天這樣就夠了',
+      name: '今天的一個小時刻',
       style: '存在取向風格',
       core: [
         ['今天你做了一些選擇。有些是你想要的，有些只是當下能做的。', 5],
         ['兩種都算數。', 4],
-        ['今天有沒有一個小小的時刻，你覺得比較像自己？', 8],
+        ['今天有沒有一個小小的時刻，你覺得比較像自己？如果想不到，也沒關係。', 8],
         ['也許是一句話、一杯熱的東西，或一段安靜的路。', 6],
         ['那個時刻透露了你在乎什麼。', 6],
         ['明天你還可以再選一次。今晚，你只需要休息。', 8],
       ],
     },
     en: {
-      name: 'Today was enough',
+      name: 'A small moment from today',
       style: 'in the spirit of existential therapy',
       core: [
         ['Today you made some choices. Some were what you wanted; some were simply what you could manage.', 5],
         ['Both count.', 4],
-        ['Was there a small moment today when you felt more like yourself?', 8],
+        ['Was there a small moment today when you felt more like yourself? If nothing comes to mind, that is fine.', 8],
         ['Maybe a sentence, a warm drink, or a quiet stretch of walking.', 6],
         ['That moment says something about what you care about.', 6],
         ['Tomorrow you can choose again. Tonight, you only need to rest.', 8],
@@ -180,7 +188,7 @@ export const TRACKS = [
       name: '今天還可以的事',
       style: '焦點解決取向風格',
       core: [
-        ['回想今天，有沒有一件事雖然很小，但還算順利？', 6],
+        ['回想今天，有沒有一件事雖然很小，但還算順利？想不到也沒關係。', 6],
         ['也許是好好吃了一餐、回了一則訊息，或撐過了一段難熬的時間。', 6],
         ['你是怎麼做到的？', 6],
         ['不用回答得很完整，只要讓那個畫面停留一下。', 8],
@@ -192,7 +200,7 @@ export const TRACKS = [
       name: 'What went okay today',
       style: 'in the spirit of solution-focused therapy',
       core: [
-        ['Think back over today. Was there one thing, however small, that went reasonably well?', 6],
+        ['Think back over today. Was there one thing, however small, that went reasonably well? If nothing comes to mind, that is fine.', 6],
         ['Maybe eating a proper meal, answering a message, or getting through a hard stretch of time.', 6],
         ['How did you manage it?', 6],
         ['You do not need a full answer. Just let that picture stay for a moment.', 8],
@@ -241,7 +249,7 @@ export const TRACKS = [
       style: '阿德勒學派風格',
       core: [
         ['今天，你有沒有讓誰的一天好過一點點？', 6],
-        ['也許只是一句謝謝，或好好聽一個人說完話。', 6],
+        ['也許只是一句謝謝，或好好聽一個人說完話。想不到也沒關係。', 6],
         ['今天你花的力氣，不管結果怎樣，都是真的。', 6],
         ['你不需要很完美，也一樣屬於這裡。', 6],
         ['明天，也許可以再為別人或自己做一件小事。', 6],
@@ -253,7 +261,7 @@ export const TRACKS = [
       style: 'in the spirit of Adlerian therapy',
       core: [
         ['Today, did you make someone\'s day a little easier?', 6],
-        ['Maybe just a thank-you, or listening to someone all the way through.', 6],
+        ['Maybe just a thank-you, or listening to someone all the way through. If nothing comes to mind, that is fine.', 6],
         ['The effort you put in today was real, whatever came of it.', 6],
         ['You do not have to be perfect to belong here.', 6],
         ['Tomorrow, maybe one more small thing for someone else, or for yourself.', 6],
@@ -271,8 +279,9 @@ export function trackById(id) {
 export function buildScript(trackId, theme, lang) {
   const l = lang === 'en' ? 'en' : 'zh-TW';
   const t = trackById(trackId)[l === 'en' ? 'en' : 'zh'];
-  const themeText = THEME_TEXT[l][theme] || THEME_TEXT[l].none;
-  return [...OPEN[l], ...SET_DOWN[l], ...t.core, ...CLOSE[l]].map(([s, p]) => [s.replace('{theme}', themeText), p]);
+  const setDown = theme && THEME_TEXT[l][theme] ? SET_DOWN[l] : SET_DOWN_GENERIC[l];
+  const themeText = THEME_TEXT[l][theme] || '';
+  return [...OPEN[l], ...setDown, ...t.core, ...CLOSE[l]].map(([s, p]) => [s.replace('{theme}', themeText), p]);
 }
 
 export function scriptSeconds(script, charsPerSecond) {
@@ -290,14 +299,36 @@ export function pickVoice(lang, preferredName) {
     if (v) return v;
   }
   const want = lang === 'en' ? /^en/i : /^(zh[-_](TW|Hant)|cmn[-_]Hant)/i;
-  const fallback = lang === 'en' ? /^en/i : /^zh/i;
-  return voices.find((v) => want.test(v.lang) && /premium|enhanced|natural/i.test(v.name)) || voices.find((v) => want.test(v.lang)) || voices.find((v) => fallback.test(v.lang)) || null;
+  // Mandarin only as a fallback: Cantonese voices (zh-HK, yue) would read the script in another language
+  const fallback = lang === 'en' ? /^en/i : /^(zh|cmn)(?![-_](HK|MO))/i;
+  const ok = (v) => !/yue|HK|MO/i.test(v.lang);
+  return (
+    voices.find((v) => want.test(v.lang) && ok(v) && /premium|enhanced|natural/i.test(v.name)) ||
+    voices.find((v) => want.test(v.lang) && ok(v)) ||
+    voices.find((v) => fallback.test(v.lang) && ok(v)) ||
+    null
+  );
 }
 
 export function voicesFor(lang) {
   if (typeof speechSynthesis === 'undefined') return [];
-  const re = lang === 'en' ? /^en/i : /^zh/i;
-  return speechSynthesis.getVoices().filter((v) => re.test(v.lang));
+  const re = lang === 'en' ? /^en/i : /^(zh|cmn)/i;
+  return speechSynthesis.getVoices().filter((v) => re.test(v.lang) && !/yue|HK|MO/i.test(v.lang));
+}
+
+// Voices load asynchronously in Chrome and Android: getVoices() is empty at first.
+export function voicesReady(timeoutMs = 1500) {
+  if (typeof speechSynthesis === 'undefined') return Promise.resolve([]);
+  const now = speechSynthesis.getVoices();
+  if (now.length) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const done = () => {
+      speechSynthesis.removeEventListener('voiceschanged', done);
+      resolve(speechSynthesis.getVoices());
+    };
+    speechSynthesis.addEventListener('voiceschanged', done);
+    setTimeout(done, timeoutMs);
+  });
 }
 
 // Automated tests set globalThis.__MURMUR_SPEED to run tracks quickly.
@@ -316,15 +347,20 @@ export class BedtimePlayer {
     this.stopped = false;
     this.paused = false;
     this.wakeLock = null;
+    this.gen = 0; // bumped on every pause/stop so stale callbacks are ignored
   }
 
   async start() {
     try {
-      if ('wakeLock' in navigator) this.wakeLock = await navigator.wakeLock.request('screen');
+      if ('wakeLock' in navigator) {
+        const lock = await navigator.wakeLock.request('screen');
+        if (this.stopped) lock.release().catch(() => {});
+        else this.wakeLock = lock;
+      }
     } catch (_) {
       /* not available */
     }
-    this.next();
+    if (!this.stopped) this.next();
   }
 
   next() {
@@ -332,8 +368,12 @@ export class BedtimePlayer {
     if (this.i >= this.script.length) return this.finish();
     const [text, pause] = this.script[this.i];
     this.onLine && this.onLine(this.i, text);
+    const gen = this.gen;
+    let fired = false;
     const after = () => {
-      if (this.stopped) return;
+      if (fired || this.stopped || this.paused || gen !== this.gen) return;
+      fired = true;
+      clearTimeout(this.watchdog);
       this.i++;
       this.timer = setTimeout(() => this.next(), (pause * 1000) / speed());
     };
@@ -345,7 +385,11 @@ export class BedtimePlayer {
       u.pitch = 0.95;
       u.onend = after;
       u.onerror = after;
+      this.utterance = u; // keep a reference: some browsers drop onend for collected utterances
       speechSynthesis.speak(u);
+      // some Android browsers never fire onend; move on after a generous estimate
+      clearTimeout(this.watchdog);
+      this.watchdog = setTimeout(after, (4 + text.length / (this.lang === 'en' ? 8 : 2.5)) * 1000);
     } else {
       // read-along: give time to read the line, then pause
       const readSeconds = Math.max(2.5, text.length / (this.lang === 'en' ? 14 : 4.5));
@@ -355,7 +399,9 @@ export class BedtimePlayer {
 
   pause() {
     this.paused = true;
+    this.gen++;
     clearTimeout(this.timer);
+    clearTimeout(this.watchdog);
     if (this.speak) speechSynthesis.cancel();
   }
 
@@ -367,7 +413,9 @@ export class BedtimePlayer {
 
   stop() {
     this.stopped = true;
+    this.gen++;
     clearTimeout(this.timer);
+    clearTimeout(this.watchdog);
     if (this.speak) speechSynthesis.cancel();
     this.release();
   }

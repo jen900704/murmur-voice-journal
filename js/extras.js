@@ -2,6 +2,7 @@
 // jar in the Journal, a low-mood card on Today, and exchanging today's prompt with someone.
 import { postcardSvg } from './postcard.js';
 import { trackById } from './bedtime.js';
+import { checkRisk, RESOURCES } from './safety.js';
 
 const S = {
   'zh-TW': {
@@ -27,9 +28,13 @@ const S = {
     track: '聽的是',
     delete: '刪除',
     confirmDelete: '確定刪除這個夜晚的紀錄嗎？',
-    lowTitle: '最近好像比較辛苦',
-    lowBody: '你上次標記的心情比較低。這裡有幾件以前讓你好過一點的事：',
-    lowBodyEmpty: '你上次標記的心情比較低。可以試試這些，也可以什麼都不做。',
+    lowTitle: '上次的心情比較低',
+    lowBody: '你之前寫下的、對自己好的事：',
+    lowBodyEmpty: '可以試試這些，也可以什麼都不做。',
+    lowDismiss: '先不用',
+    helpTitle: '想先讓你知道這些',
+    helpBody: '你寫的內容聽起來可能很沉重。如果你想找人說話，這些地方隨時都在。你剛剛寫的筆記沒有被儲存。',
+    helpBodyShare: '你寫的內容聽起來可能很沉重。把它傳給信任的人是很好的事；如果需要，這些地方也隨時都在。再按一次「分享」就會送出。',
     lowRitual: '睡前儀式',
     lowLens: '用理論透鏡看看',
     lowHelp: '找人說話的資源',
@@ -63,9 +68,13 @@ const S = {
     track: 'Track',
     delete: 'Delete',
     confirmDelete: 'Delete this night?',
-    lowTitle: 'It seems things have been harder lately',
-    lowBody: 'Your last mood check-in was low. Here are a few things that helped you before:',
-    lowBodyEmpty: 'Your last mood check-in was low. You could try one of these, or nothing at all.',
+    lowTitle: 'Your last check-in was low',
+    lowBody: 'Kind things you wrote down before:',
+    lowBodyEmpty: 'You could try one of these, or nothing at all.',
+    lowDismiss: 'Not now',
+    helpTitle: 'Before you go on',
+    helpBody: 'What you wrote sounds like it may be heavy. If you want to talk to someone, these are always available. Your note was not saved.',
+    helpBodyShare: 'What you wrote sounds like it may be heavy. Sending it to someone you trust is a good thing to do; if you need more, these are always available. Tap Share again to send it.',
     lowRitual: 'Bedtime ritual',
     lowLens: 'Look through a theory lens',
     lowHelp: 'Where to find someone to talk to',
@@ -249,6 +258,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   // ---------- low mood ----------
   function lowMoodCard(latest) {
     if (!latest || !Number.isFinite(latest.mood) || latest.mood > 2) return null;
+    if (ex.lowDismissed === latest.id) return null;
     if (Date.now() - latest.createdAt > 36 * 3600 * 1000) return null;
     if (!ex.loaded) {
       loadNights().then(render);
@@ -267,13 +277,14 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
         { class: 'low-links' },
         h('button', { type: 'button', class: 'link', onclick: startRitual }, L().lowRitual),
         h('button', { type: 'button', class: 'link', onclick: () => goLens('home') }, L().lowLens),
-        h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp)
+        h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp),
+        h('button', { type: 'button', class: 'link muted-link', onclick: () => ((ex.lowDismissed = latest.id), render()) }, L().lowDismiss)
       )
     );
   }
 
   // ---------- exchange today's prompt ----------
-  function exchangeBox(prompt, fromSomeone) {
+  function exchangeBox(prompt, promptIndex, fromSomeone) {
     if (!ex.exchangeOpen && !fromSomeone) {
       return h('button', { type: 'button', class: 'link', 'data-key': 'exchange-open', onclick: () => ((ex.exchangeOpen = true), render()) }, L().exchange);
     }
@@ -292,7 +303,13 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
           onclick: async () => {
             const a = ex.exchangeText.trim();
             if (!a) return;
-            const url = `${location.origin}${location.pathname}#ask=${encodeURIComponent(prompt)}`;
+            // sharing with someone you trust is good; still make help visible first
+            if (checkRisk(a).risk && !ex.helpShown) {
+              ex.helpShown = true;
+              showHelp({ sharing: true });
+              return;
+            }
+            const url = `${location.origin}${location.pathname}#ask=${promptIndex}`;
             const text = L().exchangeText(prompt, a, url);
             if (navigator.share) {
               try {
@@ -315,5 +332,15 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     );
   }
 
-  return { openGentle, modeChips, nightsSection, jarSection, lowMoodCard, exchangeBox, loadNights };
+  function showHelp({ sharing = false } = {}) {
+    const list = RESOURCES[getLang()] || RESOURCES.en;
+    openSheet(() => [
+      h('h2', {}, L().helpTitle),
+      h('p', {}, sharing ? L().helpBodyShare : L().helpBody),
+      h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null))),
+      h('button', { type: 'button', class: 'btn', onclick: closeSheet }, L().close),
+    ]);
+  }
+
+  return { openGentle, modeChips, nightsSection, jarSection, lowMoodCard, exchangeBox, loadNights, showHelp };
 }

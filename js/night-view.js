@@ -1,6 +1,6 @@
 // The bedtime ritual: set a worry down, note one kind thing, listen to a short wind-down
 // track, and get a postcard. Every step can be skipped. No streaks, no reminders of missed days.
-import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor } from './bedtime.js';
+import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady } from './bedtime.js';
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, RESOURCES } from './safety.js';
 
@@ -39,6 +39,7 @@ const S = {
     done: '完成',
     gentle: '今晚來點溫和的作品',
     skip: '略過',
+    skipTrack: '今晚不聽，直接收明信片',
     next: '下一步',
     back: '上一步',
     crisisTitle: '先停一下',
@@ -82,6 +83,7 @@ const S = {
     done: 'Done',
     gentle: 'Something gentle to watch or read',
     skip: 'Skip',
+    skipTrack: 'Skip the track, just the postcard',
     next: 'Next',
     back: 'Back',
     crisisTitle: 'Let us pause here',
@@ -107,6 +109,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.stage = stage;
     rerender();
     window.scrollTo(0, 0);
+    // move focus to the new step's heading so screen readers announce it
+    const hd = document.querySelector('.view.night h2');
+    if (hd) {
+      hd.setAttribute('tabindex', '-1');
+      hd.focus({ preventScroll: true });
+    }
   }
 
   async function begin() {
@@ -118,6 +126,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.voiceName = await db.getSetting(`voice-${getLang()}`, null).catch(() => null);
     const nights = await db.listNights().catch(() => []);
     st.jar = nights.map((n) => n.kindness).filter(Boolean);
+    st.finishing = false;
+    voicesReady(); // start loading voices early
     go('worry');
   }
 
@@ -239,14 +249,33 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         ),
         h('button', { type: 'button', class: 'track surprise', 'data-key': 'track-surprise', onclick: () => play(chooseFor()) }, h('strong', {}, L().surprise))
       ),
-      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('kind') }, L().back)),
+      h(
+        'div',
+        { class: 'actions left' },
+        h('button', { type: 'button', class: 'btn ghost', onclick: () => go('kind') }, L().back),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'btn ghost',
+            'data-key': 'night-skip-track',
+            onclick: () => {
+              st.track = null;
+              st.stage = 'play';
+              finishTrack();
+            },
+          },
+          L().skipTrack
+        )
+      ),
     ];
   }
 
-  function play(trackId) {
+  async function play(trackId) {
     st.track = trackId;
     const lang = getLang();
     const script = buildScript(trackId, st.theme, lang);
+    await voicesReady();
     const voice = pickVoice(lang === 'en' ? 'en' : 'zh', st.voiceName);
     st.readAlong = !voice;
     st.paused = false;
@@ -278,7 +307,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       { class: 'night-play' },
       h('p', { class: 'night-track' }, t.name, h('span', {}, ' · ', t.style)),
       h('div', { class: 'breath', 'aria-hidden': 'true' }),
-      h('p', { class: 'night-line', id: 'night-line', 'aria-live': 'polite' }, st.line || '…'),
+      // only announce lines when they are not already being spoken aloud
+      h('p', { class: 'night-line', id: 'night-line', 'aria-live': st.readAlong ? 'polite' : 'off' }, st.line || '…'),
       h('div', { class: 'night-bar' }, h('div', { id: 'night-progress' })),
       st.readAlong ? h('p', { class: 'small night-dim' }, L().readAlong) : h('p', { class: 'small night-dim' }, L().playTitle),
       h(
@@ -289,6 +319,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           {
             type: 'button',
             class: 'btn night-btn',
+            'data-key': 'night-pause',
             onclick: () => {
               if (st.paused) {
                 st.paused = false;
@@ -307,6 +338,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           {
             type: 'button',
             class: 'btn night-btn ghost',
+            'data-key': 'night-stop',
             onclick: () => {
               st.player.stop();
               finishTrack();
@@ -339,7 +371,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   async function finishTrack() {
-    if (st.stage !== 'play') return;
+    if (st.stage !== 'play' || st.finishing) return;
+    st.finishing = true;
     const now = new Date();
     const seed = `${now.toDateString()}-${st.track}-${st.kind}`;
     const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(now);
@@ -361,6 +394,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       lang: getLang(),
     };
     await db.saveNight(night).catch(() => {});
+    st.finishing = false;
     go('postcard');
   }
 
