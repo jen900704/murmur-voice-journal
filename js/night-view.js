@@ -242,7 +242,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function stepHead(i, title, help) {
-    return [h('p', { class: 'muted small night-step' }, L().step(i, 4)), h('h2', {}, title), help ? h('p', { class: 'muted small' }, help) : null];
+    return [h('p', { class: 'muted small night-step', 'data-step': i }, L().step(i, 4)), h('h2', {}, title), help ? h('p', { class: 'muted small' }, help) : null];
   }
 
   // an empty step says "Skip", so it is clear nothing has to be written
