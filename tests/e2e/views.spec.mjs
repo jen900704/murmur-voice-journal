@@ -70,3 +70,24 @@ test('breathing pacer starts, shows the phase, and stops when closed', async ({ 
   await page.keyboard.press('Escape');
   await expect(page.locator('#sheet')).toBeHidden();
 });
+
+test('after ten real entries the journal offers a backup, then waits a month', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.prompt-text').waitFor();
+  await page.evaluate(async () => {
+    const data = await fetch('./demo/demo-data.json').then((r) => r.json());
+    await new Promise((res) => {
+      const q = indexedDB.open('murmur', 3);
+      q.onsuccess = () => {
+        const t = q.result.transaction('entries', 'readwrite');
+        data.entries.slice(0, 12).forEach((e, i) => t.objectStore('entries').put({ ...e, id: 'r' + i, demo: false, hasAudio: false, createdAt: Date.now() - i * 86400000 }));
+        t.oncomplete = res;
+      };
+    });
+  });
+  await page.goto('/#journal');
+  await page.reload();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="backup-now"]').click()]);
+  expect(download.suggestedFilename()).toMatch(/^murmur-backup-/);
+  await expect(page.locator('[data-key="backup-now"]')).toHaveCount(0);
+});

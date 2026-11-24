@@ -648,7 +648,7 @@ function viewJournal() {
     add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
     return wrap;
   }
-  add(wrap, demoBanner(), h('p', { class: 'muted' }, t('entries', entries.length)));
+  add(wrap, demoBanner(), backupNote(), h('p', { class: 'muted' }, t('entries', entries.length)));
   const byMonth = new Map();
   for (const e of [...entries].reverse()) {
     const k = fmtDate(e.createdAt, { year: 'numeric', month: 'long' });
@@ -1043,6 +1043,28 @@ async function exportJson() {
   const [nights, lensSessions] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => [])]);
   const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions };
   download(`murmur-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data), 'application/json');
+  state.lastBackup = Date.now();
+  db.setSetting('lastBackup', state.lastBackup).catch(() => {});
+}
+
+// Everything lives on this one phone, and Safari can clear it. After some real entries, and
+// then once a month, a quiet note offers a backup. Dismissing it waits another month.
+function backupNote() {
+  const real = state.entries.filter((e) => !e.demo).length;
+  const month = 30 * 24 * 3600 * 1000;
+  if (real < 10 || Date.now() - (state.lastBackup || 0) < month) return null;
+  const later = () => {
+    state.lastBackup = Date.now();
+    db.setSetting('lastBackup', state.lastBackup).catch(() => {});
+    render();
+  };
+  return h(
+    'div',
+    { class: 'demo-banner', role: 'note' },
+    h('span', {}, t('backupNote')),
+    h('button', { type: 'button', class: 'link', 'data-key': 'backup-now', onclick: () => exportJson().then(render) }, t('backupNow')),
+    h('button', { type: 'button', class: 'link', onclick: later }, t('backupLater'))
+  );
 }
 
 async function importJson(file) {
@@ -1362,6 +1384,7 @@ async function init() {
   setLang(savedLang || detectLang());
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
   state.welcomed = (await db.getSetting('welcomed', false).catch(() => false)) === true;
+  state.lastBackup = await db.getSetting('lastBackup', 0).catch(() => 0);
   state.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
   state.aiKeySet = !!(await db.getSetting('aiKey', '').catch(() => ''));
   state.aiModel = await db.getSetting('aiModel', AI_MODELS[0].id).catch(() => AI_MODELS[0].id);
