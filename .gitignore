@@ -3,3 +3,5 @@ node_modules/
 *.wav
 *.f32
 validation-audio/
+test-results/
+playwright-report/
