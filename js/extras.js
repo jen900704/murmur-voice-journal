@@ -7,6 +7,7 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
+    orderNote: '排序會參考現在的時間和你最近記下的心情，只在這個裝置上計算。',
     typeLabel: '想看哪一種',
     toneLabel: '今晚想要的感覺（可不選）',
     more: (n) => `再看 ${n} 個`,
@@ -61,6 +62,7 @@ const S = {
     typeLabel: 'What kind',
     toneLabel: 'The feeling you want tonight (optional)',
     more: (n) => `Show ${n} more`,
+    orderNote: 'The order takes the time of day and your latest mood check-in into account, worked out on this device.',
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
@@ -132,13 +134,44 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     openSheet(gentleBody);
   }
 
+  // Order for right now: shorter things late at night, gentler ones after a low check-in, and a
+  // daily shuffle so the top of the list changes from day to day. Everything stays on the device.
+  function forNow(list) {
+    const entries = (getState && getState().entries) || [];
+    let mood = null;
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const e = entries[i];
+      if (!e.demo && Number.isFinite(e.mood)) {
+        if (Date.now() - e.createdAt < 36 * 3600 * 1000) mood = e.mood;
+        break;
+      }
+    }
+    const hour = new Date().getHours();
+    const late = hour >= 20 || hour < 4;
+    const day = new Date().toDateString();
+    const jitter = (id) => {
+      let x = 0;
+      for (const c of day + id) x = (x * 31 + c.charCodeAt(0)) >>> 0;
+      return (x % 1000) / 1000;
+    };
+    const score = (it) => {
+      let s = jitter(it.id);
+      if (late) s += it.minutes && it.minutes <= 60 ? 1.5 : it.minutes > 150 ? -1 : 0;
+      if (mood !== null && mood <= 3) s += it.tones.some((t) => t === 'warm' || t === 'companionship' || t === 'quiet') ? 2 : 0;
+      if (mood !== null && mood <= 2 && it.tones.includes('good-cry')) s -= 1;
+      if (mood !== null && mood >= 5 && it.tones.includes('funny')) s += 1;
+      return s;
+    };
+    return [...list].sort((a, b) => score(b) - score(a));
+  }
+
   function gentleBody(rerender) {
-    const items = ex.recs.filter((it) => (ex.type === 'all' || it.type === ex.type) && (!ex.tone || it.tones.includes(ex.tone)) && (ex.heavy || !it.cw.some((c) => HEAVY.has(c))));
+    const items = forNow(ex.recs.filter((it) => (ex.type === 'all' || it.type === ex.type) && (!ex.tone || it.tones.includes(ex.tone)) && (ex.heavy || !it.cw.some((c) => HEAVY.has(c)))));
     const chip = (on, label, onclick) => h('button', { type: 'button', class: 'chip' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', onclick }, label);
     const lang = getLang();
     return [
       h('h2', {}, L().gentleTitle),
-      h('p', { class: 'muted small' }, L().gentleNote),
+      h('p', { class: 'muted small' }, L().gentleNote, ' ', L().orderNote),
       h('p', { class: 'lens-label', id: 'recs-type' }, L().typeLabel),
       h('div', { class: 'chips wrap', role: 'group', 'aria-labelledby': 'recs-type' }, chip(ex.type === 'all', L().all, () => ((ex.type = 'all'), (ex.showAll = false), rerender())), Object.keys(L().types).map((k) => chip(ex.type === k, L().types[k], () => ((ex.type = k), (ex.showAll = false), rerender())))),
       h('p', { class: 'lens-label', id: 'recs-tone' }, L().toneLabel),
