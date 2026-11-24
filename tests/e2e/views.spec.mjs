@@ -48,3 +48,14 @@ test('bedtime reminder downloads a valid daily calendar event', async ({ page })
   expect(ics).toMatch(/DTSTART:\d{8}T214500/);
   expect(ics).toContain('BEGIN:VALARM');
 });
+
+test('first visit shows three ways in; dismissing it is remembered', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.welcome')).toBeVisible();
+  await page.locator('[data-key="welcome-lens"]').click();
+  await expect(page).toHaveURL(/#lens/);
+  await page.goto('/#today');
+  await page.reload();
+  await expect(page.locator('.prompt-text')).toBeVisible();
+  await expect(page.locator('.welcome')).toHaveCount(0);
+});

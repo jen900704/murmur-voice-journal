@@ -822,7 +822,7 @@ h3.sub {
   font-weight: 500;
 }
 .tile.is-demo {
-  opacity: 0.8;
+  color: var(--muted);
 }
 
 /* ---------- theory lens ---------- */
@@ -1496,4 +1496,49 @@ h3.sub {
 }
 .view.lens #ai-input {
   margin-bottom: 4px;
+}
+
+/* first-visit welcome */
+.welcome {
+  background: var(--surface, #fff);
+  border-radius: 20px;
+  padding: 18px 18px 12px;
+  margin: 0 0 18px;
+}
+.welcome h2 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+.welcome-doors {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.welcome-door {
+  display: grid;
+  gap: 2px;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  background: var(--bg, transparent);
+  border: 1.5px solid var(--line, rgba(0, 0, 0, 0.12));
+  border-radius: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.welcome-door:hover {
+  border-color: var(--accent, currentColor);
+}
+.welcome-door-title {
+  font-weight: 650;
+}
+.welcome-door-body {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+@media (min-width: 640px) {
+  .welcome-doors {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

@@ -465,6 +465,7 @@ function viewToday() {
   }
 
   const idle = state.phase === 'idle' || state.phase === 'error';
+  if (idle && !state.welcomed && !state.entries.length) add(wrap, welcomeCard());
   if (idle) add(wrap, extras.lowMoodCard(latestRated()));
   if (idle && isEvening()) add(wrap, nightView.card());
   add(wrap, 
@@ -562,6 +563,40 @@ function viewToday() {
     }
   }
   return wrap;
+}
+
+// First visit only: three ways in, and what the app is not. Dismissed for good with one tap.
+function welcomeCard() {
+  const dismiss = () => {
+    state.welcomed = true;
+    db.setSetting('welcomed', true).catch(() => {});
+  };
+  const door = (key, title, body, onclick) => h('button', { type: 'button', class: 'welcome-door', 'data-key': key, onclick }, h('span', { class: 'welcome-door-title' }, title), h('span', { class: 'welcome-door-body' }, body));
+  return h(
+    'section',
+    { class: 'welcome', 'aria-labelledby': 'welcome-title' },
+    h('h2', { id: 'welcome-title' }, t('welcomeTitle')),
+    h('p', {}, t('welcomeBody')),
+    h(
+      'div',
+      { class: 'welcome-doors' },
+      door('welcome-voice', t('welcomeVoice'), t('welcomeVoiceBody'), () => {
+        dismiss();
+        render();
+        focusKey('rec');
+      }),
+      door('welcome-lens', t('welcomeLens'), t('welcomeLensBody'), () => {
+        dismiss();
+        location.hash = '#lens';
+      }),
+      door('welcome-night', t('welcomeNight'), t('welcomeNightBody'), () => {
+        dismiss();
+        nightView.begin();
+      })
+    ),
+    h('p', { class: 'muted small' }, t('welcomeNote')),
+    h('button', { type: 'button', class: 'link', 'data-key': 'welcome-close', onclick: () => { dismiss(); render(); } }, t('welcomeClose'))
+  );
 }
 
 function viewJournal() {
@@ -1267,6 +1302,7 @@ async function init() {
   const savedLang = await db.getSetting('lang', null).catch(() => null);
   setLang(savedLang || detectLang());
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
+  state.welcomed = (await db.getSetting('welcomed', false).catch(() => false)) === true;
   state.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
   state.aiKeySet = !!(await db.getSetting('aiKey', '').catch(() => ''));
   state.aiModel = await db.getSetting('aiModel', AI_MODELS[0].id).catch(() => AI_MODELS[0].id);
