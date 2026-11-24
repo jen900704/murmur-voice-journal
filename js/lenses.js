@@ -505,13 +505,14 @@ export function isNonAnswer(text) {
 
 // Fill {1}, {2}, ... with earlier answers. A blank or "not sure" answer becomes an ellipsis,
 // with the quotation marks around it dropped.
-export function fill(template, answers) {
+// Inside a question (opts.inQuestion) answers are cut shorter, and a blank one reads as "it".
+export function fill(template, answers, opts = {}) {
   const zh = /[\u4e00-\u9fff]/.test(template);
   return template.replace(/([「"“]?)\{(\d)\}([」"”]?)/g, (_, open, i, close) => {
     const a = answers[Number(i) - 1];
-    if (isNonAnswer(a)) return zh ? '……' : '…';
+    if (isNonAnswer(a)) return opts.inQuestion ? (zh ? '它' : 'it') : zh ? '……' : '…';
     // one trailing full stop is dropped so a quoted answer does not end in 「。」。 or ".".
-    const q = quote(a);
+    const q = quote(a, opts.inQuestion ? (zh ? 16 : 32) : 60);
     return open + (open || close ? q.replace(/([^.。])[.。]$/, '$1') : q) + close;
   });
 }

@@ -1,6 +1,6 @@
 # Connecting with other people: design notes
 
-Murmur currently has no server, and everything stays on the device. People can already share what they choose through their phone's own share sheet:
+Murmur currently has no server, and everything stays on the device (the one exception is the optional AI conversation, which sends that conversation to Anthropic with the person's own API key). People can already share what they choose through their phone's own share sheet:
 
 - a bedtime postcard image;
 - a goodnight card to one person, carrying only a fixed line they pick (never what they wrote that night);
@@ -34,7 +34,7 @@ Anything where one user's words reach another user inside the app needs a server
 
 ## "One kind thing I did for myself" with other people
 
-The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. The low-day card also offers three small general actions (a warm drink, two minutes at a window, a sticker to someone), written by Murmur rather than posted by users, so there is no one to compare with. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
+The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. The low-day card also offers up to three small general actions from a list of 14 (a warm drink, two minutes at a window, a sticker to someone), written by Murmur rather than posted by users, so there is no one to compare with. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
 
 ## Platform options
 

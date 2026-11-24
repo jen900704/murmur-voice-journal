@@ -536,7 +536,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('div', { class: 'lens-step-head' }, lensMark(lens, 36), h('div', {}, h('p', { class: 'lens-name' }, c.name), h('p', { class: 'muted small' }, L().stepOf(st.step + 1, n)))),
       st.step === 0 ? h('blockquote', { class: 'lens-concern-quote' }, st.concern) : null,
       s.rewrite && prevAnswer ? h('p', { class: 'lens-rewrite' }, rewriteText(s.rewrite, prevAnswer, getLang())) : null,
-      h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q, st.answers)),
+      h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q, st.answers, { inQuestion: true })),
       h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
       field,
       field.tagName === 'TEXTAREA' ? h('p', { class: 'muted small lens-hint' }, L().answerHint) : null,

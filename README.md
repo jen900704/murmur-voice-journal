@@ -19,19 +19,19 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 
 ## What is in it
 
-- **Voice journal.** Speak for about 30 seconds; see pitch, pace, pauses, and voice regularity against your own usual range.
-- **Silent check-in.** When speaking aloud is not possible, note mood, energy and one line without recording. These entries show in the journal but stay out of the voice trends.
-- **Theory lens** (換個角度看看 in Chinese). Write down a worry and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Compare three lenses side by side, collect lens cards, and see which ones you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
-- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a wind-down track of about three to four minutes in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks. The whole ritual is shown in dark colors, whatever the system theme.
+- **Voice journal.** Speak for about 30 seconds (at least 5, at most 90); see pitch, pace, pauses, and voice regularity against your own usual range. Until there are 10 usable recordings to form that range, the result screen shows the voice shape and the check-in first, with the numbers folded under "See the numbers". The journal also has a short look back at the last seven days.
+- **Silent check-in.** When speaking aloud is not possible, note mood, energy and one line without recording. These entries are listed in the journal and counted in the seven-day look back, but stay out of the voice trends, the usual range, the correlations, and the CSV export. A low mood rating in one still brings up the low-mood note.
+- **Theory lens** (換個角度看看 in Chinese; the tab reads 換角度). Write down a worry, pick the kind of worry, and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Draw a lens at random, compare three side by side, or choose from a compact list that puts the lenses often used for that kind of worry first. When the worry is a loss, only the five lenses suited to grief are offered. Answers such as "not sure" are accepted and are never quoted back in the summary. Collect lens cards, and see which lenses you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
+- **Bedtime ritual.** Set a worry down, note one kind thing you did for yourself, and listen to one of nine wind-down tracks of about three to five minutes, each in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). From 8 pm to 4 am the ritual's card comes first on Today; at other times it is a link there. You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks. The whole ritual is shown in dark colors, whatever the system theme.
 - **Goodnight card.** Send one pastel card to one person through your phone's share sheet. It carries only a line you pick, never what you wrote; there is no feed, count, or read receipt.
-- **Breathe for a minute.** A one-minute pacer (in for 4 seconds, out for 6) on Today and on the low-mood card.
-- **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back, along with three small general actions many people find a little helpful (not other users' posts, so there is nothing to compare against).
-- **Daily prompt.** Everyone gets the same prompt on the same day, and you can swap answers with someone through a link.
-- **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: instructed to give one reflection and one question per turn, avoid praise and reassurance, and use only techniques suitable for self-help. Risk words in your message pause it with help lines (you can still send); a risky reply without help lines is held back; the chat ends when the model gives help lines. At most ten turns. Uses your own API key.
+- **Breathe for a minute.** A one-minute pacer (in for 4 seconds, out for 6) on Today and on the low-mood note.
+- **Kindness jar.** The kind things you noted, kept privately. When the latest mood check-in is low (1 or 2 out of 7, within the last 36 hours), up to three of them come back, along with three small general actions many people find a little helpful (not other users' posts, so there is nothing to compare against). In the evening the note is shorter: one kind thing, one small action, breathing, and help.
+- **Daily prompt.** Everyone gets the same prompt (one of 40) on the same day, and you can swap answers with someone through a link.
+- **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: instructed to give one reflection and one question per turn, avoid praise and reassurance, and use only techniques suitable for self-help. Risk words in your message pause it with help lines (you can still send); a risky reply without help lines is held back; the chat ends when the model gives help lines, or when a reply comes back empty or refused. At most ten turns, the last one a short summary. Uses your own API key.
 - **Bedtime reminder.** Add a daily calendar event at a time you choose; Murmur sends no notifications.
-- **Something gentle.** A short, curated list of films, short films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them. The list is ordered for the moment (shorter works late at night, gentler ones after a low check-in), worked out on the device.
+- **Something gentle.** A curated list of 42 films, short films, series, books, musicals, operas, and pieces of music, with content notes; heavier works are hidden unless you ask for them. The list is ordered for the moment (shorter works late at night, gentler ones after a low check-in, with a daily shuffle), worked out on the device.
 
-**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses the lens exercise, the bedtime ritual and the AI chat and shows help lines for the person's region (a voice note is saved first, then help lines are shown; the prompt exchange shows them before sharing) (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every lens and ritual step, and under About. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
+**Safety.** Text typed into the theory lens, the bedtime ritual, check-in notes (with or without a recording), the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses the lens exercise, the bedtime ritual and the AI chat and shows help lines for the person's region (a check-in note is saved first, then help lines are shown; the prompt exchange shows them once before sharing). The region is guessed from the device's time zone and can be switched (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: the local emergency number and a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every lens and ritual step, and under About. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
@@ -44,11 +44,11 @@ It is meant for self-reflection and for people curious about speech measurement.
 ## Privacy
 
 - Audio is decoded and analyzed in the browser, in a Web Worker. Nothing is uploaded.
-- Entries, recordings, theory-lens exercises you choose to save, bedtime notes, and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
+- Entries, recordings, theory-lens exercises you choose to save, which lenses you used and how you rated them, bedtime notes (the worry only if you leave "keep" on), and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
 - The one exception is an experimental AI conversation that continues a theory-lens exercise. It is off by default, needs your own Anthropic API key (stored unencrypted in this browser), and sends only that conversation, the worry, and your answers in that exercise to Anthropic. Voice entries and bedtime notes are never sent. The conversation is not saved on this device; Anthropic handles what it receives under its API data policy.
-- You can keep only the measurements and not the audio (a setting), export a backup (JSON: measurements, notes, bedtime notes and saved exercises, as unencrypted text; audio is not exported) or the measurements as CSV, and delete everything at any time.
+- You can keep only the measurements and not the audio (a setting), export a backup (JSON: measurements, check-ins, notes, bedtime notes and saved exercises, as unencrypted text; audio is not exported) or the voice entries as CSV (measurements, ratings, notes and prompts; silent check-ins are left out), and delete everything at any time.
 - Bedtime tracks use only voices that run on the device; online voices (such as Chrome's "Google" voices) are skipped, and the track falls back to read-along text.
-- The help-line region you pick is kept in the browser's local storage. The site is hosted on GitHub Pages, which, like any web host, sees the IP address that loads it.
+- The help-line region you pick, and which low-mood note you dismissed, are kept in the browser's local storage. The site is hosted on GitHub Pages, which, like any web host, sees the IP address that loads it.
 - Sharing is always your own choice, through your phone's share sheet: a postcard, a goodnight card, a prompt link (which carries only the prompt's number), or a backup file.
 
 ## What it measures
@@ -95,7 +95,7 @@ Speech activity is found with an adaptive energy threshold placed between the re
 
 Median F0 agrees with Praat within about 1 Hz. The syllable count is within about 12% at ordinary rates but undercounts very fast speech, where intensity dips between syllables become too shallow. Synthetic speech is a limited test; the human-speech results above are the main evidence. An exploratory pilot on two recorded Mandarin clips ([`docs/mandarin-pilot.md`](docs/mandarin-pilot.md)) found almost no gross pitch errors (0.2%), looser frame agreement than in English (median 22 cents), and a 4 to 6% higher median pitch that comes from frames Murmur alone counts as voiced (on frames both call voiced, the two agree to 0.1%). A steady difference like this does not affect comparisons with oneself.
 
-The unit tests (`npm test`) cover YIN on harmonic tones from 90 to 380 Hz, rejection of a 600 Hz tone instead of reporting it at a subharmonic, pause and syllable detection on speech-like signals with known structure, robustness to noise and to a DC offset, rejection of noise-only audio, survival of real pitch excursions wider than an octave, voice regularity falling with added noise and with breathiness, clipping and noise flags, the direction of each feature under controlled changes, the false-flag rate of the baseline rule, and the statistics helpers against SciPy.
+The unit tests (`npm test`) for the measurements cover YIN on harmonic tones from 90 to 380 Hz, rejection of a 600 Hz tone instead of reporting it at a subharmonic, pause and syllable detection on speech-like signals with known structure, robustness to noise and to a DC offset, rejection of noise-only audio, survival of real pitch excursions wider than an octave, voice regularity falling with added noise and with breathiness, clipping and noise flags, the direction of each feature under controlled changes, the false-flag rate of the baseline rule, and the statistics helpers against SciPy. A third unit test file checks the risk-language patterns against the test phrases, the lens and bedtime content (for example that "not sure" is never quoted back), the checks on imported backups, and that the content review file and the service worker cache name match the code.
 
 ## Limitations
 
@@ -110,7 +110,7 @@ The unit tests (`npm test`) cover YIN on harmonic tones from 90 to 380 Hz, rejec
 
 ## Run it locally
 
-No build step and no dependencies.
+The app has no build step and no runtime dependencies. The unit tests need only Node; the browser tests need `npm ci` and `npx playwright install chromium webkit`.
 
 ```bash
 git clone https://github.com/jen900704/murmur-voice-journal
@@ -118,14 +118,19 @@ cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
 npm run test:e2e              # browser tests in Chromium: recording through a fake microphone, the main flows,
-                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 22 screens
+                              # a mocked AI API, offline use, double taps and damaged backups, and an axe-core
+                              # WCAG 2.1 AA audit of 20 screens
+                              # (each in Chinese with light colors and in English with dark colors)
 npm run test:webkit           # the same flows in WebKit (Safari's engine), without the microphone tests
+                              # and the offline reload test
 ```
 
-Microphone access requires `https` or `localhost`. The unit tests (`npm test`) need no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
+Microphone access requires `https` or `localhost`. All three test commands run in CI on every push (`.github/workflows/test.yml`). The unit tests (`npm test`) need no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
 
 ```
 index.html            app shell
+css/style.css         all styles, light and dark
+manifest.webmanifest  home-screen app manifest
 js/features.js        feature extraction (pure functions, also runs in Node)
 js/stats.js           baseline and correlation helpers
 js/worker.js          runs the analysis off the main thread
@@ -136,20 +141,26 @@ js/i18n.js            Traditional Chinese and English text
 js/lenses.js          theory-lens content (14 approaches, zh-TW and en)
 js/lens-view.js       theory-lens screens
 js/safety.js          risk-language check and help lines
-js/bedtime.js         bedtime scripts and the speech player
+js/bedtime.js         bedtime scripts (nine tracks) and the speech player
 js/night-view.js      bedtime ritual screens
 js/postcard.js        procedural postcards
-js/extras.js          recommendations, nights, kindness jar, prompt exchange
-js/prompts.js         daily prompts
+js/extras.js          recommendations, nights, kindness jar, low-mood note, seven-day look back, prompt exchange
+js/prompts.js         daily prompts (40, zh-TW and en)
 js/breathe.js         one-minute breathing pacer
 js/validate.js        checks records in an imported backup
 js/ai-chat.js         experimental AI conversation (system prompt and safety rules)
-data/recs.json        curated recommendations
+data/recs.json        curated recommendations (42 works)
 sw.js                 offline cache
 tools/validate.sh     comparison with Praat on synthesized speech
 tools/make-demo.mjs   builds the synthetic demo data (demo/demo-data.json)
 tools/export-content.mjs  writes docs/content-review.md from the content
 tools/bump-cache.mjs  sets the service worker cache name from the app files
+tools/screenshots.mjs regenerates the README screenshots
+tools/fetch-validation-audio.sh, validate_human.py, robustness.py, chrome_path.py,
+validate_mandarin.py, murmur-analyze.mjs   the human-speech validation, robustness and Mandarin pilot studies
+tests/*.test.mjs      unit tests (features, statistics, content and safety)
+tests/e2e/            browser tests (Playwright), including the accessibility audit and robustness checks
+.github/workflows/test.yml  CI: unit tests, Chromium, WebKit
 ```
 
 The voice shape for each entry is the recording's pitch contour wrapped around a circle: the outline moves outward when pitch rises above that recording's median and inward when it falls, and loudness thickens it slightly.
@@ -178,9 +189,9 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 
 ## 中文說明
 
-**功能。** 聲音日記之外，還有：不方便出聲時只記心情（不錄音，不進聲音趨勢）、換個角度看看（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片；也可以「只想聽一段」直接開始）、寄一張晚安明信片給一個人（明信片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。
+**功能。** 聲音日記之外，還有：不方便出聲時只記心情（不錄音；會列在紀錄裡，也算進「這七天」的回顧，但不進聲音趨勢、平常範圍和 CSV）、換個角度看看（分頁名稱是「換角度」；用 14 個諮商學派的提問方式看同一個煩惱，每個學派問 3 到 4 題，可以抽一張、比較三個，或從依煩惱類型排序的精簡清單裡自己選；寫「不知道」也可以，小結不會把它引用回來；屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、從九段三到五分鐘的睡前引導裡聽一段、收一張粉彩明信片；也可以「只想聽一段」直接開始；整個儀式都用深色畫面；晚上 8 點到凌晨 4 點，睡前儀式的卡片會排在「今天」的最上面）、寄一張晚安明信片給一個人（明信片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子（最近一次心情記得偏低時，會把你寫過的幾件事和三件一般的小事帶回來；晚上只各列一件）、每日小題交換（共 40 題，同一天每個人拿到同一題）、加進行事曆的睡前提醒（Murmur 不會傳送通知）、附內容提醒的溫和作品推薦（42 部），以及實驗性的 AI 對話（預設關閉，需要你自己的 API 金鑰，最多十輪）。累積 10 筆可用的錄音之前，結果頁會先顯示聲音圖形和心情紀錄，數字先收合起來，點開才看得到。
 
-**安全。** 輸入的文字如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（台灣、美國或其他地方，可以切換）。寫下的內容不會被刪掉；如果只是誤判，可以按「我不是那個意思，繼續」。每個步驟都能一鍵找到求助專線。這只是粗略的安全網，已用約 210 個句子測試，仍然可能漏掉某些說法。
+**安全。** 在換個角度看看、睡前儀式、心情紀錄的備註、每日小題交換和 AI 對話裡輸入的文字，如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（一開始依裝置的時區判斷，可以切換。台灣：1925、1995、113、110、119、1980；美國：988、家暴專線、911；其他地方：當地的緊急電話和 findahelpline.com 的連結）。心情紀錄的備註會先照常存好，再顯示專線；小題交換會在分享前先顯示一次。寫下的內容不會被刪掉；如果只是誤判，可以按「我不是那個意思，繼續」。換個角度看看和睡前儀式的每個步驟，以及「關於」頁，都能一鍵找到求助專線。這只是粗略的安全網，已用約 210 個句子測試，仍然可能漏掉某些說法。
 
 
 Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天說大約 30 秒的話，它會在你的裝置上算出音高、音高起伏、語速、停頓和聲音規律度。累積幾次之後，它會告訴你今天的聲音和你自己的平常範圍相比是高、低，還是差不多。如果你每次花兩秒標記心情和精神，它也會顯示你的聲音和你的感受之間的關聯。
@@ -190,7 +201,7 @@ Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天�
 
 **為什麼只跟自己比。** 音高起伏、語速、停頓這些特徵常出現在情緒和心理健康的語音研究裡，但每個人的聲音差異很大。對一個人來說偏低的數字，對另一個人可能很正常。所以 Murmur 不拿你和其他人比較，只拿你和你自己比較。
 
-**隱私。** 錄音在瀏覽器裡解碼和分析，不會上傳。資料存在你裝置上的 IndexedDB（求助專線的地區設定存在瀏覽器的 localStorage），沒有帳號、沒有追蹤、沒有第三方請求。唯一的例外是你自己開啟的實驗性 AI 對話。睡前引導只用裝置內建的語音。你可以選擇只保留分析結果不保留錄音，也可以隨時匯出或全部刪除。
+**隱私。** 錄音在瀏覽器裡解碼和分析，不會上傳。資料存在你裝置上的 IndexedDB（求助專線的地區設定，以及你關掉的是哪一則低潮提醒，存在瀏覽器的 localStorage），沒有帳號、沒有追蹤、沒有第三方請求。唯一的例外是你自己開啟的實驗性 AI 對話：它預設關閉，需要你自己的 Anthropic API 金鑰（未加密，存在這個瀏覽器裡），只會把那段對話、那次練習寫下的煩惱和回答傳給 Anthropic；聲音紀錄和睡前紀錄不會被傳送，對話也不會存在裝置上。睡前引導只用裝置內建的語音，沒有的話改成跟著文字慢慢讀。你可以選擇只保留分析結果不保留錄音，也可以隨時匯出（JSON 備份，或聲音紀錄的 CSV）或全部刪除。
 
 **和自己比的規則。** 累積 10 筆可用的紀錄後，每筆新的數值會和你之前的紀錄比較（中位數加減 k 個標準化的 MAD）。紀錄少的時候中位數本身也不準，所以 k 會隨筆數調整：10 筆時是 3.02，100 筆時是 2.06。這個公式是用模擬校正的，在什麼都沒變的情況下，不論累積幾筆，大約都只有 5% 的數值會被標成「比平常的範圍高或低」；結果頁一次看五項，所以平常的日子也常會有一兩項落在範圍外，app 會在結果旁說明。爆音或背景噪音太大的錄音會保留，但不會拿來算平常範圍。聲音和心情的相關要等到有 20 筆標記後才顯示，並且會清楚說明同時看了很多個相關、每天的紀錄彼此不獨立，所以只能當作線索。
 

@@ -6,6 +6,8 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Copy pass on interface text and daily prompts (same names for the same features everywhere; prompts that work on a bad day and assume no family closeness, money or job). Inside a lens question, an earlier answer is cut short, and a blank one reads as "it".
+
 - Content passes: theory-lens summaries reframed so any answer reads naturally, long questions shortened, attributions checked against Corey (for example WDEP credited to Wubbolding building on Glasser); bedtime scripts split into shorter spoken lines with more pause time and fewer characters a speech voice may misread; recommendations fact-checked (Taiwan titles, creators, years, runtimes) with content notes added. Titles without a confirmed Taiwan release name show the original title.
 
 - Theory lens: the pick list is compact rows, with the lenses often used for the chosen kind of worry first. Answers like "not sure" are never quoted back in summaries; when most were left open, the summary says so plainly. The note on finding someone to talk to sits under the buttons, and is no longer repeated inside two lenses. Several lines reworded (Gestalt body sentence and the long "I choose" question, the family-systems first question, the rating scale's low end).
@@ -32,4 +34,4 @@ The first public version, built and reviewed over one night. Each area below wen
 - Recording cannot hang, ends cleanly when the microphone is lost or the app is hidden, and decodes on older Safari.
 - Backups are checked record by record on import; a damaged file cannot break a screen.
 - The service worker serves one release at a time, fetches past the CDN cache, applies updates only when the app is idle, and the cache name is a hash of the app files checked by a unit test.
-- 261 unit checks and 70+ browser tests, including an offline test and a WCAG 2.1 AA audit of 19 screens (Chinese in light mode, English in dark mode).
+- 228 unit checks and 93 browser tests in Chromium (most also run in WebKit in CI), including an offline test and a WCAG 2.1 AA audit of 20 screens (Chinese in light mode, English in dark mode).

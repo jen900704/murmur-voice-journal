@@ -235,6 +235,12 @@ test('"not sure" and blank answers are never quoted back in any summary', () => 
   }
 });
 
+test('answers repeated inside a later question are short, and a blank one reads as "it"', () => {
+  assert.equal(fill('有沒有一次，你沒有照「{1}」說的做？', ['不知道'], { inQuestion: true }), '有沒有一次，你沒有照它說的做？');
+  assert.equal(fill('How does "{1}" affect you?', [''], { inQuestion: true }), 'How does it affect you?');
+  assert.ok(fill('照「{1}」', ['很長很長的名字'.repeat(5)], { inQuestion: true }).length <= 19);
+});
+
 test('rewrite turns "I have to" into "I choose"', () => {
   assert.equal(rewriteText(true, '我必須每天加班', 'zh'), '我選擇每天加班');
   assert.ok(!rewriteText(true, '他們逼我加班', 'zh').startsWith('我選擇他們'));
