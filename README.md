@@ -35,6 +35,23 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
+## Research and engineering modules
+
+The app stays small and private. Around it are modules that study it, each with its own README, tests in CI, and a statement of what can and cannot be claimed.
+
+| Module | What it is | Key result so far |
+|---|---|---|
+| [`lab/eval`](lab/eval/README.md) | Multi-agent evaluation of the optional AI conversation: scripted test cases, the app's real code run in Node, a deterministic safety gate, rubric judges (Anthropic, AWS Bedrock or a mock), an annotation page and judge-human agreement statistics | Found seven kinds of warning signs the risk screen missed; they now pause the conversation |
+| [`lab/rl`](lab/rl/README.md) | Preregistered simulation of the on-device bandit (Thompson sampling with an epsilon mixture, safety filtering before sampling) and off-policy evaluation (IPS, SNIPS, doubly robust) | At about one rating a day, learning does not beat the expert order within 90 interactions in the primary world; adaptive logs break the usual confidence intervals |
+| [`js/search.js`, `js/rag.js`](docs/search-and-rag.md) | BM25 search over mixed Chinese and English with bigrams and synonyms; retrieval from vetted lens content to ground the AI conversation, with citations | MRR .950, nDCG@5 .846 on a 20-query labeled set |
+| [`js/policy.js`](lab/rl/POLICY_SPEC.md) | The bandit in the app: opt-in, off by default, logged propensities, CSV export for off-policy evaluation | Same spec as the simulation |
+| [`lab/dlatk`](lab/dlatk/README.md) | Murmur exports through DLATK (Schwartz et al., 2017) on SQLite, with a tested pure-Python fallback | DLATK and the fallback agree row for row on the synthetic example |
+| [`lab/mcp`](lab/mcp/README.md) | A read-only Model Context Protocol server for the vetted content: lenses, help lines, the risk screen, track suggestions, recommendations | 17 tests, including help lines on every risk match |
+| [`infra`](infra/README.md) | Terraform for AWS: an ECS Fargate eval runner with Bedrock-only IAM, encrypted S3 results, a budget alarm, optional S3 and CloudFront hosting, and a GitHub OIDC role | Validated with OpenTofu, tflint and checkov; nothing deployed |
+| [`docs/language-analysis`](docs/language-analysis/DESIGN.md) | Literature, licenses and design for on-device language analysis | LIWC and C-LIWC cannot be bundled; Chinese categories are written from scratch |
+
+None of these modules receives anyone's journal. The evaluation and simulation use scripted or synthetic data only.
+
 ## Why
 
 Speech features like pitch variability, speaking rate, and pausing appear throughout research on mood and mental health, but voices differ a lot between people. A number that is low for one person is ordinary for another. Murmur therefore never compares you with population norms. It compares you with yourself, and it lets you see whether your own voice tracks your own self-reports.
