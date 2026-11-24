@@ -167,7 +167,9 @@ test('a goodnight card carries only the chosen line, never what was written', as
   await page.locator('[data-key="night-next"]').click();
   await page.locator('[data-key="night-skip-track"]').click();
   await page.locator('[data-key="night-send"]').click();
-  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="send-line-0"]').click()]);
+  await page.locator('[data-key="send-line-0"]').click();
+  await expect(page.locator('.send-preview svg')).toBeVisible();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="send-share"]').click()]);
   expect(download.suggestedFilename()).toMatch(/^goodnight-.*\.png$/);
 });
 

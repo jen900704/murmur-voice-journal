@@ -1408,6 +1408,14 @@ function render() {
         {
           href: `#${tab}`,
           class: 'tab' + (state.tab === tab ? ' on' : ''),
+          // tapping the tab you are on goes back to its top page, as phone apps do
+          onclick: (e) => {
+            if (state.tab !== tab) return;
+            e.preventDefault();
+            if (tab === 'lens' && lensView && !lensView.active()) lensView.reset();
+            render();
+            window.scrollTo(0, 0);
+          },
           'aria-current': state.tab === tab ? 'page' : null,
         },
         h('span', { class: `tab-icon icon-${tab}`, 'aria-hidden': 'true' }),

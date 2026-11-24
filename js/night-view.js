@@ -7,6 +7,8 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     cardTitle: '睡前儀式',
+    cardDoneTitle: '今晚完成了，晚安',
+    cardDoneBody: '明信片收在「紀錄」的「夜晚」裡。想再聽一段的話，也可以。',
     cardBody: '放下今天的心事，聽一段三到五分鐘的睡前引導，收一張晚安明信片。',
     cardStart: '開始',
     cardListen: '只想聽一段',
@@ -38,10 +40,12 @@ const S = {
     voiceDefault: '自動選擇',
     preview: '試聽',
     cardDone: '今晚的明信片',
+    cardDoneDay: '今天的明信片',
     kindLabel: '今天對自己好的一件事',
     nightLabel: '晚安',
     nightLine: '今晚就到這裡。',
     sendTitle: '寄一張晚安明信片給一個人',
+    sendShare: '分享這張明信片',
     sendHelp: '明信片上只會有你選的這句話，不會有你今晚寫的任何內容。',
     sendLines: ['晚安。今天辛苦了。', '想到你了。希望你今晚睡得好。', '明天見。先好好休息。'],
     savePng: '存成圖片或分享',
@@ -61,6 +65,8 @@ const S = {
   },
   en: {
     cardTitle: 'Bedtime ritual',
+    cardDoneTitle: 'Done for tonight. Good night',
+    cardDoneBody: 'Your postcard is in Journal, under Nights. You can listen to another track if you like.',
     cardBody: 'Set down today\'s worry, listen to a three to five minute wind-down, and get a small postcard.',
     cardStart: 'Start',
     cardListen: 'Just listen',
@@ -92,10 +98,12 @@ const S = {
     voiceDefault: 'Automatic',
     preview: 'Preview',
     cardDone: 'Tonight\'s postcard',
+    cardDoneDay: 'Today\'s postcard',
     kindLabel: 'One kind thing I did for myself',
     nightLabel: 'Good night',
     nightLine: 'That is enough for tonight.',
     sendTitle: 'Send a goodnight card to someone',
+    sendShare: 'Share this card',
     sendHelp: 'The card carries only the line you pick, nothing you wrote tonight.',
     sendLines: ['Good night. You worked hard today.', 'Thinking of you. Sleep well tonight.', 'See you tomorrow. Rest well.'],
     savePng: 'Save or share image',
@@ -158,7 +166,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   async function begin({ stay = false } = {}) {
     const run = ++st.run;
     st.helpOpen = false;
-    st.sendPngs = null;
+    st.sendPick = null;
+    st.sendPng = null;
+    st.sendOpen = false;
     st.worry = '';
     st.theme = null;
     st.kind = '';
@@ -208,7 +218,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
-      h('div', {}, h('h2', {}, L().cardTitle), h('p', {}, L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
+      h('div', {}, h('h2', {}, st.doneOn === new Date().toDateString() ? L().cardDoneTitle : L().cardTitle), h('p', {}, st.doneOn === new Date().toDateString() ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
 
@@ -484,10 +494,10 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function postcard() {
-    const holder = h('div', { class: 'postcard', role: 'img', 'aria-label': L().cardDone });
+    const holder = h('div', { class: 'postcard', role: 'img', 'aria-label': isEvening() ? L().cardDone : L().cardDoneDay });
     holder.innerHTML = st.postcard;
     return [
-      h('h2', {}, L().cardDone),
+      h('h2', {}, isEvening() ? L().cardDone : L().cardDoneDay),
       holder,
       h(
         'div',
@@ -514,7 +524,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             'data-key': 'night-done',
             onclick: () => {
               st.stage = 'card';
+              st.doneOn = new Date().toDateString();
               onExit();
+              window.scrollTo(0, 0);
             },
           },
           L().done
@@ -530,35 +542,56 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function sendCard() {
     const lines = L().sendLines;
     const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
-    const make = (line) => postcardPng(postcardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date }));
+    const svgFor = (line) => postcardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
+    const pick = st.sendPick ?? null;
+    const preview = pick !== null ? h('div', { class: 'send-preview', role: 'img', 'aria-label': lines[pick] }) : null;
+    if (preview) preview.innerHTML = svgFor(lines[pick]);
     return h(
       'details',
       {
         class: 'send-card',
-        // draw the cards when the section opens, so the share sheet opens right after the tap
-        ontoggle: (e) => {
-          if (e.currentTarget.open && !st.sendPngs) st.sendPngs = lines.map(make);
-        },
+        open: st.sendOpen ? '' : null,
+        ontoggle: (e) => (st.sendOpen = e.currentTarget.open),
       },
       h('summary', { 'data-key': 'night-send' }, L().sendTitle),
       h('p', { class: 'muted small' }, L().sendHelp),
       h(
         'div',
-        { class: 'chips wrap' },
+        { class: 'chips wrap', role: 'radiogroup', 'aria-label': L().sendTitle },
         lines.map((line, i) =>
           h(
             'button',
             {
               type: 'button',
-              class: 'chip',
+              role: 'radio',
+              'aria-checked': pick === i ? 'true' : 'false',
+              class: 'chip' + (pick === i ? ' on' : ''),
               'data-key': `send-line-${i}`,
+              onclick: () => {
+                st.sendPick = i;
+                st.sendPng = postcardPng(svgFor(line)); // drawn now, so sharing opens right away
+                rerender();
+              },
+            },
+            line
+          )
+        )
+      ),
+      preview,
+      pick !== null
+        ? h(
+            'button',
+            {
+              type: 'button',
+              class: 'btn',
+              'data-key': 'send-share',
               onclick: async () => {
                 if (st.sending) return; // a second tap while the share sheet opens would fail
                 st.sending = true;
                 try {
-                  const png = await (st.sendPngs ? st.sendPngs[i] : make(line));
+                  const png = await (st.sendPng || postcardPng(svgFor(lines[pick])));
                   const d = new Date();
-                  const r = await sharePng(png, `goodnight-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.png`, line);
+                  const r = await sharePng(png, `goodnight-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.png`, lines[pick]);
                   if (r === 'shared') toast(L().shared);
                   if (r === 'downloaded') toast(L().downloaded);
                 } finally {
@@ -566,10 +599,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
                 }
               },
             },
-            line
+            L().sendShare
           )
-        )
-      )
+        : null
     );
   }
 
