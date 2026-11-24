@@ -391,7 +391,7 @@ export const LENSES = [
       idea: 'Rather than analyzing the problem in depth, find what already works. Everyone has resources and moments when the problem is smaller.',
       steps: [
         { scale: true, q: 'On a scale from 0 to 10, where 10 means you are satisfied with how this is going, where are you now?', why: 'Scaling questions make a vague feeling something you can talk about.' },
-        { q: 'What makes it a {1} and not lower? What have you been doing that keeps it from being worse?', qZero: 'A 0 means things are really hard right now. How have you managed to keep going?', why: 'This is a coping question: it notices efforts you are already making.' },
+        { q: 'What keeps it at {1} rather than lower? What have you been doing that keeps it from being worse?', qZero: 'A 0 means things are really hard right now. How have you managed to keep going?', why: 'This is a coping question: it notices efforts you are already making.' },
         { q: 'Recently, was there a moment when this worry was smaller or absent? What was different then? If nothing comes, that is fine; a very small moment counts.', why: 'This is an exception question: the answer often hides in the exceptions.' },
       ],
       noticed: 'You are at {1}. What you said keeps you going: "{2}". When the exception happened: "{3}". A solution-focused view would look in these places for things you already do that help.',

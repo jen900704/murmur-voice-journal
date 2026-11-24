@@ -124,7 +124,8 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   async function openGentle() {
     if (!ex.recs) {
       try {
-        ex.recs = (await fetch('./data/recs.json').then((r) => r.json())).items;
+        // missing lists are treated as empty, so one incomplete entry cannot break the sheet
+        ex.recs = (await fetch('./data/recs.json').then((r) => r.json())).items.map((it) => ({ ...it, tones: it.tones || [], cw: it.cw || [], why: it.why || {}, title: it.title || {} }));
       } catch (_) {
         // not cached, so the next tap tries again
         toast(L().recsFailed);
@@ -155,11 +156,12 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       return (x % 1000) / 1000;
     };
     const score = (it) => {
+      const tones = it.tones || [];
       let s = jitter(it.id);
       if (late) s += it.minutes && it.minutes <= 60 ? 1.5 : it.minutes > 150 ? -1 : 0;
-      if (mood !== null && mood <= 3) s += it.tones.some((t) => t === 'warm' || t === 'companionship' || t === 'quiet') ? 2 : 0;
-      if (mood !== null && mood <= 2 && it.tones.includes('good-cry')) s -= 1;
-      if (mood !== null && mood >= 5 && it.tones.includes('funny')) s += 1;
+      if (mood !== null && mood <= 3) s += tones.some((t) => t === 'warm' || t === 'companionship' || t === 'quiet') ? 2 : 0;
+      if (mood !== null && mood <= 2 && tones.includes('good-cry')) s -= 1;
+      if (mood !== null && mood >= 5 && tones.includes('funny')) s += 1;
       return s;
     };
     return [...list].sort((a, b) => score(b) - score(a));

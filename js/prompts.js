@@ -1,6 +1,8 @@
 // Daily writing prompts. Everyone gets the same prompt on the same calendar date, so two
 // people can answer it separately and share their answers with each other.
 // Prompts are light and reflective on purpose; none asks people to dig into pain at night.
+// Share links carry only a prompt's index, so the two lists stay parallel; from here on, add
+// new prompts at the end rather than replacing one in place.
 
 export const DAILY = {
   'zh-TW': [

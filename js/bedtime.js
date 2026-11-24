@@ -42,12 +42,12 @@ const SET_DOWN_GENERIC = {
 
 const SET_DOWN = {
   'zh-TW': [
-    ['今天你寫下了{theme}。', 2],
+    ['今晚，{theme}在你心上。', 2],
     ['它是真的，也值得好好處理。只是不是現在。', 3],
     ['想像把它放在床邊的桌上。明天早上它還會在那裡，你可以到時候再決定怎麼做。', 6],
   ],
   en: [
-    ['Tonight you wrote down {theme}.', 2],
+    ['Tonight, {theme} is on your mind.', 2],
     ['It is real, and it deserves attention. Just not right now.', 3],
     ['Imagine placing it on the table beside your bed. It will still be there in the morning, and you can decide what to do with it then.', 6],
   ],
