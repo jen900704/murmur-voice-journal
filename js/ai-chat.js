@@ -8,10 +8,8 @@ import { lensById } from './lenses.js';
 import { checkRisk, helpList as regionHelpList, hasHelpLine } from './safety.js';
 import { retrieve, referenceBlock, basedOn, stripCitations } from './rag.js';
 
-export const MODELS = [
-  { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5' },
-  { id: 'claude-haiku-5-5', label: 'Claude Haiku 5.5' },
-];
+import { MODELS } from './ai-models.js';
+export { MODELS };
 
 const MAX_USER_TURNS = 10;
 

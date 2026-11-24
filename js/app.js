@@ -4,11 +4,10 @@ import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
 import { personalBaseline, baselineK, spearman, fmtR, mad, distinctCount } from './stats.js';
 import { glyph, ringPath, lineChart } from './viz.js';
 import * as db from './db.js';
-import { createLensView } from './lens-view.js';
 import { createNightView, isEvening } from './night-view.js';
 import { createExtras } from './extras.js';
 import { checkRisk, helpList } from './safety.js';
-import { MODELS as AI_MODELS } from './ai-chat.js';
+import { MODELS as AI_MODELS } from './ai-models.js';
 import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
@@ -1587,14 +1586,34 @@ function viewAbout() {
 }
 
 // ---------- shell ----------
+function lensLoading() {
+  loadLens().catch(() => {});
+  return h('section', { class: 'view' }, h('p', { class: 'muted', role: 'status' }, t('loading')));
+}
 const TABS = ['today', 'journal', 'trends', 'lens', 'about'];
 let lensView = null;
+// the theory lens (and the AI conversation inside it) loads on first use
+function loadLens() {
+  if (!loadLens.p) {
+    loadLens.p = import('./lens-view.js').then(({ createLensView }) => {
+      lensView = createLensView({ h, add, getLang, rerender: render, toast, db, openGentle: () => extras.openGentle() });
+      if (state.tab === 'lens') render();
+      return lensView;
+    });
+    loadLens.p.catch(() => {
+      loadLens.p = null;
+      toast(t('loadFailed'));
+    });
+  }
+  return loadLens.p;
+}
 function goLens(stage) {
-  if (!lensView) render();
-  // coming from another tab starts fresh, so Back on the help page goes to the lens home
-  lensView.reset();
-  lensView.go(stage);
-  if (location.hash !== '#lens') location.hash = '#lens';
+  loadLens().then((lv) => {
+    // coming from another tab starts fresh, so Back on the help page goes to the lens home
+    lv.reset();
+    lv.go(stage);
+    if (location.hash !== '#lens') location.hash = '#lens';
+  }, () => {});
 }
 const extras = createExtras({
   h,
@@ -1722,9 +1741,8 @@ function render() {
   $('.skip').textContent = t('skip');
   const main = $('#main');
   main.innerHTML = '';
-  if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db, openGentle: () => extras.openGentle() });
   settleLensImport();
-  const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView.view, about: viewAbout };
+  const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView ? lensView.view : lensLoading, about: viewAbout };
   const section = views[state.tab]();
   if (state.storageDown) section.prepend(h('p', { class: 'demo-banner', role: 'note', 'data-key': 'storage-down' }, STORAGE_DOWN[getLang()] || STORAGE_DOWN['zh-TW']));
   main.appendChild(section);
@@ -1854,7 +1872,10 @@ async function init() {
   // on localhost the worker is off unless a test asks for it (?sw), so development reloads stay fresh
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || new URLSearchParams(location.search).has('sw'))) setupUpdates();
   // search is not needed for the first screen; fetch it when the browser is idle
-  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => loadSearch());
+  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => {
+    loadSearch();
+    loadLens().catch(() => {});
+  });
 }
 
 // A new release waits until the app is reopened and idle, then reloads once, so a page never
