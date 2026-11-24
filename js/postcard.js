@@ -1,5 +1,5 @@
 // Pastel bedtime postcards, drawn procedurally so every night looks a little different.
-// Original motifs only (sleepy moon, cloud, sprout, teacup, stars). Exported as PNG.
+// Original motifs only (sleepy moon, cloud, sprout, teacup, stars, bun, cat, lamp). Exported as PNG.
 
 const PALETTES = [
   { bg: ['#fde2e4', '#e2ecf9'], ink: '#5b4a6b', soft: '#fff5f7', accent: '#f4a7b9', leaf: '#9cc9a8' },
@@ -84,8 +84,29 @@ const MOTIFS = {
     ${face(x, y + r * 0.15, r * 0.6, p.ink, p.accent)}`,
   stars: (p, x, y, r) => {
     const star = (cx, cy, s, o) => `<path d="M${cx} ${cy - s} L${cx + s * 0.3} ${cy - s * 0.3} L${cx + s} ${cy} L${cx + s * 0.3} ${cy + s * 0.3} L${cx} ${cy + s} L${cx - s * 0.3} ${cy + s * 0.3} L${cx - s} ${cy} L${cx - s * 0.3} ${cy - s * 0.3}Z" fill="${p.soft}" opacity="${o}"/>`;
-    return star(x, y, r * 0.8, 1) + star(x + r * 0.95, y - r * 0.7, r * 0.35, 0.85) + star(x - r * 0.9, y + r * 0.6, r * 0.3, 0.75) + face(x, y + r * 0.05, r * 0.5, p.ink, p.accent);
+    // the big star gets an outline so it shows on the palest backgrounds
+    return `<g stroke="${p.accent}" stroke-width="${r * 0.05}" stroke-linejoin="round">${star(x, y, r * 0.8, 1)}</g>` + star(x + r * 0.95, y - r * 0.7, r * 0.35, 0.85).replace(p.soft, p.accent) + star(x - r * 0.9, y + r * 0.6, r * 0.3, 0.75).replace(p.soft, p.accent) + face(x, y + r * 0.05, r * 0.5, p.ink, p.accent);
   },
+  // a steamed bun, a small nod to late-night snacks in Taiwan
+  bun: (p, x, y, r) => `
+    <ellipse cx="${x}" cy="${y + r * 0.75}" rx="${r * 1.1}" ry="${r * 0.14}" fill="${p.accent}" opacity=".45"/>
+    <path d="M${x - r} ${y + r * 0.6} C ${x - r * 1.05} ${y - r * 0.2}, ${x - r * 0.45} ${y - r * 0.75}, ${x} ${y - r * 0.78} C ${x + r * 0.45} ${y - r * 0.75}, ${x + r * 1.05} ${y - r * 0.2}, ${x + r} ${y + r * 0.6} Z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/>
+    <path d="M${x - r * 0.28} ${y - r * 0.55} q${r * 0.28} ${r * 0.18} ${r * 0.56} 0 M${x - r * 0.12} ${y - r * 0.72} q${r * 0.12} ${r * 0.22} ${r * 0.24} 0" stroke="${p.accent}" stroke-width="${r * 0.05}" fill="none" stroke-linecap="round"/>
+    ${face(x, y + r * 0.1, r * 0.7, p.ink, p.accent)}`,
+  // a cat curled up asleep
+  cat: (p, x, y, r) => `
+    <ellipse cx="${x + r * 0.2}" cy="${y + r * 0.35}" rx="${r * 1.05}" ry="${r * 0.55}" fill="${p.accent}"/>
+    <path d="M${x + r * 1.15} ${y + r * 0.45} C ${x + r * 1.35} ${y + r * 0.95}, ${x + r * 0.4} ${y + r * 1.05}, ${x - r * 0.2} ${y + r * 0.85}" stroke="${p.accent}" stroke-width="${r * 0.2}" fill="none" stroke-linecap="round"/>
+    <circle cx="${x - r * 0.55}" cy="${y + r * 0.15}" r="${r * 0.45}" fill="${p.accent}"/>
+    <path d="M${x - r * 0.92} ${y - r * 0.05} l${r * 0.05} ${-r * 0.45} l${r * 0.3} ${r * 0.25}Z M${x - r * 0.5} ${y - r * 0.25} l${r * 0.25} ${-r * 0.38} l${r * 0.12} ${r * 0.42}Z" fill="${p.accent}"/>
+    ${face(x - r * 0.55, y + r * 0.2, r * 0.42, p.ink, p.soft)}`,
+  // a small night lamp, still glowing
+  lamp: (p, x, y, r) => `
+    <circle cx="${x}" cy="${y - r * 0.15}" r="${r * 1.05}" fill="${p.soft}" opacity=".7"/>
+    <path d="M${x - r * 0.5} ${y - r * 0.6} h${r} l${r * 0.25} ${r * 0.65} h${-r * 1.5}z" fill="${p.accent}"/>
+    <rect x="${x - r * 0.07}" y="${y + r * 0.05}" width="${r * 0.14}" height="${r * 0.55}" fill="${p.ink}" opacity=".55"/>
+    <ellipse cx="${x}" cy="${y + r * 0.65}" rx="${r * 0.45}" ry="${r * 0.12}" fill="${p.ink}" opacity=".55"/>
+    ${face(x, y - r * 0.25, r * 0.5, p.ink, p.soft)}`,
 };
 
 // Build the postcard SVG.
