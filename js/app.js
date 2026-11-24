@@ -13,7 +13,6 @@ import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 import { LENSES } from './lenses.js';
-import { createJournalSearch } from './search.js';
 import { calmSheet } from './calm.js';
 
 const MIN_SECONDS = 5;
@@ -1638,15 +1637,34 @@ async function openWriting() {
 // The language mirror: on-device analysis of the person's own writing (js/langlab)
 let languageView = null;
 // Search over the person's own writing. The index is held in memory only (js/search.js).
-const journalSearch = createJournalSearch({
-  h,
-  getLang,
-  db,
-  getEntries: () => state.entries,
-  openEntry: (id, opener) => openDetail(id, opener),
-  openSheet,
-  closeSheet,
-});
+// js/search.js loads after the first screen (or when the Journal opens); until then the hooks
+// are no-ops, which is safe because the index is built from IndexedDB when it first shows.
+let searchImpl = null;
+function loadSearch() {
+  if (!loadSearch.p) {
+    loadSearch.p = import('./search.js')
+      .then(({ createJournalSearch }) => {
+        searchImpl = createJournalSearch({
+          h,
+          getLang,
+          db,
+          getEntries: () => state.entries,
+          openEntry: (id, opener) => openDetail(id, opener),
+          openSheet,
+          closeSheet,
+        });
+        if (state.tab === 'journal' && !state.sheetFn) render();
+      })
+      .catch(() => {});
+  }
+  return loadSearch.p;
+}
+const journalSearch = {
+  view: (wrap) => (searchImpl ? searchImpl.view(wrap) : void loadSearch()),
+  entrySaved: (entry) => searchImpl && searchImpl.entrySaved(entry),
+  entryDeleted: (id) => searchImpl && searchImpl.entryDeleted(id),
+  reset: () => searchImpl && searchImpl.reset(),
+};
 const nightView = createNightView({
   h,
   add,
@@ -1835,6 +1853,8 @@ async function init() {
   render();
   // on localhost the worker is off unless a test asks for it (?sw), so development reloads stay fresh
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || new URLSearchParams(location.search).has('sw'))) setupUpdates();
+  // search is not needed for the first screen; fetch it when the browser is idle
+  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => loadSearch());
 }
 
 // A new release waits until the app is reopened and idle, then reloads once, so a page never
