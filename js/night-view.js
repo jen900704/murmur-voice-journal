@@ -1,6 +1,6 @@
 // The bedtime ritual: set a worry down, note one kind thing, listen to a short wind-down
 // track, and get a postcard. Every step can be skipped. No streaks, no reminders of missed days.
-import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady } from './bedtime.js';
+import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, RESOURCES } from './safety.js';
 
@@ -272,6 +272,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   async function play(trackId) {
+    unlockSpeech(); // must run before the first await
     st.track = trackId;
     const lang = getLang();
     const script = buildScript(trackId, st.theme, lang);

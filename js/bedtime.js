@@ -316,6 +316,19 @@ export function voicesFor(lang) {
   return speechSynthesis.getVoices().filter((v) => re.test(v.lang) && !/yue|HK|MO/i.test(v.lang));
 }
 
+// iOS Safari only allows speech that starts inside a user gesture. Call this synchronously
+// from the tap handler, before any await, so later utterances are allowed.
+export function unlockSpeech() {
+  try {
+    if (typeof speechSynthesis === 'undefined') return;
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  } catch (_) {
+    /* ignore */
+  }
+}
+
 // Voices load asynchronously in Chrome and Android: getVoices() is empty at first.
 export function voicesReady(timeoutMs = 1500) {
   if (typeof speechSynthesis === 'undefined') return Promise.resolve([]);
