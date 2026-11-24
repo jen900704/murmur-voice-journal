@@ -294,18 +294,18 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     ];
   }
 
-  async function play(trackId) {
+  async function play(trackId, from = 0) {
     unlockSpeech(); // must run before the first await
     if (st.starting) return; // a double tap would start two players talking over each other
     st.starting = true;
     try {
-      await startTrack(trackId);
+      await startTrack(trackId, from);
     } finally {
       st.starting = false;
     }
   }
 
-  async function startTrack(trackId) {
+  async function startTrack(trackId, from = 0) {
     if (st.player) st.player.stop();
     st.track = trackId;
     const lang = getLang();
@@ -315,7 +315,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.readAlong = !voice;
     st.paused = false;
     st.line = '';
-    st.lineIndex = 0;
+    st.lineIndex = from;
     st.player = new BedtimePlayer({
       script,
       lang,
@@ -331,6 +331,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       onEnd: () => finishTrack(),
     });
     go('play');
+    st.player.i = Math.max(0, Math.min(from, script.length - 1));
     st.player.start();
   }
 
@@ -395,8 +396,10 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
                 onchange: async (e) => {
                   st.voiceName = e.target.value || null;
                   await db.setSetting(`voice-${getLang()}`, st.voiceName);
+                  // carry on from the current line in the new voice, not from the top
+                  const from = st.lineIndex;
                   st.player.stop();
-                  play(st.track);
+                  play(st.track, from);
                 },
               },
               h('option', { value: '' }, L().voiceDefault),

@@ -1,6 +1,6 @@
 // Offline support. Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-v15';
+const CACHE = 'murmur-v16';
 const SHELL = [
   './',
   './index.html',

@@ -105,6 +105,18 @@ test.describe('theory lens', () => {
     expect(await page.evaluate(() => localStorage.getItem('murmur-region'))).toBe('US');
   });
 
+  test('topic chips work with arrow keys and keep one tab stop', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.locator('[data-key="topic-work"]').click();
+    await page.keyboard.press('ArrowRight');
+    const checked = page.locator('[role="radiogroup"] [aria-checked="true"]');
+    await expect(checked).toHaveCount(1);
+    await expect(checked).not.toHaveAttribute('data-key', 'topic-work');
+    await expect(checked).toBeFocused();
+    expect(await page.locator('[role="radiogroup"] [role="radio"][tabindex="0"]').count()).toBe(1);
+  });
+
   test('loss topic hides lenses unsuited to grief', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();

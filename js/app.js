@@ -332,7 +332,7 @@ function demoBanner() {
 
 // ---------- views ----------
 function scale7(name, value, lowLabel, highLabel, onPick) {
-  const group = h('div', { class: 'scale', role: 'radiogroup', 'aria-label': t(name) });
+  const group = h('div', { class: 'scale', role: 'radiogroup', 'aria-label': t(name), 'data-roving': '1' });
   for (let i = 1; i <= 7; i++) {
     const checked = value === i;
     group.appendChild(
@@ -363,6 +363,28 @@ function scale7(name, value, lowLabel, highLabel, onPick) {
     group,
     h('div', { class: 'scale-ends', 'aria-hidden': 'true' }, h('span', {}, lowLabel), h('span', {}, highLabel))
   );
+}
+
+// Radio groups get one tab stop and arrow keys, as the ARIA radio pattern expects.
+// Groups that handle this themselves carry data-roving.
+function enhanceRadios(root) {
+  for (const g of root.querySelectorAll('[role="radiogroup"]:not([data-roving])')) {
+    const radios = [...g.querySelectorAll('[role="radio"]')];
+    if (!radios.length) continue;
+    g.dataset.roving = '1';
+    const current = radios.find((r) => r.getAttribute('aria-checked') === 'true') || radios[0];
+    for (const r of radios) r.tabIndex = r === current ? 0 : -1;
+    g.addEventListener('keydown', (e) => {
+      const i = radios.indexOf(document.activeElement);
+      if (i < 0) return;
+      const n = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: radios.length - 1 }[e.key];
+      if (n === undefined) return;
+      e.preventDefault();
+      const target = radios[(n + radios.length) % radios.length];
+      target.focus();
+      target.click();
+    });
+  }
 }
 
 function focusKey(key) {
@@ -678,6 +700,7 @@ function renderSheet() {
     body.setAttribute('aria-labelledby', head.id);
   }
   sheet.appendChild(body);
+  enhanceRadios(body);
   body.querySelector('.back').focus();
   sheet.onkeydown = null;
 }
@@ -1277,6 +1300,7 @@ function render() {
       )
     );
   }
+  enhanceRadios(main);
   if (focusedKey) focusKey(focusedKey);
 }
 
