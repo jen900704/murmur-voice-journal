@@ -8,12 +8,14 @@ A private voice journal and wind-down companion that runs entirely in your brows
 [中文說明在下方](#中文說明)
 
 <p>
-  <img src="docs/today.png" width="240" alt="Recording screen with today's prompt and the record button">
-  <img src="docs/journal.png" width="240" alt="Journal of voice shapes, one per recording">
-  <img src="docs/trends.png" width="240" alt="Trend chart of pitch with the usual range shaded, and a table of correlations with mood and energy">
+  <img src="docs/lens.png" width="200" alt="Theory lens summary in the style of narrative therapy">
+  <img src="docs/bedtime.png" width="200" alt="Bedtime track playing on a dark screen with a breathing circle">
+  <img src="docs/postcard.png" width="200" alt="A pastel postcard with one kind thing written on it">
+  <img src="docs/trends.png" width="200" alt="Trend chart of pitch with the usual range shaded">
+  <img src="docs/journal.png" width="200" alt="Journal of voice shapes, one per recording">
 </p>
 
-The screenshots use the app's built-in synthetic demo data.
+The trend and journal screenshots use the app's built-in synthetic demo data.
 
 ## What is in it
 

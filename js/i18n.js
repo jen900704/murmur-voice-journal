@@ -2,7 +2,7 @@
 export const STRINGS = {
   'zh-TW': {
     appName: 'Murmur 低語日記',
-    tagline: '每天說 30 秒，看見自己聲音的變化。',
+    tagline: '私密的聲音日記，也陪你在睡前放下今天。',
     skip: '跳到主要內容',
     sections: '頁面',
     tabToday: '今天',
@@ -175,7 +175,7 @@ export const STRINGS = {
   },
   en: {
     appName: 'Murmur',
-    tagline: 'Speak for 30 seconds a day. Watch how your voice changes.',
+    tagline: 'A private voice journal that also helps you set the day down.',
     skip: 'Skip to content',
     sections: 'Sections',
     tabToday: 'Today',
