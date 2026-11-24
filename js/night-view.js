@@ -10,6 +10,7 @@ const S = {
     cardBody: '放下今天的心事，聽一段三到五分鐘的睡前引導，收一張小明信片。',
     cardStart: '開始',
     cardListen: '只想聽一段',
+    preparing: '準備中…',
     leave: '離開睡前儀式',
     helpBar: '需要現在就找人說說話？',
     helpOpen: '求助專線',
@@ -21,7 +22,7 @@ const S = {
     themes: { work: '工作或學業', relationship: '關係', family: '家人', health: '身體', future: '以後的事', unsure: '說不清楚' },
     keep: '存進心事日記',
     kindTitle: '今天對自己好的一件事',
-    kindHelp: '再小都算：好好吃一餐、早點睡、拒絕一件事。',
+    kindHelp: '再小都算：好好吃一餐、早點睡、拒絕一件事。想不到也沒關係。',
     kindPlaceholder: '今天我……',
     kindIdeas: '以前你做過的：',
     toneTitle: '今晚想聽哪一種？',
@@ -50,9 +51,9 @@ const S = {
     next: '下一步',
     back: '上一步',
     crisisTitle: '先停一下',
-    crisisBody: '你寫的內容裡，有些字詞可能代表你現在很辛苦。如果是這樣，今晚比起睡前引導，你更值得和一個真人說說話。',
+    crisisBody: '你寫的內容裡，有些字詞可能代表你現在很辛苦。如果是這樣，今晚先找一個人說說話，可能會比睡前引導更有幫助。',
     crisisKept: '你寫的內容還在，沒有被刪掉。如果這不是你的意思，可以繼續。',
-    crisisContinue: '我沒事，這是別的意思，繼續',
+    crisisContinue: '我不是那個意思，繼續',
     crisisBack: '回到今天（不儲存）',
     shared: '已分享',
     downloaded: '已存成圖片',
@@ -62,6 +63,7 @@ const S = {
     cardBody: 'Set down today\'s worry, listen to a three to five minute wind-down, and get a small postcard.',
     cardStart: 'Start',
     cardListen: 'Just listen',
+    preparing: 'Getting ready…',
     leave: 'Leave the ritual',
     helpBar: 'Need to talk to someone now?',
     helpOpen: 'Help lines',
@@ -73,7 +75,7 @@ const S = {
     themes: { work: 'Work or school', relationship: 'A relationship', family: 'Family', health: 'My body', future: 'What comes next', unsure: 'Hard to say' },
     keep: 'Keep it in my worry diary',
     kindTitle: 'One kind thing I did for myself today',
-    kindHelp: 'Anything counts: a proper meal, going to bed early, saying no to something.',
+    kindHelp: 'Anything counts: a proper meal, going to bed early, saying no to something. If nothing comes to mind, that is fine.',
     kindPlaceholder: 'Today I…',
     kindIdeas: 'Things you have done before:',
     toneTitle: 'What would you like to hear tonight?',
@@ -117,7 +119,7 @@ export function isEvening(d = new Date()) {
 }
 
 export function createNightView({ h, add, getLang, rerender, toast, db, onExit, latestMood, openGentle }) {
-  const st = { stage: 'card', worry: '', theme: null, keep: true, kind: '', track: null, player: null, line: '', lineIndex: 0, paused: false, readAlong: false, postcard: null, jar: [], voiceName: null };
+  const st = { run: 0, preparing: false, stage: 'card', worry: '', theme: null, keep: true, kind: '', track: null, player: null, line: '', lineIndex: 0, paused: false, readAlong: false, postcard: null, jar: [], voiceName: null };
   const L = () => S[getLang()] || S.en;
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
 
@@ -136,11 +138,22 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   // One tap from the card straight to a track, for nights when writing is too much.
   async function listenNow() {
     unlockSpeech(); // must run inside the tap, before any await
-    await begin({ stay: true });
-    await play(chooseFor());
+    if (st.preparing) return;
+    st.preparing = true;
+    rerender(); // show "getting ready" so a second tap is not needed
+    try {
+      const run = await begin({ stay: true });
+      if (run !== st.run) return;
+      await play(chooseFor());
+    } finally {
+      st.preparing = false;
+    }
   }
 
+  // st.run changes whenever the person leaves or starts over; work that was waiting
+  // (loading settings or voices) checks it and quietly gives up instead of reopening the ritual.
   async function begin({ stay = false } = {}) {
+    const run = ++st.run;
     st.helpOpen = false;
     st.worry = '';
     st.theme = null;
@@ -152,7 +165,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.jar = nights.map((n) => n.kindness).filter(Boolean);
     st.finishing = false;
     voicesReady(); // start loading voices early
+    if (run !== st.run) return null;
     if (!stay) go('worry');
+    return run;
   }
 
   // Pause with help instead of deleting; the person can carry on if it was something else.
@@ -169,6 +184,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     return [h('p', { class: 'muted small night-step' }, L().step(i, 4)), h('h2', {}, title), help ? h('p', { class: 'muted small' }, help) : null];
   }
 
+  // an empty step says "Skip", so it is clear nothing has to be written
+  function nextLabel(text) {
+    const b = document.querySelector('[data-key="night-next"]');
+    if (b) b.textContent = text.trim() ? L().next : L().skip;
+  }
+
   function nav(onNext, { back = null, nextLabel } = {}) {
     return h(
       'div',
@@ -183,12 +204,15 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
-      h('div', {}, h('h2', {}, L().cardTitle), h('p', {}, L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', onclick: listenNow }, L().cardListen)))
+      h('div', {}, h('h2', {}, L().cardTitle), h('p', {}, L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
 
   function worry() {
-    const ta = h('textarea', { id: 'night-worry', rows: '4', maxlength: '1000', placeholder: L().worryPlaceholder, oninput: (e) => (st.worry = e.target.value) });
+    const ta = h('textarea', { id: 'night-worry', rows: '4', maxlength: '1000', placeholder: L().worryPlaceholder, oninput: (e) => {
+      st.worry = e.target.value;
+      nextLabel(st.worry);
+    } });
     ta.value = st.worry;
     return [
       ...stepHead(1, L().worryTitle, L().worryHelp),
@@ -231,12 +255,15 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       ),
       nav(() => {
         if (guard(st.worry, () => go('kind'))) go('kind');
-      }, { back: () => { st.stage = 'card'; onExit(); } }),
+      }, { back: () => { st.stage = 'card'; onExit(); }, nextLabel: st.worry.trim() ? L().next : L().skip }),
     ];
   }
 
   function kind() {
-    const input = h('input', { type: 'text', id: 'night-kind', maxlength: '120', placeholder: L().kindPlaceholder, oninput: (e) => (st.kind = e.target.value) });
+    const input = h('input', { type: 'text', id: 'night-kind', maxlength: '120', placeholder: L().kindPlaceholder, oninput: (e) => {
+      st.kind = e.target.value;
+      nextLabel(st.kind);
+    } });
     input.value = st.kind;
     const ideas = [...new Set(st.jar)].slice(-30).sort(() => Math.random() - 0.5).slice(0, 3);
     return [
@@ -245,7 +272,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       ideas.length ? h('div', { class: 'jar-ideas' }, h('p', { class: 'muted small' }, L().kindIdeas), h('ul', { class: 'plain-list' }, ideas.map((k) => h('li', {}, k)))) : null,
       nav(() => {
         if (guard(st.kind, () => go('tone'))) go('tone');
-      }, { back: () => go('worry') }),
+      }, { back: () => go('worry'), nextLabel: st.kind.trim() ? L().next : L().skip }),
     ];
   }
 
@@ -262,6 +289,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       h(
         'div',
         { class: 'tracks' },
+        h('button', { type: 'button', class: 'track surprise', 'data-key': 'track-surprise', onclick: () => play(chooseFor()) }, h('strong', {}, L().surprise)),
         TRACKS.map((t) =>
           h(
             'button',
@@ -269,8 +297,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             h('strong', {}, t[lk()].name),
             h('span', {}, t[lk()].style)
           )
-        ),
-        h('button', { type: 'button', class: 'track surprise', 'data-key': 'track-surprise', onclick: () => play(chooseFor()) }, h('strong', {}, L().surprise))
+        )
       ),
       h(
         'div',
@@ -306,11 +333,13 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   async function startTrack(trackId, from = 0) {
+    const run = ++st.run;
     if (st.player) st.player.stop();
     st.track = trackId;
     const lang = getLang();
     const script = buildScript(trackId, st.theme, lang);
     await voicesReady();
+    if (run !== st.run) return; // the person left while voices were loading
     const voice = pickVoice(lang === 'en' ? 'en' : 'zh', st.voiceName);
     st.readAlong = !voice;
     st.paused = false;
@@ -398,6 +427,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
                   await db.setSetting(`voice-${getLang()}`, st.voiceName);
                   // carry on from the current line in the new voice, not from the top
                   const from = st.lineIndex;
+                  if (!st.player || st.stage !== 'play') return; // left while saving the choice
                   st.player.stop();
                   play(st.track, from);
                 },
@@ -600,6 +630,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   // Leaving the Today tab stops the sound but keeps what was written, so coming back
   // picks up where the person was. A full reset is only for "delete all data".
   function stopAll(full = false) {
+    st.run++;
     if (st.player) st.player.stop();
     st.player = null;
     if (full) {

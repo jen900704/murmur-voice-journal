@@ -1,6 +1,6 @@
 // Offline support. Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-v18';
+const CACHE = 'murmur-v20';
 const SHELL = [
   './',
   './index.html',
@@ -40,8 +40,12 @@ self.addEventListener('install', (e) => {
     caches
       .open(CACHE)
       .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
-      .then(() => self.skipWaiting())
   );
+});
+
+// The page asks for this when it is idle (just reopened, nothing typed or playing), then reloads.
+self.addEventListener('message', (e) => {
+  if (e.data === 'skip-waiting') self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
@@ -56,9 +60,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  // Cache first, from the cache this version installed as a whole. Mixing files from two
-  // releases (new app.js with an old module) can break imports, so a new release is picked
-  // up when its service worker installs, and used from the next launch.
+  // Cache first, from the cache this version installed as a whole. A new release waits until
+  // the page is idle and asks for it, then the page reloads, so two releases never mix.
   e.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const cached = await cache.match(req, { ignoreSearch: true });

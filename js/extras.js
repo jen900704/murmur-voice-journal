@@ -31,15 +31,15 @@ const S = {
     lowTitle: '最近好像比較沉重',
     lowBody: '你之前寫下的、對自己好的事：',
     lowBodyEmpty: '可以試試這些，也可以什麼都不做。',
-    lowSmall: '很多人在低落時說有一點點幫助的小事，挑一件就好，不做也沒關係：',
+    lowSmall: '心情低落時，有些人覺得這些小事有一點幫助。挑一件就好，不做也沒關係：',
     lowBreathe: '呼吸一分鐘',
-    smallThings: ['喝一杯溫的東西', '到窗邊或門口站兩分鐘，看看天空', '洗把臉，或沖個熱水澡', '傳一句話給一個人，不用解釋為什麼', '吃一點東西，什麼都可以', '把一個小地方收乾淨，例如桌角', '聽一首以前喜歡的歌', '換一套舒服的衣服', '出門走到巷口再走回來', '摸摸寵物，或抱著一個軟的東西', '把明天最小的一件事寫下來，然後先放著', '早一點躺下，不用馬上睡著'],
+    smallThings: ['喝一杯溫的東西', '看看窗外兩分鐘', '洗把臉，或沖個熱水澡', '傳一句話給一個人，不用解釋為什麼', '喝點水，或吃一點東西', '把一個小地方收乾淨，例如桌角', '聽一首以前喜歡的歌', '換一套舒服的衣服', '白天的話，走到巷口再走回來', '摸摸寵物，或抱著一個軟的東西', '把明天最小的一件事寫下來，然後先放著', '早一點躺下，不用馬上睡著'],
     lowDismiss: '先不用',
     helpTitle: '想先讓你知道這些',
     helpBody: '你寫的筆記裡，有些字詞可能代表你現在很辛苦。筆記已經照常存在這個裝置上。如果你想找人說話，這些地方隨時都在。',
     helpBodyShare: '你寫的內容聽起來可能很沉重。把它傳給信任的人是很好的事；如果需要，這些地方也隨時都在。再按一次「分享」就會送出。',
     lowRitual: '睡前儀式',
-    lowLens: '用理論透鏡看看',
+    lowLens: '換個角度看看',
     lowHelp: '找人說話的資源',
     exchange: '寫下來，和別人交換這一題',
     exchangePlaceholder: '我的回答……',
@@ -76,7 +76,7 @@ const S = {
     lowBodyEmpty: 'You could try one of these, or nothing at all.',
     lowSmall: 'Small things many people say help a little when they feel low. Pick one, or none:',
     lowBreathe: 'Breathe for a minute',
-    smallThings: ['Drink something warm', 'Stand by a window or the door for two minutes and look at the sky', 'Wash your face or take a warm shower', 'Send one line to someone, no explanation needed', 'Eat something, anything', 'Clear one small spot, like a corner of the desk', 'Play a song you used to love', 'Change into something comfortable', 'Walk to the end of the street and back', 'Pet an animal, or hold something soft', 'Write down the smallest task for tomorrow, then leave it', 'Lie down a little early; no need to fall asleep right away'],
+    smallThings: ['Drink something warm', 'Look out of a window for two minutes', 'Wash your face or take a warm shower', 'Send one line to someone, no explanation needed', 'Drink some water, or eat a little', 'Clear one small spot, like a corner of the desk', 'Play a song you used to love', 'Change into something comfortable', 'In the daytime, walk to the end of the street and back', 'Pet an animal, or hold something soft', 'Write down the smallest task for tomorrow, then leave it', 'Lie down a little early; no need to fall asleep right away'],
     lowDismiss: 'Not now',
     helpTitle: 'Before you go on',
     helpBody: 'Some words in your note can mean things are very hard right now. The note was saved on this device as usual. If you want to talk to someone, these are always available.',
@@ -273,7 +273,12 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     const items = jarItems();
     const pick = items.sort(() => Math.random() - 0.5).slice(0, 3);
     // general small actions, not other users' posts: something outside oneself, with nothing to compare against
-    if (!ex.smallPick || ex.smallPick.lang !== getLang()) ex.smallPick = { lang: getLang(), items: [...L().smallThings].sort(() => Math.random() - 0.5).slice(0, 3) };
+    if (!ex.smallPick || ex.smallPick.lang !== getLang()) {
+      // no walking outside suggested late at night
+      const late = new Date().getHours() >= 21 || new Date().getHours() < 6;
+      const things = L().smallThings.filter((t) => !(late && /白天|daytime/i.test(t)));
+      ex.smallPick = { lang: getLang(), items: things.sort(() => Math.random() - 0.5).slice(0, 3) };
+    }
     return h(
       'div',
       { class: 'low-card', role: 'note' },
@@ -285,10 +290,12 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       h(
         'div',
         { class: 'low-links' },
+        // at the lowest rating, finding a person to talk to comes first
+        latest.mood <= 1 ? h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp) : null,
         openBreathe ? h('button', { type: 'button', class: 'link', onclick: openBreathe }, L().lowBreathe) : null,
         h('button', { type: 'button', class: 'link', onclick: startRitual }, L().lowRitual),
         h('button', { type: 'button', class: 'link', onclick: () => goLens('home') }, L().lowLens),
-        h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp),
+        latest.mood <= 1 ? null : h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp),
         h('button', { type: 'button', class: 'link muted-link', onclick: () => ((ex.lowDismissed = latest.id), render()) }, L().lowDismiss)
       )
     );

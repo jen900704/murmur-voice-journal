@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+// the first visit shows a welcome card; close it so the usual Today screen is there
+async function skipWelcome(page) {
+  await page.locator('.prompt-text').waitFor();
+  const w = page.locator('[data-key="welcome-close"]');
+  if (await w.count()) await w.click();
+}
+
 // Accessibility audit (WCAG 2.1 A and AA) of each main screen, light and dark, zh-TW and en.
 const screens = [
   ['today', async (page) => page.goto('/')],
@@ -26,12 +33,16 @@ const screens = [
   }],
   ['ritual worry', async (page) => {
     await page.goto('/');
-    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await skipWelcome(page);
+    await skipWelcome(page);
+  await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
   }],
   ['about', async (page) => page.goto('/#about')],
   ['ritual playback', async (page) => {
     await page.goto('/');
-    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await skipWelcome(page);
+    await skipWelcome(page);
+  await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="track-person-centered"]').click();
@@ -40,7 +51,9 @@ const screens = [
   ['postcard', async (page) => {
     await page.addInitScript(() => (globalThis.__MURMUR_SPEED = 500));
     await page.goto('/');
-    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await skipWelcome(page);
+    await skipWelcome(page);
+  await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="night-skip-track"]').click();

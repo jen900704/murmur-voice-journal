@@ -106,6 +106,13 @@ const shouldFlag = [
   ['I should just die', 'self'], ['I want to slit my wrists', 'self'], ['jump off a bridge', 'self'],
   ['I took all my pills', 'self'], ['he threatened to kill me', 'abuse'], ['scared to go home', 'abuse'],
   ['I was assaulted', 'abuse'],
+  ['我真的不想再撐了', 'self'], ['好想從這個世界上消失', 'self'], ['如果明天不用醒來就好了', 'self'],
+  ['我覺得大家沒有我會比較輕鬆', 'self'], ['最近一直在查怎麼死比較不痛', 'self'], ['我把藥都收集起來了想一次吃掉', 'self'],
+  ['只想睡著然後不要再起來', 'self'], ['活得好累', 'self'], ['他說我敢分手就要我好看', 'abuse'],
+  ['很想一走了之反正沒人在乎我', 'self'], ['我已經寫好要留給家人的信了', 'self'], ['我站在頂樓想了很久', 'self'],
+  ["I don't see the point of anything anymore", 'self'], ["everyone would be happier if I wasn't around", 'self'],
+  ["I've been thinking about ending things", 'self'], ['go to sleep and not wake up', 'self'],
+  ["I don't think I can keep myself safe tonight", 'self'], ['he grabbed me by the throat', 'abuse'],
   ['想跟他同歸於盡', 'others'],
 ];
 
@@ -155,7 +162,10 @@ const shouldNotFlag = [
   '我 1988 年出生',
   '報告撐不下去了', '撐不下去的專案', '想消失一下', '這報告做到想死', '不小心割手指', '老闆威脅我要扣薪水',
   '看了一部家暴的電影', '性侵新聞看了很難過', '遊戲裡殺了他', '我被老闆摸頭',
-  '尷尬到好想死', 'ran 5 kms today', 'I never wake up on time', 'I cut myself shaving', 'I hurt myself at the gym',
+  '尷尬到好想死', 'ran 5 kms today',
+  '我想消失一個禮拜去花蓮', '手機快沒電了，撐不下去', '我媽一直逼我去相親', '老師逼我們寫三篇心得', '今天切菜不小心割手了',
+  "I can't go on vacation this year", 'my sister kicked me under the table as a joke', '希望這種病從世界上消失',
+  '劇裡主角最後怎麼死的', '醫生說抗生素要全部吃完', '囤了一些感冒藥備用', '真想辭職一走了之', 'I can keep myself safe, thanks', 'I never wake up on time', 'I cut myself shaving', 'I hurt myself at the gym',
   "I want to end things with my boyfriend", 'I teach a drug abuse class', 'he hit me up last night',
   'my baby kicks me all night', 'the rapeseed field was yellow', 'we watched suicide squad',
 ];

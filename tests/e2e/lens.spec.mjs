@@ -15,7 +15,7 @@ test.describe('theory lens', () => {
     await page.fill('#lens-concern', '我一直擔心報告做不好，晚上睡不好');
     await page.locator('[data-key="topic-work"]').click();
     await page.getByRole('button', { name: '下一步' }).click();
-    await page.getByRole('button', { name: /比較三個透鏡/ }).click();
+    await page.getByRole('button', { name: /比較三個角度/ }).click();
     await expect(page.locator('.lens-card')).toHaveCount(3);
     await page.locator('.lens-card .btn').first().click();
     // answer every step
@@ -35,7 +35,7 @@ test.describe('theory lens', () => {
     await page.getByRole('button', { name: '刪除' }).click();
     await expect(page.locator('.lens-summary.compact')).toHaveCount(0);
     await page.getByRole('button', { name: '上一步' }).click();
-    await page.getByRole('button', { name: /哪個透鏡適合我/ }).click();
+    await page.getByRole('button', { name: /哪個角度適合我/ }).click();
     await expect(page.locator('.fit-list li')).toHaveCount(1);
     expect(outside).toEqual([]);
     expect(errors).toEqual([]);
@@ -132,7 +132,7 @@ test.describe('theory lens', () => {
 
   test('help resources are always reachable', async ({ page }) => {
     await page.goto('/#lens');
-    await page.getByRole('button', { name: '查看求助資源' }).click();
+    await page.getByRole('button', { name: '求助專線' }).click();
     await expect(page.locator('.resource-list a[href="tel:113"]')).toBeVisible();
   });
 });

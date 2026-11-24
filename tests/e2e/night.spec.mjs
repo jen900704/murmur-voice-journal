@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// the first visit shows a welcome card; close it so the usual Today screen is there
+async function skipWelcome(page) {
+  await page.locator('.prompt-text').waitFor();
+  const w = page.locator('[data-key="welcome-close"]');
+  if (await w.count()) await w.click();
+}
+
 test.use({ locale: 'zh-TW' });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -10,6 +17,7 @@ test.beforeEach(async ({ page }) => {
 async function startRitual(page) {
   await page.goto('/');
   // evening shows a card, daytime shows a link; either opens the ritual
+  await skipWelcome(page);
   await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
 }
 
@@ -130,6 +138,7 @@ test('leaving the Today tab mid-ritual keeps what was written', async ({ page })
 
 test('just listen goes from the card straight to a track; leave returns to Today', async ({ page }) => {
   await page.goto('/');
+  await skipWelcome(page);
   const listen = page.locator('[data-key="night-listen"]');
   if (!(await listen.count())) {
     // daytime: the card is not on Today, so open the ritual and leave it instead

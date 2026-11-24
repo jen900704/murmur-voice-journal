@@ -7,7 +7,7 @@ import * as db from './db.js';
 import { createLensView } from './lens-view.js';
 import { createNightView, isEvening } from './night-view.js';
 import { createExtras } from './extras.js';
-import { checkRisk } from './safety.js';
+import { checkRisk, helpList } from './safety.js';
 import { MODELS as AI_MODELS } from './ai-chat.js';
 import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
@@ -383,7 +383,8 @@ function enhanceRadios(root) {
       e.preventDefault();
       const target = radios[(n + radios.length) % radios.length];
       target.focus();
-      target.click();
+      // some chips toggle off when clicked again, so only click one that is not already chosen
+      if (target.getAttribute('aria-checked') !== 'true') target.click();
     });
   }
 }
@@ -490,7 +491,8 @@ function viewToday() {
   const idle = state.phase === 'idle' || state.phase === 'error';
   if (idle && !state.welcomed && !state.entries.length) add(wrap, welcomeCard());
   if (idle) add(wrap, extras.lowMoodCard(latestRated()));
-  if (idle && isEvening()) add(wrap, nightView.card());
+  const welcoming = idle && !state.welcomed && !state.entries.length;
+  if (idle && isEvening() && !welcoming) add(wrap, nightView.card());
   add(wrap, 
     h(
       'div',
@@ -697,6 +699,9 @@ function closeSheet() {
 function renderSheet() {
   const sheet = $('#sheet');
   if (!state.sheetFn) return;
+  // a rerender inside the sheet keeps focus on the same control
+  const a = document.activeElement;
+  const keepKey = !sheet.hidden && a && sheet.contains(a) && a.dataset ? a.dataset.key : null;
   sheet.hidden = false;
   sheet.innerHTML = '';
   setBackgroundInert(true);
@@ -710,7 +715,8 @@ function renderSheet() {
   }
   sheet.appendChild(body);
   enhanceRadios(body);
-  body.querySelector('.back').focus();
+  const again = keepKey && body.querySelector(`[data-key="${CSS.escape(keepKey)}"]`);
+  (again || body.querySelector('.back')).focus();
   sheet.onkeydown = null;
 }
 
@@ -1081,7 +1087,7 @@ function viewAbout() {
     h('ul', { class: 'plain-list' }, t('storageNotes').map((s) => h('li', {}, s))),
     h('h2', {}, t('notMedicalTitle')),
     h('p', {}, t('notMedicalBody')),
-    h('div', { class: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), t('helpLines').map((line) => h('span', {}, line))),
+    h('div', { class: 'help', id: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), helpList(h, getLang())),
     h('h2', {}, t('experimentalTitle')),
     h('p', { class: 'small' }, t('aiAbout')),
     h(
@@ -1380,9 +1386,37 @@ async function init() {
     }
   });
   render();
-  if ('serviceWorker' in navigator && location.protocol === 'https:') {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') setupUpdates();
+}
+
+// A new release waits until the app is reopened and idle, then reloads once, so a page never
+// mixes files from two releases and nothing being typed or played is interrupted.
+function isIdle() {
+  return state.phase === 'idle' && !nightView.active() && $('#sheet').hidden && !document.querySelector('textarea:not(:placeholder-shown), input[type="text"]:not(:placeholder-shown)');
+}
+
+async function setupUpdates() {
+  let reg;
+  try {
+    reg = await navigator.serviceWorker.register('./sw.js');
+  } catch (_) {
+    return;
   }
+  let reloading = false;
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading || !hadController) return;
+    reloading = true;
+    location.reload();
+  });
+  const applyIfIdle = () => {
+    if (reg.waiting && navigator.serviceWorker.controller && isIdle()) reg.waiting.postMessage('skip-waiting');
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    reg.update().then(applyIfIdle, () => {});
+  });
+  applyIfIdle();
 }
 
 init();
