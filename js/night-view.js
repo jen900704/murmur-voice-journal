@@ -39,6 +39,9 @@ const S = {
     kindLabel: '今天對自己好的一件事',
     nightLabel: '晚安',
     nightLine: '今晚就到這裡。',
+    sendTitle: '寄一張晚安卡給一個人',
+    sendHelp: '卡片上只會有你選的這句話，不會有你今晚寫的任何內容。',
+    sendLines: ['晚安。今天辛苦了。', '想到你了。希望你今晚睡得好。', '明天見。先好好休息。'],
     savePng: '存成圖片或分享',
     done: '完成',
     gentle: '今晚來點溫和的作品',
@@ -88,6 +91,9 @@ const S = {
     kindLabel: 'One kind thing I did for myself',
     nightLabel: 'Good night',
     nightLine: 'That is enough for tonight.',
+    sendTitle: 'Send a goodnight card to someone',
+    sendHelp: 'The card carries only the line you pick, nothing you wrote tonight.',
+    sendLines: ['Good night. You worked hard today.', 'Thinking of you. Sleep well tonight.', 'See you tomorrow. Rest well.'],
     savePng: 'Save or share image',
     done: 'Done',
     gentle: 'Something gentle to watch or read',
@@ -470,8 +476,44 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           L().done
         )
       ),
+      sendCard(),
       openGentle ? h('button', { type: 'button', class: 'link', onclick: () => openGentle() }, L().gentle) : null,
     ];
+  }
+
+  // A goodnight card for one person, through the phone's own share sheet. Only a fixed line
+  // the person picks goes on it; never the worry or the kind thing. No feed, counts, or receipts.
+  function sendCard() {
+    const lines = L().sendLines;
+    return h(
+      'details',
+      { class: 'send-card' },
+      h('summary', { 'data-key': 'night-send' }, L().sendTitle),
+      h('p', { class: 'muted small' }, L().sendHelp),
+      h(
+        'div',
+        { class: 'chips wrap' },
+        lines.map((line, i) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'chip',
+              'data-key': `send-line-${i}`,
+              onclick: async () => {
+                const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
+                const svg = postcardSvg({ seed: `send-${Date.now()}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
+                const png = await postcardPng(svg);
+                const r = await sharePng(png, `goodnight-${new Date().toISOString().slice(0, 10)}.png`, line);
+                if (r === 'shared') toast(L().shared);
+                if (r === 'downloaded') toast(L().downloaded);
+              },
+            },
+            line
+          )
+        )
+      )
+    );
   }
 
   function crisis() {

@@ -7,7 +7,8 @@
 - Confidence label for each feature, and a CSV codebook
 - Theory lens: 14 counseling approaches, compare mode, lens cards, "which lens fits me"
 - Bedtime ritual: set a worry down, one kind thing, a wind-down track in the style of seven approaches, pastel postcard
-- Kindness jar, low-mood card, daily prompt exchange by link, calendar reminder
+- Kindness jar, low-mood card, daily prompt exchange by link, calendar reminder, goodnight card to one person
+- First-visit welcome with three ways in; help lines by region (Taiwan, US, elsewhere)
 - Gentle recommendations with content notes
 - Experimental AI conversation for theory lenses (off by default, own API key)
 - Safety net for risk language in every free-text field that is stored or shared, with help lines always reachable
@@ -39,6 +40,7 @@ Ideas come in over time; each gets reshaped for safety and ease of use before it
 | Pastel healing postcards | built | Procedural, original motifs |
 | Recommendations: films, books, drama, musicals, opera, short films | built | Short animated films added; live short plays not included, since what is on stage changes too fast for a static list |
 | Messaging and social connection | design only | Starts with invite-code pairs; see `social-design.md` |
+| Goodnight card to one person | built | A fixed line the person picks, sent through the phone's share sheet; nothing written that night goes on it; no feed, counts, or receipts |
 | Daily writing prompt and partner exchange | built | Exchange by link, no server |
 | "One kind thing I did today", visible to people in a low mood | built privately | Shared version waits for the social design |
 | AI counselor-style conversation | built, experimental | Psychoeducation framing; not counseling |

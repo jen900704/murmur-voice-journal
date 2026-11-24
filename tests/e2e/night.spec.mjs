@@ -148,3 +148,15 @@ test('help lines are one tap away during the ritual', async ({ page }) => {
   await page.locator('[data-key="night-help"]').click();
   await expect(page.locator('.view.night a[href="tel:1925"]')).toBeVisible();
 });
+
+test('a goodnight card carries only the chosen line, never what was written', async ({ page }) => {
+  await startRitual(page);
+  await page.fill('#night-worry', '和室友吵架');
+  await page.locator('[data-key="night-next"]').click();
+  await page.fill('#night-kind', '吃了一頓好吃的');
+  await page.locator('[data-key="night-next"]').click();
+  await page.locator('[data-key="night-skip-track"]').click();
+  await page.locator('[data-key="night-send"]').click();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="send-line-0"]').click()]);
+  expect(download.suggestedFilename()).toMatch(/^goodnight-.*\.png$/);
+});
