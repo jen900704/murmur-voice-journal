@@ -190,18 +190,44 @@ export function coverage() {
 }
 
 // ---------- drawing ----------
+//
+// A flat print. Paper, two spot inks per card and their overprint colour, the way a riso
+// print looks: shapes are circles, half-circles and bands with no outlines, gradients or
+// see-through shading; where the two inks cross, the crossing is a fixed third colour; one
+// ink layer sits a couple of pixels off, like a print that slipped. Ink is only for small
+// line details and the words. The words lead: the person's line large on the right, the
+// card's name small and vertical by a hairline at the edge, like the spine of a book.
 
-const PAL = {
-  rain: { bg: ['#dfe7f5', '#ece4f6'], ink: '#3f4b66', soft: '#f7f9ff', accent: '#9fb3dd', leaf: '#9cc3b3', ground: '#cfd9ee' },
-  cloudy: { bg: ['#e4ebf2', '#f3eaf0'], ink: '#46506a', soft: '#fbfcff', accent: '#b4bfd9', leaf: '#9fc6ad', ground: '#d7e2e8' },
-  mixed: { bg: ['#e2f1ec', '#fdf0dc'], ink: '#475a52', soft: '#fbfffd', accent: '#f2c57c', leaf: '#8fbf9f', ground: '#d4ead9' },
-  sunny: { bg: ['#fff1d1', '#fde1e6'], ink: '#6b4f4a', soft: '#fffaf0', accent: '#f4a7a0', leaf: '#a8cf8f', ground: '#f5e1c4' },
-  wind: { bg: ['#e0efef', '#eceaf6'], ink: '#3f5a5c', soft: '#f7fdfd', accent: '#9cc8c4', leaf: '#9cc3b3', ground: '#d3e6e3' },
-  fog: { bg: ['#e9e7ef', '#f2eef0'], ink: '#4f4d63', soft: '#fbfaff', accent: '#bdb6d3', leaf: '#a9c4b5', ground: '#dedbe8' },
-  dusk: { bg: ['#fbe0d2', '#efd6ea'], ink: '#6a4552', soft: '#fff6f1', accent: '#f0a58f', leaf: '#b7c99a', ground: '#f0d2c8' },
-  clear: { bg: ['#e9f0fb', '#f5ecfa'], ink: '#4d4a6e', soft: '#fbf9ff', accent: '#c7a6e3', leaf: '#a3c9b7', ground: '#e2e0f3' },
-  night: { bg: ['#2f3557', '#4a3f66'], ink: '#f2ecff', soft: '#fff7e6', accent: '#f3d08a', leaf: '#9fc6b8', ground: '#3b3f63' },
+const PAPER = '#F5F6F1';
+const INK = '#1B1F3B';
+const NIGHT = '#14172B';
+const AO = '#2747C7'; // 群青
+const MOMO = '#FF7A8A'; // 桃
+const EGG = '#FFC83D'; // 蛋黃
+const MOSS = '#2E9C7E'; // 青苔
+
+const rgbOf = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const hexOf = (a) => '#' + a.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+// a flat screen of an ink on paper (t = how much ink)
+const tint = (c, t, base = PAPER) => hexOf(rgbOf(base).map((v, i) => v + (rgbOf(c)[i] - v) * t));
+
+// Each card: paper, ink for lines and words, a sky screen, ink a (land, and the
+// accents of things) and ink b (the sun, and the bodies of things), c where they cross.
+const PRINT = {
+  clear: { a: AO, b: EGG, c: MOSS, sky: tint(AO, 0.13) },
+  sunny: { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.12) },
+  mixed: { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(MOSS, 0.12) },
+  cloudy: { a: AO, b: MOMO, c: '#5B3B9E', sky: tint(AO, 0.12) },
+  rain: { a: AO, b: MOSS, c: '#1D3F86', sky: tint(AO, 0.16) },
+  wind: { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(EGG, 0.16) },
+  fog: { paper: '#E9EAE4', a: tint(AO, 0.4, '#E9EAE4'), b: AO, c: '#2A3F9A', sky: tint(AO, 0.1, '#E9EAE4'), sun: '#F7F8F4' },
+  dusk: { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.16) },
+  night: { paper: NIGHT, ink: PAPER, a: MOSS, b: EGG, c: '#8AB84A', sky: '#20264A' },
 };
+const pal = (w) => ({ paper: PAPER, ink: INK, ...PRINT.clear, ...(PRINT[w] || {}) });
+
+// the slipped layer
+const OFF = [2.5, -2];
 
 function rng(seed) {
   let s = 7;
@@ -216,204 +242,404 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
-const eyes = (x, y, s, ink, blush) => `
-  <circle cx="${x - s}" cy="${y}" r="${s * 0.22}" fill="${ink}"/><circle cx="${x + s}" cy="${y}" r="${s * 0.22}" fill="${ink}"/>
-  <path d="M${x - s * 0.35} ${y + s * 0.45} q${s * 0.35} ${s * 0.35} ${s * 0.7} 0" stroke="${ink}" stroke-width="${s * 0.16}" fill="none" stroke-linecap="round"/>
-  <ellipse cx="${x - s * 1.5}" cy="${y + s * 0.55}" rx="${s * 0.35}" ry="${s * 0.2}" fill="${blush}" opacity=".7"/>
-  <ellipse cx="${x + s * 1.5}" cy="${y + s * 0.55}" rx="${s * 0.35}" ry="${s * 0.2}" fill="${blush}" opacity=".7"/>`;
+// geometry, no fill: the layer decides the colour
+const n = (v) => +(+v).toFixed(1);
+const circ = (cx, cy, r) => `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}"/>`;
+const box = (x, y, w, h, rx = 0) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}"${rx ? ` rx="${n(rx)}"` : ''}/>`;
+// a half-circle with its flat side on (cx, cy): up, down, left or right
+function half(cx, cy, r, dir = 'up') {
+  if (dir === 'up') return `<path d="M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 1 ${n(cx + r)} ${n(cy)}Z"/>`;
+  if (dir === 'down') return `<path d="M${n(cx - r)} ${n(cy)} A${n(r)} ${n(r)} 0 0 0 ${n(cx + r)} ${n(cy)}Z"/>`;
+  if (dir === 'left') return `<path d="M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 0 ${n(cx)} ${n(cy + r)}Z"/>`;
+  return `<path d="M${n(cx)} ${n(cy - r)} A${n(r)} ${n(r)} 0 0 1 ${n(cx)} ${n(cy + r)}Z"/>`;
+}
+const poly = (...pts) => `<path d="M${pts.map(([x, y]) => `${n(x)} ${n(y)}`).join(' L')}Z"/>`;
+const fillWith = (c, g) => (g ? `<g fill="${c}">${g}</g>` : '');
+// ink line details
+const line = (p, d, w = 2.2) => `<path d="${d}" fill="none" stroke="${p.ink}" stroke-width="${n(w)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const dot = (p, x, y, r) => `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${p.ink}"/>`;
+// a small face: two dot eyes and a soft smile
+const face = (p, x, y, s) => dot(p, x - s, y, s * 0.24) + dot(p, x + s, y, s * 0.24) + line(p, `M${n(x - s * 0.32)} ${n(y + s * 0.42)} q${n(s * 0.32)} ${n(s * 0.3)} ${n(s * 0.64)} 0`, Math.max(1.4, s * 0.18));
+// a cloud of stacked half-circles, flat along the bottom
+const cloudShape = (x, y, s) => half(x, y, s * 0.62) + half(x - s * 0.78, y, s * 0.4) + half(x + s * 0.74, y, s * 0.46);
 
-// Objects, drawn around (x, y) at size r. Each sits on the ground line.
+// Objects, drawn at (x, y) = where they stand, size r. Each returns its parts:
+// a and b for the two ink layers, k for paper cut out of the inks, l for ink lines.
 const OBJ = {
-  cat: (p, x, y, r) => `<ellipse cx="${x}" cy="${y - r * 0.45}" rx="${r * 0.7}" ry="${r * 0.5}" fill="${p.accent}"/><path d="M${x - r * 0.6} ${y - r * 0.75} l${r * 0.1} ${-r * 0.45} l${r * 0.3} ${r * 0.3}Z M${x + r * 0.6} ${y - r * 0.75} l${-r * 0.1} ${-r * 0.45} l${-r * 0.3} ${r * 0.3}Z" fill="${p.accent}"/><path d="M${x + r * 0.65} ${y - r * 0.2} q${r * 0.5} ${-r * 0.1} ${r * 0.4} ${-r * 0.6}" stroke="${p.accent}" stroke-width="${r * 0.14}" fill="none" stroke-linecap="round"/>${eyes(x, y - r * 0.5, r * 0.18, p.ink, p.soft)}`,
-  dog: (p, x, y, r) => `<ellipse cx="${x}" cy="${y - r * 0.45}" rx="${r * 0.68}" ry="${r * 0.52}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.06}"/><ellipse cx="${x - r * 0.62}" cy="${y - r * 0.55}" rx="${r * 0.2}" ry="${r * 0.38}" fill="${p.accent}"/><ellipse cx="${x + r * 0.62}" cy="${y - r * 0.55}" rx="${r * 0.2}" ry="${r * 0.38}" fill="${p.accent}"/>${eyes(x, y - r * 0.5, r * 0.18, p.ink, p.accent)}`,
-  coffee: (p, x, y, r) => `<path d="M${x - r * 0.45} ${y - r * 0.85} h${r * 0.9} l${-r * 0.1} ${r * 0.85} h${-r * 0.7}z" fill="${p.soft}" stroke="${p.ink}" stroke-opacity=".25" stroke-width="${r * 0.04}"/><path d="M${x + r * 0.42} ${y - r * 0.7} q${r * 0.35} ${r * 0.1} ${r * 0.05} ${r * 0.45}" stroke="${p.soft}" stroke-width="${r * 0.1}" fill="none"/><rect x="${x - r * 0.45}" y="${y - r * 0.6}" width="${r * 0.9}" height="${r * 0.2}" fill="${p.accent}" opacity=".8"/><path d="M${x - r * 0.1} ${y - r * 1.0} q${r * 0.1} ${-r * 0.15} 0 ${-r * 0.3}" stroke="${p.ink}" stroke-opacity=".35" stroke-width="${r * 0.05}" fill="none" stroke-linecap="round"/>`,
-  tea: (p, x, y, r) => `<path d="M${x - r * 0.55} ${y - r * 0.6} h${r * 1.1} c0 ${r * 0.5} ${-r * 0.25} ${r * 0.6} ${-r * 0.55} ${r * 0.6} s${-r * 0.55} ${-r * 0.1} ${-r * 0.55} ${-r * 0.6}z" fill="${p.soft}"/><path d="M${x + r * 0.52} ${y - r * 0.45} c${r * 0.3} 0 ${r * 0.3} ${r * 0.3} 0 ${r * 0.3}" stroke="${p.soft}" stroke-width="${r * 0.09}" fill="none"/><path d="M${x} ${y - r * 0.75} q${r * 0.1} ${-r * 0.15} 0 ${-r * 0.3}" stroke="${p.ink}" stroke-opacity=".35" stroke-width="${r * 0.05}" fill="none" stroke-linecap="round"/>`,
-  book: (p, x, y, r) => `<path d="M${x} ${y - r * 0.15} q${-r * 0.45} ${-r * 0.25} ${-r * 0.85} 0 v${-r * 0.6} q${r * 0.4} ${-r * 0.25} ${r * 0.85} 0z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.06}"/><path d="M${x} ${y - r * 0.15} q${r * 0.45} ${-r * 0.25} ${r * 0.85} 0 v${-r * 0.6} q${-r * 0.4} ${-r * 0.25} ${-r * 0.85} 0z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.06}"/>`,
-  laptop: (p, x, y, r) => `<rect x="${x - r * 0.6}" y="${y - r * 1.0}" width="${r * 1.2}" height="${r * 0.75}" rx="${r * 0.08}" fill="${p.ink}" opacity=".75"/><rect x="${x - r * 0.5}" y="${y - r * 0.92}" width="${r * 1.0}" height="${r * 0.58}" rx="${r * 0.04}" fill="${p.soft}"/><path d="M${x - r * 0.8} ${y - r * 0.2} h${r * 1.6} l${-r * 0.1} ${r * 0.15} h${-r * 1.4}z" fill="${p.ink}" opacity=".6"/>${eyes(x, y - r * 0.65, r * 0.1, p.ink, p.accent)}`,
-  phone: (p, x, y, r) => `<rect x="${x - r * 0.32}" y="${y - r * 1.05}" width="${r * 0.64}" height="${r * 1.05}" rx="${r * 0.12}" fill="${p.ink}" opacity=".7"/><rect x="${x - r * 0.25}" y="${y - r * 0.95}" width="${r * 0.5}" height="${r * 0.8}" rx="${r * 0.06}" fill="${p.soft}"/><rect x="${x - r * 0.18}" y="${y - r * 0.82}" width="${r * 0.3}" height="${r * 0.12}" rx="${r * 0.06}" fill="${p.accent}"/><rect x="${x - r * 0.12}" y="${y - r * 0.62}" width="${r * 0.3}" height="${r * 0.12}" rx="${r * 0.06}" fill="${p.leaf}"/>`,
-  clock: (p, x, y, r) => `<circle cx="${x}" cy="${y - r * 0.55}" r="${r * 0.5}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.08}"/><path d="M${x} ${y - r * 0.55} v${-r * 0.3} M${x} ${y - r * 0.55} h${r * 0.22}" stroke="${p.ink}" stroke-width="${r * 0.07}" stroke-linecap="round"/>`,
-  house: (p, x, y, r) => `<path d="M${x - r * 0.7} ${y - r * 0.55} l${r * 0.7} ${-r * 0.55} l${r * 0.7} ${r * 0.55}z" fill="${p.accent}"/><rect x="${x - r * 0.55}" y="${y - r * 0.6}" width="${r * 1.1}" height="${r * 0.6}" fill="${p.soft}"/><rect x="${x - r * 0.12}" y="${y - r * 0.35}" width="${r * 0.24}" height="${r * 0.35}" rx="${r * 0.05}" fill="${p.leaf}"/>`,
-  plant: (p, x, y, r) => `<path d="M${x} ${y} v${-r * 0.75}" stroke="${p.leaf}" stroke-width="${r * 0.08}"/><path d="M${x} ${y - r * 0.35} q${-r * 0.35} ${-r * 0.05} ${-r * 0.4} ${-r * 0.35} q${r * 0.3} 0 ${r * 0.4} ${r * 0.35}z" fill="${p.leaf}"/>${[0, 72, 144, 216, 288].map((a) => `<circle cx="${(x + Math.cos((a * Math.PI) / 180) * r * 0.2).toFixed(1)}" cy="${(y - r * 0.85 + Math.sin((a * Math.PI) / 180) * r * 0.2).toFixed(1)}" r="${r * 0.16}" fill="${p.accent}"/>`).join('')}<circle cx="${x}" cy="${y - r * 0.85}" r="${r * 0.12}" fill="${p.soft}"/>`,
-  letter: (p, x, y, r) => `<rect x="${x - r * 0.6}" y="${y - r * 0.75}" width="${r * 1.2}" height="${r * 0.75}" rx="${r * 0.06}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/><path d="M${x - r * 0.6} ${y - r * 0.75} l${r * 0.6} ${r * 0.42} l${r * 0.6} ${-r * 0.42}" stroke="${p.accent}" stroke-width="${r * 0.05}" fill="none"/><path d="M${x} ${y - r * 0.22} c${-r * 0.12} ${-r * 0.1} ${-r * 0.06} ${-r * 0.22} 0 ${-r * 0.14} c${r * 0.06} ${-r * 0.08} ${r * 0.12} ${r * 0.04} 0 ${r * 0.14}z" fill="${p.accent}"/>`,
-  music: (p, x, y, r) => `<path d="M${x - r * 0.2} ${y - r * 0.3} v${-r * 0.7} l${r * 0.55} ${-r * 0.15} v${r * 0.7}" stroke="${p.ink}" stroke-opacity=".6" stroke-width="${r * 0.07}" fill="none"/><ellipse cx="${x - r * 0.32}" cy="${y - r * 0.28}" rx="${r * 0.15}" ry="${r * 0.11}" fill="${p.accent}"/><ellipse cx="${x + r * 0.23}" cy="${y - r * 0.43}" rx="${r * 0.15}" ry="${r * 0.11}" fill="${p.accent}"/>`,
-  food: (p, x, y, r) => `<path d="M${x - r * 0.65} ${y - r * 0.5} h${r * 1.3} c0 ${r * 0.4} ${-r * 0.3} ${r * 0.5} ${-r * 0.65} ${r * 0.5} s${-r * 0.65} ${-r * 0.1} ${-r * 0.65} ${-r * 0.5}z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/><ellipse cx="${x}" cy="${y - r * 0.55}" rx="${r * 0.55}" ry="${r * 0.18}" fill="${p.accent}" opacity=".6"/><path d="M${x + r * 0.2} ${y - r * 0.6} l${r * 0.5} ${-r * 0.5} M${x + r * 0.35} ${y - r * 0.55} l${r * 0.5} ${-r * 0.5}" stroke="${p.ink}" stroke-opacity=".5" stroke-width="${r * 0.05}" stroke-linecap="round"/>`,
-  bed: (p, x, y, r) => `<rect x="${x - r * 0.7}" y="${y - r * 0.45}" width="${r * 1.4}" height="${r * 0.45}" rx="${r * 0.22}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/><text x="${x + r * 0.45}" y="${y - r * 0.6}" font-size="${r * 0.35}" fill="${p.ink}" opacity=".5" font-family="sans-serif">z</text>`,
-  bus: (p, x, y, r) => `<rect x="${x - r * 0.75}" y="${y - r * 0.85}" width="${r * 1.5}" height="${r * 0.7}" rx="${r * 0.15}" fill="${p.accent}"/><rect x="${x - r * 0.6}" y="${y - r * 0.75}" width="${r * 0.5}" height="${r * 0.25}" rx="${r * 0.05}" fill="${p.soft}"/><rect x="${x + r * 0.05}" y="${y - r * 0.75}" width="${r * 0.5}" height="${r * 0.25}" rx="${r * 0.05}" fill="${p.soft}"/><circle cx="${x - r * 0.4}" cy="${y - r * 0.12}" r="${r * 0.13}" fill="${p.ink}" opacity=".7"/><circle cx="${x + r * 0.4}" cy="${y - r * 0.12}" r="${r * 0.13}" fill="${p.ink}" opacity=".7"/>`,
-  sea: (p, x, y, r) => `<path d="M${x - r} ${y - r * 0.25} q${r * 0.25} ${-r * 0.25} ${r * 0.5} 0 t${r * 0.5} 0 t${r * 0.5} 0 t${r * 0.5} 0" stroke="${p.accent}" stroke-width="${r * 0.1}" fill="none" stroke-linecap="round"/><path d="M${x - r * 0.75} ${y - r * 0.55} q${r * 0.25} ${-r * 0.25} ${r * 0.5} 0 t${r * 0.5} 0 t${r * 0.5} 0" stroke="${p.accent}" stroke-opacity=".6" stroke-width="${r * 0.08}" fill="none" stroke-linecap="round"/>`,
-  mountain: (p, x, y, r) => `<path d="M${x - r * 0.9} ${y} l${r * 0.6} ${-r * 0.95} l${r * 0.35} ${r * 0.45} l${r * 0.25} ${-r * 0.25} l${r * 0.6} ${r * 0.75}z" fill="${p.leaf}"/><path d="M${x - r * 0.42} ${y - r * 0.75} l${r * 0.12} ${-r * 0.2} l${r * 0.12} ${r * 0.18}z" fill="${p.soft}"/>`,
-  heart: (p, x, y, r) => `<path d="M${x} ${y - r * 0.15} c${-r * 0.8} ${-r * 0.45} ${-r * 0.55} ${-r * 1.15} 0 ${-r * 0.8} c${r * 0.55} ${-r * 0.35} ${r * 0.8} ${r * 0.35} 0 ${r * 0.8}z" fill="${p.accent}"/>`,
-  gift: (p, x, y, r) => `<rect x="${x - r * 0.5}" y="${y - r * 0.7}" width="${r}" height="${r * 0.7}" rx="${r * 0.06}" fill="${p.accent}"/><rect x="${x - r * 0.08}" y="${y - r * 0.7}" width="${r * 0.16}" height="${r * 0.7}" fill="${p.soft}"/><path d="M${x} ${y - r * 0.7} c${-r * 0.3} ${-r * 0.35} ${-r * 0.45} 0 0 0 c${r * 0.3} ${-r * 0.35} ${r * 0.45} 0 0 0" stroke="${p.soft}" stroke-width="${r * 0.08}" fill="none"/>`,
-  friends: (p, x, y, r) => `<path d="M${x - r * 0.75} ${y - r * 0.7} h${r * 0.6} l${-r * 0.06} ${r * 0.7} h${-r * 0.48}z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/><path d="M${x + r * 0.15} ${y - r * 0.7} h${r * 0.6} l${-r * 0.06} ${r * 0.7} h${-r * 0.48}z" fill="${p.accent}"/>${eyes(x - r * 0.45, y - r * 0.4, r * 0.08, p.ink, p.accent)}${eyes(x + r * 0.45, y - r * 0.4, r * 0.08, p.ink, p.soft)}<path d="M${x - r * 0.1} ${y - r * 1.0} c${-r * 0.1} ${-r * 0.12} ${-r * 0.02} ${-r * 0.22} ${r * 0.1} ${-r * 0.1} c${r * 0.12} ${-r * 0.12} ${r * 0.2} ${-r * 0.02} ${r * 0.1} ${r * 0.1} l${-r * 0.1} ${r * 0.1}z" fill="${p.accent}"/>`,
-  money: (p, x, y, r) => `<rect x="${x - r * 0.45}" y="${y - r * 0.85}" width="${r * 0.9}" height="${r * 0.85}" rx="${r * 0.2}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}" opacity=".9"/><rect x="${x - r * 0.35}" y="${y - r * 0.98}" width="${r * 0.7}" height="${r * 0.16}" rx="${r * 0.05}" fill="${p.accent}"/>${[[-0.15, -0.25], [0.15, -0.25], [0, -0.48]].map(([dx, dy]) => `<circle cx="${(x + dx * r).toFixed(1)}" cy="${(y + dy * r).toFixed(1)}" r="${(r * 0.15).toFixed(1)}" fill="${p.accent}"/>`).join('')}`,
-  game: (p, x, y, r) => `<rect x="${x - r * 0.7}" y="${y - r * 0.65}" width="${r * 1.4}" height="${r * 0.6}" rx="${r * 0.3}" fill="${p.accent}"/><path d="M${x - r * 0.45} ${y - r * 0.35} h${r * 0.3} M${x - r * 0.3} ${y - r * 0.5} v${r * 0.3}" stroke="${p.soft}" stroke-width="${r * 0.08}" stroke-linecap="round"/><circle cx="${x + r * 0.3}" cy="${y - r * 0.42}" r="${r * 0.08}" fill="${p.soft}"/><circle cx="${x + r * 0.48}" cy="${y - r * 0.3}" r="${r * 0.08}" fill="${p.soft}"/>`,
-  suitcase: (p, x, y, r) => `<rect x="${x - r * 0.55}" y="${y - r * 0.85}" width="${r * 1.1}" height="${r * 0.8}" rx="${r * 0.12}" fill="${p.accent}"/><path d="M${x - r * 0.2} ${y - r * 0.85} v${-r * 0.15} h${r * 0.4} v${r * 0.15}" stroke="${p.ink}" stroke-opacity=".5" stroke-width="${r * 0.06}" fill="none"/><path d="M${x - r * 0.3} ${y - r * 0.85} v${r * 0.8} M${x + r * 0.3} ${y - r * 0.85} v${r * 0.8}" stroke="${p.soft}" stroke-width="${r * 0.06}"/><circle cx="${x - r * 0.35}" cy="${y}" r="${r * 0.07}" fill="${p.ink}" opacity=".5"/><circle cx="${x + r * 0.35}" cy="${y}" r="${r * 0.07}" fill="${p.ink}" opacity=".5"/>`,
-  bike: (p, x, y, r) => `<circle cx="${x - r * 0.5}" cy="${y - r * 0.3}" r="${r * 0.3}" fill="none" stroke="${p.ink}" stroke-opacity=".6" stroke-width="${r * 0.06}"/><circle cx="${x + r * 0.5}" cy="${y - r * 0.3}" r="${r * 0.3}" fill="none" stroke="${p.ink}" stroke-opacity=".6" stroke-width="${r * 0.06}"/><path d="M${x - r * 0.5} ${y - r * 0.3} l${r * 0.35} ${-r * 0.45} h${r * 0.45} l${r * 0.2} ${r * 0.45} M${x - r * 0.15} ${y - r * 0.75} l${r * 0.2} ${r * 0.45}" stroke="${p.accent}" stroke-width="${r * 0.07}" fill="none" stroke-linecap="round"/>`,
+  cat: (p, x, y, r) => ({
+    b: half(x + r * 0.1, y, r * 0.55) + circ(x - r * 0.38, y - r * 0.52, r * 0.3) + poly([x - r * 0.66, y - r * 0.62], [x - r * 0.6, y - r * 0.98], [x - r * 0.38, y - r * 0.8]) + poly([x - r * 0.1, y - r * 0.62], [x - r * 0.16, y - r * 0.98], [x - r * 0.38, y - r * 0.8]),
+    a: half(x + r * 0.62, y, r * 0.2),
+    l: face(p, x - r * 0.38, y - r * 0.52, r * 0.1),
+  }),
+  dog: (p, x, y, r) => ({
+    b: half(x + r * 0.1, y, r * 0.55) + circ(x - r * 0.35, y - r * 0.55, r * 0.32),
+    a: box(x - r * 0.72, y - r * 0.78, r * 0.18, r * 0.36, r * 0.09) + box(x - r * 0.16, y - r * 0.78, r * 0.18, r * 0.36, r * 0.09),
+    l: face(p, x - r * 0.35, y - r * 0.52, r * 0.1),
+  }),
+  coffee: (p, x, y, r) => ({
+    b: box(x - r * 0.4, y - r * 0.84, r * 0.8, r * 0.84, r * 0.1),
+    a: box(x - r * 0.5, y - r * 0.56, r * 1.0, r * 0.26),
+    l: line(p, `M${n(x + r * 0.4)} ${n(y - r * 0.66)} h${n(r * 0.14)} a${n(r * 0.14)} ${n(r * 0.14)} 0 0 1 0 ${n(r * 0.36)} h${n(-r * 0.14)}`) + line(p, `M${n(x - r * 0.1)} ${n(y - r * 1.02)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)} M${n(x + r * 0.14)} ${n(y - r * 1.02)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)}`),
+  }),
+  tea: (p, x, y, r) => ({
+    b: half(x, y - r * 0.62, r * 0.62, 'down'),
+    a: box(x - r * 0.7, y - r * 0.68, r * 1.4, r * 0.16, r * 0.08) + box(x - r * 0.5, y - r * 0.06, r * 1.0, r * 0.06),
+    l: line(p, `M${n(x + r * 0.56)} ${n(y - r * 0.5)} a${n(r * 0.16)} ${n(r * 0.16)} 0 0 1 ${n(-r * 0.1)} ${n(r * 0.3)}`) + line(p, `M${n(x - r * 0.12)} ${n(y - r * 0.86)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)} M${n(x + r * 0.14)} ${n(y - r * 0.86)} q${n(r * 0.1)} ${n(-r * 0.12)} 0 ${n(-r * 0.26)}`),
+  }),
+  book: (p, x, y, r) => ({
+    b: box(x - r * 0.62, y - r * 0.26, r * 1.24, r * 0.26, r * 0.04) + box(x - r * 0.46, y - r * 0.8, r * 0.92, r * 0.26, r * 0.04),
+    a: box(x - r * 0.54, y - r * 0.5, r * 1.04, r * 0.28, r * 0.04),
+    l: line(p, `M${n(x - r * 0.48)} ${n(y - r * 0.13)} h${n(r * 0.7)} M${n(x - r * 0.3)} ${n(y - r * 0.67)} h${n(r * 0.5)}`, 1.6),
+  }),
+  laptop: (p, x, y, r) => ({
+    b: box(x - r * 0.56, y - r * 0.92, r * 1.12, r * 0.76, r * 0.06),
+    a: box(x - r * 0.78, y - r * 0.2, r * 1.56, r * 0.2, r * 0.06),
+    k: fillWith(p.paper, box(x - r * 0.44, y - r * 0.8, r * 0.88, r * 0.52, r * 0.03)),
+    l: face(p, x, y - r * 0.56, r * 0.1),
+  }),
+  phone: (p, x, y, r) => ({
+    b: box(x - r * 0.32, y - r * 1.04, r * 0.64, r * 1.04, r * 0.12),
+    a: box(x - r * 0.06, y - r * 0.86, r * 0.56, r * 0.26, r * 0.13) + box(x - r * 0.46, y - r * 0.5, r * 0.5, r * 0.22, r * 0.11),
+    k: fillWith(p.paper, box(x - r * 0.22, y - r * 0.92, r * 0.44, r * 0.78, r * 0.04)),
+  }),
+  clock: (p, x, y, r) => ({
+    b: circ(x, y - r * 0.5, r * 0.5),
+    a: half(x - r * 0.36, y - r * 0.9, r * 0.17) + half(x + r * 0.36, y - r * 0.9, r * 0.17) + box(x - r * 0.4, y - r * 0.08, r * 0.8, r * 0.08),
+    k: fillWith(p.paper, circ(x, y - r * 0.5, r * 0.36)),
+    l: line(p, `M${n(x)} ${n(y - r * 0.5)} v${n(-r * 0.24)} M${n(x)} ${n(y - r * 0.5)} h${n(r * 0.18)}`),
+  }),
+  house: (p, x, y, r) => ({
+    b: box(x - r * 0.52, y - r * 0.62, r * 1.04, r * 0.62),
+    a: poly([x - r * 0.7, y - r * 0.5], [x, y - r * 1.1], [x + r * 0.7, y - r * 0.5]),
+    k: fillWith(p.paper, half(x, y, r * 0.18, 'up') + box(x - r * 0.18, y - r * 0.2, r * 0.36, r * 0.2)),
+  }),
+  plant: (p, x, y, r) => ({
+    a: poly([x - r * 0.34, y - r * 0.44], [x + r * 0.34, y - r * 0.44], [x + r * 0.26, y], [x - r * 0.26, y]),
+    b: circ(x, y - r * 1.0, r * 0.22) + half(x - r * 0.02, y - r * 0.56, r * 0.26, 'left') + half(x + r * 0.02, y - r * 0.7, r * 0.22, 'right'),
+    l: line(p, `M${n(x)} ${n(y - r * 0.44)} V${n(y - r * 0.86)}`),
+  }),
+  letter: (p, x, y, r) => ({
+    b: box(x - r * 0.62, y - r * 0.78, r * 1.24, r * 0.78, r * 0.05),
+    a: circ(x, y - r * 0.36, r * 0.14) + box(x + r * 0.3, y - r * 0.9, r * 0.26, r * 0.3),
+    l: line(p, `M${n(x - r * 0.62)} ${n(y - r * 0.78)} L${n(x)} ${n(y - r * 0.36)} L${n(x + r * 0.62)} ${n(y - r * 0.78)}`, 1.8),
+  }),
+  music: (p, x, y, r) => ({
+    b: circ(x - r * 0.38, y - r * 0.2, r * 0.18) + circ(x + r * 0.3, y - r * 0.34, r * 0.18),
+    a: poly([x - r * 0.24, y - r * 0.98], [x + r * 0.46, y - r * 1.12], [x + r * 0.46, y - r * 0.96], [x - r * 0.24, y - r * 0.82]),
+    l: line(p, `M${n(x - r * 0.22)} ${n(y - r * 0.22)} V${n(y - r * 0.92)} M${n(x + r * 0.46)} ${n(y - r * 0.36)} V${n(y - r * 1.06)}`),
+  }),
+  food: (p, x, y, r) => ({
+    b: half(x, y - r * 0.5, r * 0.62, 'down'),
+    a: circ(x + r * 0.22, y - r * 0.68, r * 0.13) + box(x - r * 0.3, y - r * 0.06, r * 0.6, r * 0.06),
+    k: fillWith(p.paper, half(x - r * 0.04, y - r * 0.5, r * 0.46, 'up')),
+    l: line(p, `M${n(x + r * 0.1)} ${n(y - r * 0.62)} l${n(r * 0.5)} ${n(-r * 0.5)} M${n(x + r * 0.26)} ${n(y - r * 0.56)} l${n(r * 0.5)} ${n(-r * 0.5)}`, 1.8),
+  }),
+  bed: (p, x, y, r) => ({
+    b: box(x - r * 0.72, y - r * 0.5, r * 1.44, r * 0.5, r * 0.25),
+    a: half(x + r * 0.72, y, r * 0.3, 'up') + box(x - r * 0.1, y - r * 0.24, r * 0.82, r * 0.24),
+    l: line(p, `M${n(x + r * 0.44)} ${n(y - r * 0.98)} h${n(r * 0.18)} l${n(-r * 0.18)} ${n(r * 0.2)} h${n(r * 0.18)}`, 1.8),
+  }),
+  bus: (p, x, y, r) => ({
+    b: box(x - r * 0.76, y - r * 0.9, r * 1.52, r * 0.74, r * 0.16),
+    a: circ(x - r * 0.42, y - r * 0.16, r * 0.15) + circ(x + r * 0.42, y - r * 0.16, r * 0.15),
+    k: fillWith(p.paper, box(x - r * 0.62, y - r * 0.78, r * 0.52, r * 0.26, r * 0.05) + box(x + r * 0.06, y - r * 0.78, r * 0.52, r * 0.26, r * 0.05)),
+  }),
+  // a band of water with paper wave lines and a strip of shore
+  sea: (p, x, y, r) => ({
+    b: box(x - r * 0.9, y - r * 0.56, r * 1.8, r * 0.56, r * 0.06),
+    a: box(x - r * 0.9, y - r * 0.12, r * 1.8, r * 0.12),
+    k: `<g fill="none" stroke="${p.paper}" stroke-width="${n(r * 0.07)}" stroke-linecap="round">` + [0.4, 0.2].map((dy, i) => `<path d="M${n(x - r * (0.7 - i * 0.2))} ${n(y - r * dy)} q${n(r * 0.15)} ${n(-r * 0.12)} ${n(r * 0.3)} 0 t${n(r * 0.3)} 0 t${n(r * 0.3)} 0${i ? '' : ` t${n(r * 0.3)} 0`}"/>`).join('') + '</g>',
+  }),
+  mountain: (p, x, y, r) => ({
+    a: poly([x - r * 0.9, y], [x - r * 0.3, y - r * 0.96], [x + r * 0.3, y]),
+    b: poly([x - r * 0.3, y], [x + r * 0.3, y - r * 0.7], [x + r * 0.9, y]),
+    k: fillWith(p.paper, poly([x - r * 0.42, y - r * 0.77], [x - r * 0.3, y - r * 0.96], [x - r * 0.18, y - r * 0.77])),
+  }),
+  heart: (p, x, y, r) => {
+    const hp = (cx, cy, s) => `<path d="M${n(cx)} ${n(cy)} L${n(cx - s)} ${n(cy - s)} A${n(s * 0.5)} ${n(s * 0.5)} 0 0 1 ${n(cx)} ${n(cy - s * 1.5)} A${n(s * 0.5)} ${n(s * 0.5)} 0 0 1 ${n(cx + s)} ${n(cy - s)}Z"/>`;
+    return { b: hp(x - r * 0.12, y - r * 0.04, r * 0.5), a: hp(x + r * 0.34, y - r * 0.4, r * 0.26) };
+  },
+  gift: (p, x, y, r) => ({
+    b: box(x - r * 0.48, y - r * 0.7, r * 0.96, r * 0.7),
+    a: box(x - r * 0.09, y - r * 0.7, r * 0.18, r * 0.7) + circ(x - r * 0.17, y - r * 0.82, r * 0.13) + circ(x + r * 0.17, y - r * 0.82, r * 0.13),
+  }),
+  friends: (p, x, y, r) => ({
+    b: box(x - r * 0.74, y - r * 0.72, r * 0.6, r * 0.72, r * 0.08),
+    a: box(x - r * 0.24, y - r * 0.58, r * 0.6, r * 0.58, r * 0.08),
+    l: face(p, x - r * 0.48, y - r * 0.44, r * 0.08) + face(p, x + r * 0.08, y - r * 0.3, r * 0.08),
+  }),
+  money: (p, x, y, r) => ({
+    b: half(x, y - r * 0.12, r * 0.56) + box(x - r * 0.4, y - r * 0.12, r * 0.8, r * 0.12),
+    a: circ(x + r * 0.08, y - r * 0.66, r * 0.17) + poly([x + r * 0.34, y - r * 0.5], [x + r * 0.62, y - r * 0.6], [x + r * 0.54, y - r * 0.3]),
+    l: line(p, `M${n(x - r * 0.14)} ${n(y - r * 0.52)} h${n(r * 0.3)}`, 1.8) + dot(p, x - r * 0.3, y - r * 0.3, r * 0.04),
+  }),
+  game: (p, x, y, r) => ({
+    b: box(x - r * 0.72, y - r * 0.64, r * 1.44, r * 0.6, r * 0.3),
+    a: circ(x + r * 0.3, y - r * 0.4, r * 0.09) + circ(x + r * 0.48, y - r * 0.28, r * 0.09),
+    l: line(p, `M${n(x - r * 0.5)} ${n(y - r * 0.34)} h${n(r * 0.26)} M${n(x - r * 0.37)} ${n(y - r * 0.47)} v${n(r * 0.26)}`, 2),
+  }),
+  suitcase: (p, x, y, r) => ({
+    b: box(x - r * 0.52, y - r * 0.86, r * 1.04, r * 0.8, r * 0.12),
+    a: box(x - r * 0.3, y - r * 0.86, r * 0.14, r * 0.8) + box(x + r * 0.16, y - r * 0.86, r * 0.14, r * 0.8),
+    l: line(p, `M${n(x - r * 0.18)} ${n(y - r * 0.86)} v${n(-r * 0.14)} h${n(r * 0.36)} v${n(r * 0.14)}`) + dot(p, x - r * 0.34, y - r * 0.02, r * 0.06) + dot(p, x + r * 0.34, y - r * 0.02, r * 0.06),
+  }),
+  bike: (p, x, y, r) => ({
+    a: circ(x - r * 0.48, y - r * 0.28, r * 0.28) + circ(x + r * 0.48, y - r * 0.28, r * 0.28),
+    b: box(x - r * 0.2, y - r * 0.86, r * 0.32, r * 0.1, r * 0.05) + half(x + r * 0.36, y - r * 0.74, r * 0.12, 'right'),
+    k: fillWith(p.paper, circ(x - r * 0.48, y - r * 0.28, r * 0.08) + circ(x + r * 0.48, y - r * 0.28, r * 0.08)),
+    l: line(p, `M${n(x - r * 0.48)} ${n(y - r * 0.28)} L${n(x - r * 0.08)} ${n(y - r * 0.76)} H${n(x + r * 0.32)} L${n(x + r * 0.48)} ${n(y - r * 0.28)} M${n(x - r * 0.08)} ${n(y - r * 0.76)} L${n(x + r * 0.08)} ${n(y - r * 0.28)} L${n(x - r * 0.48)} ${n(y - r * 0.28)}`, 1.8),
+  }),
 };
 
-// Companions: small, round, original. Drawn with their feet at (x, y).
+// Companions: paper-white with a thin ink outline and pink cheeks, standing at (x, y).
+const outline = (p, d, w) => `<path d="${d}" fill="${p.paper === NIGHT ? '#F5F6F1' : '#FFFFFF'}" stroke="${p.paper === NIGHT ? '#F5F6F1' : p.ink}" stroke-width="${n(w)}" stroke-linejoin="round"/>`;
+const cheeks = (x, y, s) => `<ellipse cx="${n(x - s)}" cy="${n(y)}" rx="${n(s * 0.24)}" ry="${n(s * 0.14)}" fill="${MOMO}"/><ellipse cx="${n(x + s)}" cy="${n(y)}" rx="${n(s * 0.24)}" ry="${n(s * 0.14)}" fill="${MOMO}"/>`;
+const sprout = (x, y, s, ink) => `<path d="M${n(x)} ${n(y)} v${n(-s * 0.3)}" stroke="${ink}" stroke-width="${n(s * 0.06)}" stroke-linecap="round"/>` + `<g fill="${MOSS}">${half(x - s * 0.17, y - s * 0.3, s * 0.17)}${half(x + s * 0.17, y - s * 0.36, s * 0.17)}</g>`;
+// ink on the paper-white body is always dark, even at night
+const kp = (p) => ({ ...p, ink: INK });
 const PAL_CREATURE = {
-  bun: (p, x, y, r) => `<path d="M${x - r} ${y} C ${x - r * 1.05} ${y - r * 0.8}, ${x - r * 0.45} ${y - r * 1.35}, ${x} ${y - r * 1.38} C ${x + r * 0.45} ${y - r * 1.35}, ${x + r * 1.05} ${y - r * 0.8}, ${x + r} ${y} Z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.06}"/><path d="M${x - r * 0.25} ${y - r * 1.15} q${r * 0.25} ${r * 0.15} ${r * 0.5} 0" stroke="${p.accent}" stroke-width="${r * 0.06}" fill="none" stroke-linecap="round"/>${eyes(x, y - r * 0.55, r * 0.14, p.ink, p.accent)}`,
-  bird: (p, x, y, r) => `<ellipse cx="${x}" cy="${y - r * 0.6}" rx="${r * 0.75}" ry="${r * 0.62}" fill="${p.accent}"/><path d="M${x + r * 0.7} ${y - r * 0.7} l${r * 0.3} ${r * 0.1} l${-r * 0.3} ${r * 0.1}z" fill="${p.soft}"/><path d="M${x - r * 0.3} ${y - r * 0.55} q${r * 0.3} ${r * 0.35} ${r * 0.55} 0" fill="${p.soft}" opacity=".7"/><path d="M${x - r * 0.15} ${y} v${-r * 0.1} M${x + r * 0.15} ${y} v${-r * 0.1}" stroke="${p.ink}" stroke-width="${r * 0.06}"/>${eyes(x + r * 0.2, y - r * 0.8, r * 0.12, p.ink, p.soft)}`,
-  cat: (p, x, y, r) => `<ellipse cx="${x}" cy="${y - r * 0.55}" rx="${r * 0.85}" ry="${r * 0.6}" fill="${p.accent}"/><path d="M${x - r * 0.75} ${y - r * 0.9} l${r * 0.12} ${-r * 0.5} l${r * 0.35} ${r * 0.32}Z M${x + r * 0.75} ${y - r * 0.9} l${-r * 0.12} ${-r * 0.5} l${-r * 0.35} ${r * 0.32}Z" fill="${p.accent}"/><path d="M${x + r * 0.8} ${y - r * 0.3} q${r * 0.6} ${-r * 0.1} ${r * 0.5} ${-r * 0.7}" stroke="${p.accent}" stroke-width="${r * 0.16}" fill="none" stroke-linecap="round"/>${eyes(x, y - r * 0.62, r * 0.17, p.ink, p.soft)}`,
-  dog: (p, x, y, r) => `<ellipse cx="${x}" cy="${y - r * 0.6}" rx="${r * 0.82}" ry="${r * 0.65}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.06}"/><ellipse cx="${x - r * 0.78}" cy="${y - r * 0.7}" rx="${r * 0.24}" ry="${r * 0.45}" fill="${p.accent}"/><ellipse cx="${x + r * 0.78}" cy="${y - r * 0.7}" rx="${r * 0.24}" ry="${r * 0.45}" fill="${p.accent}"/>${eyes(x, y - r * 0.65, r * 0.17, p.ink, p.accent)}`,
-  sprout: (p, x, y, r) => `<path d="M${x - r * 0.7} ${y - r * 0.8} h${r * 1.4} l${-r * 0.18} ${r * 0.8} h${-r * 1.04}z" fill="${p.accent}"/><path d="M${x} ${y - r * 0.8} v${-r * 0.45}" stroke="${p.leaf}" stroke-width="${r * 0.09}"/><path d="M${x} ${y - r * 1.2} c${-r * 0.2} ${-r * 0.45} ${-r * 0.75} ${-r * 0.4} ${-r * 0.7} 0 c${r * 0.3} ${r * 0.12} ${r * 0.55} ${r * 0.05} ${r * 0.7} 0z M${x} ${y - r * 1.2} c${r * 0.2} ${-r * 0.45} ${r * 0.75} ${-r * 0.4} ${r * 0.7} 0 c${-r * 0.3} ${r * 0.12} ${-r * 0.55} ${r * 0.05} ${-r * 0.7} 0z" fill="${p.leaf}"/>${eyes(x, y - r * 0.45, r * 0.13, p.ink, p.soft)}`,
-  cloudlet: (p, x, y, r) => `<g fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"><path d="M${x - r * 0.9} ${y} a${r * 0.4} ${r * 0.4} 0 0 1 ${r * 0.2} ${-r * 0.75} a${r * 0.5} ${r * 0.5} 0 0 1 ${r * 0.95} ${-r * 0.2} a${r * 0.4} ${r * 0.4} 0 0 1 ${r * 0.65} ${r * 0.95}z"/></g>${eyes(x, y - r * 0.45, r * 0.13, p.ink, p.accent)}`,
-  lamp: (p, x, y, r) => `<circle cx="${x}" cy="${y - r * 0.95}" r="${r * 0.95}" fill="${p.accent}" opacity=".18"/><path d="M${x - r * 0.45} ${y - r * 1.35} h${r * 0.9} l${r * 0.22} ${r * 0.6} h${-r * 1.34}z" fill="${p.accent}"/><rect x="${x - r * 0.06}" y="${y - r * 0.75}" width="${r * 0.12}" height="${r * 0.65}" fill="${p.soft}" opacity=".7"/><ellipse cx="${x}" cy="${y - r * 0.08}" rx="${r * 0.4}" ry="${r * 0.1}" fill="${p.soft}" opacity=".7"/>`,
+  // a small cloud, round and soft, with a sprout: Murmur's own companion
+  cloudlet: (p, x, y, r) => {
+    const s = r / 40;
+    const T = (px, py) => `${n(x + (px - 52) * s)} ${n(y + (py - 80) * s)}`;
+    const d = `M${T(18, 70)} C${T(10, 70)} ${T(8, 56)} ${T(17, 51)} C${T(14, 36)} ${T(30, 24)} ${T(42, 29)} C${T(48, 19)} ${T(66, 19)} ${T(71, 30)} C${T(84, 26)} ${T(96, 38)} ${T(90, 51)} C${T(99, 56)} ${T(96, 71)} ${T(86, 71)} C${T(80, 84)} ${T(26, 84)} ${T(18, 70)}Z`;
+    return sprout(x, y - r * 1.38, r, INK) + outline(p, d, r * 0.06) + cheeks(x, y - r * 0.4, r * 0.46) + face(kp(p), x, y - r * 0.6, r * 0.28);
+  },
+  bun: (p, x, y, r) => outline(p, `M${n(x - r * 0.95)} ${n(y)} C${n(x - r)} ${n(y - r * 0.75)} ${n(x - r * 0.45)} ${n(y - r * 1.2)} ${n(x)} ${n(y - r * 1.2)} C${n(x + r * 0.45)} ${n(y - r * 1.2)} ${n(x + r)} ${n(y - r * 0.75)} ${n(x + r * 0.95)} ${n(y)}Z`, r * 0.06) + line(kp(p), `M${n(x - r * 0.22)} ${n(y - r * 1.02)} q${n(r * 0.22)} ${n(r * 0.14)} ${n(r * 0.44)} 0`, r * 0.05) + cheeks(x, y - r * 0.36, r * 0.5) + face(kp(p), x, y - r * 0.56, r * 0.26),
+  cat: (p, x, y, r) => `<path d="M${n(x + r * 0.7)} ${n(y - r * 0.2)} q${n(r * 0.55)} ${n(-r * 0.05)} ${n(r * 0.42)} ${n(-r * 0.62)}" stroke="${p.b}" stroke-width="${n(r * 0.18)}" fill="none" stroke-linecap="round"/>` + outline(p, `M${n(x - r * 0.85)} ${n(y)} C${n(x - r * 0.9)} ${n(y - r * 0.6)} ${n(x - r * 0.8)} ${n(y - r * 0.9)} ${n(x - r * 0.72)} ${n(y - r * 1.0)} L${n(x - r * 0.66)} ${n(y - r * 1.36)} L${n(x - r * 0.34)} ${n(y - r * 1.1)} Q${n(x)} ${n(y - r * 1.18)} ${n(x + r * 0.34)} ${n(y - r * 1.1)} L${n(x + r * 0.66)} ${n(y - r * 1.36)} L${n(x + r * 0.72)} ${n(y - r * 1.0)} C${n(x + r * 0.8)} ${n(y - r * 0.9)} ${n(x + r * 0.9)} ${n(y - r * 0.6)} ${n(x + r * 0.85)} ${n(y)}Z`, r * 0.06) + cheeks(x, y - r * 0.5, r * 0.5) + face(kp(p), x, y - r * 0.7, r * 0.26),
+  dog: (p, x, y, r) => outline(p, `M${n(x - r * 0.82)} ${n(y)} C${n(x - r * 0.9)} ${n(y - r * 0.9)} ${n(x - r * 0.5)} ${n(y - r * 1.2)} ${n(x)} ${n(y - r * 1.2)} C${n(x + r * 0.5)} ${n(y - r * 1.2)} ${n(x + r * 0.9)} ${n(y - r * 0.9)} ${n(x + r * 0.82)} ${n(y)}Z`, r * 0.06) + `<g fill="${p.b}">${box(x - r * 0.96, y - r * 1.02, r * 0.3, r * 0.6, r * 0.15)}${box(x + r * 0.66, y - r * 1.02, r * 0.3, r * 0.6, r * 0.15)}</g>` + cheeks(x, y - r * 0.42, r * 0.48) + face(kp(p), x, y - r * 0.64, r * 0.26),
+  bird: (p, x, y, r) => outline(p, `M${n(x - r * 0.8)} ${n(y - r * 0.12)} C${n(x - r * 0.84)} ${n(y - r * 0.9)} ${n(x - r * 0.3)} ${n(y - r * 1.16)} ${n(x + r * 0.1)} ${n(y - r * 1.12)} C${n(x + r * 0.6)} ${n(y - r * 1.08)} ${n(x + r * 0.84)} ${n(y - r * 0.6)} ${n(x + r * 0.8)} ${n(y - r * 0.12)}Z`, r * 0.06) + `<g fill="${p.b}">${half(x - r * 0.16, y - r * 0.46, r * 0.36, 'down')}</g>` + `<path d="M${n(x + r * 0.78)} ${n(y - r * 0.78)} l${n(r * 0.3)} ${n(r * 0.1)} l${n(-r * 0.3)} ${n(r * 0.12)}Z" fill="${EGG}"/>` + line(kp(p), `M${n(x - r * 0.2)} ${n(y - r * 0.1)} v${n(r * 0.1)} M${n(x + r * 0.2)} ${n(y - r * 0.1)} v${n(r * 0.1)}`, r * 0.06) + dot(kp(p), x + r * 0.36, y - r * 0.8, r * 0.07) + `<ellipse cx="${n(x + r * 0.5)}" cy="${n(y - r * 0.6)}" rx="${n(r * 0.1)}" ry="${n(r * 0.06)}" fill="${MOMO}"/>`,
+  sprout: (p, x, y, r) => sprout(x, y - r * 0.86, r * 1.3, INK) + outline(p, `M${n(x - r * 0.72)} ${n(y - r * 0.86)} H${n(x + r * 0.72)} L${n(x + r * 0.56)} ${n(y)} H${n(x - r * 0.56)}Z`, r * 0.06) + cheeks(x, y - r * 0.34, r * 0.42) + face(kp(p), x, y - r * 0.52, r * 0.22),
+  lamp: (p, x, y, r) => `<g fill="${p.b}">${half(x, y - r * 0.8, r * 0.62)}${box(x - r * 0.36, y - r * 0.08, r * 0.72, r * 0.08, r * 0.04)}</g>` + `<path d="M${n(x)} ${n(y - r * 0.8)} V${n(y - r * 0.08)}" stroke="${p.ink}" stroke-width="${n(r * 0.06)}" stroke-linecap="round"/>` + dot(kp(p), x - r * 0.18, y - r * 0.98, r * 0.05) + dot(kp(p), x + r * 0.18, y - r * 0.98, r * 0.05),
 };
 
-// Small corner glyph for the lens the person looked through.
+// Small mark for the lens the person looked through, in ink.
 const GLYPH = {
-  iceberg: (c) => `<path d="M-9 1 l5 -8 l4 4 l3 -2 l6 6z" fill="${c}"/><path d="M-11 3 h22 l-5 8 h-12z" fill="${c}" opacity=".45"/>`,
-  bridge: (c) => `<path d="M-11 5 q11 -14 22 0" stroke="${c}" stroke-width="2.5" fill="none"/><path d="M-11 5 h22" stroke="${c}" stroke-width="2"/>`,
+  iceberg: (c) => `<path d="M-9 1 l5 -8 l4 4 l3 -2 l6 6z" fill="${c}"/><path d="M-11 4 h22 l-5 8 h-12z" fill="none" stroke="${c}" stroke-width="1.4"/>`,
+  bridge: (c) => `<path d="M-11 5 q11 -14 22 0" stroke="${c}" stroke-width="2" fill="none"/><path d="M-11 5 h22" stroke="${c}" stroke-width="1.6"/>`,
   star: (c) => `<path d="M0 -10 l3 7 l7 1 l-5 5 l1 7 l-6 -3 l-6 3 l1 -7 l-5 -5 l7 -1z" fill="${c}"/>`,
-  sun: (c) => `<circle r="5" fill="${c}"/>${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<path d="M${(Math.cos((a * Math.PI) / 180) * 8).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 8).toFixed(1)} L${(Math.cos((a * Math.PI) / 180) * 11).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 11).toFixed(1)}" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`).join('')}`,
-  chair: (c) => `<path d="M-6 -10 v18 M-6 0 h12 v8 M6 0 v-2" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
-  steps: (c) => `<path d="M-10 8 h6 v-6 h6 v-6 h6 v-6" stroke="${c}" stroke-width="2.5" fill="none" stroke-linejoin="round"/>`,
+  sun: (c) => `<circle r="5" fill="${c}"/>${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<path d="M${(Math.cos((a * Math.PI) / 180) * 8).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 8).toFixed(1)} L${(Math.cos((a * Math.PI) / 180) * 11).toFixed(1)} ${(Math.sin((a * Math.PI) / 180) * 11).toFixed(1)}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`).join('')}`,
+  chair: (c) => `<path d="M-6 -10 v18 M-6 0 h12 v8 M6 0 v-2" stroke="${c}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+  steps: (c) => `<path d="M-10 8 h6 v-6 h6 v-6 h6 v-6" stroke="${c}" stroke-width="2" fill="none" stroke-linejoin="round"/>`,
   leaf: (c) => `<path d="M-8 8 C -8 -6, 4 -10, 10 -10 C 10 -2, 4 8, -8 8z" fill="${c}"/>`,
-  scale: (c) => `<path d="M0 -9 v17 M-9 -5 h18 M-9 -5 l-3 7 h6z M9 -5 l-3 7 h6z" stroke="${c}" stroke-width="2" fill="none" stroke-linejoin="round"/>`,
-  lens: (c) => `<circle cx="-2" cy="-2" r="6" stroke="${c}" stroke-width="2.5" fill="none"/><path d="M3 3 l6 6" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`,
-  compass: (c) => `<circle r="9" stroke="${c}" stroke-width="2" fill="none"/><path d="M0 -6 l3 6 l-3 6 l-3 -6z" fill="${c}"/>`,
+  scale: (c) => `<path d="M0 -9 v17 M-9 -5 h18 M-9 -5 l-3 7 h6z M9 -5 l-3 7 h6z" stroke="${c}" stroke-width="1.6" fill="none" stroke-linejoin="round"/>`,
+  lens: (c) => `<circle cx="-2" cy="-2" r="6" stroke="${c}" stroke-width="2" fill="none"/><path d="M3 3 l6 6" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/>`,
+  compass: (c) => `<circle r="9" stroke="${c}" stroke-width="1.6" fill="none"/><path d="M0 -6 l3 6 l-3 6 l-3 -6z" fill="${c}"/>`,
   circle: (c) => `${[0, 90, 180, 270].map((a) => `<circle cx="${(Math.cos((a * Math.PI) / 180) * 6).toFixed(1)}" cy="${(Math.sin((a * Math.PI) / 180) * 6).toFixed(1)}" r="3.5" fill="${c}"/>`).join('')}`,
-  ladder: (c) => `<path d="M-5 10 v-20 M5 10 v-20 M-5 5 h10 M-5 0 h10 M-5 -5 h10" stroke="${c}" stroke-width="2" fill="none"/>`,
+  ladder: (c) => `<path d="M-5 10 v-20 M5 10 v-20 M-5 5 h10 M-5 0 h10 M-5 -5 h10" stroke="${c}" stroke-width="1.6" fill="none"/>`,
   book: (c) => `<path d="M0 6 q-5 -3 -10 0 v-12 q5 -3 10 0z M0 6 q5 -3 10 0 v-12 q-5 -3 -10 0z" fill="${c}"/>`,
-  knots: (c) => `<circle cx="-6" cy="3" r="4" fill="${c}"/><circle cx="6" cy="3" r="4" fill="${c}"/><circle cx="0" cy="-6" r="4" fill="${c}"/><path d="M-6 3 L0 -6 L6 3z" stroke="${c}" stroke-width="1.5" fill="none"/>`,
+  knots: (c) => `<circle cx="-6" cy="3" r="4" fill="${c}"/><circle cx="6" cy="3" r="4" fill="${c}"/><circle cx="0" cy="-6" r="4" fill="${c}"/><path d="M-6 3 L0 -6 L6 3z" stroke="${c}" stroke-width="1.4" fill="none"/>`,
 };
 
-function backdrop(setting, p, W, G) {
+// The picture sits in an arch on the left; the words take the right.
+const ARCH = { x: 32, y: 32, w: 232, b: 368 };
+const G = 300; // where things stand
+const archPath = () => {
+  const r = ARCH.w / 2;
+  return `M${ARCH.x} ${ARCH.b} V${ARCH.y + r} A${r} ${r} 0 0 1 ${ARCH.x + ARCH.w} ${ARCH.y + r} V${ARCH.b}Z`;
+};
+
+// The ground and what stands behind the things, by topic. Returns layer parts.
+function backdrop(setting, p, count = 0) {
+  const L = ARCH.x;
+  const R = ARCH.x + ARCH.w;
+  const ground = box(L - 4, G, ARCH.w + 8, ARCH.b - G + 4);
   switch (setting) {
     case 'desk':
-      return `<rect x="34" y="70" width="110" height="86" rx="10" fill="${p.soft}" opacity=".75"/><path d="M89 70 v86 M34 113 h110" stroke="${p.accent}" stroke-opacity=".5" stroke-width="3"/><rect x="0" y="${G}" width="${W}" height="10" fill="${p.ink}" opacity=".12"/>`;
+      // a small window
+      return { a: ground, k: fillWith(p.paper, box(L + 30, 190, 56, 46, 3)), l: line(p, `M${L + 58} 190 v46 M${L + 30} 213 h56`, 1) };
     case 'bench':
-      return `<rect x="40" y="${G - 34}" width="190" height="10" rx="5" fill="${p.accent}" opacity=".55"/><rect x="40" y="${G - 52}" width="190" height="8" rx="4" fill="${p.accent}" opacity=".4"/><path d="M55 ${G - 24} v24 M215 ${G - 24} v24" stroke="${p.accent}" stroke-opacity=".55" stroke-width="6"/>`;
+      return { a: ground + box(L + 30, G - 30, 172, 8, 4) + box(L + 44, G - 26, 7, 26) + box(L + 182, G - 26, 7, 26) };
     case 'roof':
-      return `<path d="M20 ${G - 120} l115 -70 l115 70z" fill="${p.accent}" opacity=".3"/><rect x="40" y="${G - 120}" width="190" height="120" fill="${p.soft}" opacity=".35"/>`;
+      if (count > 1) return { a: ground };
+      // a house far off on the ground
+      return { a: ground + box(R - 66, G - 40, 46, 40) + poly([R - 74, G - 38], [R - 43, G - 64], [R - 12, G - 38]), k: fillWith(p.sky, box(R - 50, G - 30, 14, 14, 1)) };
     case 'path':
-      return `<path d="M60 ${G} C 120 ${G - 40}, 170 ${G - 70}, 240 ${G - 140}" stroke="${p.soft}" stroke-width="26" fill="none" opacity=".7" stroke-linecap="round"/>`;
+      return { a: ground + half(L + 60, G, 64) };
     case 'candle':
-      return `<rect x="206" y="${G - 58}" width="18" height="58" rx="4" fill="${p.soft}"/><path d="M215 ${G - 74} c-7 8 -5 16 0 16 c5 0 7 -8 0 -16z" fill="${p.accent}"/><circle cx="215" cy="${G - 66}" r="22" fill="${p.accent}" opacity=".15"/>`;
+      if (count > 1) return { a: ground };
+      return { a: ground, b: box(R - 40, G - 44, 14, 44, 2) + circ(R - 33, G - 54, 6) + poly([R - 39, G - 55], [R - 33, G - 70], [R - 27, G - 55]) };
     default:
-      return '';
+      return { a: ground + half(R - 26, G, 58) };
   }
 }
 
-function sky(weather, p, rand, uid) {
-  const cloud = (x, y, s, cls = '') => `<g class="${cls}" fill="${p.soft}"><circle cx="${x - s * 0.6}" cy="${y + s * 0.15}" r="${s * 0.55}"/><circle cx="${x}" cy="${y - s * 0.15}" r="${s * 0.75}"/><circle cx="${x + s * 0.65}" cy="${y + s * 0.15}" r="${s * 0.55}"/><rect x="${x - s * 1.1}" y="${y + s * 0.1}" width="${s * 2.2}" height="${s * 0.6}" rx="${s * 0.3}"/></g>`;
-  const sun = (x, y, s) => `<g class="${uid}-sun"><circle cx="${x}" cy="${y}" r="${s * 1.6}" fill="${p.accent}" opacity=".18"/><circle cx="${x}" cy="${y}" r="${s}" fill="${p.accent}"/></g>`;
-  const drops = () => {
-    let d = '';
-    for (let i = 0; i < 9; i++) {
-      const x = 50 + rand() * 170;
-      const y = 92 + rand() * 60;
-      d += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l-3 9" stroke="${p.accent}" stroke-width="2.5" stroke-linecap="round"/>`;
-    }
-    return `<g class="${uid}-rain">${d}</g>`;
-  };
+// The sky: sun or moon in ink b, and the weather on top (clouds of paper, rain and wind
+// in ink a, fog as bands of paper).
+function sky(weather, p, rand, uid, count = 0) {
+  const out = { b: '', k: '', top: '' };
+  const cloud = (x, y, s, cls) => `<g class="${cls}" fill="${p.paper}">${cloudShape(x, y, s)}</g>`;
+  const sunAt = { sunny: [192, 112, 44], clear: [196, 110, 34], mixed: [178, 128, 38], cloudy: [200, 110, 26], rain: [204, 104, 22], wind: [196, 104, 28], fog: [150, 132, 40], dusk: [158, G, 56], night: [196, 104, 28] }[weather] || [196, 110, 34];
+  let [sx, sy, sr] = sunAt;
+  // the low dusk sun sets in the gap between things, or stays up when there is none
+  if (weather === 'dusk') [sx, sy, sr] = [[196, G, 52], [196, G, 52], [146, G, 40], [150, 196, 38]][Math.min(3, count)];
+  if (weather === 'fog') out.k += `<g class="${uid}-sun" fill="${p.sun}">${circ(sx, sy, sr)}</g>`;
+  else out.b += circ(sx, sy, sr);
+  if (weather === 'night') {
+    // a crescent: the sky takes a bite out of the moon, and a few small stars
+    out.k += fillWith(p.sky, circ(sx + sr * 0.46, sy - sr * 0.3, sr * 0.86));
+    for (let i = 0; i < 7; i++) out.b += circ(48 + rand() * 120, 70 + rand() * 120, 1.6 + rand() * 1.8);
+  }
   switch (weather) {
-    case 'sunny':
-      return sun(205, 74, 22);
     case 'mixed':
-      return sun(190, 70, 20) + cloud(150, 82, 30, `${uid}-cloud`);
+      out.top += cloud(150, 158, 46, `${uid}-cloud`);
+      break;
     case 'cloudy':
-      return sun(200, 70, 18) + cloud(110, 70, 30, `${uid}-cloud`) + cloud(190, 86, 24, `${uid}-cloud2`);
-    case 'rain':
-      return sun(200, 70, 18) + drops() + cloud(120, 74, 34, `${uid}-cloud`) + cloud(195, 84, 26, `${uid}-cloud2`);
+      out.top += cloud(112, 128, 44, `${uid}-cloud`) + cloud(206, 150, 34, `${uid}-cloud2`);
+      break;
+    case 'rain': {
+      let d = '';
+      for (let i = 0; i < 10; i++) {
+        const x = 52 + rand() * 180;
+        const y = 150 + rand() * 90;
+        d += box(x, y, 3, 11, 1.5);
+      }
+      out.top += `<g class="${uid}-rain" fill="${p.a}">${d}</g>` + cloud(110, 128, 46, `${uid}-cloud`) + cloud(214, 112, 30, `${uid}-cloud2`);
+      break;
+    }
     case 'wind': {
       let w = '';
       for (let i = 0; i < 3; i++) {
-        const y = 70 + i * 28 + rand() * 8;
-        const x = 30 + rand() * 40;
-        w += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} q40 -14 80 0 t80 0 q16 6 8 -10" stroke="${p.accent}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="150 60"/>`;
+        const y = 140 + i * 24;
+        const x = 70 + i * 16 + rand() * 12;
+        w += `<path d="M${n(x)} ${n(y)} h${n(100 + rand() * 30)} a10 10 0 1 0 -10 -10" stroke="${p.a}" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="150 60"/>`;
       }
-      return sun(210, 62, 16) + cloud(200, 92, 22, `${uid}-cloud2`) + `<g class="${uid}-wind">${w}</g>`;
+      out.top += `<g class="${uid}-wind">${w}</g>`;
+      break;
     }
     case 'fog': {
       let f = '';
-      for (let i = 0; i < 4; i++) f += `<rect x="${(-20 + rand() * 40).toFixed(1)}" y="${(90 + i * 42).toFixed(1)}" width="${(200 + rand() * 90).toFixed(1)}" height="14" rx="7" fill="${p.soft}" opacity=".55"/>`;
-      return sun(200, 66, 18) + `<g class="${uid}-fog">${f}</g>`;
+      for (let i = 0; i < 4; i++) f += box(ARCH.x - 10 + (i % 2) * 40 + rand() * 20, 150 + i * 40, 150 + rand() * 50, 12, 6);
+      out.top += `<g class="${uid}-fog" fill="${p.paper}">${f}</g>`;
+      break;
     }
     case 'dusk':
-      return `<g class="${uid}-sun"><circle cx="200" cy="150" r="46" fill="${p.accent}" opacity=".22"/><circle cx="200" cy="150" r="26" fill="${p.accent}"/></g>` + cloud(110, 80, 26, `${uid}-cloud`);
-    case 'night': {
-      let s = '';
-      for (let i = 0; i < 12; i++) s += `<circle cx="${(20 + rand() * 230).toFixed(1)}" cy="${(30 + rand() * 120).toFixed(1)}" r="${(1 + rand() * 2).toFixed(1)}" fill="${p.soft}" opacity=".8"/>`;
-      return s + `<circle cx="205" cy="70" r="18" fill="${p.soft}"/><circle cx="214" cy="63" r="15" fill="${p.bg[0]}"/>`;
-    }
+      out.top += cloud(96, 118, 34, `${uid}-cloud`);
+      break;
     default:
-      return '';
   }
+  return out;
 }
 
-// The animation, scoped to this card. Clouds drift aside, rain eases, the companion hops
+// The animation, scoped to this card. Clouds slide aside, rain eases, the companion hops
 // twice, sparkles twinkle. Nothing moves when reduced motion is asked for.
 function motionCss(uid, scene) {
   const clear = scene.clearing || scene.weather === 'sunny' || scene.weather === 'mixed';
   return `<style>@media (prefers-reduced-motion: no-preference){
   .${uid}-pal{animation:${uid}hop 1.1s cubic-bezier(.3,1.6,.5,1) .5s 2 both;transform-box:fill-box;transform-origin:50% 100%}
   .${uid}-spark{animation:${uid}tw 1.6s ease-in-out .9s 3 both;transform-box:fill-box;transform-origin:center}
-  .${uid}-obj{animation:${uid}pop .55s cubic-bezier(.3,1.5,.5,1) both;transform-box:fill-box;transform-origin:50% 100%}
-  ${clear ? `.${uid}-wind{animation:${uid}fade 2s ease .4s both}.${uid}-fog{animation:${uid}fade 2.4s ease .3s both}.${uid}-cloud{animation:${uid}drift 2.4s ease-in-out .3s both}.${uid}-cloud2{animation:${uid}drift2 2.4s ease-in-out .3s both}.${uid}-rain{animation:${uid}fade 1.8s ease .4s both}.${uid}-sun{animation:${uid}glow 2.4s ease .6s both}` : `.${uid}-rain{animation:${uid}fall 1.2s linear infinite}.${uid}-wind path{animation:${uid}blow 2.2s linear infinite}`}
+  ${clear ? `.${uid}-wind{animation:${uid}fade 2s ease .4s both}.${uid}-fog{animation:${uid}fade 2.4s ease .3s both}.${uid}-cloud{animation:${uid}drift 2.4s ease-in-out .3s both}.${uid}-cloud2{animation:${uid}drift2 2.4s ease-in-out .3s both}.${uid}-rain{animation:${uid}fade 1.8s ease .4s both}.${uid}-sun{animation:${uid}rise 2.4s ease .6s both}` : `.${uid}-cloud{animation:${uid}sway 6s ease-in-out infinite alternate}.${uid}-cloud2{animation:${uid}sway 7s ease-in-out -2s infinite alternate-reverse}.${uid}-rain{animation:${uid}fall 1.2s linear infinite}.${uid}-wind path{animation:${uid}blow 2.2s linear infinite}`}
   @keyframes ${uid}hop{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-14px) scale(.95,1.06)}60%{transform:translateY(0) scale(1.06,.94)}}
   @keyframes ${uid}tw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
-  @keyframes ${uid}pop{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:scale(1)}}
-  @keyframes ${uid}drift{to{transform:translateX(-70px);opacity:.55}}
-  @keyframes ${uid}drift2{to{transform:translateX(60px);opacity:.55}}
+  @keyframes ${uid}drift{to{transform:translateX(-90px)}}
+  @keyframes ${uid}drift2{to{transform:translateX(80px)}}
+  @keyframes ${uid}sway{from{transform:translateX(-6px)}to{transform:translateX(8px)}}
   @keyframes ${uid}fade{to{opacity:0}}
   @keyframes ${uid}blow{to{stroke-dashoffset:-210}}
-  @keyframes ${uid}glow{0%{opacity:.4}100%{opacity:1}}
-  @keyframes ${uid}fall{0%{transform:translateY(-4px);opacity:.9}100%{transform:translateY(8px);opacity:.3}}
+  @keyframes ${uid}rise{from{transform:translateY(10px)}to{transform:translateY(0)}}
+  @keyframes ${uid}fall{0%{transform:translateY(-6px)}100%{transform:translateY(8px)}}
 }</style>`;
 }
+
+const FONT = `'Murmur Round', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
+const isCjk = (s) => /[　-鿿＀-￯]/.test(s);
+
+// The words: the line large on the right, the name small and vertical along a hairline at
+// the right edge with a small English caption under it, the date and "Murmur" small.
+function words(p, { line: text, label, caption, date, brand, glyph, fitText }) {
+  const out = [];
+  const X = 300;
+  const fit = fitText ? fitText(text) : { lines: [text], size: 20, lh: 28 };
+  const top = 60 + fit.size;
+  fit.lines.forEach((l, i) => out.push(`<text x="${X}" y="${top + i * fit.lh}" font-size="${fit.size}" font-weight="600" fill="${p.ink}" font-family="${FONT}">${esc(l)}</text>`));
+  // the spine
+  const SX = 548;
+  out.push(`<path d="M${SX} 32 V368" stroke="${p.ink}" stroke-width="0.75"/>`);
+  const cx = 570;
+  let y = 40;
+  const lab = String(label || '').trim();
+  if (lab && isCjk(lab)) {
+    const chars = [...lab];
+    const step = Math.min(17, 236 / chars.length);
+    const size = Math.min(14, step - 1);
+    out.push(`<text font-size="${n(size)}" fill="${p.ink}" text-anchor="middle" font-family="${FONT}" letter-spacing="0">${chars.map((ch, i) => `<tspan x="${cx}" y="${n(y + size + i * step)}">${esc(ch)}</tspan>`).join('')}</text>`);
+    y += size + chars.length * step + 6;
+  } else if (lab) {
+    const size = Math.min(12, 250 / Math.max(1, lab.length * 0.56));
+    out.push(`<text transform="translate(${cx - size * 0.36} ${y}) rotate(90)" font-size="${n(size)}" fill="${p.ink}" font-family="${FONT}" letter-spacing=".04em">${esc(lab)}</text>`);
+    y += lab.length * size * 0.6 + 12;
+  }
+  if (caption && y < 300) out.push(`<text transform="translate(${cx - 3} ${n(y + 4)}) rotate(90)" font-size="8" fill="${p.ink}" font-family="${FONT}" letter-spacing=".16em">${esc(caption.toUpperCase())}</text>`);
+  if (glyph) out.push(`<g transform="translate(${cx} 350) scale(.8)">${glyph}</g>`);
+  out.push(`<text x="${X}" y="364" font-size="12" fill="${p.ink}" font-family="${FONT}" letter-spacing=".04em">${esc(date || '')}</text>`);
+  out.push(`<text x="528" y="364" font-size="11" fill="${p.ink}" text-anchor="end" font-family="${FONT}" letter-spacing=".08em">${esc(brand || '')}</text>`);
+  return out.join('');
+}
+
+// Put the parts together as a print: ink a, ink b slipped by OFF, their crossing in c,
+// paper cut-outs, then ink lines. passes: lists of parts { a, b, k, l } printed one over the
+// other (the land and sky first, then the things), so a thing covers the land behind it.
+// top: weather over the inks; front: the companion, not clipped by the arch.
+export function printCard(p, { uid, passes, top = '', front = '', css = '', words: w, img = true }) {
+  const off = `translate(${OFF[0]} ${OFF[1]})`;
+  const defs = [];
+  const body = passes.map((parts, i) => {
+    const A = parts.map((x) => x.a || '').join('');
+    const B = parts.map((x) => x.b || '').join('');
+    const K = parts.map((x) => x.k || '').join('');
+    const Ln = parts.map((x) => x.l || '').join('');
+    if (A && B) defs.push(`<clipPath id="${uid}ov${i}" transform="${off}">${B}</clipPath>`);
+    return `${fillWith(p.a, A)}${B ? `<g transform="${off}" fill="${p.b}">${B}</g>` : ''}${A && B ? `<g fill="${p.c}" clip-path="url(#${uid}ov${i})">${A}</g>` : ''}${K ? `<g transform="${off}">${K}</g>` : ''}${Ln}`;
+  });
+  const W = 600;
+  const H = 400;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"${img ? ' role="img"' : ''}>
+  <defs><clipPath id="${uid}card"><rect width="${W}" height="${H}" rx="22"/></clipPath><clipPath id="${uid}arch"><path d="${archPath()}"/></clipPath>${defs.join('')}</defs>
+  ${css}
+  <g clip-path="url(#${uid}card)"><rect width="${W}" height="${H}" fill="${p.paper}"/>
+  <g clip-path="url(#${uid}arch)"><rect x="0" y="0" width="300" height="${H}" fill="${p.sky}"/>
+  ${body[0] || ''}${top}${body.slice(1).join('')}</g>
+  ${front}${w}</g>
+</svg>`;
+}
+
+const CAPTION = { clear: 'clear sky', sunny: 'sunny', mixed: 'sun and cloud', cloudy: 'cloudy', rain: 'rain', wind: 'wind', fog: 'mist', dusk: 'dusk', night: 'quiet night' };
 
 // Draw the card. line: the main text; label: a small heading; date; animate: add motion.
 export function sceneSvg(scene, { seed = 'm', line = '', label = '', date = '', brand = 'Murmur', animate = false, fitText = null } = {}) {
   const rand = rng(seed + JSON.stringify(scene.objects) + scene.weather);
   const uid = 'sc' + Math.floor(rand() * 1e9).toString(36);
-  const p = PAL[scene.weather] || PAL.clear;
-  const W = 600;
-  const H = 400;
-  const G = 318; // ground line
-  const pieces = [];
-  pieces.push(`<rect width="${W}" height="${H}" rx="28" fill="url(#${uid}bg)"/>`);
-  pieces.push(`<path d="M0 ${G} Q 140 ${G - 18} 280 ${G} L280 ${H - 28} Q280 ${H} 252 ${H} L28 ${H} Q0 ${H} 0 ${H - 28}z" fill="${p.ground}"/>`);
-  pieces.push(backdrop(scene.setting, p, 280, G));
-  pieces.push(sky(scene.weather, p, rand, uid));
-  // objects spread along the ground, companion in front
-  const slots = [[62, G], [215, G - 4], [72, G - 150]];
-  scene.objects.forEach((o, i) => {
-    const [x, y] = slots[i];
-    const r = i === 2 ? 34 : 42;
-    // the third one sits on a small floating shelf, so it reads as placed, not dropped
-    const shelf = i === 2 ? `<rect x="${x - 46}" y="${y}" width="92" height="9" rx="4.5" fill="${p.soft}" opacity=".85"/>` : '';
-    if (OBJ[o]) pieces.push(`<g class="${uid}-obj" style="animation-delay:${(0.15 + i * 0.18).toFixed(2)}s">${shelf}${OBJ[o](p, x, y, r)}</g>`);
-  });
+  const p = pal(scene.weather);
+  const back = backdrop(scene.setting, p, scene.objects.length);
+  const s = sky(scene.weather, p, rand, uid, scene.objects.length);
+  // things stand along the ground, spread by how many there are
+  const xs = [[96], [84, 208], [72, 150, 226]][Math.max(0, scene.objects.length - 1)];
+  const r = [44, 42, 36][Math.max(0, scene.objects.length - 1)];
+  const things = scene.objects.filter((o) => OBJ[o]).map((o, i) => OBJ[o](p, xs[i], G, r));
   const draw = PAL_CREATURE[scene.companion] || PAL_CREATURE.cloudlet;
-  pieces.push(`<g class="${uid}-pal">${draw(p, 138, G + 30, 38)}</g>`);
-  // sparkles
+  const front = `<g class="${uid}-pal">${draw(p, 148, 362, scene.companion === 'lamp' ? 56 : 34)}</g>`;
+  // sparkles: small four-point stars in ink b, just above the arch
   let sp = '';
-  for (let i = 0; i < 5; i++) {
-    const x = 30 + rand() * 230;
-    const y = 40 + rand() * 120;
-    const s = 4 + rand() * 4;
-    sp += `<path class="${uid}-spark" style="animation-delay:${(0.9 + i * 0.25).toFixed(2)}s" d="M${x.toFixed(1)} ${(y - s).toFixed(1)} l${(s * 0.3).toFixed(1)} ${(s * 0.7).toFixed(1)} l${(s * 0.7).toFixed(1)} ${(s * 0.3).toFixed(1)} l${(-s * 0.7).toFixed(1)} ${(s * 0.3).toFixed(1)} l${(-s * 0.3).toFixed(1)} ${(s * 0.7).toFixed(1)} l${(-s * 0.3).toFixed(1)} ${(-s * 0.7).toFixed(1)} l${(-s * 0.7).toFixed(1)} ${(-s * 0.3).toFixed(1)} l${(s * 0.7).toFixed(1)} ${(-s * 0.3).toFixed(1)}z" fill="#fff" opacity=".85"/>`;
+  for (let i = 0; i < 4; i++) {
+    const x = 92 + rand() * 120;
+    const y = 64 + rand() * 60;
+    const k = 4 + rand() * 3;
+    sp += `<path class="${uid}-spark" style="animation-delay:${(0.9 + i * 0.25).toFixed(2)}s" d="M${n(x)} ${n(y - k)} L${n(x + k * 0.28)} ${n(y - k * 0.28)} L${n(x + k)} ${n(y)} L${n(x + k * 0.28)} ${n(y + k * 0.28)} L${n(x)} ${n(y + k)} L${n(x - k * 0.28)} ${n(y + k * 0.28)} L${n(x - k)} ${n(y)} L${n(x - k * 0.28)} ${n(y - k * 0.28)}Z" fill="${p.b}"/>`;
   }
-  pieces.push(sp);
-  // text panel
-  const fontStack = `'Bricolage', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
-  pieces.push(`<rect x="296" y="36" width="272" height="328" rx="22" fill="#fff" opacity="${scene.weather === 'night' ? '.12' : '.5'}"/>`);
-  if (scene.lensGlyph && GLYPH[scene.lensGlyph]) pieces.push(`<g transform="translate(546 300)">${GLYPH[scene.lensGlyph](p.ink)}</g>`);
-  if (label) pieces.push(`<text x="320" y="76" font-size="16" fill="${p.ink}" opacity=".75" font-family="${fontStack}">${esc(label)}</text>`);
-  const fit = fitText ? fitText(line) : { lines: [line], size: 20, lh: 28 };
-  const top = Math.max(200 - ((fit.lines.length - 1) * fit.lh) / 2, 104 + fit.size);
-  fit.lines.forEach((l, i) => pieces.push(`<text x="320" y="${top + i * fit.lh}" font-size="${fit.size}" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`));
-  pieces.push(`<text x="320" y="340" font-size="14" fill="${p.ink}" opacity=".7" font-family="${fontStack}">${esc(date)}</text>`);
-  pieces.push(`<text x="548" y="340" font-size="13" fill="${p.ink}" opacity=".55" text-anchor="end" font-family="${fontStack}">${esc(brand)}</text>`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">
-  <defs><linearGradient id="${uid}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p.bg[0]}"/><stop offset="1" stop-color="${p.bg[1]}"/></linearGradient>
-  <clipPath id="${uid}clip"><rect width="${W}" height="${H}" rx="28"/></clipPath></defs>
-  ${animate ? motionCss(uid, scene) : ''}
-  <g clip-path="url(#${uid}clip)">${pieces.join('')}</g>
-</svg>`;
+  const caption = scene.calm ? 'quiet night' : scene.clearing ? 'clearing' : CAPTION[scene.weather] || '';
+  const glyph = scene.lensGlyph && GLYPH[scene.lensGlyph] ? GLYPH[scene.lensGlyph](p.ink) : '';
+  return printCard(p, {
+    uid,
+    passes: [[back, { b: s.b, k: s.k }], things],
+    top: s.top + `<g>${sp}</g>`,
+    front,
+    css: animate ? motionCss(uid, scene) : '',
+    words: words(p, { line, label, caption, date, brand, glyph, fitText }),
+  });
 }
+
+// For the postcard (js/postcard.js): the same print, with its own picture.
+export const print = { PAPER, INK, NIGHT, AO, MOMO, EGG, MOSS, tint, circ, box, half, poly, line, dot, face, fillWith, cloudShape, OBJ, PAL_CREATURE, G, ARCH, words, n, esc };
 
 // What a model may choose from when it picks the card's picture (js/lens-llm.js).
 export const CHOICES = {

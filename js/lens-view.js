@@ -294,8 +294,60 @@ const S = {
   },
 };
 
-// one colour family for all fourteen approaches (purple to blue-violet), so cards and marks match the icons
-const HUES = [250, 262, 240, 270, 246, 256, 236, 266, 244, 258, 238, 268, 252, 242];
+// each approach prints in one of three spot inks (桃, 蛋黃, 青苔), as CSS colours; cards use them
+// only as flat fills (a light tint or the mark's offset shape), never as text colour
+const HUES = ['var(--pink)', 'var(--yolk)', 'var(--moss)'];
+
+// Shapes for the marks, in a 44 x 44 box: [spot-ink shapes, ink-line shapes], one pair per
+// approach in the order of LENSES. ring() is a circle, halfRing() a half circle, quarter() a quarter circle.
+const ring = (cx, cy, r) => ['circle', { cx, cy, r }];
+const halfRing = (cx, cy, r, dir) => {
+  // the flat side faces away from dir: 'up' is a dome, 'down' a bowl, 'left'/'right' a D
+  const d = {
+    up: `M${cx - r} ${cy}A${r} ${r} 0 0 1 ${cx + r} ${cy}Z`,
+    down: `M${cx - r} ${cy}A${r} ${r} 0 0 0 ${cx + r} ${cy}Z`,
+    left: `M${cx} ${cy - r}A${r} ${r} 0 0 0 ${cx} ${cy + r}Z`,
+    right: `M${cx} ${cy - r}A${r} ${r} 0 0 1 ${cx} ${cy + r}Z`,
+  }[dir];
+  return ['path', { d }];
+};
+const quarter = (cx, cy, r, corner) => {
+  // the quarter that opens towards corner: 'ne', 'nw', 'se', 'sw'
+  const sx = corner.includes('e') ? 1 : -1;
+  const sy = corner.includes('s') ? 1 : -1;
+  const sweep = sx * sy > 0 ? 1 : 0;
+  return ['path', { d: `M${cx} ${cy}L${cx + sx * r} ${cy}A${r} ${r} 0 0 ${sweep} ${cx} ${cy + sy * r}Z` }];
+};
+const MARKS = [
+  // psychoanalytic: rings going down, a deep bowl under them
+  [[halfRing(22, 24, 15, 'down')], [ring(22, 22, 15), ring(22, 22, 9), ring(22, 22, 3)]],
+  // adlerian: two people side by side, one held in colour
+  [[ring(15, 22, 9)], [ring(15, 22, 9), ring(29, 22, 9)]],
+  // existential: a sun over the horizon
+  [[ring(22, 13, 6)], [halfRing(22, 32, 14, 'up'), ring(22, 13, 6)]],
+  // person-centered: one whole circle, a dot at its centre
+  [[ring(22, 22, 14)], [ring(22, 22, 14), ring(22, 22, 2.5)]],
+  // gestalt: four quarters make the whole; one is printed
+  [[quarter(22, 22, 13, 'nw')], [quarter(22, 22, 13, 'nw'), quarter(22, 22, 13, 'ne'), quarter(22, 22, 13, 'se'), quarter(22, 22, 13, 'sw')]],
+  // behavioral: three small steps, the last one done
+  [[ring(33, 22, 7)], [ring(9, 22, 4), ring(19, 22, 5.5), ring(33, 22, 7)]],
+  // acceptance: room around a small thought
+  [[ring(22, 22, 7)], [ring(22, 22, 15), ring(22, 22, 7)]],
+  // rebt: two halves turned towards each other
+  [[halfRing(20, 22, 12, 'left')], [halfRing(20, 22, 12, 'left'), halfRing(24, 22, 12, 'right')]],
+  // cognitive: a lens over one quarter of the picture
+  [[quarter(22, 22, 14, 'ne')], [ring(22, 22, 14), quarter(22, 22, 14, 'ne')]],
+  // reality: a head over a choice
+  [[halfRing(22, 34, 12, 'up')], [ring(22, 15, 7), halfRing(22, 34, 12, 'up')]],
+  // feminist: three circles overlapping
+  [[ring(22, 16, 8)], [ring(22, 16, 8), ring(15, 27, 8), ring(29, 27, 8)]],
+  // solution-focused: one small bright spot inside a bigger arc
+  [[ring(21, 22, 6)], [quarter(9, 35, 26, 'ne'), ring(21, 22, 6), ring(14, 12, 2.5)]],
+  // narrative: pages of a story, one turning
+  [[halfRing(22, 30, 9, 'up')], [halfRing(22, 18, 9, 'up'), halfRing(22, 30, 9, 'up'), halfRing(22, 30, 15, 'up')]],
+  // family-systems: three people inside one circle
+  [[ring(22, 22, 15)], [ring(22, 22, 15), ring(22, 14, 4), ring(15, 27, 4), ring(29, 27, 4)]],
+];
 
 // One plain line per approach for the suggestion cards: what it does, in everyday words.
 const HOOK = {
@@ -448,9 +500,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return a;
   }
 
+  // One flat mark per approach, in the app's riso style: a solid spot-ink shape printed 2 units
+  // down and to the right, under a drawing in one even ink line built only from circles,
+  // half circles and quarter circles. Same family, fourteen different pictures.
   function lensMark(lens, size = 44) {
-    const hue = HUES[LENSES.indexOf(lens) % HUES.length];
-    const n = 5 + (LENSES.indexOf(lens) % 4);
+    const i = Math.max(0, LENSES.indexOf(lens));
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('viewBox', '0 0 44 44');
@@ -458,16 +512,21 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     svg.setAttribute('height', size);
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('class', 'lens-mark');
-    svg.style.setProperty('--lens-hue', hue);
-    for (let i = 0; i < n; i++) {
-      const c = document.createElementNS(ns, 'ellipse');
-      c.setAttribute('cx', 22);
-      c.setAttribute('cy', 22);
-      c.setAttribute('rx', 18);
-      c.setAttribute('ry', 7);
-      c.setAttribute('transform', `rotate(${(180 / n) * i} 22 22)`);
-      svg.appendChild(c);
-    }
+    svg.style.setProperty('--mark-ink', HUES[i % HUES.length]);
+    const [spot, line] = MARKS[i % MARKS.length];
+    const layer = (cls, shapes, shift) => {
+      const g = document.createElementNS(ns, 'g');
+      g.setAttribute('class', cls);
+      if (shift) g.setAttribute('transform', 'translate(2 2)');
+      for (const [tag, attrs] of shapes) {
+        const el = document.createElementNS(ns, tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        g.appendChild(el);
+      }
+      svg.appendChild(g);
+    };
+    layer('mark-spot', spot, true);
+    layer('mark-line', line, false);
     return svg;
   }
 

@@ -6,8 +6,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f1f0f6",
-  "theme_color": "#f1f0f6",
+  "background_color": "#f5f6f1",
+  "theme_color": "#f5f6f1",
   "categories": [
     "lifestyle",
     "productivity"

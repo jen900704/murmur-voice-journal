@@ -1,16 +1,18 @@
-// Pastel bedtime postcards, drawn procedurally so every night looks a little different.
-import { readScene, sceneSvg } from './scene.js';
+// Bedtime postcards, drawn procedurally so every night looks a little different: a flat
+// print in two spot inks on paper (or on night paper), with the same layout as the scene card.
+import { readScene, sceneSvg, printCard, print } from './scene.js';
 
 // Original motifs only (sleepy moon, cloud, sprout, teacup, stars, bun, cat, lamp). Exported as PNG.
+const { PAPER, NIGHT, AO, MOMO, EGG, MOSS, tint, circ, box, half, line, fillWith, OBJ, PAL_CREATURE, G, ARCH, words, n } = print;
 
 const PALETTES = [
-  { bg: ['#fde2e4', '#e2ecf9'], ink: '#5b4a6b', soft: '#fff5f7', accent: '#f4a7b9', leaf: '#9cc9a8' },
-  { bg: ['#e8f3e8', '#fdf3d7'], ink: '#4f5d4a', soft: '#fbfff8', accent: '#f2c57c', leaf: '#8fbf8f' },
-  { bg: ['#e6e1fa', '#fde8d7'], ink: '#4d4a6e', soft: '#fbf9ff', accent: '#f6b8a0', leaf: '#a3c9b7' },
-  { bg: ['#dff3f6', '#f1e4f7'], ink: '#3f5866', soft: '#f6fdff', accent: '#c7a6e3', leaf: '#93c7c0' },
-  { bg: ['#fff1cf', '#f9dde6'], ink: '#6b4f4a', soft: '#fffaf0', accent: '#f19fb0', leaf: '#b5cf8f' },
-  { bg: ['#e3f0ff', '#e9f7e4'], ink: '#3e5270', soft: '#f7fbff', accent: '#9fc3ef', leaf: '#9ccf9a' },
-];
+  { a: AO, b: EGG, c: MOSS, sky: tint(AO, 0.13) },
+  { a: MOMO, b: EGG, c: '#FF6A3D', sky: tint(MOMO, 0.12) },
+  { a: MOSS, b: EGG, c: '#5E8F2E', sky: tint(MOSS, 0.12) },
+  { a: AO, b: MOMO, c: '#5B3B9E', sky: tint(MOMO, 0.1) },
+  { paper: NIGHT, ink: PAPER, a: MOSS, b: EGG, c: '#8AB84A', sky: '#20264A' },
+  { paper: NIGHT, ink: PAPER, a: MOMO, b: EGG, c: '#FF6A3D', sky: '#20264A' },
+].map((x) => ({ paper: PAPER, ink: '#1B1F3B', ...x }));
 
 function rng(seed) {
   let s = 0;
@@ -21,10 +23,6 @@ function rng(seed) {
   };
 }
 
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-}
-
 // Rough width of Latin text in ems at weight 600 (a CJK character is one em).
 function ems(str) {
   let sum = 0;
@@ -33,17 +31,41 @@ function ems(str) {
 }
 
 // Simple line wrapping: CJK text by character count, other text by words and estimated width.
+const NO_START = '，。、；：？！）」』〉》,.;:?!)';
+
 export function wrap(text, maxUnits) {
   const s = String(text || '').trim();
   if (!s) return [];
   const isCjk = /[　-鿿＀-￯]/.test(s);
   const lines = [];
   if (isCjk) {
+    // short sentences that each fit a line are packed whole, so a line ends where a
+    // clause ends
+    const clauses = s.match(/[^，。、；：？！,.;:?!]+[，。、；：？！,.;:?!]*/g) || [s];
+    if (clauses.length > 1 && clauses.length <= 4 && clauses.every((c) => [...c.trim()].length <= maxUnits)) {
+      let cur = '';
+      for (const c of clauses.map((x) => x.trim())) {
+        if (cur && [...cur].length + [...c].length > maxUnits) {
+          lines.push(cur);
+          cur = c;
+        } else cur += c;
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    }
     // even line lengths, so a line never ends with a single character on its own
     const chars = [...s];
     const n = Math.ceil(chars.length / maxUnits);
     const per = Math.ceil(chars.length / n);
     for (let i = 0; i < chars.length; i += per) lines.push(chars.slice(i, i + per).join(''));
+    // a comma or full stop never starts a line: it stays at the end of the line before
+    for (let i = 1; i < lines.length; i++) {
+      while (lines[i] && NO_START.includes(lines[i][0])) {
+        lines[i - 1] += lines[i][0];
+        lines[i] = lines[i].slice(1);
+      }
+    }
+    if (lines.length > 1 && !lines[lines.length - 1]) lines.pop();
   } else {
     // by estimated width, so a line of capitals does not run off the card
     const cut = (w) => {
@@ -72,27 +94,33 @@ export function wrap(text, maxUnits) {
   return lines;
 }
 
-// The text column is 240 wide and has room for 200 of height under the label.
+// The text column is 228 wide and has room for 280 of height from the first baseline down.
 // Font sizes to try, largest first; each comes with its line height.
 const FIT = [
+  { size: 28, lh: 40 },
   { size: 24, lh: 34 },
   { size: 21, lh: 30 },
   { size: 18, lh: 26 },
   { size: 16, lh: 23 },
   { size: 14, lh: 20 },
 ];
-const TEXT_W = 240;
-const TEXT_H = 200;
+const TEXT_W = 228;
+const TEXT_H = 280;
 
 // Pick the largest font at which the whole text fits the card (the kind-thing field allows
 // 120 characters). Only when even the smallest does not fit is the text cut, with an ellipsis.
 export function fitText(text) {
   let fit = null;
-  for (const f of FIT) {
+  const at = (f) => {
     const lines = wrap(text, Math.floor(TEXT_W / f.size));
-    const maxLines = Math.floor((TEXT_H - f.size) / f.lh) + 1;
-    fit = { ...f, lines, maxLines };
-    if (lines.length <= maxLines) return fit;
+    return { ...f, lines, maxLines: Math.floor((TEXT_H - f.size) / f.lh) + 1 };
+  };
+  for (let i = 0; i < FIT.length; i++) {
+    fit = at(FIT[i]);
+    if (fit.lines.length > fit.maxLines) continue;
+    // one size down is fine when it saves a line, as long as the type stays large
+    const next = FIT[i + 1] && FIT[i + 1].size >= 21 ? at(FIT[i + 1]) : null;
+    return next && next.lines.length < fit.lines.length ? next : fit;
   }
   const last = [...fit.lines[fit.maxLines - 1]];
   fit.lines = fit.lines.slice(0, fit.maxLines);
@@ -100,109 +128,59 @@ export function fitText(text) {
   return fit;
 }
 
-const face = (cx, cy, r, ink, blush) => `
-  <path d="M${cx - r * 0.42} ${cy} q${r * 0.14} ${r * 0.14} ${r * 0.28} 0" stroke="${ink}" stroke-width="${r * 0.07}" fill="none" stroke-linecap="round"/>
-  <path d="M${cx + r * 0.14} ${cy} q${r * 0.14} ${r * 0.14} ${r * 0.28} 0" stroke="${ink}" stroke-width="${r * 0.07}" fill="none" stroke-linecap="round"/>
-  <ellipse cx="${cx - r * 0.42}" cy="${cy + r * 0.22}" rx="${r * 0.12}" ry="${r * 0.07}" fill="${blush}" opacity=".7"/>
-  <ellipse cx="${cx + r * 0.42}" cy="${cy + r * 0.22}" rx="${r * 0.12}" ry="${r * 0.07}" fill="${blush}" opacity=".7"/>`;
+const sleepyEyes = (p, x, y, s) => line(p, `M${n(x - s * 1.3)} ${n(y)} q${n(s * 0.3)} ${n(s * 0.3)} ${n(s * 0.6)} 0 M${n(x + s * 0.7)} ${n(y)} q${n(s * 0.3)} ${n(s * 0.3)} ${n(s * 0.6)} 0`, Math.max(1.6, s * 0.2));
+const star4 = (x, y, k) => `<path d="M${n(x)} ${n(y - k)} L${n(x + k * 0.28)} ${n(y - k * 0.28)} L${n(x + k)} ${n(y)} L${n(x + k * 0.28)} ${n(y + k * 0.28)} L${n(x)} ${n(y + k)} L${n(x - k * 0.28)} ${n(y + k * 0.28)} L${n(x - k)} ${n(y)} L${n(x - k * 0.28)} ${n(y - k * 0.28)}Z"/>`;
+const ink = (p) => (p.paper === NIGHT ? { ...p, ink: '#1B1F3B' } : p);
 
+// Each motif returns { parts (for the print), front (drawn over it) } around the ground line.
 const MOTIFS = {
-  moon: (p, x, y, r, uid = '') => `
-    <mask id="${uid}crescent"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + r * 0.55}" cy="${y - r * 0.35}" r="${r * 0.82}" fill="#000"/></mask>
-    <circle cx="${x}" cy="${y}" r="${r}" fill="${p.soft}" mask="url(#${uid}crescent)"/>
-    ${face(x - r * 0.42, y + r * 0.28, r * 0.6, p.ink, p.accent)}
-    <text x="${x + r * 0.75}" y="${y - r * 0.75}" font-size="${r * 0.35}" fill="${p.ink}" opacity=".6" font-family="sans-serif">z</text>
-    <text x="${x + r * 1.0}" y="${y - r * 1.05}" font-size="${r * 0.25}" fill="${p.ink}" opacity=".5" font-family="sans-serif">z</text>`,
-  cloud: (p, x, y, r) => `
-    <g fill="${p.soft}">
-      <circle cx="${x - r * 0.6}" cy="${y + r * 0.15}" r="${r * 0.55}"/>
-      <circle cx="${x}" cy="${y - r * 0.15}" r="${r * 0.75}"/>
-      <circle cx="${x + r * 0.65}" cy="${y + r * 0.15}" r="${r * 0.55}"/>
-      <rect x="${x - r * 1.1}" y="${y + r * 0.1}" width="${r * 2.2}" height="${r * 0.6}" rx="${r * 0.3}"/>
-    </g>
-    ${face(x, y + r * 0.2, r * 0.8, p.ink, p.accent)}`,
-  sprout: (p, x, y, r) => `
-    <path d="M${x} ${y + r * 0.2} C ${x} ${y - r * 0.2}, ${x} ${y - r * 0.5}, ${x} ${y - r * 0.7}" stroke="${p.leaf}" stroke-width="${r * 0.09}" fill="none" stroke-linecap="round"/>
-    <path d="M${x} ${y - r * 0.55} C ${x - r * 0.2} ${y - r * 1.1}, ${x - r * 0.9} ${y - r * 1.0}, ${x - r * 0.85} ${y - r * 0.55} C ${x - r * 0.5} ${y - r * 0.4}, ${x - r * 0.15} ${y - r * 0.45}, ${x} ${y - r * 0.55}Z" fill="${p.leaf}"/>
-    <path d="M${x} ${y - r * 0.65} C ${x + r * 0.2} ${y - r * 1.2}, ${x + r * 0.9} ${y - r * 1.1}, ${x + r * 0.85} ${y - r * 0.65} C ${x + r * 0.5} ${y - r * 0.5}, ${x + r * 0.15} ${y - r * 0.55}, ${x} ${y - r * 0.65}Z" fill="${p.leaf}" opacity=".85"/>
-    <path d="M${x - r * 0.75} ${y + r * 0.15} h${r * 1.5} l${-r * 0.18} ${r * 0.95} h${-r * 1.14}z" fill="${p.accent}"/>
-    ${face(x, y + r * 0.55, r * 0.55, p.ink, p.soft)}`,
-  teacup: (p, x, y, r) => `
-    <path d="M${x - r * 0.25} ${y - r * 0.55} q${r * 0.12} ${-r * 0.2} 0 ${-r * 0.4} q${-r * 0.12} ${-r * 0.2} 0 ${-r * 0.4}" stroke="${p.ink}" stroke-width="${r * 0.05}" fill="none" opacity=".35" stroke-linecap="round"/>
-    <path d="M${x + r * 0.2} ${y - r * 0.55} q${r * 0.12} ${-r * 0.2} 0 ${-r * 0.4} q${-r * 0.12} ${-r * 0.2} 0 ${-r * 0.4}" stroke="${p.ink}" stroke-width="${r * 0.05}" fill="none" opacity=".35" stroke-linecap="round"/>
-    <path d="M${x - r * 0.9} ${y - r * 0.4} h${r * 1.8} c0 ${r * 0.9} ${-r * 0.45} ${r * 1.2} ${-r * 0.9} ${r * 1.2} s${-r * 0.9} ${-r * 0.3} ${-r * 0.9} ${-r * 1.2}z" fill="${p.soft}"/>
-    <path d="M${x + r * 0.88} ${y - r * 0.15} c${r * 0.5} 0 ${r * 0.5} ${r * 0.55} 0 ${r * 0.55}" stroke="${p.soft}" stroke-width="${r * 0.14}" fill="none"/>
-    <ellipse cx="${x}" cy="${y + r * 0.85}" rx="${r * 1.15}" ry="${r * 0.15}" fill="${p.accent}" opacity=".6"/>
-    ${face(x, y + r * 0.15, r * 0.6, p.ink, p.accent)}`,
-  stars: (p, x, y, r) => {
-    const star = (cx, cy, s, o) => `<path d="M${cx} ${cy - s} L${cx + s * 0.3} ${cy - s * 0.3} L${cx + s} ${cy} L${cx + s * 0.3} ${cy + s * 0.3} L${cx} ${cy + s} L${cx - s * 0.3} ${cy + s * 0.3} L${cx - s} ${cy} L${cx - s * 0.3} ${cy - s * 0.3}Z" fill="${p.soft}" opacity="${o}"/>`;
-    // the big star gets an outline so it shows on the palest backgrounds
-    return `<g stroke="${p.accent}" stroke-width="${r * 0.05}" stroke-linejoin="round">${star(x, y, r * 0.8, 1)}</g>` + star(x + r * 0.95, y - r * 0.7, r * 0.35, 0.85).replace(p.soft, p.accent) + star(x - r * 0.9, y + r * 0.6, r * 0.3, 0.75).replace(p.soft, p.accent) + face(x, y + r * 0.05, r * 0.5, p.ink, p.accent);
+  moon: (p) => ({
+    parts: [{ b: circ(150, 190, 70), k: fillWith(p.sky, circ(186, 160, 60)) }],
+    front: sleepyEyes(ink(p), 112, 218, 8) + `<g fill="${p.ink}" font-family="sans-serif"><text x="212" y="236" font-size="20">z</text><text x="230" y="216" font-size="14">z</text></g>`,
+  }),
+  cloud: (p) => ({ parts: [], front: PAL_CREATURE.cloudlet(p, 148, 352, 64) }),
+  sprout: (p) => ({ parts: [], front: PAL_CREATURE.sprout(p, 148, 352, 58) }),
+  teacup: (p) => {
+    const t = OBJ.tea(p, 148, G, 104);
+    return { parts: [t], front: sleepyEyes(ink(p), 148, G - 38, 9) };
   },
-  // a steamed bun, a small nod to late-night snacks in Taiwan
-  bun: (p, x, y, r) => `
-    <ellipse cx="${x}" cy="${y + r * 0.75}" rx="${r * 1.1}" ry="${r * 0.14}" fill="${p.accent}" opacity=".45"/>
-    <path d="M${x - r} ${y + r * 0.6} C ${x - r * 1.05} ${y - r * 0.2}, ${x - r * 0.45} ${y - r * 0.75}, ${x} ${y - r * 0.78} C ${x + r * 0.45} ${y - r * 0.75}, ${x + r * 1.05} ${y - r * 0.2}, ${x + r} ${y + r * 0.6} Z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/>
-    <path d="M${x - r * 0.28} ${y - r * 0.55} q${r * 0.28} ${r * 0.18} ${r * 0.56} 0 M${x - r * 0.12} ${y - r * 0.72} q${r * 0.12} ${r * 0.22} ${r * 0.24} 0" stroke="${p.accent}" stroke-width="${r * 0.05}" fill="none" stroke-linecap="round"/>
-    ${face(x, y + r * 0.1, r * 0.7, p.ink, p.accent)}`,
-  // a cat curled up asleep
-  cat: (p, x, y, r) => `
-    <ellipse cx="${x + r * 0.2}" cy="${y + r * 0.35}" rx="${r * 1.05}" ry="${r * 0.55}" fill="${p.accent}"/>
-    <path d="M${x + r * 1.15} ${y + r * 0.45} C ${x + r * 1.35} ${y + r * 0.95}, ${x + r * 0.4} ${y + r * 1.05}, ${x - r * 0.2} ${y + r * 0.85}" stroke="${p.accent}" stroke-width="${r * 0.2}" fill="none" stroke-linecap="round"/>
-    <circle cx="${x - r * 0.55}" cy="${y + r * 0.15}" r="${r * 0.45}" fill="${p.accent}"/>
-    <path d="M${x - r * 0.92} ${y - r * 0.05} l${r * 0.05} ${-r * 0.45} l${r * 0.3} ${r * 0.25}Z M${x - r * 0.5} ${y - r * 0.25} l${r * 0.25} ${-r * 0.38} l${r * 0.12} ${r * 0.42}Z" fill="${p.accent}"/>
-    ${face(x - r * 0.55, y + r * 0.2, r * 0.42, p.ink, p.soft)}`,
-  // a small night lamp, still glowing
-  lamp: (p, x, y, r) => `
-    <circle cx="${x}" cy="${y - r * 0.15}" r="${r * 1.05}" fill="${p.soft}" opacity=".7"/>
-    <path d="M${x - r * 0.5} ${y - r * 0.6} h${r} l${r * 0.25} ${r * 0.65} h${-r * 1.5}z" fill="${p.accent}"/>
-    <rect x="${x - r * 0.07}" y="${y + r * 0.05}" width="${r * 0.14}" height="${r * 0.55}" fill="${p.ink}" opacity=".55"/>
-    <ellipse cx="${x}" cy="${y + r * 0.65}" rx="${r * 0.45}" ry="${r * 0.12}" fill="${p.ink}" opacity=".55"/>
-    ${face(x, y - r * 0.25, r * 0.5, p.ink, p.soft)}`,
+  stars: (p) => ({
+    parts: [{ b: star4(148, 196, 62) + star4(226, 122, 18) + star4(70, 140, 14) }],
+    front: sleepyEyes(ink(p), 148, 200, 7),
+  }),
+  bun: (p) => ({ parts: [], front: PAL_CREATURE.bun(p, 148, 352, 62) }),
+  cat: (p) => ({ parts: [], front: PAL_CREATURE.cat(p, 148, 352, 60) }),
+  lamp: (p) => ({ parts: [], front: PAL_CREATURE.lamp(p, 148, 352, 104) }),
 };
 
 // Build the postcard SVG.
 // line: the main text (usually the person's own "kind thing" or a closing line)
-// label: a small heading above it; date: shown at the bottom
-export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
+// label: a small heading beside it; date: shown at the bottom
+export function postcardSvg({ seed, line: text, label, date, brand = 'Murmur' }) {
   const r = rng(seed);
   // ids must be unique when several postcards are inline on one page
   const uid = 'pc' + Math.floor(r() * 1e9).toString(36);
   const p = PALETTES[Math.floor(r() * PALETTES.length)];
   const motifNames = Object.keys(MOTIFS);
   const motif = motifNames[Math.floor(r() * motifNames.length)];
-  const W = 600;
-  const H = 400;
-  // soft background dots
-  let dots = '';
-  for (let i = 0; i < 26; i++) {
-    const x = r() * W;
-    const y = r() * H;
-    const rad = 1.5 + r() * 3.5;
-    dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="#fff" opacity="${(0.35 + r() * 0.4).toFixed(2)}"/>`;
+  const m = MOTIFS[motif](p);
+  const L = ARCH.x;
+  // the land, a small moon unless the moon is the picture, and a few stars
+  const land = { a: box(L - 4, G, ARCH.w + 8, ARCH.b - G + 4) + half(L + 54, G, 64) };
+  const sky = { b: '', k: '' };
+  if (motif !== 'moon') {
+    sky.b += circ(222, 92, 20);
+    sky.k += fillWith(p.sky, circ(231, 85, 17));
   }
-  const blobs = [0, 1, 2]
-    .map(() => `<ellipse cx="${(r() * W).toFixed(0)}" cy="${(r() * H).toFixed(0)}" rx="${(80 + r() * 120).toFixed(0)}" ry="${(60 + r() * 90).toFixed(0)}" fill="#fff" opacity=".22"/>`)
-    .join('');
-  const { lines, size, lh } = fitText(line);
-  // the app's display stack (--display in css/style.css), so the card reads as part of the app
-  const fontStack = `'Bricolage', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
-  // short text sits where it always did; a tall block starts just under the label instead
-  const textY = Math.max(165 - ((lines.length - 1) * lh) / 2, (label ? 104 : 70) + size);
-  const text = lines.map((l, i) => `<text x="300" y="${textY + i * lh}" font-size="${size}" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
-  <defs>
-    <linearGradient id="${uid}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p.bg[0]}"/><stop offset="1" stop-color="${p.bg[1]}"/></linearGradient>
-  </defs>
-  <rect width="${W}" height="${H}" rx="28" fill="url(#${uid}bg)"/>
-  ${blobs}${dots}
-  <g>${MOTIFS[motif](p, 150, 210, 78, uid)}</g>
-  <rect x="268" y="40" width="300" height="320" rx="22" fill="#fff" opacity=".42"/>
-  ${label ? `<text x="300" y="90" font-size="17" fill="${p.ink}" opacity=".75" font-family="${fontStack}">${esc(label)}</text>` : ''}
-  ${text}
-  <text x="300" y="330" font-size="16" fill="${p.ink}" opacity=".7" font-family="${fontStack}">${esc(date || '')}</text>
-  <text x="548" y="330" font-size="14" fill="${p.ink}" opacity=".55" text-anchor="end" font-family="${fontStack}">${esc(brand)}</text>
-</svg>`;
+  for (let i = 0; i < 5; i++) sky.b += circ(52 + r() * 150, 70 + r() * 90, 1.6 + r() * 1.6);
+  return printCard(p, {
+    uid,
+    passes: [[land, sky, ...m.parts]],
+    front: m.front,
+    // the postcard sits beside its own text in the app, so it is not announced as a picture
+    img: false,
+    words: words(p, { line: text, label, caption: 'good night', date, brand, fitText }),
+  });
 }
 
 // Render the SVG to a PNG blob (2x for sharp sharing).

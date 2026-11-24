@@ -1,5 +1,7 @@
-// One icon family for the whole app: 24 x 24, 1.9 px rounded strokes in the current text
-// colour, with an optional soft fill (the "duo" layer) in the accent tint. Nothing else in
+// One icon family for the whole app: 24 x 24, one even 1.75 px line in the current text
+// colour, printed over one flat spot-ink shape (the "duo" layer) that sits 1.5 px down and
+// to the right, like a riso print slightly out of register. The spot colour comes from the
+// CSS variable --ink-spot (蛋黃 by default; a context can set 桃 or 青苔). Nothing else in
 // the interface draws icons, and no emoji is used as an icon, so every symbol matches.
 // Mumu (js/mascot.js) and the card scenes (js/scene.js) are illustrations, not icons.
 
@@ -10,7 +12,7 @@ const P = {
   write: '<path class="duo" d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>',
   moon: '<path class="duo" d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/>',
   mic: '<rect class="duo" x="8.5" y="3" width="7" height="11" rx="3.5"/><rect x="8.5" y="3" width="7" height="11" rx="3.5"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
-  lens: '<ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)"/><circle class="duo solid" cx="12" cy="12" r="1.6"/>',
+  lens: '<circle class="duo" cx="12" cy="12" r="4.5"/><ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)"/><circle class="duo solid" cx="12" cy="12" r="1.6"/>',
   // kinds of worry
   work: '<rect class="duo" x="3.5" y="7.5" width="17" height="12" rx="2.5"/><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 12.5h17"/>',
   relationship: '<path class="duo" d="M12 20s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/><path d="M12 20s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/>',
@@ -41,14 +43,14 @@ const P = {
   // tab bar
   today: '<rect class="duo" x="8.5" y="3" width="7" height="11" rx="3.5"/><rect x="8.5" y="3" width="7" height="11" rx="3.5"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
   journal: '<rect class="duo" x="4" y="4" width="16" height="16" rx="3"/><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 12.5h8M8 16h5"/>',
-  trends: '<path d="M3.5 17l5-6 4 4 4-7 4 5"/><path d="M3.5 20.5h17"/>',
+  trends: '<path class="duo" d="M3.5 17l5-6 4 4 4-7 4 5v3.5h-17z"/><path d="M3.5 17l5-6 4 4 4-7 4 5"/><path d="M3.5 20.5h17"/>',
   about: '<circle class="duo" cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
 };
 
 export const ICON_NAMES = Object.keys(P);
 
 export function iconSvg(name, size = 24) {
-  const body = P[name] || P.other;
+  const body = (P[name] || P.other).replace(/ class="duo"/g, ' class="duo" transform="translate(1.5 1.5)"');
   return `<svg class="ic" viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
@@ -64,8 +66,10 @@ export function icon(name, { size = 24, label = '' } = {}) {
   return el;
 }
 
-// The same drawing as a CSS mask, for places drawn from CSS (the tab bar).
+// The line drawing alone as a CSS mask, for places drawn from CSS (the tab bar). A mask has
+// one colour, so the spot-ink layer is left out; solid dots stay.
 export function iconDataUri(name) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'>${(P[name] || '').replace(/ class="duo[^"]*"/g, " fill='black' fill-opacity='.18' stroke='none'").replace(/"/g, "'")}</svg>`;
+  const body = (P[name] || '').replace(/<[a-z]+ class="duo"[^>]*\/>/g, '').replace(/ class="duo solid"/g, " fill='black' stroke='none'");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'>${body.replace(/"/g, "'")}</svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, '%27')}")`;
 }
