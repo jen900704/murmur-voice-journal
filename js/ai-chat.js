@@ -46,7 +46,7 @@ Each reply:
 - Optionally one short line beginning "${lang === 'en' ? 'Why this lens asks this:' : '這個取向這樣問，是因為：'}" explaining the reasoning in theory terms.
 - Under 90 words in English or 150 characters in Chinese.
 
-Do not flatter or praise ("great insight", "you are so brave"). Do not reassure that things will be fine. Do not agree with the person's conclusions about other people; you have heard only one side, and you may say so. If they seek validation, reflect the feeling and offer one alternative reading.${evaluative ? ' You may gently name a gap between what they say they want and what they describe doing.' : ''} Exception: never question, doubt, or reframe reports of being hit, threatened, harassed, discriminated against, or unsafe.
+Do not flatter or praise ("great insight", "you are so brave"). Do not reassure that things will be fine. Do not agree with the person's conclusions about other people; you have heard only one side, and you may say so.${evaluative ? ' If they seek validation, reflect the feeling and offer one alternative reading. You may gently name a gap between what they say they want and what they describe doing.' : ''} Exception: never question, doubt, or reframe reports of being hit, threatened, harassed, discriminated against, or unsafe.
 
 If at any point they mention suicide, self-harm, wanting to die or disappear, harming someone, abuse or violence at home, psychosis or mania, eating restriction or purging, heavy alcohol or drug use, or a child at risk: stop the exercise. Reply briefly and kindly, say this is more than this exercise can hold, encourage contacting a real person now, list Taiwan 1925 (24-hour mental health line), Taiwan 113 (protection line), US 988 (call or text), or local emergency services, and do not continue the lens.
 
@@ -111,7 +111,9 @@ const S = {
     error: (m) => `沒有成功送出：${m}`,
     badKey: 'API 金鑰無效或沒有權限，請到「關於」重新確認。',
     crisisTitle: '先停一下',
-    crisisBody: '這段對話聽起來可能比這個練習能承接的更沉重。比起和 AI 聊，你更值得現在就和一個真人說說話。',
+    crisisBody: 'AI 的回覆提到了比較沉重的內容，所以這一則先不顯示。如果你現在真的很辛苦，比起和 AI 聊，你更值得和一個真人說說話。你寫的話還在，可以回去修改或再送一次。',
+    backToChat: '回到對話',
+    editFirst: '回去修改',
     pauseBody: '你寫的內容裡，有些字詞可能代表你現在很辛苦。如果是這樣，比起和 AI 聊，你更值得現在就和一個真人說說話。如果這不是你的意思，可以照常送出。',
     sendAnyway: '我沒事，照常送出',
     tooLong: '回覆太長被截斷了，請再送一次',
@@ -131,7 +133,9 @@ const S = {
     error: (m) => `Could not send: ${m}`,
     badKey: 'The API key is invalid or lacks permission. Check it in About.',
     crisisTitle: 'Let us pause here',
-    crisisBody: 'This conversation sounds like it may be heavier than this exercise can hold. You deserve to talk with a real person now, more than with an AI.',
+    crisisBody: 'The AI reply touched on something heavy, so it is not shown. If things are very hard right now, you deserve to talk with a real person, more than with an AI. What you wrote is still there; you can edit it or send it again.',
+    backToChat: 'Back to the conversation',
+    editFirst: 'Edit first',
     pauseBody: 'Some words in what you wrote can mean things are very hard right now. If so, you deserve to talk with a real person, more than with an AI. If this is not what you meant, you can send it as usual.',
     sendAnyway: 'I am okay, send it',
     tooLong: 'the reply was cut off; please send again',
@@ -197,8 +201,10 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         st.draft = text;
         st.error = L().error(L().tooLong);
       } else if (checkRisk(reply).risk && !HELP_NUMBER.test(reply)) {
+        // hold this one reply back and show help; what the person wrote stays, and they can continue
         st.crisis = true;
-        st.messages = [];
+        st.messages.pop();
+        st.draft = text;
       } else {
         st.messages.push({ role: 'assistant', content: reply });
         announce(reply);
@@ -231,7 +237,12 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
       const list = RESOURCES[getLang()] || RESOURCES.en;
       return [
         h('div', { class: 'crisis', role: 'alert' }, h('h2', {}, L().crisisTitle), h('p', {}, L().crisisBody), h('ul', { class: 'resource-list' }, list.map((r) => h('li', {}, h('span', {}, r.label), r.number ? h('a', { class: 'btn call', href: `tel:${r.number}` }, r.display || r.number) : null)))),
-        h('button', { type: 'button', class: 'btn ghost', onclick: close }, L().end),
+        h(
+          'div',
+          { class: 'actions left wrap' },
+          h('button', { type: 'button', class: 'btn', 'data-key': 'ai-crisis-continue', onclick: () => ((st.crisis = false), rerender()) }, L().backToChat),
+          h('button', { type: 'button', class: 'btn ghost', onclick: close }, L().end)
+        ),
       ];
     }
     const list = RESOURCES[getLang()] || RESOURCES.en;
@@ -243,6 +254,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
           'div',
           { class: 'actions left wrap' },
           h('button', { type: 'button', class: 'btn', 'data-key': 'ai-send-anyway', onclick: () => send(rerender, { confirmed: true }) }, L().sendAnyway),
+          h('button', { type: 'button', class: 'btn', 'data-key': 'ai-edit', onclick: () => ((st.pause = false), rerender()) }, L().editFirst),
           h('button', { type: 'button', class: 'btn ghost', onclick: close }, L().end)
         ),
       ];

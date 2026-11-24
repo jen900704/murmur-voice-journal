@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { checkRisk } from '../js/safety.js';
+import { readFileSync } from 'node:fs';
+import { checkRisk, HELP_NUMBER } from '../js/safety.js';
 import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
 
 let passed = 0;
@@ -93,6 +94,18 @@ const shouldFlag = [
   ['took too many pills last night', 'self'],
   ['I am such a burden', 'self'],
   ['想打死他', 'others'],
+  ['想要消失', 'self'], ['不想存在', 'self'], ['想自我了斷', 'self'], ['想尋短', 'self'],
+  ['希望明天不要醒來', 'self'], ['想一睡不醒', 'self'], ['想結束一切', 'self'], ['沒有活下去的理由', 'self'],
+  ['活著好痛苦', 'self'], ['活著沒意思', 'self'], ['我是累贅', 'self'], ['我只會拖累大家', 'self'],
+  ['跳下去就好了', 'self'], ['想從陽台跳下去', 'self'], ['想去跳河', 'self'], ['想跳軌', 'self'],
+  ['想把藥全吃了', 'self'], ['拿刀割', 'self'], ['想紫砂', 'self'], ['好想自鯊', 'self'],
+  ['被我爸打', 'abuse'], ['他說要殺了我', 'abuse'], ['他威脅要殺我', 'abuse'], ['在學校被霸凌', 'abuse'],
+  ['下班被跟蹤', 'abuse'], ['想帶孩子一起死', 'others'],
+  ["I can't go on", 'self'], ["I can't do this anymore", 'self'], ["I don't want to exist", 'self'],
+  ['I wish I could disappear', 'self'], ["I hope I don't wake up", 'self'], ['nothing to live for', 'self'],
+  ['I should just die', 'self'], ['I want to slit my wrists', 'self'], ['jump off a bridge', 'self'],
+  ['I took all my pills', 'self'], ['he threatened to kill me', 'abuse'], ['scared to go home', 'abuse'],
+  ['I was assaulted', 'abuse'],
   ['想跟他同歸於盡', 'others'],
 ];
 
@@ -140,6 +153,11 @@ const shouldNotFlag = [
   '公司辦了性騷擾防治課程',
   'I overdosed on coffee today',
   '我 1988 年出生',
+  '報告撐不下去了', '撐不下去的專案', '想消失一下', '這報告做到想死', '不小心割手指', '老闆威脅我要扣薪水',
+  '看了一部家暴的電影', '性侵新聞看了很難過', '遊戲裡殺了他', '我被老闆摸頭',
+  '尷尬到好想死', 'ran 5 kms today', 'I never wake up on time', 'I cut myself shaving', 'I hurt myself at the gym',
+  "I want to end things with my boyfriend", 'I teach a drug abuse class', 'he hit me up last night',
+  'my baby kicks me all night', 'the rapeseed field was yellow', 'we watched suicide squad',
 ];
 
 for (const [text, kind] of shouldFlag) {
@@ -196,6 +214,18 @@ test('lenses unsuited to loss are excluded for that topic', () => {
   for (const bad of ['existential', 'solution-focused', 'rebt', 'narrative', 'adlerian', 'reality', 'gestalt']) assert.ok(!ids.includes(bad), bad);
   assert.ok(ids.includes('person-centered'));
   for (const t of TOPICS) assert.ok(lensesForTopic(t).length >= 5, t);
+});
+
+
+test('help numbers are matched as whole numbers only', () => {
+  for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '(911)']) assert.ok(HELP_NUMBER.test(t), t);
+  for (const t of ['我 1988 年出生', '民國 113 年', '113年的計畫', 'on 9/11', '21130', '1925/1/1']) assert.ok(!HELP_NUMBER.test(t), t);
+});
+
+test('no regex lookbehind in app code (Safari before 16.4 cannot parse it)', () => {
+  for (const f of ['js/safety.js', 'js/ai-chat.js', 'js/lenses.js', 'js/app.js', 'js/extras.js', 'js/lens-view.js', 'js/night-view.js', 'js/bedtime.js']) {
+    assert.ok(!/\(\?<[=!]/.test(readFileSync(new URL('../' + f, import.meta.url), 'utf8')), f);
+  }
 });
 
 console.log(`\n${passed} passed`);

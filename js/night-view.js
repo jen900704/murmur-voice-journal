@@ -515,9 +515,18 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     return wrap;
   }
 
-  function stopAll() {
+  // Leaving the Today tab stops the sound but keeps what was written, so coming back
+  // picks up where the person was. A full reset is only for "delete all data".
+  function stopAll(full = false) {
     if (st.player) st.player.stop();
-    st.stage = 'card';
+    st.player = null;
+    if (full) {
+      st.worry = '';
+      st.kind = '';
+      st.theme = null;
+      st.track = null;
+      st.stage = 'card';
+    } else if (st.stage === 'play') st.stage = 'tone';
   }
 
   return { view, card, begin, active: () => st.stage !== 'card', stopAll };

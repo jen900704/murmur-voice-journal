@@ -81,6 +81,16 @@ test.describe('theory lens', () => {
     await expect(page.getByRole('button', { name: /自己選/ })).toBeVisible();
   });
 
+  test('Next turns on whether the topic or the text comes first', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.locator('[data-key="topic-work"]').click();
+    const next = page.locator('[data-key="lens-concern-next"]');
+    await expect(next).toBeDisabled();
+    await page.fill('#lens-concern', '主管一直改需求');
+    await expect(next).toBeEnabled();
+  });
+
   test('loss topic hides lenses unsuited to grief', async ({ page }) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();

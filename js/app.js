@@ -1003,6 +1003,11 @@ async function importJson(file) {
     const data = JSON.parse(await file.text());
     if (!data || data.app !== 'murmur' || !Array.isArray(data.entries)) throw new Error('bad');
     const n = await db.importEntries(data.entries.map((e) => ({ ...e, hasAudio: false })));
+    // bedtime notes and saved lens exercises come back too; ids keep a second import from duplicating them
+    for (const night of Array.isArray(data.nights) ? data.nights : []) if (night && night.id) await db.saveNight(night).catch(() => {});
+    for (const ses of Array.isArray(data.lensSessions) ? data.lensSessions : []) if (ses && ses.id) await db.saveLensSession(ses).catch(() => {});
+    if (lensView) lensView.reload();
+    await extras.loadNights();
     state.entries = await db.listEntries();
     toast(t('imported', n));
     render();
@@ -1177,7 +1182,12 @@ function viewAbout() {
             state.entries = [];
             state.aiKeySet = false;
             state.aiEnabled = false;
-            if (lensView) lensView.setAiEnabled(false);
+            if (lensView) {
+              lensView.setAiEnabled(false);
+              lensView.reload();
+            }
+            nightView.stopAll(true);
+            state.welcomed = false;
             await extras.loadNights();
             toast(t('deletedAll'));
             render();

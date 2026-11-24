@@ -1,7 +1,6 @@
-// Offline support. Network first, so a new release reaches people on the next load;
-// the cache is used only when the network is unavailable.
-const CACHE = 'murmur-v11';
-const NETWORK_TIMEOUT_MS = 3000;
+// Offline support. Every release installs its files into one versioned cache, and pages
+// are served from that cache, so a page never runs files from two different releases.
+const CACHE = 'murmur-v12';
 const SHELL = [
   './',
   './index.html',
@@ -56,29 +55,20 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  const network = fetch(req);
-  // refresh the cache whenever the network answers, even if it was too slow to use this time
-  e.waitUntil(
-    network
-      .then((res) => {
-        if (res && res.ok) return caches.open(CACHE).then((c) => c.put(req, res.clone()));
-      })
-      .catch(() => {})
-  );
-  // a slow connection should not leave the app hanging: use the cache after 3 s
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), NETWORK_TIMEOUT_MS));
+  // Cache first, from the cache this version installed as a whole. Mixing files from two
+  // releases (new app.js with an old module) can break imports, so a new release is picked
+  // up when its service worker installs, and used from the next launch.
   e.respondWith(
-    Promise.race([network, timeout])
-      .then((res) => res.clone())
-      .catch(async () => {
-        const cached = await caches.match(req, { ignoreSearch: true });
-        if (cached) return cached;
-        if (req.mode === 'navigate') {
-          const shell = await caches.match('./index.html');
-          if (shell) return shell;
-        }
-        // nothing cached: keep waiting for the network
-        return network.then((res) => res.clone());
-      })
+    caches.open(CACHE).then(async (cache) => {
+      const cached = await cache.match(req, { ignoreSearch: true });
+      if (cached) return cached;
+      if (req.mode === 'navigate') {
+        const shell = await cache.match('./index.html');
+        if (shell) return shell;
+      }
+      const res = await fetch(req);
+      if (res && res.ok) cache.put(req, res.clone());
+      return res;
+    })
   );
 });

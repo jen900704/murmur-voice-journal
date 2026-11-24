@@ -22,7 +22,10 @@ function open() {
     req.onsuccess = () => {
       const db = req.result;
       // let a newer version of the app (in another tab) upgrade the database
-      db.onversionchange = () => db.close();
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
       resolve(db);
     };
     req.onerror = () => reject(req.error);

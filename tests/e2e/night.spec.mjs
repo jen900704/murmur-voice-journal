@@ -116,3 +116,13 @@ test('gentle recommendations open from the lens tab and hide heavy works by defa
   await page.getByText('也顯示內容較沉重的作品').click();
   expect(await page.locator('.rec').count()).toBeGreaterThan(light);
 });
+
+test('leaving the Today tab mid-ritual keeps what was written', async ({ page }) => {
+  await startRitual(page);
+  await page.fill('#night-worry', '明天要報告');
+  await page.locator('[data-key="night-next"]').click();
+  await page.fill('#night-kind', '早點洗澡');
+  await page.goto('/#lens');
+  await page.goto('/#today');
+  await expect(page.locator('#night-kind')).toHaveValue('早點洗澡');
+});

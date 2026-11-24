@@ -159,6 +159,14 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
   const ai = createAiChat({ h, add, getLang, db, onClose: () => go('summary') });
 
+  // after "delete all data": forget what was loaded, so nothing deleted is shown or written back
+  function reload() {
+    reset();
+    st.loaded = false;
+    st.stats = {};
+    st.sessions = [];
+  }
+
   async function load() {
     if (st.loaded) return;
     st.stats = (await db.getSetting('lensStats', {}).catch(() => ({}))) || {};
@@ -299,7 +307,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       maxlength: '400',
       placeholder: L().worryPlaceholder,
       'data-key': 'lens-concern',
-      oninput: (e) => (st.concern = e.target.value),
+      oninput: (e) => {
+        st.concern = e.target.value;
+        const b = document.querySelector('[data-key="lens-concern-next"]');
+        if (b) b.disabled = !st.concern.trim() || !st.topic;
+      },
     });
     input.value = st.concern;
     return [
@@ -335,6 +347,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           {
             type: 'button',
             class: 'btn primary',
+            'data-key': 'lens-concern-next',
             disabled: !st.concern.trim() || !st.topic,
             onclick: () => {
               const next = () => (onNext ? onNext() : go('choose'));
@@ -824,5 +837,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       st.stage = 'home';
     },
     setAiEnabled: (v) => (st.aiEnabled = v),
+    reload: () => {
+      reload();
+      st.stage = 'home';
+    },
   };
 }

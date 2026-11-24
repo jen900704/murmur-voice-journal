@@ -382,8 +382,22 @@ export class BedtimePlayer {
 
   async start() {
     // the browser drops the wake lock when the page is hidden; take it again on return
+    // When the phone locks, speech stops but timers would keep going and the person would come
+    // back to a finished track. Pause on hide; resume (and take the wake lock again) on return.
     this.onVisible = () => {
-      if (document.visibilityState === 'visible' && !this.stopped) this.lock();
+      if (this.stopped) return;
+      if (document.visibilityState === 'hidden') {
+        if (!this.paused) {
+          this.autoPaused = true;
+          this.pause();
+        }
+      } else {
+        this.lock();
+        if (this.autoPaused) {
+          this.autoPaused = false;
+          this.resume();
+        }
+      }
     };
     document.addEventListener('visibilitychange', this.onVisible);
     await this.lock();
@@ -411,7 +425,15 @@ export class BedtimePlayer {
       u.rate = 0.82;
       u.pitch = 0.95;
       u.onend = after;
-      u.onerror = after;
+      u.onerror = (ev) => {
+        if (ev && (ev.error === 'interrupted' || ev.error === 'canceled')) return after();
+        if (fired || this.stopped || this.paused || gen !== this.gen) return;
+        // the voice failed: carry on as read-along instead of racing through the lines
+        fired = true;
+        clearTimeout(this.watchdog);
+        this.speak = false;
+        this.next();
+      };
       this.utterance = u; // keep a reference: some browsers drop onend for collected utterances
       speechSynthesis.speak(u);
       // some Android browsers never fire onend; move on after a generous estimate

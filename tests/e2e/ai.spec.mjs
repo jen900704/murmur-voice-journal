@@ -111,7 +111,7 @@ test('delete all data also removes the API key', async ({ page }) => {
   expect(key).toBeUndefined();
 });
 
-test('a risky reply without help lines is replaced by the help screen', async ({ page }) => {
+test('a risky reply without help lines is held back; the person can return with their text', async ({ page }) => {
   await page.route('https://api.anthropic.com/**', (route) => route.fulfill({ json: { content: [{ type: 'text', text: '聽起來你有自殺的念頭。' }] } }));
   await enableAi(page);
   await finishLens(page);
@@ -119,6 +119,9 @@ test('a risky reply without help lines is replaced by the help screen', async ({
   await page.fill('#ai-input', '好累');
   await page.locator('[data-key="ai-send"]').click();
   await expect(page.locator('.crisis')).toBeVisible();
+  await page.locator('[data-key="ai-crisis-continue"]').click();
+  await expect(page.locator('#ai-input')).toHaveValue('好累');
+  await expect(page.locator('.ai-msg')).toHaveCount(0);
 });
 
 test('an invalid key shows a clear message and keeps the draft', async ({ page }) => {
