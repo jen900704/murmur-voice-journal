@@ -134,7 +134,6 @@ test.describe('backup import', () => {
 
   test('a file with the same id twice reports the number actually stored', async ({ page }) => {
     // BUG: js/db.js:167-172 importEntries counts every record that passes the check, also a second one with the same id (put overwrites it). The toast says 2, one is stored. Fix: existing.add(e.id) after s.put(e).
-    test.fail();
     const toast = await importFile(page, backup({ entries: [entry('dup', { note: 'first' }), entry('dup', { note: 'second' })] }));
     expect(await storedEntries(page)).toHaveLength(1);
     expect(toast).toContain('1');
@@ -185,14 +184,12 @@ test.describe('backup import', () => {
     // BUG: js/app.js importJson never clears the file input after a failure. A browser does not
     // fire "change" when the same file is picked again, so the second try shows nothing at all.
     // (Playwright always fires the event, so this checks the input was reset.)
-    test.fail();
     await importFile(page, '[]');
     expect(await page.locator('.data-actions input[type="file"]').inputValue()).toBe('');
   });
 
   test('a backup with only nights says something was imported', async ({ page }) => {
     // BUG: js/app.js:1223 the toast counts voice entries only; a backup of nights or lens exercises restores them and then says "已匯入 0 筆". Fix: count nights and sessions too (or name them in the toast).
-    test.fail();
     const toast = await importFile(page, backup({ nights: [{ id: 'n1', createdAt: Date.now() - 1000, kindness: 'k', seed: 's', lang: 'zh-TW' }] }));
     expect(await stored(page, 'nights')).toHaveLength(1);
     expect(toast).not.toContain('0');
@@ -223,7 +220,6 @@ test.describe('backup import', () => {
 
   test('importing while a lens exercise is open keeps the exercise', async ({ page }) => {
     // BUG: js/app.js:1220 lensView.reload() resets the exercise in progress (worry and answers gone). Fix: reload only the saved list, e.g. skip reload when lensView.active().
-    test.fail();
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', '寫到一半的煩惱');
@@ -318,8 +314,8 @@ test.describe('double taps', () => {
 // ---------- history and hashes ----------
 test.describe('back button and hashes', () => {
   test('Back in the middle of the ritual goes one step back, not out of the ritual', async ({ page }) => {
-    // BUG: ritual steps are not in the history (js/night-view.js go()), so the phone's Back button leaves Today, or closes an installed app when Today was the first page; the text is only in memory. Fix: pushState per step and handle popstate, as the sheets do with #entry.
     test.fail();
+    // BUG: ritual steps are not in the history (js/night-view.js go()), so the phone's Back button leaves Today, or closes an installed app when Today was the first page; the text is only in memory. Fix: pushState per step and handle popstate, as the sheets do with #entry.
     await page.goto('/#journal');
     await page.locator('#tabs a[href="#today"]').click();
     await skipWelcome(page);
@@ -348,8 +344,8 @@ test.describe('back button and hashes', () => {
   });
 
   test('Back in the middle of a lens exercise goes one question back', async ({ page }) => {
-    // BUG: same as the ritual: js/lens-view.js go() keeps steps out of the history, so Back leaves the Lens tab.
     test.fail();
+    // BUG: same as the ritual: js/lens-view.js go() keeps steps out of the history, so Back leaves the Lens tab.
     await page.goto('/#today');
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
@@ -381,7 +377,6 @@ test.describe('back button and hashes', () => {
 
   test('closing a night postcard returns focus to the postcard that opened it', async ({ page }) => {
     // BUG: js/app.js:797 openSheet remembers the opener by data-key, and js/extras.js:260 .night-thumb has none, so focus falls to <body> on close. Fix: give the thumb a data-key (`night-${n.id}`).
-    test.fail();
     await importFile(page, backup({ nights: [{ id: 'n1', createdAt: Date.now() - 1000, kindness: '散步', seed: 's', lang: 'zh-TW' }] }));
     await page.goto('/#journal');
     await page.locator('[data-key="jmode-nights"]').click();
@@ -491,7 +486,6 @@ test.describe('long text', () => {
   // string (a pasted link, "hahahaha…") makes the whole page scroll sideways.
   // Fix: body { overflow-wrap: anywhere; }
   test('a pasted link in a lens worry wraps instead of widening the page', async ({ page }) => {
-    test.fail();
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();
     await page.fill('#lens-concern', LONG);
@@ -504,7 +498,6 @@ test.describe('long text', () => {
   });
 
   test('a pasted link in a bedtime worry wraps in the night sheet', async ({ page }) => {
-    test.fail();
     await importFile(page, backup({ nights: [{ id: 'n1', createdAt: Date.now() - 1000, worry: LONG, kindness: 'ok', seed: 's', lang: 'zh-TW' }] }));
     await page.goto('/#journal');
     await page.locator('[data-key="jmode-nights"]').click();
@@ -514,7 +507,6 @@ test.describe('long text', () => {
   });
 
   test('a long unbroken kind thing wraps in the kindness jar', async ({ page }) => {
-    test.fail();
     await importFile(page, backup({ nights: [{ id: 'n1', createdAt: Date.now() - 1000, kindness: LONG.slice(0, 120), seed: 's', lang: 'zh-TW' }] }));
     await page.goto('/#journal');
     await page.locator('[data-key="jmode-jar"]').click();
@@ -523,7 +515,6 @@ test.describe('long text', () => {
   });
 
   test('a long unbroken note wraps in the list of silent check-ins', async ({ page }) => {
-    test.fail();
     await openToday(page);
     await page.locator('[data-key="silent-checkin"]').click();
     await page.fill('#note', LONG.slice(0, 140));
@@ -535,7 +526,6 @@ test.describe('long text', () => {
 
   test('the whole kind thing fits on the postcard (the field allows 120 characters)', async ({ page }) => {
     // BUG: js/postcard.js:48 wrap() keeps 5 lines (about 50 Chinese or 100 Latin characters) and drops the rest without a mark; the field allows 120. Fix: shrink the font for long text, or end the last line with an ellipsis.
-    test.fail();
     await startRitual(page);
     await page.locator('[data-key="night-next"]').click();
     const kind = Array.from({ length: 60 }, (_, i) => '一二三四五六七八九十'[i % 10]).join('') + '結尾';
@@ -572,7 +562,6 @@ test.describe('language and time', () => {
 
   test('Today turns to its evening layout at 20:00 without a reload', async ({ page }) => {
     // BUG: nothing re-renders Today when the clock passes 20:00 (js/app.js init has no timer and the visibilitychange handler at ~1588 only stops a recording). An app left open in the afternoon still shows the daytime layout at night. Fix: on visibilitychange and once a minute, render() when isEvening() or the date changed and isIdle().
-    test.fail();
     await page.clock.install({ time: new Date('2026-11-24T19:58:00+08:00') });
     await openToday(page);
     await expect(page.locator('[data-key="night-link"]')).toBeVisible();
@@ -583,7 +572,6 @@ test.describe('language and time', () => {
 
   test('"done for tonight" still shows after midnight, as it does after a reload', async ({ page }) => {
     // BUG: js/night-view.js:239 compares st.doneOn with today's date string, while markDone (line 150-160) counts the evening from 4 pm. Past midnight the open page says "start", a reload says "done". Fix: keep the time of the last night and compare it with the evening start in card().
-    test.fail();
     await page.clock.install({ time: new Date('2026-11-24T23:50:00+08:00') });
     await startRitual(page);
     await page.locator('[data-key="night-next"]').click();
@@ -603,7 +591,6 @@ test.describe('language and time', () => {
 
   test('a ritual finished at 1 am is not shown as done the next evening', async ({ page }) => {
     // BUG: same cause as above (js/night-view.js:550 stores a date string): done at 1 am still reads "done for tonight" at 9 pm that day until a reload.
-    test.fail();
     await page.clock.install({ time: new Date('2026-11-24T01:00:00+08:00') });
     await startRitual(page);
     await page.locator('[data-key="night-next"]').click();
@@ -618,7 +605,6 @@ test.describe('language and time', () => {
 
   test('the prompt of the day changes when the page is left open past midnight', async ({ page }) => {
     // BUG: js/app.js:1577 sets state.promptIndex once in init, so an app left open keeps yesterday's prompt. Fix: recompute with promptOfDay() when the date changes.
-    test.fail();
     await page.clock.install({ time: new Date('2026-11-24T23:58:00+08:00') });
     await openToday(page);
     const before = await page.locator('.prompt-text').textContent();
@@ -676,7 +662,6 @@ test.describe('storage unavailable', () => {
 
   test('IndexedDB failing: a night that could not be saved is not shown as kept', async ({ page }) => {
     // BUG: js/night-view.js:511 swallows the saveNight error. The postcard appears as if the worry and kind thing were kept; Journal > Nights stays empty. Fix: toast the save failure in the catch.
-    test.fail();
     await page.addInitScript(breakIdb);
     await startRitual(page);
     await page.fill('#night-worry', '很重要的心事');
@@ -691,7 +676,6 @@ test.describe('storage unavailable', () => {
 
   test('IndexedDB failing: the language switch still works', async ({ page }) => {
     // BUG: js/app.js:1372 awaits db.setSetting('lang') before render(); when storage rejects, render never runs and the tap does nothing. Fix: db.setSetting('lang', code).catch(() => {}) and render right away.
-    test.fail();
     await page.addInitScript(breakIdb);
     await page.goto('/#about');
     await page.locator('[data-key="lang-en"]').click();
@@ -702,7 +686,6 @@ test.describe('storage unavailable', () => {
     // BUG: js/night-view.js:283 db.setSetting('nightKeep', …) has no catch (same pattern at
     // js/app.js keepAudio / aiEnabled), so each tap is an unhandled rejection.
     // Fix: add .catch(() => {}) as the 'welcomed' setting already does.
-    test.fail();
     const errors = collectErrors(page);
     await page.addInitScript(breakIdb);
     await startRitual(page);
@@ -713,7 +696,6 @@ test.describe('storage unavailable', () => {
 
   test('IndexedDB that never answers does not leave a blank page', async ({ page }) => {
     // BUG: js/app.js init awaits every setting before the first render and js/db.js open() has no timeout, so an open request that never answers (seen on some iOS versions) leaves an empty page. Fix: race open() against a few seconds' timeout and reject.
-    test.fail();
     await page.addInitScript(() => {
       Object.defineProperty(IDBFactory.prototype, 'open', { value: () => ({}) });
     });
@@ -758,7 +740,6 @@ test.describe('focus in the new flows', () => {
     // BUG: js/night-view.js "night-done" removes the focused button and nothing takes focus, so a
     // keyboard or screen-reader user starts again from the top of the document.
     // Fix: after onExit's render, focus the night card's start button (or #main).
-    test.fail();
     await startRitual(page);
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="night-next"]').click();

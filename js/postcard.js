@@ -23,7 +23,14 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
-// Simple line wrapping: CJK text by character count, other text by words.
+// Rough width of Latin text in ems at weight 600 (a CJK character is one em).
+function ems(str) {
+  let sum = 0;
+  for (const ch of str) sum += /[MW@%mw]/.test(ch) ? 0.95 : /[A-Z0-9]/.test(ch) ? 0.7 : /[\s.,:;'|!iljtf]/.test(ch) ? 0.34 : 0.58;
+  return sum;
+}
+
+// Simple line wrapping: CJK text by character count, other text by words and estimated width.
 export function wrap(text, maxUnits) {
   const s = String(text || '').trim();
   if (!s) return [];
@@ -36,16 +43,59 @@ export function wrap(text, maxUnits) {
     const per = Math.ceil(chars.length / n);
     for (let i = 0; i < chars.length; i += per) lines.push(chars.slice(i, i + per).join(''));
   } else {
+    // by estimated width, so a line of capitals does not run off the card
+    const cut = (w) => {
+      let i = 0;
+      for (let sum = 0; i < w.length && (sum += ems(w[i])) <= maxUnits; i++);
+      return Math.max(1, i);
+    };
     let line = '';
-    for (const w of s.split(/\s+/)) {
-      if ((line + ' ' + w).trim().length > maxUnits * 2) {
+    for (let w of s.split(/\s+/)) {
+      // a word wider than a whole line (a pasted link) is cut into line-sized pieces
+      while (ems(w) > maxUnits) {
+        if (line) lines.push(line);
+        line = '';
+        const n = cut(w);
+        lines.push(w.slice(0, n));
+        w = w.slice(n);
+      }
+      if (!w) continue;
+      if (ems((line + ' ' + w).trim()) > maxUnits) {
         lines.push(line);
         line = w;
       } else line = (line + ' ' + w).trim();
     }
     if (line) lines.push(line);
   }
-  return lines.slice(0, 5);
+  return lines;
+}
+
+// The text column is 240 wide and has room for 200 of height under the label.
+// Font sizes to try, largest first; each comes with its line height.
+const FIT = [
+  { size: 24, lh: 34 },
+  { size: 21, lh: 30 },
+  { size: 18, lh: 26 },
+  { size: 16, lh: 23 },
+  { size: 14, lh: 20 },
+];
+const TEXT_W = 240;
+const TEXT_H = 200;
+
+// Pick the largest font at which the whole text fits the card (the kind-thing field allows
+// 120 characters). Only when even the smallest does not fit is the text cut, with an ellipsis.
+export function fitText(text) {
+  let fit = null;
+  for (const f of FIT) {
+    const lines = wrap(text, Math.floor(TEXT_W / f.size));
+    const maxLines = Math.floor((TEXT_H - f.size) / f.lh) + 1;
+    fit = { ...f, lines, maxLines };
+    if (lines.length <= maxLines) return fit;
+  }
+  const last = [...fit.lines[fit.maxLines - 1]];
+  fit.lines = fit.lines.slice(0, fit.maxLines);
+  fit.lines[fit.maxLines - 1] = last.slice(0, -1).join('').trimEnd() + '…';
+  return fit;
 }
 
 const face = (cx, cy, r, ink, blush) => `
@@ -132,10 +182,11 @@ export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
   const blobs = [0, 1, 2]
     .map(() => `<ellipse cx="${(r() * W).toFixed(0)}" cy="${(r() * H).toFixed(0)}" rx="${(80 + r() * 120).toFixed(0)}" ry="${(60 + r() * 90).toFixed(0)}" fill="#fff" opacity=".22"/>`)
     .join('');
-  const lines = wrap(line, 10);
+  const { lines, size, lh } = fitText(line);
   const fontStack = `ui-rounded, 'Hiragino Maru Gothic ProN', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
-  const textY = 165 - (lines.length - 1) * 17;
-  const text = lines.map((l, i) => `<text x="300" y="${textY + i * 34}" font-size="24" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`).join('');
+  // short text sits where it always did; a tall block starts just under the label instead
+  const textY = Math.max(165 - ((lines.length - 1) * lh) / 2, (label ? 104 : 70) + size);
+  const text = lines.map((l, i) => `<text x="300" y="${textY + i * lh}" font-size="${size}" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
   <defs>
     <linearGradient id="${uid}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p.bg[0]}"/><stop offset="1" stop-color="${p.bg[1]}"/></linearGradient>

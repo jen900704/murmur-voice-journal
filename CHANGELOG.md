@@ -31,6 +31,8 @@ The first public version, built and reviewed over one night. Each area below wen
 - Bedtime speech skips voices the browser reports as online.
 
 ### Reliability
+
+- From a robustness hunt (47 browser checks): long unbroken text wraps; failed saves in private mode say so; a hanging IndexedDB no longer leaves a blank page; Today refreshes at 20:00 and at midnight when idle; "done for tonight" uses the same 4 pm window everywhere; postcards fit 120 characters; import counts duplicates, nights and saved exercises correctly, keeps a lens exercise in progress, clears the file picker, and now includes lens ratings; focus returns after closing a postcard and after Done. Still open: the phone's Back button inside the ritual and a lens exercise.
 - Recording cannot hang, ends cleanly when the microphone is lost or the app is hidden, and decodes on older Safari.
 - Backups are checked record by record on import; a damaged file cannot break a screen.
 - The service worker serves one release at a time, fetches past the CDN cache, applies updates only when the app is idle, and the cache name is a hash of the app files checked by a unit test.

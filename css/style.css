@@ -62,6 +62,8 @@ html {
 }
 
 body {
+  /* a pasted link or a long unbroken word must wrap, never push the page sideways */
+  overflow-wrap: anywhere;
   margin: 0;
   background: var(--bg);
   color: var(--ink);

@@ -2,11 +2,26 @@
 const DB_NAME = 'murmur';
 const DB_VERSION = 3;
 
+// Some browsers (seen on iOS) now and then never answer an open request. After this long the
+// app goes on without storage rather than waiting on a blank page.
+const OPEN_TIMEOUT_MS = 4000;
+const RETRY_AFTER_MS = 30000;
+
 let dbPromise;
+let timedOutAt = 0;
 
 function open() {
   if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve, reject) => {
+  // right after a timeout, fail at once so each screen does not wait the full time again
+  if (timedOutAt && Date.now() - timedOutAt < RETRY_AFTER_MS) return Promise.reject(new Error('timeout'));
+  const attempt = new Promise((resolve, reject) => {
+    let late = false;
+    const timer = setTimeout(() => {
+      late = true;
+      timedOutAt = Date.now();
+      if (dbPromise === attempt) dbPromise = null;
+      reject(new Error('timeout'));
+    }, OPEN_TIMEOUT_MS);
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -20,6 +35,7 @@ function open() {
       if (!db.objectStoreNames.contains('nights')) db.createObjectStore('nights', { keyPath: 'id' });
     };
     req.onsuccess = () => {
+      clearTimeout(timer);
       const db = req.result;
       // let a newer version of the app (in another tab) upgrade the database
       db.onversionchange = () => {
@@ -30,17 +46,25 @@ function open() {
       db.onclose = () => {
         dbPromise = null;
       };
+      if (late) {
+        // the answer came after the timeout: use this connection from now on
+        timedOutAt = 0;
+        dbPromise = Promise.resolve(db);
+      }
       resolve(db);
     };
     req.onerror = () => {
-      dbPromise = null; // a failed open is retried next time, not cached
+      clearTimeout(timer);
+      if (dbPromise === attempt) dbPromise = null; // a failed open is retried next time, not cached
       reject(req.error);
     };
     req.onblocked = () => {
-      dbPromise = null;
+      clearTimeout(timer);
+      if (dbPromise === attempt) dbPromise = null;
       reject(new Error('blocked'));
     };
   });
+  dbPromise = attempt;
   return dbPromise;
 }
 
@@ -169,6 +193,7 @@ export async function importEntries(entries) {
       if (!e || typeof e.id !== 'string' || !Number.isFinite(e.createdAt) || (!e.features && !e.silent)) continue;
       if (existing.has(e.id)) continue;
       s.put(e);
+      existing.add(e.id); // the same id twice in one file is one entry
       added++;
     }
   });

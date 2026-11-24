@@ -12,6 +12,7 @@ import { MODELS as AI_MODELS } from './ai-chat.js';
 import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
+import { LENSES } from './lenses.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -39,6 +40,9 @@ const state = {
   sheetFn: null,
   journalMode: 'voice',
   askIndex: null,
+  storageDown: false, // storage did not answer at launch; nothing can be saved
+  clockDay: '', // the date and evening state Today was last drawn for
+  clockEvening: false,
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -1179,8 +1183,8 @@ function exportCsv() {
 }
 
 async function exportJson() {
-  const [nights, lensSessions] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => [])]);
-  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions };
+  const [nights, lensSessions, lensStats] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => []), db.getSetting('lensStats', {}).catch(() => ({}))]);
+  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions, lensStats: cleanLensStats(lensStats) || {} };
   if (!(await saveFile(`murmur-backup-${localDate()}.json`, JSON.stringify(data), 'application/json'))) return false;
   state.lastBackup = Date.now();
   db.setSetting('lastBackup', state.lastBackup).catch(() => {});
@@ -1207,6 +1211,67 @@ function backupNote() {
   );
 }
 
+// Which lenses were used and how they were rated ("which lens fits"). Only known lens ids
+// and numbers in range are kept from a backup; anything else is dropped.
+const MAX_LENS_USED = 100000;
+const MAX_LENS_RATINGS = 500;
+function cleanLensStats(raw) {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const out = {};
+  for (const { id } of LENSES) {
+    const s = Object.prototype.hasOwnProperty.call(raw, id) ? raw[id] : null;
+    if (s === null || typeof s !== 'object' || Array.isArray(s)) continue;
+    const used = Number.isInteger(s.used) && s.used > 0 ? Math.min(s.used, MAX_LENS_USED) : 0;
+    const ratings = (Array.isArray(s.ratings) ? s.ratings : []).filter((r) => Number.isInteger(r) && r >= 1 && r <= 5).slice(-MAX_LENS_RATINGS);
+    if (used || ratings.length) out[id] = { used, ratings };
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+// counts add up and ratings are joined, so a restore keeps what this device already has
+async function mergeLensStats(incoming) {
+  const mine = cleanLensStats(await db.getSetting('lensStats', {})) || {};
+  for (const [id, s] of Object.entries(incoming)) {
+    const m = mine[id] || { used: 0, ratings: [] };
+    mine[id] = { used: Math.min(m.used + s.used, MAX_LENS_USED), ratings: [...m.ratings, ...s.ratings].slice(-MAX_LENS_RATINGS) };
+  }
+  await db.setSetting('lensStats', mine);
+}
+
+// An exercise in progress is never reset by an import: the lens view reads the imported
+// sessions and stats once the exercise is over (see render).
+let lensImport = null; // imported stats waiting for the exercise to end
+let lensStale = false; // the lens view should read storage again
+function settleLensImport() {
+  if (!lensView || lensView.active()) return;
+  if (lensImport) {
+    const incoming = lensImport;
+    lensImport = null;
+    mergeLensStats(incoming)
+      .catch(() => {})
+      .then(() => {
+        lensStale = true;
+        render();
+      });
+    return;
+  }
+  if (lensStale) {
+    lensStale = false;
+    lensView.reload();
+  }
+}
+
+function importedText(n, nights, sessions) {
+  if (!nights && !sessions) return t('imported', n);
+  const zh = getLang() !== 'en';
+  const parts = [];
+  if (n) parts.push(zh ? `聲音日記 ${n} 筆` : `${n} voice entr${n === 1 ? 'y' : 'ies'}`);
+  if (nights) parts.push(zh ? `睡前紀錄 ${nights} 筆` : `${nights} bedtime note${nights === 1 ? '' : 's'}`);
+  if (sessions) parts.push(zh ? `「換個角度看看」練習 ${sessions} 筆` : `${sessions} lens exercise${sessions === 1 ? '' : 's'}`);
+  if (zh) return `已匯入${parts.join('、')}`;
+  return `Imported ${parts.length > 2 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts.join(' and ')}`;
+}
+
 async function importJson(file) {
   try {
     if (file.size > 50 * 1024 * 1024) throw new Error('too big');
@@ -1214,13 +1279,35 @@ async function importJson(file) {
     if (!data || data.app !== 'murmur' || !Array.isArray(data.entries)) throw new Error('bad');
     // every record is checked and trimmed first: one bad record must not break a screen
     const n = await db.importEntries(data.entries.map(cleanEntry).filter(Boolean));
-    // bedtime notes and saved lens exercises come back too; ids keep a second import from duplicating them
-    for (const night of (Array.isArray(data.nights) ? data.nights : []).map(cleanNight).filter(Boolean)) await db.saveNight(night).catch(() => {});
-    for (const ses of (Array.isArray(data.lensSessions) ? data.lensSessions : []).map(cleanSession).filter(Boolean)) await db.saveLensSession(ses).catch(() => {});
-    if (lensView) lensView.reload();
+    // bedtime notes and saved lens exercises come back too; ids keep a second import from duplicating them.
+    // Like voice entries, only records this device did not have yet are counted.
+    const putNew = async (records, have, save) => {
+      const seen = new Set(have.map((r) => r.id));
+      let added = 0;
+      for (const r of records) {
+        const ok = await save(r).then(
+          () => true,
+          () => false
+        );
+        if (ok && !seen.has(r.id)) added++;
+        seen.add(r.id);
+      }
+      return added;
+    };
+    const nights = await putNew((Array.isArray(data.nights) ? data.nights : []).map(cleanNight).filter(Boolean), await db.listNights().catch(() => []), db.saveNight);
+    const sessions = await putNew((Array.isArray(data.lensSessions) ? data.lensSessions : []).map(cleanSession).filter(Boolean), await db.listLensSessions().catch(() => []), db.saveLensSession);
+    const stats = cleanLensStats(data.lensStats);
+    if (lensView && lensView.active()) {
+      // an exercise is in progress: leave it alone and bring the lens view up to date afterwards
+      if (stats) lensImport = stats;
+      lensStale = true;
+    } else {
+      if (stats) await mergeLensStats(stats).catch(() => {});
+      if (lensView) lensView.reload();
+    }
     await extras.loadNights();
     state.entries = await db.listEntries();
-    toast(t('imported', n));
+    toast(importedText(n, nights, sessions));
     render();
   } catch (_) {
     toast(t('importFailed'));
@@ -1233,7 +1320,12 @@ function viewAbout() {
     type: 'file',
     accept: 'application/json,.json',
     hidden: true,
-    onchange: (e) => e.target.files[0] && importJson(e.target.files[0]),
+    onchange: (e) => {
+      const file = e.target.files[0];
+      // cleared every time, so picking the same file again (after a refusal, say) is noticed
+      e.target.value = '';
+      if (file) importJson(file);
+    },
   });
   const hasDemo = state.entries.some((e) => e.demo);
   add(wrap, 
@@ -1367,9 +1459,10 @@ function viewAbout() {
               'aria-pressed': getLang() === code ? 'true' : 'false',
               'data-key': `lang-${code}`,
               lang: code,
-              onclick: async () => {
+              onclick: () => {
+                // the switch shows at once, also when the choice cannot be stored
                 setLang(code);
-                await db.setSetting('lang', code);
+                db.setSetting('lang', code).catch(() => {});
                 render();
               },
             },
@@ -1401,6 +1494,8 @@ function viewAbout() {
             state.entries = [];
             state.aiKeySet = false;
             state.aiEnabled = false;
+            lensImport = null;
+            lensStale = false;
             if (lensView) {
               lensView.setAiEnabled(false);
               lensView.reload();
@@ -1465,6 +1560,38 @@ const nightView = createNightView({
   openGentle: () => extras.openGentle(),
 });
 
+// shown on every page while this browser's storage does not answer
+const STORAGE_DOWN = {
+  'zh-TW': '這個裝置現在無法儲存，新的紀錄關掉後不會留下。請稍後重新整理再試一次。',
+  en: 'Entries cannot be saved on this device right now, so new ones will be gone when you close the app. Please reload and try again later.',
+};
+
+// Today depends on the clock: the bedtime card comes in the evening and the prompt changes with
+// the date. Returns true when either changed since the last look.
+function clockChanged() {
+  const day = localDate();
+  const evening = isEvening();
+  if (day === state.clockDay && evening === state.clockEvening) return false;
+  if (state.clockDay && day !== state.clockDay) state.promptIndex = promptOfDay(getLang()).index;
+  state.clockDay = day;
+  state.clockEvening = evening;
+  return true;
+}
+
+// An app left open is brought up to date only while nothing is going on: never while
+// recording, with a sheet open, with text typed, or in the middle of a ritual or exercise.
+function refreshWithClock() {
+  if (document.visibilityState === 'hidden' || !isIdle()) return;
+  if (state.storageDown) {
+    // storage may answer again later; a reload then brings the saved entries back
+    db.getSetting('lang', null).then(
+      () => isIdle() && location.reload(),
+      () => {}
+    );
+  }
+  if (clockChanged()) render();
+}
+
 function render() {
   // keep keyboard focus on the same control across re-renders
   const active = document.activeElement;
@@ -1477,8 +1604,11 @@ function render() {
   const main = $('#main');
   main.innerHTML = '';
   if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db, openGentle: () => extras.openGentle() });
+  settleLensImport();
   const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView.view, about: viewAbout };
-  main.appendChild(views[state.tab]());
+  const section = views[state.tab]();
+  if (state.storageDown) section.prepend(h('p', { class: 'demo-banner', role: 'note', 'data-key': 'storage-down' }, STORAGE_DOWN[getLang()] || STORAGE_DOWN['zh-TW']));
+  main.appendChild(section);
   // the bedtime ritual dims the whole screen, header and tabs included, whatever the system theme
   const night = state.tab === 'today' && nightView.active();
   document.documentElement.classList.toggle('night-mode', night);
@@ -1541,6 +1671,7 @@ function onHash() {
     if (state.phase === 'recording') cancelRecording();
     if (state.tab === 'today' && nightView.busy()) nightView.stopAll();
     state.tab = tab;
+    if (isIdle()) clockChanged();
     render();
     window.scrollTo(0, 0);
   } else if (TABS.includes(tab)) {
@@ -1562,6 +1693,8 @@ async function init() {
     get('aiModel', AI_MODELS[0].id),
     db.listEntries().catch((e) => {
       if (e && e.message === 'blocked') setTimeout(() => toast(t('dbBlocked')), 300);
+      // storage never answered: go on with what is in memory and say so on the page
+      if (e && e.message === 'timeout') state.storageDown = true;
       return [];
     }),
   ]);
@@ -1575,6 +1708,7 @@ async function init() {
   state.aiModel = aiModel;
   state.entries = entries;
   state.promptIndex = promptOfDay(getLang()).index;
+  clockChanged();
   const tab = location.hash.replace('#', '');
   state.tab = TABS.includes(tab) ? tab : 'today';
   if (tab === 'entry') history.replaceState(null, '', '#today');
@@ -1586,9 +1720,11 @@ async function init() {
   window.addEventListener('hashchange', onHash);
   // leaving the app mid-recording ends the recording (iOS silences the microphone in the background)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'hidden' || state.phase !== 'recording' || !state.recorder) return;
+    if (document.visibilityState !== 'hidden') return refreshWithClock();
+    if (state.phase !== 'recording' || !state.recorder) return;
     state.recorder.elapsed() >= MIN_SECONDS ? stopRecording(true) : cancelRecording();
   });
+  setInterval(refreshWithClock, 60 * 1000);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#sheet').hidden) {
       if (location.hash === '#entry') history.back();

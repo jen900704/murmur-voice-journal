@@ -64,6 +64,7 @@ const S = {
     crisisBack: '回到今天（不儲存）',
     shared: '已分享',
     downloaded: '已存成圖片',
+    notKept: '今晚的紀錄沒有存進這台裝置，明信片還是可以存成圖片。',
   },
   en: {
     cardTitle: 'Bedtime ritual',
@@ -124,6 +125,7 @@ const S = {
     crisisBack: 'Back to Today (nothing saved)',
     shared: 'Shared',
     downloaded: 'Image saved',
+    notKept: 'Tonight could not be stored on this device. You can still save the postcard as an image.',
   },
 };
 
@@ -150,14 +152,21 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     }
   }
 
-  // "Done for tonight" survives a reload: it is true when a night was saved since this
-  // evening began (after 4 pm, or yesterday after 4 pm if it is past midnight).
-  function markDone(nights) {
-    const now = new Date();
+  // An evening runs from 4 pm to the next 4 pm, so 1 am still belongs to the night before.
+  function eveningStart(now = new Date()) {
     const start = new Date(now);
     start.setHours(16, 0, 0, 0);
     if (now.getHours() < 16) start.setDate(start.getDate() - 1);
-    st.doneOn = nights.some((n) => n.createdAt >= start.getTime()) ? now.toDateString() : st.doneOn;
+    return start.getTime();
+  }
+
+  // "Done for tonight" is true when the last ritual finished since this evening began.
+  // st.doneAt is a time, not a date, so the card, a reload and past midnight all agree.
+  const doneTonight = () => (st.doneAt || 0) >= eveningStart();
+
+  // the same answer after a reload: take the time of the latest saved night
+  function markDone(nights) {
+    st.doneAt = Math.max(st.doneAt || 0, ...nights.map((n) => n.createdAt || 0));
   }
   db.listNights().then(markDone, () => {});
 
@@ -232,11 +241,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function card() {
+    const done = doneTonight();
     return h(
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
-      h('div', {}, h('h2', {}, st.doneOn === new Date().toDateString() ? L().cardDoneTitle : L().cardTitle), h('p', {}, st.doneOn === new Date().toDateString() ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, st.doneOn === new Date().toDateString() ? L().cardAgain : L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
+      h('div', {}, h('h2', {}, done ? L().cardDoneTitle : L().cardTitle), h('p', {}, done ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, done ? L().cardAgain : L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
 
@@ -280,7 +290,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           'data-key': 'night-keep',
           onchange: (e) => {
             st.keep = e.target.checked;
-            db.setSetting('nightKeep', st.keep);
+            db.setSetting('nightKeep', st.keep).catch(() => {});
           },
         }),
         h('span', {}, L().keep)
@@ -508,9 +518,11 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       };
       // the postcard still shows even if saving failed
       const run = st.run;
-      await db.saveNight(night).catch(() => {});
+      const kept = await db.saveNight(night).then(() => true, () => false);
       if (run !== st.run) return; // left during the save: do not reopen the ritual
+      st.nightAt = night.createdAt;
       go('postcard');
+      if (!kept) toast(L().notKept);
     } finally {
       st.finishing = false;
     }
@@ -547,7 +559,15 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             'data-key': 'night-done',
             onclick: () => {
               st.stage = 'card';
-              st.doneOn = new Date().toDateString();
+              st.doneAt = Math.max(st.doneAt || 0, st.nightAt || Date.now());
+              // draw Today now and put focus on the ritual's button there, so it does not
+              // fall to <body>; the render that follows onExit keeps it by data-key
+              rerender();
+              const next = document.querySelector('[data-key="night-start"], [data-key="night-link"]') || document.getElementById('main');
+              if (next) {
+                if (next.id === 'main') next.setAttribute('tabindex', '-1');
+                next.focus({ preventScroll: true });
+              }
               onExit();
               window.scrollTo(0, 0);
             },
@@ -723,7 +743,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     if (st.player) st.player.stop();
     st.player = null;
     if (full) {
-      st.doneOn = null;
+      st.doneAt = null;
+      st.nightAt = null;
       st.worry = '';
       st.kind = '';
       st.theme = null;

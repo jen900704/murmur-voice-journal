@@ -257,7 +257,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
         'div',
         { class: 'night-grid' },
         [...ex.nights].reverse().map((n) => {
-          const b = h('button', { type: 'button', class: 'night-thumb', 'aria-label': new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date(n.createdAt)), onclick: () => openSheet((rr) => nightBody(n, rr)) });
+          const b = h('button', { type: 'button', class: 'night-thumb', 'data-key': `night-${n.id}`, 'aria-label': new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date(n.createdAt)), onclick: () => openSheet((rr) => nightBody(n, rr)) });
           b.innerHTML = nightCardSvg(n);
           return b;
         })
