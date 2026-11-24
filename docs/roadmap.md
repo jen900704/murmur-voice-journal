@@ -55,4 +55,5 @@ Ideas come in over time; each gets reshaped for safety and ease of use before it
 | Daily writing prompt and partner exchange | built | Exchange by link, no server |
 | "One kind thing I did today", visible to people in a low mood | built privately | Shared version waits for the social design |
 | AI counselor-style conversation | built, experimental | Psychoeducation framing; not counseling |
+| Silent check-in (mood and a note without speaking, for nights when others are asleep nearby) | idea | Entries without audio features need care throughout the journal, trends and baselines |
 | Japanese interface | not started | Needs Japanese crisis patterns in the safety net and verified Japanese help lines before anything else |
