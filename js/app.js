@@ -1409,6 +1409,13 @@ function viewAbout() {
         FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
       )
     ),
+    // how the app is checked, for anyone curious; every link goes to the public repository
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('testedTitle'))),
+      h('ul', { class: 'plain-list' }, t('testedItems').map(([text, path]) => h('li', {}, h('a', { href: `https://github.com/jen900704/murmur-voice-journal/blob/main/${path}`, rel: 'noopener' }, text))))
+    ),
     h('h2', {}, t('experimentalTitle')),
     h('p', { class: 'small' }, t('aiAbout')),
     h(
