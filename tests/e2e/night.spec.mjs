@@ -52,6 +52,7 @@ test('worry text is not kept when the person turns keeping off', async ({ page }
   await page.locator('[data-key="night-keep"]').uncheck();
   await page.locator('[data-key="night-next"]').click();
   await page.locator('[data-key="night-next"]').click();
+  await page.locator('[data-key="tracks-all"]').click();
   await page.locator('[data-key="track-relaxation"]').click();
   await expect(page.locator('.postcard svg')).toBeVisible({ timeout: 20_000 });
   const nights = await page.evaluate(
@@ -180,4 +181,7 @@ test("the track that fits tonight's worry comes first", async ({ page }) => {
   await page.locator('[data-key="night-next"]').click();
   await expect(page.locator('.track').nth(1)).toHaveAttribute('data-key', 'track-family-systems');
   await expect(page.locator('.track.suggested')).toHaveCount(1);
+  await expect(page.locator('.track')).toHaveCount(4); // choose for me, the suggestion, two more
+  await page.locator('[data-key="tracks-all"]').click();
+  await expect(page.locator('.track')).toHaveCount(10);
 });

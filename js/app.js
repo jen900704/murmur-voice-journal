@@ -1163,19 +1163,24 @@ function viewAbout() {
   add(wrap, 
     h('h2', {}, t('aboutTitle')),
     h('p', {}, t('aboutBody')),
-    h('h2', {}, t('featuresTitle')),
-    h(
-      'dl',
-      { class: 'feature-list' },
-      FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
-    ),
+    // help lines near the top: the welcome card and other screens point here
+    h('h2', {}, t('notMedicalTitle')),
+    h('p', {}, t('notMedicalBody')),
+    h('div', { class: 'help', id: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), helpList(h, getLang())),
     h('h2', {}, t('privacyTitle')),
     h('p', {}, t('privacyBody')),
     h('h3', { class: 'sub' }, t('storageTitle')),
     h('ul', { class: 'plain-list' }, t('storageNotes').map((s) => h('li', {}, s))),
-    h('h2', {}, t('notMedicalTitle')),
-    h('p', {}, t('notMedicalBody')),
-    h('div', { class: 'help', id: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), helpList(h, getLang())),
+    h(
+      'details',
+      { class: 'about-more' },
+      h('summary', {}, h('h2', { class: 'inline' }, t('featuresTitle'))),
+      h(
+        'dl',
+        { class: 'feature-list' },
+        FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
+      )
+    ),
     h('h2', {}, t('experimentalTitle')),
     h('p', { class: 'small' }, t('aiAbout')),
     h(

@@ -30,6 +30,7 @@ const S = {
     toneTitle: '今晚想聽哪一種？',
     toneHelp: '每一段都是為 Murmur 寫的，靈感來自不同的諮商學派，不是治療。',
     surprise: '幫我選',
+    allTracks: (n) => `看全部 ${n} 段`,
     suggested: '適合今晚的心事',
     playTitle: '把手機放在旁邊，讓螢幕亮著',
     pause: '暫停',
@@ -88,6 +89,7 @@ const S = {
     toneTitle: 'What would you like to hear tonight?',
     toneHelp: 'Each track was written for Murmur, inspired by a counseling approach. None of them is therapy.',
     surprise: 'Choose for me',
+    allTracks: (n) => `Show all ${n}`,
     suggested: "Suits tonight's worry",
     playTitle: 'Put the phone down nearby and leave the screen on',
     pause: 'Pause',
@@ -167,6 +169,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     const run = ++st.run;
     st.helpOpen = false;
     st.sendPick = null;
+    st.allTracks = false;
     st.sendPng = null;
     st.sendOpen = false;
     st.worry = '';
@@ -305,8 +308,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         'div',
         { class: 'tracks' },
         h('button', { type: 'button', class: 'track surprise', 'data-key': 'track-surprise', onclick: () => play(chooseFor()) }, h('strong', {}, L().surprise)),
-        // the track suited to tonight's kind of worry comes first, marked as a suggestion
-        [...TRACKS].sort((a, b) => (b.id === THEME_TRACK[st.theme]) - (a.id === THEME_TRACK[st.theme])).map((t) =>
+        // the track suited to tonight's kind of worry comes first, marked as a suggestion;
+        // a few are shown at first so the choice is not a long list at bedtime
+        [...TRACKS]
+          .sort((a, b) => (b.id === THEME_TRACK[st.theme]) - (a.id === THEME_TRACK[st.theme]))
+          .slice(0, st.allTracks ? TRACKS.length : 3)
+          .map((t) =>
           h(
             'button',
             { type: 'button', class: 'track' + (t.id === THEME_TRACK[st.theme] ? ' suggested' : ''), 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
@@ -315,7 +322,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             h('span', {}, t[lk()].style),
             t[lk()].note ? h('span', { class: 'track-note' }, t[lk()].note) : null
           )
-        )
+        ),
+        st.allTracks ? null : h('button', { type: 'button', class: 'link', 'data-key': 'tracks-all', onclick: () => ((st.allTracks = true), rerender()) }, L().allTracks(TRACKS.length))
       ),
       h(
         'div',
@@ -676,6 +684,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           h('button', { type: 'button', class: 'link', 'aria-expanded': st.helpOpen ? 'true' : 'false', 'data-key': 'night-help', onclick: () => {
             st.helpOpen = !st.helpOpen;
             rerender();
+            const list = st.helpOpen && document.querySelector('.view.night .help-lines');
+            if (list) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
           } }, L().helpOpen)
         ),
         st.helpOpen ? helpList(h, getLang()) : null

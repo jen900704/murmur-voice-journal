@@ -7,6 +7,12 @@ import { createAiChat } from './ai-chat.js';
 const S = {
   'zh-TW': {
     title: '換個角度看看',
+    drewTitle: '你抽到的是',
+    redraw: '再抽一張',
+    answerHint: '寫幾個字就好。想不到的話，寫「不知道」也可以。',
+    moreAbout: '多了解這個學派',
+    savedMore: '看完整內容',
+    yourAnswers: '你當時的回答',
     saveFailed: '沒有存成功，請再試一次。',
     broken: '剛才那一頁出了問題，先回到這裡。你存下的練習都還在。',
     intro:
@@ -76,6 +82,12 @@ const S = {
     topicHidden: '有些學派不適合用來看這類煩惱，所以沒有列出。',
   },
   en: {
+    drewTitle: 'You drew',
+    redraw: 'Draw again',
+    answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
+    moreAbout: 'More about this approach',
+    savedMore: 'Show all',
+    yourAnswers: 'What you answered',
     saveFailed: 'Could not save. Please try again.',
     broken: 'That page ran into a problem, so you are back here. Saved exercises are still here.',
     title: 'Theory lens',
@@ -363,7 +375,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h(
         'div',
         { class: 'lens-options' },
-        option(L().draw, L().drawWhy, () => startLens(shuffle(pool)[0].id)),
+        option(L().draw, L().drawWhy, () => {
+          // show what was drawn first, with a chance to draw again
+          const others = pool.filter((l) => l.id !== st.drawn);
+          st.drawn = shuffle(others.length ? others : pool)[0].id;
+          go('drawn');
+        }),
         option(L().compare, L().compareWhy, () => {
           st.compare = shuffle(pool).slice(0, 3).map((l) => l.id);
           go('compare');
@@ -392,6 +409,25 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('h2', {}, L().compare),
       st.compare.map((id) => lensCard(lensById(id), { first: true, action: () => startLens(id) })),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('choose') }, L().back)),
+    ];
+  }
+
+  function drawn() {
+    const lens = lensById(st.drawn);
+    const pool = lensesForTopic(st.topic);
+    return [
+      h('h2', {}, L().drewTitle),
+      lensCard(lens, { first: true, action: () => startLens(lens.id) }),
+      h(
+        'div',
+        { class: 'actions left wrap' },
+        h('button', { type: 'button', class: 'btn', 'data-key': 'lens-redraw', onclick: () => {
+          const others = pool.filter((l) => l.id !== st.drawn);
+          st.drawn = shuffle(others.length ? others : pool)[0].id;
+          rerender();
+        } }, L().redraw),
+        h('button', { type: 'button', class: 'btn ghost', onclick: () => go('choose') }, L().back)
+      ),
     ];
   }
 
@@ -477,6 +513,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q, st.answers)),
       h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
       field,
+      field.tagName === 'TEXTAREA' ? h('p', { class: 'muted small lens-hint' }, L().answerHint) : null,
       h(
         'div',
         { class: 'actions left' },
@@ -516,12 +553,18 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('p', {}, fill(c.noticed, st.answers)),
         h('h3', {}, L().experiment),
         h('p', {}, fill(c.experiment, st.answers)),
-        h('h3', {}, L().concepts),
-        h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
         h('h3', {}, L().misses),
         h('p', {}, c.misses),
-        h('p', { class: 'muted small' }, L().people, '：', (lk() === 'zh' && lens.peopleZh) || lens.people),
-        h('p', { class: 'muted small' }, L().reading(lens.chapter))
+        // background on the approach, folded so rating and saving are close at hand
+        h(
+          'details',
+          { class: 'lens-more' },
+          h('summary', {}, L().moreAbout),
+          h('h3', {}, L().concepts),
+          h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
+          h('p', { class: 'muted small' }, L().people, '：', (lk() === 'zh' && lens.peopleZh) || lens.people),
+          h('p', { class: 'muted small' }, L().reading(lens.chapter))
+        )
       ),
       h('p', { class: 'lens-talk' }, L().talk),
       h(
@@ -749,6 +792,15 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('blockquote', { class: 'lens-concern-quote' }, s.concern),
           h('p', {}, fill(c.noticed, s.answers)),
           h(
+            'details',
+            { class: 'lens-more' },
+            h('summary', {}, L().savedMore),
+            h('h4', {}, L().experiment),
+            h('p', {}, fill(c.experiment, s.answers)),
+            h('h4', {}, L().yourAnswers),
+            h('ol', { class: 'plain-list' }, c.steps.map((stp, i) => h('li', {}, h('span', { class: 'muted small' }, stp.q), h('br'), String(s.answers[i] ?? '–'))))
+          ),
+          h(
             'button',
             {
               type: 'button',
@@ -823,6 +875,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       home,
       concern: () => concern(),
       choose,
+      drawn: () => (lensById(st.drawn) ? drawn() : choose()),
       compare,
       pick,
       step,

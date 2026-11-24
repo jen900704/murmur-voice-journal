@@ -7,6 +7,8 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
+    exchangeHow: '寫下你的回答，用手機的分享功能傳給一個人。對方會收到你的回答，和一個連結，可以回答同一題再傳回給你。Murmur 不會經手或保存。',
+    cancel: '取消',
     recsFailed: '片單沒有載入成功，請連上網路後再試一次。',
     gentleNote: '這些是有些人覺得溫柔、有陪伴感的作品，不是治療。清單由 Murmur 整理，可能有錯，歡迎回報。',
     all: '全部',
@@ -51,6 +53,8 @@ const S = {
   },
   en: {
     recsFailed: 'The list did not load. Please try again when you are online.',
+    exchangeHow: 'Write your answer and send it to one person with your phone\'s share sheet. They get your answer and a link to answer the same prompt and send it back. Murmur does not pass it on or keep it.',
+    cancel: 'Cancel',
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
@@ -331,7 +335,11 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       'div',
       { class: 'exchange' },
       fromSomeone ? h('p', { class: 'small exchange-from' }, L().exchangeFrom) : null,
+      h('p', { class: 'muted small' }, L().exchangeHow),
       ta,
+      h(
+        'div',
+        { class: 'actions left wrap' },
       h(
         'button',
         {
@@ -340,9 +348,9 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
           onclick: async () => {
             const a = ex.exchangeText.trim();
             if (!a) return;
-            // sharing with someone you trust is good; still make help visible first
-            if (checkRisk(a).risk && !ex.helpShown) {
-              ex.helpShown = true;
+            // sharing with someone you trust is good; still make help visible first (once per text)
+            if (checkRisk(a).risk && ex.helpShownFor !== a) {
+              ex.helpShownFor = a;
               showHelp({ sharing: true });
               return;
             }
@@ -365,6 +373,10 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
           },
         },
         L().exchangeShare
+      ),
+        fromSomeone
+          ? null
+          : h('button', { type: 'button', class: 'btn ghost', 'data-key': 'exchange-cancel', onclick: () => ((ex.exchangeOpen = false), render()) }, L().cancel)
       )
     );
   }

@@ -1707,3 +1707,22 @@ h3.sub {
   width: 100%;
   height: auto;
 }
+.lens-more {
+  margin-top: 14px;
+}
+.lens-more summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  min-height: 32px;
+}
+.about-more summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.about-more summary h2.inline {
+  display: inline;
+  margin: 0;
+}
