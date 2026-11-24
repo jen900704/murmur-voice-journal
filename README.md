@@ -21,14 +21,16 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 
 - **Voice journal.** Speak for about 30 seconds; see pitch, pace, pauses, and voice regularity against your own usual range.
 - **Theory lens.** Write down a worry and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Compare three lenses side by side, collect lens cards, and see which ones you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
-- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down track in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped; there are no streaks.
-- **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back.
+- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down track in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks.
+- **Goodnight card.** Send one pastel card to one person through your phone's share sheet. It carries only a line you pick, never what you wrote; there is no feed, count, or read receipt.
+- **Breathe for a minute.** A one-minute pacer (in for 4 seconds, out for 6) on Today and on the low-mood card.
+- **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back, along with three small general actions many people find a little helpful (not other users' posts, so there is nothing to compare against).
 - **Daily prompt.** Everyone gets the same prompt on the same day, and you can swap answers with someone through a link.
 - **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: one reflection and one question per turn, the reasoning named, no praise or reassurance, only techniques suitable for self-help, and a stop with help lines if risk appears on either side. Uses your own API key.
 - **Bedtime reminder.** Add a daily calendar event at a time you choose; Murmur sends no notifications.
-- **Something gentle.** A short, curated list of films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them.
+- **Something gentle.** A short, curated list of films, short films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them.
 
-**Safety.** Text typed into the theory lens, the bedtime ritual, and the kind-thing field is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match stops the exercise and shows help lines (Taiwan 1925, 1995, 1980, 113; US 988), and nothing from that step is saved. Help is always one tap away. The check is a coarse safety net and will miss some wording.
+**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses and shows help lines for the person's region (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every step. The check is a coarse safety net, tested against about 150 phrases, and will still miss some wording.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
@@ -87,7 +89,7 @@ Speech activity is found with an adaptive energy threshold placed between the re
 | Mandarin (pinyin), slow | 90.7 | 89.5 | 35 | 32 |
 | Mandarin (pinyin), fast | 90.7 | 89.5 | 29 | 32 |
 
-Median F0 agrees with Praat within about 1 Hz. The syllable count is within about 12% at ordinary rates but undercounts very fast speech, where intensity dips between syllables become too shallow. Synthetic speech is a limited test. Validation on recorded human speech, across phones and rooms, is the obvious next step.
+Median F0 agrees with Praat within about 1 Hz. The syllable count is within about 12% at ordinary rates but undercounts very fast speech, where intensity dips between syllables become too shallow. Synthetic speech is a limited test; the human-speech results above are the main evidence. Recorded Mandarin speech has not been tested yet.
 
 The unit tests (`npm test`) cover YIN on harmonic tones from 90 to 380 Hz, rejection of a 600 Hz tone instead of reporting it at a subharmonic, pause and syllable detection on speech-like signals with known structure, robustness to noise and to a DC offset, rejection of noise-only audio, survival of real pitch excursions wider than an octave, voice regularity falling with added noise and with breathiness, clipping and noise flags, the direction of each feature under controlled changes, the false-flag rate of the baseline rule, and the statistics helpers against SciPy.
 
@@ -166,7 +168,9 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 
 ## 中文說明
 
-**功能。** 聲音日記之外，還有：理論透鏡（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片）、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。輸入的文字如果出現自傷、傷人或受虐的訊號，練習會停下並顯示求助專線。
+**功能。** 聲音日記之外，還有：理論透鏡（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片；也可以「只想聽一段」直接開始）、寄一張晚安卡給一個人（卡片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。
+
+**安全。** 輸入的文字如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（台灣、美國或其他地方，可以切換）。寫下的內容不會被刪掉；如果只是誤判，可以按「我沒事，繼續」。每個步驟都能一鍵找到求助專線。這只是粗略的安全網，已用約 150 個句子測試，仍然可能漏掉某些說法。
 
 
 Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天說大約 30 秒的話，它會在你的裝置上算出音高、音高起伏、語速、停頓和聲音規律度。累積幾次之後，它會告訴你今天的聲音和你自己的平常範圍相比是高、低，還是差不多。如果你每次花兩秒標記心情和精神，它也會顯示你的聲音和你的感受之間的關聯。
@@ -182,7 +186,7 @@ Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天�
 
 **它不是什麼。** Murmur 不是醫療器材，不做診斷。手機麥克風、距離、環境噪音、感冒都會影響數字，每次在差不多的地方、用差不多的姿勢錄，結果會比較穩定。
 
-**驗證。** 用合成語音和 Praat 比較，音高中位數相差約 1 Hz。正常語速下音節數誤差約 12% 以內，但非常快的語速會低估。這只是合成語音上的檢查，還需要用真人錄音驗證。詳細方法和數字見上方英文說明的 Validation 一節。
+**驗證。** 先公開登錄分析計畫，再用 36 段真人英文錄音和 Praat 比較：音高很接近（嚴重音高錯誤 1.8%，細部誤差中位數 4.6 cents），停頓偵測在 30 組數字串中有 29 組完全正確。有聲段覆蓋率、部分說話者的音高中位數、音高範圍和音節數沒有達到事先訂的標準，原因寫在 `docs/validation-results.md`。另一個登錄過的研究測試了壓縮、音量、自動增益、噪音、回音和電話音質：64 kbit/s 以上的壓縮、±6 dB 音量和自動增益幾乎沒有影響，背景噪音則會影響響度起伏、聲音規律度和時間相關的特徵。中文真人錄音還沒有驗證。
 
 **資料可能會不見的情況。** iPhone 的 Safari 如果超過 7 天沒打開這個網站，可能會清掉資料，加入主畫面後使用可以避免；主畫面 App 和 Safari 分頁的資料是分開的；匯出的備份只有數據，沒有錄音檔。
 
