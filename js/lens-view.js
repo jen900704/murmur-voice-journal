@@ -39,6 +39,7 @@ const S = {
     compare: '比較三個角度',
     compareWhy: '看三個學派各自會先問什麼，再選一個',
     pick: '自己選',
+    pickTitle: '選一個角度',
     pickWhy: '從全部適合的學派裡挑',
     useThis: '用這個角度',
     stepOf: (i, n) => `第 ${i} 題，共 ${n} 題`,
@@ -86,7 +87,7 @@ const S = {
     redraw: 'Draw again',
     answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
     moreAbout: 'More about this approach',
-    savedMore: 'Show all',
+    savedMore: 'Show full exercise',
     yourAnswers: 'What you answered',
     saveFailed: 'Could not save. Please try again.',
     broken: 'That page ran into a problem, so you are back here. Saved exercises are still here.',
@@ -100,7 +101,7 @@ const S = {
     deck: 'Lens cards',
     fit: 'Which lens fits me',
     saved: 'My saved exercises',
-    savedCount: (n) => (n ? String(n) : 'None yet'),
+    savedCount: (n) => (n ? `${n} saved` : 'None yet'),
     aiContinue: 'Keep talking with AI through this lens (experimental)',
     gentle: 'Gentle recommendations (films, books, musicals)',
     worryLabel: 'In a sentence or two, what is on your mind?',
@@ -115,6 +116,7 @@ const S = {
     compare: 'Compare three lenses',
     compareWhy: 'See what three schools would ask first, then pick one',
     pick: 'Choose myself',
+    pickTitle: 'Choose a lens',
     pickWhy: 'Pick from every school that fits',
     useThis: 'Use this lens',
     stepOf: (i, n) => `Question ${i} of ${n}`,
@@ -129,12 +131,12 @@ const S = {
     people: 'Associated with',
     talk: 'This can help you see things differently, but it does not replace talking with a person. If this keeps weighing on you, a campus or workplace counseling service is a good place to start.',
     rateQ: 'Was this lens helpful?',
-    rateLabels: ['Not at all', '', 'Somewhat', '', 'Very'],
+    rateLabels: ['Not at all', '', 'Somewhat', '', 'Very helpful'],
     anotherLens: 'Look at the same worry through another lens',
     save: 'Save on this device',
     savedToast: 'Saved on this device only',
     finish: 'Finish without saving',
-    explored: (n) => (n ? `You have looked through ${n}` : `${LENSES.length} approaches`),
+    explored: (n) => (n ? `${n} of ${LENSES.length} tried` : `${LENSES.length} approaches`),
     times: (n) => `Used ${n} time${n === 1 ? '' : 's'}`,
     notYet: 'Not used yet',
     startWith: 'Start with this lens',
@@ -392,7 +394,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
-  function lensCard(lens, { first = false, action } = {}) {
+  function lensCard(lens, { first = false, action, primary = false } = {}) {
     const c = lens[lk()];
     return h(
       'article',
@@ -400,7 +402,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('div', { class: 'lens-card-head' }, lensMark(lens), h('h3', {}, c.name)),
       h('p', { class: 'small' }, c.idea),
       first ? h('p', { class: 'lens-first' }, fill(c.steps[0].q, [])) : null,
-      action ? h('button', { type: 'button', class: 'btn', onclick: action }, L().useThis) : null
+      action ? h('button', { type: 'button', class: primary ? 'btn primary' : 'btn', onclick: action }, L().useThis) : null
     );
   }
 
@@ -417,11 +419,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const pool = lensesForTopic(st.topic);
     return [
       h('h2', {}, L().drewTitle),
-      lensCard(lens, { first: true, action: () => startLens(lens.id) }),
+      lensCard(lens, { first: true, primary: true, action: () => startLens(lens.id) }),
       h(
         'div',
         { class: 'actions left wrap' },
-        h('button', { type: 'button', class: 'btn', 'data-key': 'lens-redraw', onclick: () => {
+        h('button', { type: 'button', class: 'btn ghost', 'data-key': 'lens-redraw', onclick: () => {
           const others = pool.filter((l) => l.id !== st.drawn);
           st.drawn = shuffle(others.length ? others : pool)[0].id;
           rerender();
@@ -433,7 +435,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   function pick() {
     return [
-      h('h2', {}, L().pick),
+      h('h2', {}, L().pickTitle),
       lensesForTopic(st.topic).map((l) => lensCard(l, { action: () => startLens(l.id) })),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('choose') }, L().back)),
     ];

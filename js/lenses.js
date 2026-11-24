@@ -477,7 +477,12 @@ export function lensesForTopic(topic) {
 // Shorten an answer for quoting back.
 export function quote(text, max = 60) {
   const s = String(text || '').trim().replace(/\s+/g, ' ');
-  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+  if (s.length <= max) return s;
+  // cut at a word boundary for space-separated text; Chinese can be cut anywhere
+  let cut = s.slice(0, max - 1);
+  const sp = cut.lastIndexOf(' ');
+  if (sp > max * 0.6) cut = cut.slice(0, sp);
+  return cut + '…';
 }
 
 // Fill {1}, {2}, ... with earlier answers.

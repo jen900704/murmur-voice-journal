@@ -724,6 +724,7 @@ function openSheet(fn) {
   state.detailOpener = a && a.dataset ? a.dataset.key || null : null;
   if (location.hash !== '#entry') location.hash = '#entry';
   renderSheet();
+  $('#sheet').scrollTop = 0; // a new sheet starts at its top, not where the last one was left
 }
 
 function closeSheet() {

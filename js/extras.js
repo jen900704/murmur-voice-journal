@@ -96,7 +96,7 @@ const S = {
     lowRitual: 'Bedtime ritual',
     lowLens: 'Look through a theory lens',
     lowHelp: 'Where to find someone to talk to',
-    exchange: 'Write it down and swap answers with someone',
+    exchange: 'Swap answers with someone',
     exchangePlaceholder: 'My answer…',
     exchangeShare: 'Share',
     exchangeCopied: 'Copied. Paste it to them.',
@@ -167,8 +167,12 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
           );
         })
       ),
-      !ex.showAll && items.length > 6 ? h('button', { type: 'button', class: 'btn', 'data-key': 'recs-more', onclick: () => ((ex.showAll = true), rerender()) }, L().more(items.length - 6)) : null,
-      h('button', { type: 'button', class: 'btn', onclick: closeSheet }, L().close),
+      h(
+        'div',
+        { class: 'actions left wrap' },
+        !ex.showAll && items.length > 6 ? h('button', { type: 'button', class: 'btn', 'data-key': 'recs-more', onclick: () => ((ex.showAll = true), rerender()) }, L().more(items.length - 6)) : null,
+        h('button', { type: 'button', class: 'btn ghost', onclick: closeSheet }, L().close)
+      ),
     ];
   }
 

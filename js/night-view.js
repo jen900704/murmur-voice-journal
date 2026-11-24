@@ -11,6 +11,7 @@ const S = {
     cardDoneBody: '明信片收在「紀錄」的「夜晚」裡。想再聽一段的話，也可以。',
     cardBody: '放下今天的心事，聽一段三到五分鐘的睡前引導，收一張晚安明信片。',
     cardStart: '開始',
+    cardAgain: '再做一次',
     cardListen: '只想聽一段',
     preparing: '準備中…',
     leave: '離開睡前儀式',
@@ -21,7 +22,7 @@ const S = {
     worryHelp: '寫幾句也好，不寫也可以。這些字只存在這個裝置上。',
     worryPlaceholder: '今天讓我放不下的是……',
     themeLabel: '它比較像哪一類？（睡前引導只會提到類別，不會唸出你寫的字）',
-    themes: { work: '工作或學業', relationship: '關係', family: '家人', health: '身體', future: '以後的事', unsure: '說不清楚' },
+    themes: { work: '學業或工作', relationship: '伴侶或朋友', family: '家人', health: '身體', future: '以後的事', unsure: '說不清楚' },
     keep: '存進夜晚的紀錄',
     kindTitle: '今天對自己好的一件事',
     kindHelp: '再小都算：好好吃一餐、早點睡、拒絕一件事。想不到也沒關係。',
@@ -70,6 +71,7 @@ const S = {
     cardDoneBody: 'Your postcard is in Journal, under Nights. You can listen to another track if you like.',
     cardBody: 'Set down today\'s worry, listen to a three to five minute wind-down, and get a small postcard.',
     cardStart: 'Start',
+    cardAgain: 'Do it again',
     cardListen: 'Just listen',
     preparing: 'Getting ready…',
     leave: 'Leave the ritual',
@@ -80,8 +82,8 @@ const S = {
     worryHelp: 'A few lines, or nothing at all. What you write stays on this device.',
     worryPlaceholder: 'What I cannot put down tonight is…',
     themeLabel: 'What is it closest to? (The track only mentions the category, never your words.)',
-    themes: { work: 'Work or school', relationship: 'A relationship', family: 'Family', health: 'My body', future: 'What comes next', unsure: 'Hard to say' },
-    keep: 'Keep it in my worry diary',
+    themes: { work: 'School or work', relationship: 'Partner or friends', family: 'Family', health: 'My body', future: 'What comes next', unsure: 'Hard to say' },
+    keep: 'Keep it in Journal, under Nights',
     kindTitle: 'One kind thing I did for myself today',
     kindHelp: 'Anything counts: a proper meal, going to bed early, saying no to something. If nothing comes to mind, that is fine.',
     kindPlaceholder: 'Today I…',
@@ -221,7 +223,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       'div',
       { class: 'night-card' + (isEvening() ? ' evening' : '') },
       h('div', { class: 'night-moon', 'aria-hidden': 'true' }),
-      h('div', {}, h('h2', {}, st.doneOn === new Date().toDateString() ? L().cardDoneTitle : L().cardTitle), h('p', {}, st.doneOn === new Date().toDateString() ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
+      h('div', {}, h('h2', {}, st.doneOn === new Date().toDateString() ? L().cardDoneTitle : L().cardTitle), h('p', {}, st.doneOn === new Date().toDateString() ? L().cardDoneBody : L().cardBody), h('div', { class: 'actions left wrap' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'night-start', onclick: () => begin() }, st.doneOn === new Date().toDateString() ? L().cardAgain : L().cardStart), h('button', { type: 'button', class: 'btn ghost night-listen', 'data-key': 'night-listen', disabled: st.preparing, onclick: listenNow }, st.preparing ? L().preparing : L().cardListen)))
     );
   }
 
@@ -579,6 +581,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
                 st.sendPick = i;
                 st.sendPng = postcardPng(svgFor(line)); // drawn now, so sharing opens right away
                 rerender();
+                const share = document.querySelector('[data-key="send-share"]');
+                if (share) share.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
               },
             },
             line
