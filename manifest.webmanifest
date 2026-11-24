@@ -1,7 +1,7 @@
 {
   "name": "Murmur 低語日記",
   "short_name": "Murmur",
-  "description": "A private voice journal and wind-down companion. Everything stays on your device. 私密的聲音日記，也陪你在睡前放下今天。",
+  "description": "Look at one worry from 14 counseling perspectives, in your own words. Everything stays on your device. 用 14 個諮商取向換個角度看看心裡的事，全部留在你的裝置上。",
   "start_url": "./#today",
   "scope": "./",
   "display": "standalone",

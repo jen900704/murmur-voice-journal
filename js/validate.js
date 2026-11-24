@@ -88,6 +88,9 @@ export function cleanSession(s) {
     before: heavy(s.before),
     after: heavy(s.after),
     // the optional step-back question: which one was asked, and the answer
+    // an optional if-then plan, and how it went when asked later
+    plan: plain(s.plan) && typeof s.plan.text === 'string' && s.plan.text.trim() ? { text: s.plan.text.slice(0, 120) } : null,
+    followUp: plain(s.followUp) && ['tried', 'notYet', 'notForMe'].includes(s.followUp.answer) && isTime(s.followUp.at) ? { answer: s.followUp.answer, at: s.followUp.at } : null,
     // text a language model wrote for this session (labeled as AI-written when shown)
     generated: plain(s.generated) && (typeof s.generated.perspective === 'string' || typeof s.generated.tryThis === 'string') ? { perspective: optStr(s.generated.perspective, 800), tryThis: optStr(s.generated.tryThis, 300), source: s.generated.source === 'device' ? 'device' : 'cloud' } : null,
     distance: plain(s.distance) && (s.distance.kind === 'friend' || s.distance.kind === 'year') && typeof s.distance.text === 'string' && s.distance.text.trim() ? { kind: s.distance.kind, text: s.distance.text.slice(0, 1000) } : null,

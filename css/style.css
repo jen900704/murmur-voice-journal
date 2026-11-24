@@ -3195,3 +3195,9 @@ input[type='radio'] {
 .angle-map-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
 .angle-map-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line, rgba(127,127,127,.2)); }
 .angle-map-name { font-weight: 600; }
+
+/* If-then plan and the follow-up question on the next visit */
+.lens-plan { display: grid; gap: 6px; margin: 4px 0 12px; }
+.lens-plan input { min-height: 44px; }
+.lens-plan-check { margin-bottom: 16px; }
+.lens-plan-check .chips { margin-top: 8px; }

@@ -2,7 +2,7 @@
 export const STRINGS = {
   'zh-TW': {
     appName: 'Murmur 低語日記',
-    tagline: '私密的聲音日記，也陪你在睡前放下今天。',
+    tagline: '換個角度看看心裡的事。全部留在你的手機上。',
     skip: '跳到主要內容',
     sections: '頁面',
     tabToday: '今天',
@@ -199,7 +199,7 @@ export const STRINGS = {
   },
   en: {
     appName: 'Murmur',
-    tagline: 'A private voice journal that also helps you set the day down at bedtime.',
+    tagline: 'Look at what is on your mind from another angle. Everything stays on your phone.',
     skip: 'Skip to content',
     sections: 'Sections',
     tabToday: 'Today',

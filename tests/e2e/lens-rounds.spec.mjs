@@ -327,3 +327,30 @@ test('saved exercises show a plain look back: counts per approach, averages only
   await expect(rows.nth(0)).toContainText('average -0.3');
   await expect(rows.nth(1)).not.toContainText('average');
 });
+
+test('a plan for the small thing to try is saved, and the next visit asks once how it went', async ({ page }) => {
+  await page.goto('/#lens');
+  await page.locator('[data-key="lens-start"]').waitFor();
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const q = indexedDB.open('murmur');
+        q.onsuccess = () => {
+          const t = q.result.transaction('lensSessions', 'readwrite');
+          t.objectStore('lensSessions').put({ id: 'p1', createdAt: Date.now() - 86400000, lensId: 'cognitive', topics: ['work'], concern: '報告', answers: ['a'], rating: 4, plan: { text: 'before the next meeting' } });
+          t.oncomplete = () => {
+            q.result.close();
+            resolve();
+          };
+        };
+      })
+  );
+  await page.reload();
+  const check = page.locator('[data-key="lens-plan-check"]');
+  await expect(check).toContainText('before the next meeting');
+  await page.locator('[data-key="plan-tried"]').click();
+  await expect(check).toHaveCount(0);
+  await page.reload();
+  await page.locator('[data-key="lens-start"]').waitFor();
+  await expect(page.locator('[data-key="lens-plan-check"]')).toHaveCount(0);
+});

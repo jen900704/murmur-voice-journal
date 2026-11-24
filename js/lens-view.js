@@ -25,6 +25,13 @@ const S = {
     answerHint: '寫幾個字就好。想不到的話，寫「不知道」也可以。',
     moreAbout: '多了解這個學派',
     savedMore: '這個角度的看法和小練習',
+    plan: {
+      label: '想試的話，打算在什麼時候？（可不填）',
+      placeholder: '例如：下次開會前五分鐘',
+      checkTitle: '上次你打算試試的：',
+      answers: { tried: '試了', notYet: '還沒', notForMe: '不適合我' },
+      thanks: { tried: '記下來了。', notYet: '沒關係，記下來了。', notForMe: '知道了，這個不適合也很正常。' },
+    },
     map: {
       title: (n, k) => `回頭看：${n} 次練習，用過 ${k} 個角度`,
       note: (m) => `只是整理你自己的紀錄，不代表哪個取向比較有效。前後輕重至少有 ${m} 次才算平均。`,
@@ -144,6 +151,13 @@ const S = {
     answerHint: 'A few words are enough. If nothing comes, "not sure" is fine too.',
     moreAbout: 'More about this approach',
     savedMore: 'The approach and something to try',
+    plan: {
+      label: 'If you want to try it, when? (optional)',
+      placeholder: 'For example: five minutes before the next meeting',
+      checkTitle: 'Last time you planned to try:',
+      answers: { tried: 'Tried it', notYet: 'Not yet', notForMe: 'Not for me' },
+      thanks: { tried: 'Noted.', notYet: 'That is fine. Noted.', notForMe: 'Got it. Not every idea fits, and that is normal.' },
+    },
     map: {
       title: (n, k) => `Looking back: ${n} exercises, ${k} approaches`,
       note: (m) => `A summary of your own records, not a sign that one approach works better. Averages need at least ${m} sessions with both ratings.`,
@@ -329,6 +343,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.before = null;
     st.after = null;
     st.distance = null;
+    st.plan = '';
+    st.planChecked = false;
     st.cardAnimated = null;
     st.savedReturn = null;
     st.riskSeen = false;
@@ -366,6 +382,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.rating = null;
     st.after = null;
     st.distance = null;
+    st.plan = '';
+    st.planChecked = false;
     st.cardAnimated = null;
     st.startedAt = Date.now();
     st.counted = false;
@@ -428,6 +446,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('h2', {}, L().title),
       h('p', {}, L().intro),
       h('p', { class: 'muted small' }, L().madeBy, ' ', L().privacy, st.aiEnabled ? ' ' + L().privacyAi : ''),
+      planCheck(),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-start', onclick: () => go('concern') }, L().start)),
       h(
         'div',
@@ -1292,6 +1311,57 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     );
   }
 
+  // An optional if-then plan for the small thing to try ("I'll try it when ..."). Saved with
+  // the exercise; the next visit asks once how it went.
+  function planInput() {
+    const input = h('input', {
+      type: 'text',
+      id: 'lens-plan',
+      maxlength: '120',
+      'data-key': 'lens-plan',
+      placeholder: L().plan.placeholder,
+      oninput: (e) => {
+        st.plan = e.target.value;
+        st.planChecked = false;
+      },
+    });
+    input.value = st.plan || '';
+    return h('div', { class: 'lens-plan' }, h('label', { class: 'lens-label small', for: 'lens-plan' }, L().plan.label), input);
+  }
+
+  // The latest saved plan nobody has answered yet, at least half a day old.
+  function pendingPlan() {
+    const now = Date.now();
+    return [...st.sessions].reverse().find((s) => s.plan && s.plan.text && !s.followUp && now - s.createdAt > 12 * 3600 * 1000 && lensById(s.lensId)) || null;
+  }
+
+  function planCheck() {
+    const s = pendingPlan();
+    if (!s) return null;
+    const answer = async (v) => {
+      const updated = { ...s, followUp: { answer: v, at: Date.now() } };
+      try {
+        await db.saveLensSession(updated);
+        st.sessions = await db.listLensSessions();
+      } catch (_) {
+        /* not saved; the question comes back next time */
+      }
+      toast(L().plan.thanks[v]);
+      rerender();
+    };
+    return h(
+      'section',
+      { class: 'card lens-plan-check', 'data-key': 'lens-plan-check', 'aria-labelledby': 'plan-check-title' },
+      h('h3', { id: 'plan-check-title' }, L().plan.checkTitle),
+      h('blockquote', { class: 'lens-answer' }, s.plan.text),
+      h(
+        'div',
+        { class: 'chips wrap' },
+        ['tried', 'notYet', 'notForMe'].map((v) => h('button', { type: 'button', class: 'chip', 'data-key': `plan-${v}`, onclick: () => answer(v) }, L().plan.answers[v]))
+      )
+    );
+  }
+
   function summary() {
     const lens = lensById(st.lensId);
     const c = lens[lk()];
@@ -1318,6 +1388,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         loading ? skel() : [genPerspective ? genLabel() : null, h('p', { 'data-key': 'lens-perspective' }, genPerspective || c.perspective)],
         h('h3', {}, L().tryThis),
         loading ? skel() : [genTry ? genLabel() : null, h('p', { 'data-key': 'lens-try' }, genTry || c.tryThis)],
+        planInput(),
         h('h3', {}, L().misses),
         h('p', {}, c.misses),
         // background on the approach, folded so rating and saving are close at hand
@@ -1370,6 +1441,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             disabled: st.saving,
             onclick: async () => {
               if (st.saving) return;
+              // the plan is free text too: check it before anything is saved
+              if (st.plan && st.plan.trim() && !st.planChecked) {
+                st.planChecked = true;
+                if (!guard(st.plan, () => {})) return;
+              }
               st.saving = true;
               const session = {
                 id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
@@ -1384,6 +1460,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
               if (Number.isInteger(st.after)) session.after = st.after;
               const dist = distanceOf(st.distance);
               if (dist) session.distance = { kind: dist.kind, text: dist.text.slice(0, 1000) };
+              if (st.plan && st.plan.trim() && !checkRisk(st.plan).risk) session.plan = { text: st.plan.trim().slice(0, 120) };
               // keep what the model wrote, so reopening shows the same words (and says they were AI-written)
               if (genPerspective || genTry) session.generated = { perspective: genPerspective || null, tryThis: genTry || null, source: gen.source };
               try {

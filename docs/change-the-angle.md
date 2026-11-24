@@ -13,7 +13,8 @@ This page explains what each part does, why it is there, what is measured, and w
 5. **Summary.** Each question with the person's answer verbatim, the approach's perspective in a few plain sentences, something small to try, key ideas, and what this approach can miss. No sentences are built around the person's answers.
 6. **How heavy now.** The same 0 to 10 question again. The change is shown as it is ("7 → 5"); heavier or unchanged is described as common, never as failure.
 7. **A card to keep.** A small picture drawn from what the person wrote, with a short animation.
-8. **Same worry, another angle.** Earlier looks at a similar worry are listed, and what this angle brought up that the earlier one did not.
+8. **A small plan.** Optionally, when to try the small thing ("before the next meeting"). The next visit, at least half a day later, asks once: tried it, not yet, or not for me.
+9. **Same worry, another angle.** Earlier looks at a similar worry are listed, and what this angle brought up that the earlier one did not.
 
 ## Why each part is there
 

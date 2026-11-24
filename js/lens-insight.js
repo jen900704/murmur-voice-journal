@@ -50,7 +50,8 @@ export function suggestLenses(text, { allowed = null, max = 3 } = {}) {
       const at = t.indexOf(low(w));
       // latin cues must start at a word boundary
       if (at < 0 || (/[a-z]/.test(w[0]) && at > 0 && /[a-z]/.test(t[at - 1]))) continue;
-      if (hits.some((h) => at >= h.at && at < h.at + h.len)) continue;
+      // a second cue right next to the first would show the same sentence twice
+      if (hits.some((h) => Math.abs(at - h.at) < 14)) continue;
       hits.push({ word: w, at, len: w.length });
     }
     if (hits.length) {
