@@ -1731,7 +1731,12 @@ h3.sub {
   color: var(--accent);
   min-height: 32px;
 }
+/* Safari keeps its own disclosure triangle unless told not to; the chevron below replaces it */
+.about-more summary::-webkit-details-marker {
+  display: none;
+}
 .about-more summary {
+  list-style: none;
   cursor: pointer;
   min-height: 44px;
   display: flex;
@@ -1788,7 +1793,24 @@ h3.sub {
 .week-card summary {
   cursor: pointer;
   font-weight: 600;
-  min-height: 32px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
+.week-card summary::-webkit-details-marker {
+  display: none;
+}
+/* the same chevron as the other folding sections */
+.week-card summary::after {
+  content: '›';
+  margin-inline-start: auto;
+  font-size: 1.4rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+}
+.week-card[open] summary::after {
+  transform: rotate(90deg);
 }
 .silent-list li {
   padding: 8px 0;
