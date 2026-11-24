@@ -308,8 +308,8 @@ export function parsePlain(text, name = '') {
     // keep the words, drop the most common markup
     s = s
       .replace(/^```[\s\S]*?^```/gm, ' ')
-      .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
-      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/!\[[^\]\n]{0,500}\]\([^)\n]{0,2000}\)/g, ' ')
+      .replace(/\[([^\]\n]{0,500})\]\([^)\n]{0,2000}\)/g, '$1')
       .replace(/^[ \t]*(?:#{1,6}|>|[-*+]|\d+\.)[ \t]+/gm, '')
       .replace(/[*_`~]{1,3}/g, '');
   }

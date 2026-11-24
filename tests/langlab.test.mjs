@@ -9,7 +9,7 @@ import { createVader } from '../js/langlab/vader.js';
 import { fixMojibake, parseFile, parseCSV, parseTime, dedupe, wantedInArchive } from '../js/langlab/importers.js';
 import { readZip } from '../js/langlab/zip.js';
 import { buildReportData, buildReportHtml } from '../js/langlab/report.js';
-import { scoreMeta, groupLabel, groupNote, NOTICE, SIMPLIFIED_NOTE } from '../js/langlab/meta.js';
+import { scoreMeta, groupLabel, groupNote, NOTICE, SIMPLIFIED_NOTE, chooseObservations, observationText, validationNote, OBS_AGGREGATES, OBS_TEMPLATES, VALIDATION } from '../js/langlab/meta.js';
 import { EN_CATEGORIES, EN_WILDCARD_EXCEPTIONS } from '../js/langlab/lexicon-en.js';
 import { ZH_CATEGORIES, ZH_COMMON, ZH_LOOSE_HEADS } from '../js/langlab/lexicon-zh.js';
 import { ZH_S2T_SAFE, ZH_S2T_VARIANT } from '../js/langlab/zh-s2t.js';
@@ -594,5 +594,98 @@ test('risk language in pasted or imported text is found by the app\'s own check'
   assert.equal(checkRisk(moji).risk, false);
 });
 
+// ---------- what stood out ----------
+const obsRow = (id, count, value, extra = {}) => ({ id, kind: 'pct', count, value, enough: true, rateShown: true, ci: [value * 0.9, value * 1.1], ...extra });
+test('observations: only rows that pass their minimum and have a rate; most hits first; at most three', () => {
+  const res = {
+    lang: 'zh',
+    scores: [
+      obsRow('i', 40, 4.7),
+      obsRow('cause', 30, 2.3),
+      obsRow('family', 90, 9, { enough: false, rateShown: false }), // not enough text
+      obsRow('friend', 4, 0.4, { rateShown: false }), // too few hits for a rate
+      obsRow('cogproc', 80, 8), // a sum of other categories
+      obsRow('work', 20, 2),
+      obsRow('body', 10, 1),
+      { id: 'empath:work', kind: 'empath', count: 99, value: 9, enough: true, rateShown: true },
+    ],
+  };
+  const pick = chooseObservations(res, null);
+  assert.equal(pick.mode, 'counts');
+  assert.equal(pick.hadBaseline, false);
+  assert.deepEqual(pick.items.map((x) => x.id), ['i', 'cause', 'work']);
+  assert.equal(observationText(pick.items[0], 'zh-TW', 'zh'), '你常寫到自己（每 100 字約 4.7 個「我」的詞）。');
+  assert.equal(observationText(pick.items[1], 'zh-TW', 'zh'), '這段文字裡，想到原因和理由的詞比較多（每 100 字約 2.3 個）。');
+  assert.equal(observationText(pick.items[0], 'en', 'en'), 'You write about yourself often (about 4.7 I-words per 100 words).');
+  assert.equal(observationText(pick.items[1], 'en', 'zh'), 'In this text, words about causes and reasons are among the most frequent (about 2.3 per 100 Chinese characters).');
+  assert.equal(chooseObservations(res, null, 2).items.length, 2);
+  assert.deepEqual(chooseObservations({ lang: 'zh', scores: res.scores.filter((x) => !x.enough || !x.rateShown) }, null), { mode: 'none', hadBaseline: false, items: [] });
+  assert.deepEqual(chooseObservations(null, null).items, []);
+});
+test('observations: with a baseline, chosen by distance from the person\'s own earlier texts', () => {
+  const res = { lang: 'en', scores: [obsRow('i', 400, 8), obsRow('work', 30, 3), obsRow('cause', 20, 2), obsRow('body', 10, 1, { enough: false, rateShown: false })] };
+  const cmp = {
+    i: { earlier: 7.9, earlierCi: [7.5, 8.3], delta: 0.1, verdict: 'similar' },
+    work: { earlier: 0.5, earlierCi: [0.3, 0.7], delta: 2.5, verdict: 'higher' },
+    cause: { earlier: 4, earlierCi: [3.6, 4.4], delta: -2, verdict: 'lower' },
+    body: { earlier: 9, earlierCi: [8, 10], delta: -8, verdict: 'lower' },
+  };
+  const pick = chooseObservations(res, cmp);
+  assert.equal(pick.mode, 'baseline');
+  assert.deepEqual(pick.items.map((x) => [x.id, x.kind]), [['work', 'higher'], ['cause', 'lower']]); // not i (overlaps), not body (short)
+  assert.equal(observationText(pick.items[0], 'en', 'en'), 'Compared with your earlier kept texts, there are more words about work and school this time (about 3.0 per 100 words; earlier about 0.50).');
+  assert.equal(observationText(pick.items[1], 'zh-TW', 'en'), '和你之前留下的文字比，這次想到原因和理由的詞比較少（每 100 個英文單字約 2.0 個，之前約 4.0 個）。');
+  // a baseline in which nothing differs clearly falls back to counts, and remembers why
+  const flat = chooseObservations(res, { i: cmp.i });
+  assert.equal(flat.mode, 'counts');
+  assert.equal(flat.hadBaseline, true);
+  assert.deepEqual(flat.items.map((x) => x.id), ['i', 'work', 'cause']);
+});
+test('observations on real text: every category has a sentence in both languages, with no evaluation, clinical or advice words', () => {
+  const text = Array.from({ length: 40 }, (_, i) => `我今天和朋友一起去吃飯，我覺得很開心，因為工作終於做完了。也許明天我們再聊。第${i + 1}天。`).join('\n');
+  const res = analyze([{ text, timestamp: null, source: 'paste' }], data).byLang.zh;
+  const pick = chooseObservations(res, null);
+  assert.equal(pick.items.length, 3);
+  for (const it of pick.items) {
+    const sc = findScore(res, it.id);
+    assert.ok(sc.enough && sc.rateShown && sc.kind === 'pct', it.id);
+  }
+  const banned = /\b(good|bad|healthy|unhealthy|worrying|concerning|normal|should|try to|consider)\b|symptom|disorder|depress|anxiety|clinical|diagnos|健康|令人擔心|正常|異常|建議|應該要|試著|症狀|憂鬱|焦慮症|診斷|臨床|良好|不良/i;
+  for (const id of CATEGORY_IDS) {
+    if (OBS_AGGREGATES.includes(id)) continue;
+    for (const ui of ['zh-TW', 'en'])
+      for (const kind of ['counts', 'higher', 'lower']) {
+        const line = observationText({ id, kind, value: 4.66, earlier: 1.2 }, ui, 'zh');
+        assert.ok(/4\.7/.test(line) && !/undefined/.test(line), `${id} ${ui} ${kind}: ${line}`);
+        // quoted example words ("should" in the requests category) are the person's words, not the app's voice
+        assert.ok(!banned.test(line.replace(/"[^"]*"|「[^」]*」/g, '')), `${id} ${ui} ${kind}: ${line}`);
+        assert.ok(/[（(].*4\.7.*[)）][。.]$/.test(line), `number in parentheses, one sentence: ${line}`);
+      }
+  }
+  for (const k of ['zh', 'en']) for (const v of Object.values(OBS_TEMPLATES[k].basis)) assert.ok(!banned.test(v));
+});
+test('validation status says what lab/langval found, and no more', () => {
+  assert.equal(validationNote('posemo', 'en', 'zh-TW').text, '和人工情緒標註比對過（英文）：AUC .79。.50 等於亂猜，1.00 是完全分得開。');
+  assert.equal(validationNote('grat', 'en', 'en').text, 'Checked against human emotion labels (English): AUC .93. .50 is chance and 1.00 is perfect.');
+  assert.ok(validationNote('loss', 'en', 'en').text.includes('very few comments'));
+  assert.equal(validationNote('cause', 'en', 'en').checked, false);
+  for (const id of ['posemo', 'negemo', 'anx', 'anger', 'sad', 'tone', 'i', 'cause']) assert.deepEqual(validationNote(id, 'zh', 'zh-TW'), { checked: false, text: '中文還沒驗證' });
+  assert.equal(validationNote('posemo', 'zh', 'en').text, 'Not yet validated for Chinese');
+  const g = validationNote('grat', 'zh', 'zh-TW');
+  assert.ok(g.checked && g.text.includes('AUC .80') && g.text.includes('電視劇對白'));
+  assert.deepEqual(Object.keys(VALIDATION.en.auc).sort(), ['affil', 'anger', 'anx', 'apology', 'grat', 'loss', 'negemo', 'posemo', 'sad', 'tone', 'vader']);
+  assert.deepEqual(Object.keys(VALIDATION.zh.auc), ['grat']);
+});
+
 await Promise.all(pending);
 console.log(`\n${passed} passed${process.exitCode ? ', some FAILED' : ''}`);
+
+// From the security review: long crafted input must not make matching quadratic.
+test('masking and markdown stripping stay fast on long crafted input', async () => {
+  let t = Date.now();
+  maskSpans('a'.repeat(150000));
+  assert.ok(Date.now() - t < 1000, `maskSpans took ${Date.now() - t} ms`);
+  t = Date.now();
+  await parseFile('notes.md', '['.repeat(200000));
+  assert.ok(Date.now() - t < 1000, `markdown parsing took ${Date.now() - t} ms`);
+});

@@ -1,66 +1,118 @@
 /* Language mirror (js/language-view.js). Uses the app's color variables; the fallbacks keep
-   the test harness page readable on its own. */
-.view.language h3 {
-  font-size: 17px;
-  margin: 18px 0 6px;
+   the test harness page readable on its own.
+
+   The page reads top to bottom like a notebook: what this is, what was read, then the
+   categories. Labels carry the page; rates and intervals sit under them in small type. */
+.view.language {
+  --ll-tint: var(--accent-soft, #e6e2fb);
+  --ll-tint: color-mix(in srgb, var(--accent, #5847c9) 16%, var(--surface, #fff));
 }
+.view.language h3,
+.sheet-body:has(.ll-cannot) > h3 {
+  font-size: 16px;
+  margin: 26px 0 6px;
+}
+.view.language > p {
+  max-width: 34em;
+}
+
+/* ---------- paste or choose a file ---------- */
 .ll-label {
   display: block;
   font-weight: 600;
-  margin: 16px 0 6px;
+  margin: 22px 0 8px;
 }
 .ll-text {
+  display: block;
   width: 100%;
   box-sizing: border-box;
   font: inherit;
+  line-height: 1.75;
   color: var(--ink, #24213b);
   background: var(--surface, #fff);
-  border: 1.5px solid var(--line, #dcd9e8);
+  border: 1px solid var(--line, #dcd9e8);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 14px 16px;
+  min-height: 9em;
   resize: vertical;
+}
+.ll-text::placeholder {
+  color: var(--muted, #6b6784);
+  opacity: 1;
 }
 .ll-file {
   display: block;
   width: 100%;
   font: inherit;
-  color: var(--ink, #24213b);
+  font-size: 14px;
+  color: var(--muted, #6b6784);
   min-height: 44px;
+}
+.ll-file::file-selector-button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink, #24213b);
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--line, #dcd9e8);
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 18px;
+  margin-inline-end: 12px;
+  cursor: pointer;
 }
 .ll-text:focus-visible,
 .ll-file:focus-visible,
 .ll-row:focus-visible,
+.ll-obs-item:focus-visible,
+.ll-more > summary:focus-visible,
 .ll-excerpts:focus-visible,
 .ll-group > summary:focus-visible,
 .ll-series select:focus-visible {
   outline: 3px solid var(--accent, #5847c9);
   outline-offset: 2px;
 }
-.ll-frame,
+.view.language > .btn.primary[data-key='ll-analyze'] {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 6px;
+}
+
+/* ---------- the framing lines ---------- */
+/* what this is and is not: the first thing on the results page, tinted, not shouted */
 .ll-notice {
-  padding: 10px 14px;
-  border-radius: 12px;
+  margin: 4px 0 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
   background: var(--accent-soft, #e6e2fb);
   color: var(--ink, #24213b);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.65;
 }
-.ll-notice {
-  font-weight: 600;
-  background: var(--surface, #fff);
-  border: 1.5px solid var(--line, #dcd9e8);
-  border-left: 4px solid var(--accent, #5847c9);
+/* "counting words, not measuring who you are": a sentence in the page, with a short rule */
+.ll-frame {
+  margin: 14px 0 6px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line, #dcd9e8);
+  color: var(--ink, #24213b);
+  font-weight: 500;
+  max-width: 34em;
 }
 .ll-note {
   padding-left: 12px;
   border-left: 3px solid var(--amber, #c98420);
 }
 .ll-help {
-  margin: 12px 0;
+  margin: 12px 0 18px;
   padding: 14px 16px;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--surface, #fff);
+  border: 1px solid var(--line, #dcd9e8);
   border-left: 4px solid var(--danger, #b3364a);
 }
-.ll-help h3 {
+.ll-help h3,
+.view.language .ll-help h3 {
   margin-top: 0;
 }
 .ll-files ul,
@@ -77,6 +129,14 @@
   padding: 3px 0;
   overflow-wrap: anywhere;
 }
+/* what was read, said once in the display face */
+.ll-summary {
+  margin: 0;
+}
+.ll-summary li {
+  font: 600 17px/1.45 var(--display, inherit);
+  padding: 1px 0;
+}
 .ll-kept li {
   display: flex;
   justify-content: space-between;
@@ -87,73 +147,203 @@
 .ll-status {
   min-height: 8px;
 }
+
+/* ---------- what stood out ---------- */
+/* a few sentences to read before any table: body type, the number inside the sentence,
+   and the same turning mark as a category row to show that each one opens its evidence */
+.ll-obs {
+  margin: 0 0 22px;
+}
+.view.language .ll-obs h3 {
+  margin: 0 0 2px;
+  font: 650 17px/1.3 var(--display, inherit);
+}
+.ll-obs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ll-obs-list li + li {
+  border-top: 1px solid var(--line, #dcd9e8);
+}
+.ll-obs-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 0;
+  text-align: start;
+  font: inherit;
+  line-height: 1.65;
+  color: var(--ink, #24213b);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ll-obs-item .ll-row-open {
+  grid-row: auto;
+}
+.ll-obs-basis {
+  margin: 4px 0 0;
+  max-width: 34em;
+}
+
+/* ---------- categories ---------- */
 .ll-group {
-  margin: 14px 0;
-  padding: 4px 14px 8px;
-  border-radius: 16px;
+  margin: 8px 0;
+  padding: 0 16px;
+  border-radius: 14px;
   background: var(--surface, #fff);
   border: 1px solid var(--line, #dcd9e8);
 }
+.ll-frame + .muted.small + .ll-group,
+.ll-frame + .muted.small + .chips {
+  margin-top: 22px;
+}
+.ll-group[open] {
+  margin: 14px 0;
+  padding-bottom: 6px;
+}
 .ll-group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 17px;
-  padding: 10px 0;
-  min-height: 24px;
+  font: 650 17px/1.3 var(--display, inherit);
+  min-height: 52px;
+  padding: 6px 0;
   border-radius: 8px;
 }
-.ll-rows li + li {
+.ll-group > summary::-webkit-details-marker {
+  display: none;
+}
+/* the same turning mark as the About sections */
+.ll-group > summary::after {
+  content: '›';
+  flex: none;
+  font: 400 1.4rem/1 var(--body, inherit);
+  color: var(--accent, #5847c9);
+  transition: transform 0.15s;
+}
+.ll-group[open] > summary::after {
+  transform: rotate(90deg);
+}
+.ll-group > .muted.small {
+  margin: -2px 0 8px;
+  max-width: 34em;
+}
+.ll-rows {
+  margin: 0;
+}
+/* a group with nothing to show yet: one quiet line, no card, still opens */
+.ll-group-name {
+  min-width: 0;
+}
+.ll-group-need {
+  display: block;
+  margin-top: 2px;
+  font: 400 13.5px/1.5 var(--body, inherit);
+  color: var(--muted, #6b6784);
+  font-variant-numeric: tabular-nums;
+}
+.ll-group-short:not([open]) {
+  background: none;
+  border-color: transparent;
+  border-bottom-color: var(--line, #dcd9e8);
+  border-radius: 0;
+  margin: 0;
+}
+.ll-group-short:not([open]) > summary {
+  font-weight: 500;
+  font-size: 15.5px;
+  color: var(--muted, #6b6784);
+}
+.ll-group-short:not([open]) > summary::after {
+  color: var(--muted, #6b6784);
+}
+/* "N more need more text": the rows without enough text, behind one toggle */
+.ll-more {
+  border-top: 1px solid var(--line, #dcd9e8);
+}
+.ll-more > summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted, #6b6784);
+  border-radius: 8px;
+}
+.ll-rows li {
   border-top: 1px solid var(--line, #dcd9e8);
 }
 .ll-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 2px 10px;
+  align-items: center;
+  gap: 2px 12px;
   width: 100%;
-  text-align: left;
+  text-align: start;
   background: none;
   border: 0;
-  padding: 10px 0;
+  padding: 12px 0;
   cursor: pointer;
-  min-height: 44px;
+  min-height: 56px;
   border-radius: 8px;
 }
 .ll-row-label {
+  grid-column: 1;
   font-weight: 600;
+  line-height: 1.4;
 }
+/* the words stay for screen readers and for the name of the button; the eye gets a mark */
 .ll-row-open {
   grid-column: 2;
-  grid-row: 1;
-  color: var(--accent, #5847c9);
-  font-size: 13.5px;
-  font-weight: 600;
+  grid-row: 1 / span 4;
+  align-self: center;
+  font-size: 0;
   white-space: nowrap;
+}
+.ll-row-open::after {
+  content: '›';
+  font: 400 1.4rem/1 var(--body, inherit);
+  color: var(--accent, #5847c9);
 }
 .ll-row-value,
 .ll-row-cmp,
 .ll-bar {
-  grid-column: 1 / -1;
+  grid-column: 1;
 }
+/* numbers are the small print under the name */
 .ll-row-value,
 .ll-row-cmp {
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.ll-row-value.muted,
-.ll-row-cmp {
+  font-size: 13.5px;
+  line-height: 1.5;
   color: var(--muted, #6b6784);
+  font-variant-numeric: tabular-nums;
 }
 /* interval as a band, the rate as a dot: no color that implies good or bad */
 .ll-bar {
   position: relative;
-  height: 10px;
-  margin-top: 4px;
-  border-radius: 5px;
-  background: var(--bg, #f1f0f6);
+  height: 12px;
+  margin: 6px 0 2px;
+}
+.ll-bar::before {
+  content: '';
+  position: absolute;
+  inset: 5px 0;
+  border-radius: 1px;
+  background: var(--line, #dcd9e8);
 }
 .ll-bar-ci {
   position: absolute;
-  top: 3px;
+  top: 4px;
   height: 4px;
   min-width: 2px;
   border-radius: 2px;
@@ -162,12 +352,17 @@
 .ll-bar-dot {
   position: absolute;
   top: 0;
-  width: 10px;
-  height: 10px;
-  margin-left: -5px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
   border-radius: 50%;
   background: var(--accent, #5847c9);
-  box-shadow: 0 0 0 2px var(--surface, #fff);
+  box-shadow: 0 0 0 2.5px var(--surface, #fff);
+}
+
+/* ---------- over time ---------- */
+.ll-series {
+  margin-top: 30px;
 }
 .ll-series-pick {
   display: flex;
@@ -180,11 +375,18 @@
   font: inherit;
   color: var(--ink, #24213b);
   background: var(--surface, #fff);
-  border: 1.5px solid var(--line, #dcd9e8);
-  border-radius: 10px;
+  border: 1px solid var(--line, #dcd9e8);
+  border-radius: 12px;
   padding: 8px 10px;
   min-height: 44px;
   max-width: 100%;
+}
+.ll-series details > summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--accent, #5847c9);
+  font-weight: 600;
 }
 .ll-chart {
   width: 100%;
@@ -221,70 +423,251 @@
 }
 .ll-table th,
 .ll-table td {
-  text-align: left;
-  padding: 6px 8px 6px 0;
+  text-align: start;
+  padding: 9px 10px 9px 0;
   border-bottom: 1px solid var(--line, #dcd9e8);
   overflow-wrap: anywhere;
 }
+.ll-table td {
+  color: var(--muted, #6b6784);
+}
 .ll-table thead th {
   color: var(--muted, #6b6784);
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
+  padding-top: 4px;
+  padding-bottom: 6px;
 }
 .ll-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 20px 0;
+  margin: 32px 0 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line, #dcd9e8);
 }
 .ll-actions p {
-  margin: 8px 0 0;
+  margin: 10px 0 2px;
 }
+.ll-actions p:first-child {
+  margin-top: 0;
+}
+
+/* ---------- one category, opened ---------- */
 .ll-detail-value {
-  font-size: 17px;
-  font-weight: 600;
+  margin: -2px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted, #6b6784);
   font-variant-numeric: tabular-nums;
 }
-.ll-cf,
+/* whether this list was ever checked against human labels: said plainly, in small type */
+.ll-valid {
+  margin: -4px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--line, #dcd9e8);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted, #6b6784);
+  max-width: 34em;
+}
+.ll-valid.checked {
+  border-left-color: var(--accent, #5847c9);
+}
+/* a counted word looks the same in the list as it does in the text below */
+.ll-word,
+mark.ll-hit {
+  background: var(--accent-soft, #e6e2fb);
+  background: color-mix(in srgb, var(--accent, #5847c9) 16%, var(--surface, #fff));
+  color: var(--ink, #24213b);
+  border-bottom: 2px solid var(--accent, #5847c9);
+  border-radius: 6px 6px 3px 3px;
+  padding: 1px 6px;
+  font-weight: 600;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.ll-word {
+  display: inline-block;
+  line-height: 1.5;
+}
+mark.ll-hit {
+  margin: 0 1px;
+}
+/* highlights: color plus underline, so they do not rest on color alone */
+mark.ll-hit.neg {
+  border-bottom-style: dashed;
+}
+.ll-cf {
+  margin: 22px 0 0;
+}
+.ll-cf h3,
+.ll-cannot h3 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+.ll-cf p {
+  max-width: 34em;
+}
+/* the limits: the same warm tint the writing sheet uses for "before you start" */
 .ll-cannot {
-  margin: 14px 0;
-  padding: 4px 14px 6px;
+  margin: 20px 0 6px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  background: color-mix(in srgb, var(--amber, #c98420) 12%, var(--surface, #fff));
+}
+.ll-cannot p {
+  margin: 0;
+}
+/* the person's own text, set as a page to read */
+.ll-excerpts {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 6px 18px;
   border-radius: 14px;
   background: var(--surface, #fff);
   border: 1px solid var(--line, #dcd9e8);
 }
-.ll-cannot {
-  border-left: 4px solid var(--amber, #c98420);
-}
-.ll-cf h3,
-.ll-cannot h3 {
-  margin-top: 10px;
-}
-.ll-excerpts {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 2px 4px;
-}
 .ll-excerpt {
+  margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  padding: 8px 0;
+  padding: 14px 0;
+  line-height: 2;
   border-bottom: 1px solid var(--line, #dcd9e8);
 }
-/* highlights: color plus underline, so they do not rest on color alone */
-mark.ll-hit {
-  background: var(--accent-soft, #e6e2fb);
-  color: var(--ink, #24213b);
-  border-bottom: 2px solid var(--accent, #5847c9);
-  border-radius: 3px;
-  padding: 0 2px;
-}
-mark.ll-hit.neg {
-  border-bottom-style: dashed;
+.ll-excerpt:last-child {
+  border-bottom: 0;
 }
 @media (forced-colors: active) {
+  .ll-word,
   mark.ll-hit {
     forced-color-adjust: none;
     background: Mark;
     color: MarkText;
   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ll-group > summary::after {
+    transition: none;
+  }
+}
+
+/* ---------- small newer pieces outside the mirror ----------
+   Journal search, the voice report on Trends, the opt-in line on the lens list and the
+   "how this app is checked" list. Their base rules are in style.css; these only bring
+   them in line with the cards and rows above. */
+.journal-search label {
+  font: 600 16px/1.3 var(--display, inherit);
+}
+.search-row input {
+  min-height: 48px;
+  padding: 10px 14px;
+  border-width: 1px;
+  border-radius: 14px;
+}
+/* the Clear link next to the field does this job, with a name in the page's language */
+.search-row input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  display: none;
+}
+.search-row .search-clear {
+  min-height: 44px;
+  padding-inline: 4px;
+}
+.search-hit {
+  min-height: 56px;
+  gap: 4px;
+  padding: 12px 16px;
+}
+.search-snippet {
+  line-height: 1.7;
+}
+.search-snippet mark {
+  background: color-mix(in srgb, var(--accent, #5847c9) 16%, var(--surface, #fff));
+  border-bottom: 2px solid var(--accent, #5847c9);
+  border-radius: 6px 6px 3px 3px;
+  padding: 1px 4px;
+}
+
+.voice-report {
+  margin-top: 36px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line, #dcd9e8);
+}
+.voice-report > .small {
+  max-width: 34em;
+}
+.voice-report .toggle {
+  align-items: center;
+  min-height: 44px;
+  margin: 6px 0 10px;
+}
+.voice-report .toggle input {
+  margin-top: 0;
+}
+.voice-report-actions {
+  gap: 8px;
+}
+.voice-report-actions .btn {
+  flex: 1 1 100%;
+}
+/* the second format is the same kind of action, so it gets the same outline, only quieter */
+.voice-report-actions .btn.ghost {
+  border-color: var(--line, #dcd9e8);
+  color: var(--ink, #24213b);
+  font-weight: 500;
+}
+
+.policy-optin {
+  margin: 10px 0 18px;
+  padding: 14px 16px 12px;
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dcd9e8);
+}
+.policy-optin > p {
+  margin: 0 0 10px;
+  color: var(--ink, #24213b);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.policy-optin .actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+/* a list of places to look, not a bulleted paragraph: one full-width row per link */
+.about-more > .plain-list:has(> li > a) {
+  list-style: none;
+  margin: 2px 0 8px;
+  padding: 0;
+}
+.about-more > .plain-list:has(> li > a) > li {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line, #dcd9e8);
+}
+.about-more > .plain-list:has(> li > a) > li::before {
+  content: none;
+}
+.about-more > .plain-list > li > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.about-more > .plain-list > li > a::after {
+  content: '↗';
+  flex: none;
+  font-size: 14px;
+  color: var(--muted, #6b6784);
 }

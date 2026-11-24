@@ -486,7 +486,7 @@ function scoreLanguage(lang, items, data, opts) {
     };
   };
   for (const id of CATEGORY_IDS) {
-    scores.push(pctScore(id, contrib[id], 'pct', MIN_WORDS[TIER[id]], negatedSkips[id]));
+    scores.push(pctScore(id, contrib[id], 'pct', MIN_WORDS[TIER[id] || 'openC'], negatedSkips[id])); // the second, open-class set needs about 1000 units (DESIGN.md gates)
   }
 
   const indices = indexIds.map((k) => {

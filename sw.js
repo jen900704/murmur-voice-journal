@@ -1,7 +1,7 @@
 // Offline support. The cache name is set by tools/bump-cache.mjs (npm run prepare-release).
 // Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-5d0a658708';
+const CACHE = 'murmur-f2b65b5d34';
 const SHELL = [
   './',
   './index.html',
@@ -108,9 +108,8 @@ self.addEventListener('fetch', (e) => {
         if (shell) return shell;
       }
       try {
-        const res = await fetch(req);
-        if (res && res.status === 200) cache.put(req, res.clone()).catch(() => {});
-        return res;
+        // files outside the release list are fetched but never stored (no stray pages or query strings)
+        return await fetch(req);
       } catch (err) {
         // offline and this file was never cached (for example, the phone cleared storage)
         if (req.mode !== 'navigate') throw err;

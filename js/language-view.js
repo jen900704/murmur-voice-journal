@@ -3,10 +3,14 @@
 // Nothing typed or imported here is sent anywhere, and nothing is saved unless you choose
 // "keep in Murmur".
 import { checkRisk, helpList } from './safety.js';
-import { analyze, findScore, compare, timeSeries, sourcesOf, highlightSpans, GROUPS, INDICES, CI_LEVEL, MIN_HITS_FOR_RATE } from './langlab/score.js';
-import { scoreMeta, groupLabel, groupNote, NOTICE } from './langlab/meta.js';
+import { analyze, findScore, compare, timeSeries, sourcesOf, highlightSpans, GROUPS, INDICES, CI_LEVEL, MIN_HITS_FOR_RATE, MIN_WORDS } from './langlab/score.js';
+import { scoreMeta, groupLabel, groupNote, NOTICE, OBS_TEMPLATES, chooseObservations, observationText, validationNote } from './langlab/meta.js';
 import { parseFile, wantedInArchive, dedupe, sortByTime } from './langlab/importers.js';
 import { readZip, zipSupported } from './langlab/zip.js';
+
+// limits that keep a phone responsive: one file, and text pasted at once
+const MAX_FILE_BYTES = 50e6;
+const MAX_PASTE_CHARS = 200000;
 import { buildReportData, buildReportHtml, sha256Hex } from './langlab/report.js';
 import { keepTexts, listKept, deleteKept } from './langlab/store.js';
 
@@ -33,6 +37,7 @@ const S = {
     fileRow: (n, kind, c) => `${n}：${kind}，${c} 則`,
     fileBad: (n) => `${n}：讀不出來。請確認是 JSON 或文字格式的匯出檔。`,
     fileZipBad: (n) => `${n}：這個 .zip 打不開。請先解壓縮，再選裡面的檔案。`,
+    fileTooBig: (n) => `${n}：檔案太大，這台手機讀不動。可以只選需要的那幾個檔案。`,
     fileNone: (n) => `${n}：沒有找到可以分析的文字。`,
     clearFiles: '清除檔案',
     kinds: { text: '文字檔', csv: 'CSV', json: 'JSON', 'x-tweets': 'X 貼文', 'instagram-posts': 'Instagram 貼文', 'instagram-comments': 'Instagram 留言', 'threads-posts': 'Threads 貼文', 'facebook-posts': 'Facebook 貼文', 'facebook-comments': 'Facebook 留言', 'bluesky-records': 'Bluesky 貼文', 'bluesky-car': 'Bluesky 貼文', 'reddit-posts': 'Reddit 貼文', 'reddit-comments': 'Reddit 留言' },
@@ -44,7 +49,9 @@ const S = {
     showLang: '顯示哪種語言',
     skipped: (n) => `有 ${n} 則是其他語言，沒有計分。`,
     simplified: '有些文字看起來是簡體中文。這些類別是照繁體中文（台灣用語）寫的。簡體字會先逐字轉成繁體再比對，所以和台灣用語不同的說法還是會漏掉。',
-    unvalidated: '這些詞表是為這個 app 寫的，還沒有和人工評分比對驗證過，也不是 LIWC。',
+    unvalidated: '這些詞表是為這個 app 寫的，不是 LIWC。只有英文的幾個感受類別和人工情緒標註比對過，中文幾乎都還沒驗證。點開每一類可以看到。',
+    groupShort: (need, have) => `這一組需要更多文字（約 ${need} 個單位，目前 ${have}）`,
+    moreShort: (n) => `還有 ${n} 項文字不夠`,
     riskTitle: '先說一件事',
     riskBody: '這些文字裡，有些地方提到想死、受到傷害，或想傷害別人。舊的文字可能是在說已經過去的時候。如果其中有任何一點是你現在的狀況，這些電話可以打：',
     perZh: '每 100 個中文字',
@@ -129,6 +136,7 @@ const S = {
     fileRow: (n, kind, c) => `${n}: ${kind}, ${c} ${c === 1 ? 'item' : 'items'}`,
     fileBad: (n) => `${n}: could not be read. Check that it is a JSON or text export.`,
     fileZipBad: (n) => `${n}: this .zip could not be opened. Extract it first and choose the files inside.`,
+    fileTooBig: (n) => `${n}: this file is too large to read on a phone. Choose only the files you need.`,
     fileNone: (n) => `${n}: no text to analyze was found.`,
     clearFiles: 'Clear files',
     kinds: { text: 'text file', csv: 'CSV', json: 'JSON', 'x-tweets': 'X posts', 'instagram-posts': 'Instagram posts', 'instagram-comments': 'Instagram comments', 'threads-posts': 'Threads posts', 'facebook-posts': 'Facebook posts', 'facebook-comments': 'Facebook comments', 'bluesky-records': 'Bluesky posts', 'bluesky-car': 'Bluesky posts', 'reddit-posts': 'Reddit posts', 'reddit-comments': 'Reddit comments' },
@@ -140,7 +148,9 @@ const S = {
     showLang: 'Language to show',
     skipped: (n) => `${n} ${n === 1 ? 'item was' : 'items were'} in another language and not scored.`,
     simplified: 'Some of the text looks like Simplified Chinese. The categories were written for Traditional Chinese (Taiwan usage). Simplified characters are converted one by one before matching, so wording that differs from Taiwan usage is still missed.',
-    unvalidated: 'These word lists were written for this app. They have not been validated against human ratings, and they are not LIWC.',
+    unvalidated: 'These word lists were written for this app, and they are not LIWC. Only a few English feeling categories have been checked against human emotion labels; almost none of the Chinese ones have. Each category says which when you open it.',
+    groupShort: (need, have) => `This group needs more text (about ${need} units, has ${have})`,
+    moreShort: (n) => `${n} more ${n === 1 ? 'needs' : 'need'} more text`,
     riskTitle: 'One thing first',
     riskBody: 'Some of this text mentions wanting to die, being hurt, or hurting someone. Older writing may describe a time that has passed. If any of it is true for you now, these lines are open:',
     perZh: 'per 100 Chinese characters',
@@ -247,6 +257,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     kept: null,
     keptThis: false,
     open: new Set(),
+    closed: new Set(),
     detailId: null,
     excerpts: 15,
   };
@@ -308,7 +319,11 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
           continue;
         }
         try {
-          const entries = (await readZip(f)).filter((e) => wantedInArchive(e.name) && e.size < 300e6);
+          if (f.size > MAX_FILE_BYTES * 4) {
+            st.notes.push(L().fileTooBig(f.name));
+            continue;
+          }
+          const entries = (await readZip(f)).filter((e) => wantedInArchive(e.name) && e.size < MAX_FILE_BYTES);
           if (!entries.length) st.notes.push(L().fileNone(f.name));
           for (const e of entries) {
             let bytes = null;
@@ -319,6 +334,10 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
           st.notes.push(L().fileZipBad(f.name));
         }
       } else {
+        if (f.size > MAX_FILE_BYTES) {
+          st.notes.push(L().fileTooBig(f.name));
+          continue;
+        }
         await readOne(f.name, () => f.text(), async () => new Uint8Array(await f.arrayBuffer()), f.size);
       }
     }
@@ -329,7 +348,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   // ---------- analysis ----------
   async function run() {
     const items = [];
-    if (st.text.trim()) items.push({ text: st.text, timestamp: null, source: 'paste' });
+    if (st.text.trim()) items.push({ text: st.text.slice(0, MAX_PASTE_CHARS), timestamp: null, source: 'paste' });
     items.push(...st.imported);
     if (!items.length) {
       st.notes = [L().needText];
@@ -439,9 +458,37 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   }
 
   // ---------- results ----------
+  // The engine leaves the minimum of some open-class categories unset; show the open-class
+  // minimum for those and never the word "undefined".
+  const needOf = (sc) => (Number.isFinite(sc.minWords) ? sc.minWords : MIN_WORDS.openC);
+
+  // "What stood out": up to three plain sentences, each a button that opens its evidence.
+  function observations(res, cmp) {
+    const T = OBS_TEMPLATES[getLang() === 'en' ? 'en' : 'zh'];
+    const pick = chooseObservations(res, cmp);
+    const basis = pick.mode === 'baseline' ? T.basis.baseline : pick.hadBaseline ? T.basis.countsAfterBaseline : T.basis.counts;
+    return h(
+      'section',
+      { class: 'll-obs', 'data-key': 'll-obs', 'data-mode': pick.mode, 'aria-labelledby': 'll-obs-title' },
+      h('h3', { id: 'll-obs-title' }, T.title),
+      pick.items.length
+        ? [
+            h(
+              'ul',
+              { class: 'll-obs-list' },
+              pick.items.map((it) =>
+                h('li', {}, h('button', { type: 'button', class: 'll-obs-item', 'data-key': `obs-${it.id}`, onclick: () => openDetail(it.id) }, h('span', { class: 'll-obs-text' }, observationText(it, getLang(), res.lang)), h('span', { class: 'll-row-open' }, L().open)))
+              )
+            ),
+            h('p', { class: 'll-obs-basis muted small' }, basis),
+          ]
+        : h('p', { class: 'muted' }, T.none)
+    );
+  }
+
   function valueText(sc, res) {
     const s = L();
-    if (!sc.enough) return s.notEnough(sc.minWords, Math.floor(res.gateUnits));
+    if (!sc.enough) return s.notEnough(needOf(sc), Math.floor(res.gateUnits));
     if ((sc.kind === 'pct' || sc.kind === 'empath') && sc.count === 0) return s.zero;
     if ((sc.kind === 'pct' || sc.kind === 'empath') && sc.count < MIN_HITS_FOR_RATE) return s.countOnly(sc.count);
     let txt = show(sc, sc.value);
@@ -492,6 +539,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     const max = Math.max(1, ...pct.map((x) => (x.ci ? x.ci[1] : x.value)));
     const out = [h('h2', {}, s.results), h('p', { class: 'll-notice', role: 'note', 'data-key': 'll-notice' }, NOTICE[getLang() === 'en' ? 'en' : 'zh'])];
     if (st.risk) out.push(h('div', { class: 'll-help', role: 'note', 'data-key': 'll-help' }, h('h3', {}, s.riskTitle), h('p', {}, s.riskBody), helpList(h, getLang())));
+    out.push(observations(res, cmp));
     out.push(
       h(
         'ul',
@@ -517,23 +565,47 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     for (const g of GROUPS) {
       const rows = g.ids.map((id) => findScore(res, id)).filter(Boolean);
       if (!rows.length) continue;
-      const list = h(
-        'ul',
-        { class: 'll-rows' },
-        rows.map((sc) => {
-          const dup = used.has(sc.id);
-          used.add(sc.id);
-          return row(sc, res, cmp, max, dup ? `-${g.id}` : '');
-        })
-      );
+      const item = (sc) => {
+        const dup = used.has(sc.id);
+        used.add(sc.id);
+        return row(sc, res, cmp, max, dup ? `-${g.id}` : '');
+      };
+      // rows with enough text first; the rest wait behind one quiet toggle
+      const pass = rows.filter((sc) => sc.enough);
+      const short = rows.filter((sc) => !sc.enough);
+      const allShort = !pass.length;
+      const moreKey = `${g.id}:more`;
+      const body = allShort
+        ? h('ul', { class: 'll-rows' }, short.map(item))
+        : [
+            h('ul', { class: 'll-rows' }, pass.map(item)),
+            short.length
+              ? h(
+                  'details',
+                  { class: 'll-more', open: st.open.has(moreKey), 'data-key': `ll-more-${g.id}`, ontoggle: (e) => (e.currentTarget.open ? st.open.add(moreKey) : st.open.delete(moreKey)) },
+                  h('summary', {}, s.moreShort(short.length)),
+                  h('ul', { class: 'll-rows' }, short.map(item))
+                )
+              : null,
+          ];
+      const isOpen = allShort ? st.open.has(g.id) : st.closed.has(g.id) ? false : !!g.tier1 || st.open.has(g.id);
       out.push(
         h(
           'details',
-          { class: 'll-group', open: !!g.tier1 || st.open.has(g.id), 'data-key': `ll-group-${g.id}`, ontoggle: (e) => (e.currentTarget.open ? st.open.add(g.id) : st.open.delete(g.id)) },
-          h('summary', {}, groupLabel(g.id, getLang())),
+          {
+            class: 'll-group' + (allShort ? ' ll-group-short' : ''),
+            open: isOpen,
+            'data-key': `ll-group-${g.id}`,
+            ontoggle: (e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.currentTarget.open) st.open.add(g.id), st.closed.delete(g.id);
+              else st.open.delete(g.id), st.closed.add(g.id);
+            },
+          },
+          h('summary', {}, h('span', { class: 'll-group-name' }, groupLabel(g.id, getLang()), allShort ? h('span', { class: 'll-group-need' }, s.groupShort(Math.min(...short.map(needOf)), Math.floor(res.gateUnits))) : null)),
           h('p', { class: 'muted small' }, groupNote(g.id, getLang())),
           g.id === 'loss' && st.risk ? h('div', { class: 'll-help', role: 'note' }, h('p', {}, s.lossHelp), helpList(h, getLang())) : null,
-          list
+          body
         )
       );
     }
@@ -555,6 +627,8 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
 
   function restart() {
     Object.assign(st, { text: '', files: [], imported: [], notes: [], analysis: null, earlier: null, risk: false, items: [], keptThis: false });
+    st.open.clear();
+    st.closed.clear();
     go('home');
   }
 
@@ -684,7 +758,12 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     const sc = findScore(res, id);
     const m = scoreMeta(id, getLang());
     const again = () => (rerender ? rerender() : draw());
-    const out = [h('h2', {}, m.label), h('p', { class: 'll-detail-value', 'data-key': 'll-detail-value' }, valueText(sc, res))];
+    const valid = sc.kind === 'empath' || (sc.kind === 'index' && id !== 'tone') ? null : validationNote(id, res.lang, getLang());
+    const out = [
+      h('h2', {}, m.label),
+      valid ? h('p', { class: 'll-valid' + (valid.checked ? ' checked' : ''), 'data-key': 'll-valid' }, valid.text) : null,
+      h('p', { class: 'll-detail-value', 'data-key': 'll-detail-value' }, valueText(sc, res)),
+    ];
     out.push(h('h3', {}, s.whatCounts), h('p', {}, m.definition), m.cite ? h('p', { class: 'muted small' }, s.motivated(m.cite)) : null);
     if (sc.kind === 'sentiment' && sc.nSentences) {
       const p = (x) => Math.round(100 * x);
@@ -707,7 +786,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
           'table',
           { class: 'll-table', 'data-key': 'll-words' },
           h('thead', {}, h('tr', {}, [s.word, s.count, third].map((c) => h('th', { scope: 'col' }, c)))),
-          h('tbody', {}, top.map((c) => h('tr', {}, h('th', { scope: 'row' }, c.word), h('td', {}, c.count), h('td', {}, cell(c)))))
+          h('tbody', {}, top.map((c) => h('tr', {}, h('th', { scope: 'row' }, h('span', { class: 'll-word' }, c.word)), h('td', {}, c.count), h('td', {}, cell(c)))))
         )
       );
       const rest = (sc.nTypes ?? sc.contributors.length) - top.length;

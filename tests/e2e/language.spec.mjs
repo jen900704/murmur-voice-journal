@@ -60,6 +60,88 @@ test.describe('language mirror', () => {
     expect(w.errors).toEqual([]);
   });
 
+  test('what stood out: three plain sentences from passing rows only, each opening its evidence', async ({ page }) => {
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', ZH_TEXT);
+    await page.locator('[data-key="ll-analyze"]').click();
+    const obs = page.locator('[data-key="ll-obs"]');
+    await expect(obs.getByRole('heading', { name: '比較明顯的地方' })).toBeVisible();
+    // right under the notice
+    expect(await page.evaluate(() => document.querySelector('[data-key="ll-notice"]').nextElementSibling.dataset.key)).toBe('ll-obs');
+    // no kept texts, so these are the categories with the most hits, and the page says so
+    await expect(obs).toHaveAttribute('data-mode', 'counts');
+    await expect(obs).toContainText('只是出現次數最多的');
+    const items = obs.locator('.ll-obs-item');
+    await expect(items).toHaveCount(3);
+    await expect(items.first()).toContainText(/^你常寫到自己（每 100 字約 [\d.]+ 個「我」的詞）。/);
+    // never built from a row that says "not enough text", and never from a count too small for a rate
+    const ids = await items.evaluateAll((els) => els.map((e) => e.dataset.key.slice(4)));
+    for (const g of ['thinking', 'feelings', 'social', 'power', 'loss', 'drives', 'moral', 'style', 'topics']) await page.locator(`[data-key="ll-group-${g}"] > summary`).click();
+    for (const m of await page.locator('.ll-more > summary').all()) await m.click();
+    for (const id of ids) {
+      const row = page.locator(`[data-key="score-${id}"]`);
+      await expect(row).toContainText('每 100 個中文字');
+      await expect(row).not.toContainText('文字還不夠');
+    }
+    const text = await obs.textContent();
+    expect(text).not.toMatch(/健康|擔憂|令人|建議|應該|憂鬱|焦慮|症|診斷|良好|不好/);
+    // each observation opens its own evidence
+    await items.first().click();
+    await expect(page.locator('#sheet').getByRole('heading', { name: '「我」的詞' })).toBeVisible();
+    await expect(page.locator('#sheet [data-key="ll-valid"]')).toHaveText('中文還沒驗證');
+  });
+
+  test('a text too short for any rate has no observations, only a line saying so', async ({ page }) => {
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', '今天天氣很好，出門走走。');
+    await page.locator('[data-key="ll-analyze"]').click();
+    await expect(page.locator('[data-key="ll-obs"]')).toHaveAttribute('data-mode', 'none');
+    await expect(page.locator('[data-key="ll-obs"] .ll-obs-item')).toHaveCount(0);
+    await expect(page.locator('[data-key="ll-obs"]')).toContainText('文字還不夠');
+    // even the first group is one quiet line now, and it still opens
+    const core = page.locator('[data-key="ll-group-core"]');
+    await expect(core).not.toHaveAttribute('open', '');
+    await expect(core.locator('summary')).toContainText('這一組需要更多文字（約 50 個單位，目前');
+    await core.locator('summary').click();
+    await expect(page.locator('[data-key="score-i"]')).toContainText('文字還不夠');
+  });
+
+  test('groups: all-short groups are one quiet line that opens; mixed groups put passing rows first behind one toggle', async ({ page }) => {
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', ZH_TEXT);
+    await page.locator('[data-key="ll-analyze"]').click();
+    // every row of this group is below its minimum: one line, closed, and it still opens and closes
+    const moral = page.locator('[data-key="ll-group-moral"]');
+    await expect(moral).toHaveClass(/ll-group-short/);
+    await expect(moral.locator('> summary')).toContainText(/這一組需要更多文字（約 \d+ 個單位，目前 344）/);
+    await expect(moral.locator('.ll-more')).toHaveCount(0);
+    await expect(page.locator('[data-key="score-care"]')).toBeHidden();
+    await moral.locator('> summary').click();
+    await expect(page.locator('[data-key="score-care"]')).toContainText('文字還不夠');
+    await moral.locator('> summary').click();
+    await expect(page.locator('[data-key="score-care"]')).toBeHidden();
+    // a group with some passing rows: those first, then one toggle for the rest
+    const social = page.locator('[data-key="ll-group-social"]');
+    await expect(social).not.toHaveClass(/ll-group-short/);
+    await social.locator('> summary').click();
+    await expect(social.locator('> .ll-rows [data-key="score-friend"]')).toContainText('每 100 個中文字');
+    expect(await social.locator('> .ll-rows').textContent()).not.toContain('文字還不夠');
+    const more = page.locator('[data-key="ll-more-social"]');
+    await expect(more).toHaveCount(1);
+    const n = await more.locator('.ll-row').count();
+    expect(n).toBeGreaterThan(0);
+    await expect(more.locator('summary')).toHaveText(`還有 ${n} 項文字不夠`);
+    await expect(more.locator('.ll-row').first()).toBeHidden();
+    await more.locator('summary').click();
+    for (const r of await more.locator('.ll-row').all()) await expect(r).toContainText('文字還不夠');
+    // both stay open across a redraw
+    await page.locator('[data-key="score-i"]').click();
+    await page.locator('#sheet .back').click();
+    await expect(more.locator('.ll-row').first()).toBeVisible();
+    // the first group, all passing, has no toggle
+    await expect(page.locator('[data-key="ll-group-core"] .ll-more')).toHaveCount(0);
+  });
+
   test('user text is never read as markup', async ({ page }) => {
     const w = watch(page);
     await page.goto(HARNESS + '?sheet=0');
@@ -125,6 +207,10 @@ test.describe('language mirror', () => {
     await page.fill('#ll-text', ZH_TEXT.replaceAll('我', '他'));
     await page.locator('[data-key="ll-analyze"]').click();
     await expect(page.locator('[data-key="score-other"]')).toContainText('你之前留下的文字');
+    // with kept texts, what stood out is chosen by distance from them and says both numbers
+    await expect(page.locator('[data-key="ll-obs"]')).toHaveAttribute('data-mode', 'baseline');
+    await expect(page.locator('[data-key="ll-obs"]')).toContainText('和你自己之前留下的文字差得最多');
+    await expect(page.locator('[data-key="obs-other"]')).toContainText(/^和你之前留下的文字比，這次指別人的詞比較多（每 100 字約 [\d.]+ 個，之前約 0\.00 個）。/);
     await page.locator('[data-key="ll-restart"]').click();
     await page.locator('.ll-kept button').click();
     await expect(page.locator('.ll-kept')).toHaveCount(0);
@@ -203,6 +289,8 @@ test.describe('language mirror', () => {
     await page.locator('[data-key="ll-analyze"]').click();
     await expect(page.locator('[data-key="ll-notice"]')).toHaveText('This is language analysis for self-reflection, not a professional assessment or diagnosis, and it cannot judge personality, mental state, or whether someone is lying.');
     await expect(page.locator('[data-key="score-i"]')).toContainText('per 100 words, 90% interval');
+    await expect(page.locator('[data-key="ll-obs"] .ll-obs-item').first()).toHaveText(/^You write about yourself often \(about [\d.]+ I-words per 100 words\)\./);
+    expect(await page.locator('[data-key="ll-obs"]').textContent()).not.toMatch(/good|bad|healthy|worr(y|ying) (sign|level)|should|anxi|disorder|symptom/i);
     for (const g of ['thinking', 'feelings', 'social', 'power', 'loss', 'drives', 'moral', 'style', 'topics']) await page.locator(`[data-key="ll-group-${g}"] > summary`).click();
     await expect(page.locator('[data-key="score-analytic"]')).toContainText('interval');
     await expect(page.locator('[data-key="score-status"]')).toBeVisible();
@@ -212,6 +300,13 @@ test.describe('language mirror', () => {
     expect(axe.violations.map((v) => `${v.id}: ${v.nodes[0].html.slice(0, 80)}`)).toEqual([]);
     await page.locator('[data-key="score-authentic"]').click();
     await expect(page.locator('#sheet')).toContainText('cannot tell whether a statement is true');
+    await expect(page.locator('#sheet [data-key="ll-valid"]')).toHaveCount(0); // an index with no check of its own says nothing
+    await page.locator('#sheet .back').click();
+    await page.locator('[data-key="score-posemo"]').click();
+    await expect(page.locator('#sheet [data-key="ll-valid"]')).toHaveText('Checked against human emotion labels (English): AUC .79. .50 is chance and 1.00 is perfect.');
+    await page.locator('#sheet .back').click();
+    await page.locator('[data-key="score-cause"]').click();
+    await expect(page.locator('#sheet [data-key="ll-valid"]')).toHaveText('This category has not been checked against human labels yet.');
     axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations.map((v) => `${v.id}: ${v.nodes[0].html.slice(0, 80)}`)).toEqual([]);
     // keyboard: the sheet's back control has focus, and Enter returns

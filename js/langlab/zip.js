@@ -1,3 +1,5 @@
+// Largest file the language mirror will read from an archive, after decompression.
+export const MAX_ENTRY_BYTES = 50e6;
 // A small reader for .zip files that uses the browser's own decompression
 // (DecompressionStream), so no library is needed. It reads only the entries asked for.
 // Not supported: encrypted archives and archives over 4 GB (zip64). In those cases, or in a
@@ -59,10 +61,32 @@ export async function readZip(blob) {
         if (lv.getUint32(0, true) !== 0x04034b50) throw new Error('notzip');
         const start = local + 30 + lv.getUint16(26, true) + lv.getUint16(28, true);
         const data = blob.slice(start, start + csize);
-        if (method === 0) return new Uint8Array(await data.arrayBuffer());
+        if (method === 0) {
+          if (csize > MAX_ENTRY_BYTES) throw new Error('toolarge');
+          return new Uint8Array(await data.arrayBuffer());
+        }
         if (method !== 8) throw new Error('method');
-        const stream = data.stream().pipeThrough(new DecompressionStream('deflate-raw'));
-        return new Uint8Array(await new Response(stream).arrayBuffer());
+        // count real bytes while inflating: the size a zip declares cannot be trusted (zip bombs)
+        const reader = data.stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+        const parts = [];
+        let total = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          total += value.length;
+          if (total > MAX_ENTRY_BYTES) {
+            reader.cancel().catch(() => {});
+            throw new Error('toolarge');
+          }
+          parts.push(value);
+        }
+        const out = new Uint8Array(total);
+        let at = 0;
+        for (const part of parts) {
+          out.set(part, at);
+          at += part.length;
+        }
+        return out;
       },
     });
   }

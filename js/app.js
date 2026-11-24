@@ -1574,7 +1574,7 @@ function viewAbout() {
             state.welcomed = false;
             state.lastBackup = 0;
             try {
-              localStorage.removeItem('murmur-region');
+              for (const k of Object.keys(localStorage)) if (k.startsWith('murmur-')) localStorage.removeItem(k);
             } catch (_) {
               /* storage unavailable */
             }

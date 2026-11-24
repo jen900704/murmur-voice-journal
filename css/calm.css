@@ -1,16 +1,46 @@
 /* Calm now: breathing with a hold, 5-4-3-2-1 grounding, phrases to say to oneself.
-   Loaded after style.css; the breathing circle itself is styled there. */
+   Loaded after style.css; the breathing circle's size and scale are set there.
 
-/* the circle: a glow that grows with the in-breath, and the seconds left in the middle */
+   One thing on the screen at a time, on one centered axis. The glow around the circle is
+   the only thing that moves or shines; everything else stays flat and quiet. */
+
+/* ---------- the circle ---------- */
+/* a soft light that grows with the in-breath, and the seconds left in the middle */
+.breathe-stage {
+  height: 300px;
+}
 .breathe-circle {
+  --glow: var(--accent-soft);
+  --glow: color-mix(in srgb, var(--accent) 34%, transparent);
+  --glow-far: transparent;
+  --glow-far: color-mix(in srgb, var(--accent) 14%, transparent);
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 0 transparent;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle at 42% 36%, var(--surface) 0%, var(--accent-soft) 46%, var(--accent-soft) 100%);
+  background: radial-gradient(circle at 42% 36%, color-mix(in srgb, var(--accent) 8%, var(--surface)) 0%, var(--accent-soft) 48%, color-mix(in srgb, var(--accent) 34%, var(--accent-soft)) 100%);
+  box-shadow:
+    0 0 0 0 var(--glow),
+    0 0 0 0 var(--glow-far);
+}
+@media (prefers-color-scheme: dark) {
+  .breathe-circle {
+    --glow: color-mix(in srgb, var(--accent) 42%, transparent);
+    --glow-far: color-mix(in srgb, var(--accent) 16%, transparent);
+    background: radial-gradient(circle at 42% 36%, color-mix(in srgb, var(--accent) 62%, var(--surface)) 0%, color-mix(in srgb, var(--accent) 40%, var(--surface)) 52%, color-mix(in srgb, var(--accent) 24%, var(--bg)) 100%);
+  }
+}
+:root.night-mode .breathe-circle {
+  --glow: color-mix(in srgb, var(--accent) 42%, transparent);
+  --glow-far: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: radial-gradient(circle at 42% 36%, color-mix(in srgb, var(--accent) 62%, var(--surface)) 0%, color-mix(in srgb, var(--accent) 40%, var(--surface)) 52%, color-mix(in srgb, var(--accent) 24%, var(--bg)) 100%);
 }
 .breathe-circle.in,
 .breathe-circle.hold {
-  box-shadow: 0 0 46px 14px var(--accent-soft);
-  box-shadow: 0 0 46px 14px color-mix(in srgb, var(--accent) 38%, transparent);
+  box-shadow:
+    0 0 36px 6px var(--glow),
+    0 0 90px 34px var(--glow-far);
 }
 .breathe-circle.in {
   transition:
@@ -21,15 +51,17 @@
   transform: scale(1);
 }
 .breathe-circle.out {
-  box-shadow: 0 0 10px 2px transparent;
+  box-shadow:
+    0 0 14px 0 var(--glow-far),
+    0 0 0 0 transparent;
   transition:
     transform 6s ease-in-out,
     box-shadow 6s ease-in-out;
 }
 .breathe-count {
   font-family: var(--display);
-  font-size: 2.6rem;
-  font-weight: 600;
+  font-size: 2.75rem;
+  font-weight: 500;
   line-height: 1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
@@ -41,30 +73,78 @@
 .breathe-flow .toggle.calm-voice {
   justify-content: center;
   align-items: center;
-  margin: 14px 0 4px;
+  min-height: 44px;
+  margin: 10px 0 4px;
   color: var(--muted);
+  font-size: 14.5px;
 }
 .breathe-flow .toggle.calm-voice input {
   margin-top: 0;
 }
 
+/* ---------- the calm sheet ---------- */
+/* title and lead share the axis of the circle */
+.sheet-body:has(> .calm-flow) > h2 {
+  margin-top: 30px;
+  text-align: center;
+}
+.sheet-body:has(> .calm-flow) > h2 + .muted.small {
+  max-width: 30em;
+  margin: 0 auto;
+  text-align: center;
+  text-wrap: balance;
+}
+/* before the first breath: the same light, small and still, above the one button */
+.calm-flow .breathe-flow.compact:has(> .actions > .calm-start)::before {
+  content: '';
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 44px auto 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 36%, color-mix(in srgb, var(--accent) 8%, var(--surface)) 0%, var(--accent-soft) 48%, color-mix(in srgb, var(--accent) 34%, var(--accent-soft)) 100%);
+  box-shadow:
+    0 0 30px 4px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 0 76px 26px color-mix(in srgb, var(--accent) 13%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  .calm-flow .breathe-flow.compact:has(> .actions > .calm-start)::before {
+    background: radial-gradient(circle at 42% 36%, color-mix(in srgb, var(--accent) 62%, var(--surface)) 0%, color-mix(in srgb, var(--accent) 40%, var(--surface)) 52%, color-mix(in srgb, var(--accent) 24%, var(--bg)) 100%);
+  }
+}
+
 /* the one large button */
 .btn.calm-start {
   width: 100%;
-  min-height: 96px;
+  min-height: 92px;
   padding: 22px 20px;
-  border-radius: 24px;
-  font-size: 1.35rem;
-  font-weight: 700;
+  border-radius: 28px;
+  font-size: 1.3rem;
+  font-weight: 650;
   line-height: 1.35;
   text-wrap: balance;
 }
 .breathe-flow.compact .actions {
   margin-top: 8px;
 }
+/* while breathing, Stop is there but does not pull the eye from the circle */
+.breathe-flow.compact .breathe-stage ~ .actions {
+  margin-top: 22px;
+}
+.breathe-flow.compact .breathe-stage ~ .actions .btn.primary {
+  min-width: 112px;
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+  font-weight: 500;
+}
+.breathe-flow.compact .breathe-left {
+  margin: 2px 0 0;
+}
 
 /* big text for one thing at a time */
 .calm-big {
+  font-family: var(--display);
   font-size: 1.45rem;
   font-weight: 600;
   line-height: 1.5;
@@ -75,21 +155,33 @@
 .breathe-phase.calm-big {
   min-height: 0;
 }
+.breathe-flow.compact > .breathe-phase.calm-big:first-child {
+  margin-top: 48px;
+}
 .breathe-handoff,
 .ground {
   text-align: center;
-  padding: 18px 0 4px;
+  padding: 34px 0 4px;
 }
 .ground-progress {
   margin: 0;
 }
+/* the count sits in the same light as the breathing circle, at rest */
 .ground-num {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 132px;
+  margin: 22px auto 26px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  box-shadow: 0 0 56px 12px color-mix(in srgb, var(--accent) 16%, transparent);
   font-family: var(--display);
-  font-size: 5.5rem;
-  font-weight: 700;
+  font-size: 4.5rem;
+  font-weight: 600;
   line-height: 1;
   color: var(--accent);
-  margin: 10px 0 4px;
+  font-variant-numeric: tabular-nums;
 }
 .ground-hint,
 .breathe-handoff .muted {
@@ -99,26 +191,35 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  margin-top: 26px;
 }
 .calm-actions .calm-next {
   width: 100%;
   min-height: 60px;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
+}
+.calm-actions .link {
+  min-height: 44px;
+  padding-inline: 12px;
 }
 
-/* phrases */
+/* ---------- phrases ---------- */
 .calm-phrases {
-  margin: 26px 0 0;
-  padding: 16px 18px 12px;
-  border-radius: 18px;
+  margin: 52px 0 0;
+  padding: 18px 18px 6px;
+  border-radius: 14px;
   background: var(--surface);
+  border: 1px solid var(--line);
 }
 .calm-phrases h3 {
   margin: 0 0 4px;
 }
+.calm-phrases .actions.left {
+  margin: 12px 0 6px;
+}
 .calm-picked {
   min-height: 3em;
-  margin: 8px 0 10px;
+  margin: 14px 0 16px;
 }
 .calm-picked:empty {
   display: none;
@@ -128,21 +229,21 @@
   margin: 0;
   padding: 0;
 }
-.calm-phrase-list li + li {
+.calm-phrase-list li {
   border-top: 1px solid var(--line);
 }
 .calm-phrase {
   appearance: none;
   display: block;
   width: 100%;
-  min-height: 48px;
-  padding: 12px 4px;
+  min-height: 52px;
+  padding: 13px 2px;
   border: 0;
   border-radius: 8px;
   background: none;
   color: var(--ink);
   font: inherit;
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: start;
   cursor: pointer;
 }
@@ -151,14 +252,25 @@
   font-weight: 600;
 }
 
+/* the note about the body stays readable and loses its box: it is not a second card */
 .calm-body-note {
-  margin: 22px 0 4px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1.5px solid var(--line);
+  margin: 40px auto 0;
+  padding: 16px 0 0;
+  max-width: 30em;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
 }
 .calm-help {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
+  text-align: center;
+}
+.calm-help .link {
+  min-height: 44px;
+}
+.calm-help .link ~ * {
+  text-align: start;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -170,4 +282,9 @@
     transform: scale(0.8);
     box-shadow: none;
   }
+}
+
+/* after the last breath: the closing line gets room before "once more" */
+.breathe-flow.compact > .breathe-phase.calm-big + .actions {
+  margin-top: 20px;
 }

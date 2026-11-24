@@ -1,73 +1,116 @@
-/* Writing mode (js/writing.js). Loaded by that module the first time the sheet opens. */
+/* Writing mode (js/writing.js). Loaded by that module the first time the sheet opens.
+
+   A quiet page: the chosen prompt is the heading, the text below it is set for reading
+   (about 20 Chinese characters or 60 Latin letters a line on a phone, open leading), and
+   the choices above it are one plain list. */
 .writing-tabs {
-  margin: 12px 0 14px;
+  margin: 14px 0 16px;
   width: max-content;
   max-width: 100%;
 }
 .writing-tabs .seg-btn {
-  min-width: 64px;
-  min-height: 40px;
+  min-width: 68px;
+  min-height: 44px;
 }
 .writing-label {
-  font-weight: 600;
-  margin: 14px 0 6px;
+  font: 600 16px/1.3 var(--display);
+  margin: 22px 0 8px;
 }
+
+/* before a deep prompt */
 .writing-note {
   margin: 0 0 4px;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 16px 18px 8px;
+  border-radius: 14px;
   background: var(--surface);
   background: color-mix(in srgb, var(--amber) 12%, var(--surface));
 }
 .writing-note h3 {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
 }
 .writing-note .plain-list {
+  margin-bottom: 10px;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.writing-note .plain-list li + li {
+  margin-top: 6px;
+}
+.writing-note > p:last-child {
   margin-bottom: 8px;
 }
 .writing-help summary {
   cursor: pointer;
   color: var(--accent);
   font-weight: 600;
-  min-height: 40px;
-  padding: 8px 0;
+  min-height: 44px;
+  padding: 10px 0;
 }
+
+/* the prompts: one list on one surface, like the phrases on the calm sheet */
 .writing-prompts {
   list-style: none;
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
+  padding: 0 6px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.writing-prompts li + li {
+  border-top: 1px solid var(--line);
 }
 .writing-prompt {
   appearance: none;
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   width: 100%;
   text-align: left;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1.5px solid var(--line);
-  background: var(--surface);
+  margin: 6px 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
   cursor: pointer;
-  line-height: 1.55;
-  min-height: 44px;
+  line-height: 1.65;
+  min-height: 48px;
 }
+.writing-prompt:lang(zh) {
+  line-height: 1.75;
+}
+/* the chosen one: tint, weight and a tick, so it does not rest on color alone */
 .writing-prompt.on {
-  border-color: var(--accent);
   background: var(--accent-soft);
+  font-weight: 600;
 }
+.writing-prompt.on::after {
+  content: '✓';
+  content: '✓' / '';
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--accent);
+}
+
+/* ---------- the page ---------- */
 .writing-area {
-  margin-top: 18px;
+  margin-top: 36px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  max-width: 34em;
 }
 .writing-area p {
   margin: 0;
 }
+/* the prompt is the heading of what gets written */
 .writing-chosen {
-  padding-left: 12px;
-  border-left: 3px solid var(--accent);
-  line-height: 1.55;
+  font: 650 20px/1.5 var(--display);
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+  padding: 0 2px 4px;
+}
+.writing-chosen:lang(zh) {
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 .writing-day-n {
   font-weight: 600;
@@ -76,19 +119,39 @@
 .writing-input {
   width: 100%;
   font: inherit;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-radius: 12px;
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--line);
   background: var(--surface);
   color: var(--ink);
 }
 .writing-text {
-  min-height: 40vh;
-  line-height: 1.7;
+  display: block;
+  min-height: 46vh;
+  padding: 20px 20px 24px;
+  border-radius: 16px;
+  font-size: 17px;
+  line-height: 1.8;
   resize: vertical;
 }
+.writing-text:lang(zh) {
+  line-height: 2;
+  letter-spacing: 0.02em;
+}
+.writing-text::placeholder,
+.writing-input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+/* focus stays visible without boxing the page in a heavy frame */
+.writing-text:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent);
+  border-radius: 16px;
+}
 .writing-input {
-  min-height: 44px;
+  min-height: 48px;
 }
 .writing-fields {
   display: grid;
@@ -99,15 +162,21 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
+  padding: 0 2px;
 }
 .writing-timer .link {
-  text-align: left;
+  text-align: start;
+  min-height: 44px;
+  font-weight: 500;
 }
 .writing-timer-line {
   margin: 0;
 }
 .writing-count {
   flex: none;
-  padding-top: 10px;
+  padding-top: 12px;
   font-variant-numeric: tabular-nums;
+}
+.writing-area .actions {
+  margin-top: 6px;
 }

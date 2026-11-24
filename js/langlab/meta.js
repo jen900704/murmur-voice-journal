@@ -306,3 +306,190 @@ export const REFERENCES = [
   'Tausczik, Y. R., & Pennebaker, J. W. (2010). The psychological meaning of words: LIWC and computerized text analysis methods. Journal of Language and Social Psychology, 29(1), 24-54. https://doi.org/10.1177/0261927X09351676',
   'Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. Journal of the American Statistical Association, 22(158), 209-212.',
 ];
+
+// ---------- "what stood out": plain observations on the results page ----------
+// One short noun phrase per category, used in the sentence templates below. Plain words only:
+// nothing here evaluates (good, bad, healthy), names a condition, or gives advice.
+// The sums of other categories (cogproc, negemo, social) have no phrase and are never chosen,
+// so one word is not reported twice under two names.
+export const OBS_AGGREGATES = ['cogproc', 'negemo', 'social'];
+const OBS_PHRASE = {
+  negate: { zh: '「不」「沒有」這類否定的詞', en: 'words like "no" and "not"' },
+  certain: { zh: '把話說得很確定的詞', en: 'words that state things firmly' },
+  tentat: { zh: '「也許」「可能」這類留有餘地的詞', en: 'words like "maybe" and "perhaps"' },
+  cause: { zh: '想到原因和理由的詞', en: 'words about causes and reasons' },
+  insight: { zh: '「覺得」「知道」「發現」這類想法的詞', en: 'words like "think", "know" and "realize"' },
+  excl: { zh: '「但是」「雖然」這類轉折的詞', en: 'words like "but" and "although"' },
+  family: { zh: '提到家人的詞', en: 'words about family' },
+  friend: { zh: '提到朋友的詞', en: 'words about friends' },
+  work: { zh: '工作和學業的詞', en: 'words about work and school' },
+  body: { zh: '身體、睡眠和吃喝的詞', en: 'words about the body, sleep and eating' },
+  posemo: { zh: '「開心」「喜歡」這類正向感受的詞', en: 'words like "happy" and "love"' },
+  anx: { zh: '「擔心」「緊張」這類詞', en: 'words like "worried" and "nervous"' },
+  anger: { zh: '「生氣」「討厭」這類詞', en: 'words like "angry" and "annoyed"' },
+  sad: { zh: '「難過」「想念」這類詞', en: 'words like "sad" and "miss"' },
+  focuspast: { zh: '講過去的時間詞', en: 'words about the past' },
+  focuspresent: { zh: '講現在的時間詞', en: 'words about the present' },
+  focusfuture: { zh: '講未來的時間詞', en: 'words about the future' },
+  affil: { zh: '「愛」「一起」「陪伴」這類親近的詞', en: 'words like "love", "together" and "care"' },
+  conflict: { zh: '「吵架」「責怪」這類衝突的詞', en: 'words like "argue" and "blame"' },
+  lonely: { zh: '「一個人」「孤單」這類詞', en: 'words like "alone" and "lonely"' },
+  belong: { zh: '講歸屬和融入的詞', en: 'words about belonging' },
+  grat: { zh: '感謝的詞', en: 'words of thanks' },
+  apology: { zh: '道歉的詞', en: 'words of apology' },
+  compare: { zh: '把自己和別人放在一起比的詞', en: 'words that set you beside other people' },
+  request: { zh: '「請」「應該」「必須」這類請求和要求的詞', en: 'words like "please", "should" and "must"' },
+  polite: { zh: '禮貌用語', en: 'politeness words' },
+  loss: { zh: '講失去和告別的詞', en: 'words about loss and goodbyes' },
+  achieve: { zh: '講目標和努力的詞', en: 'words about goals and effort' },
+  reward: { zh: '講收穫和獎賞的詞', en: 'words about rewards and gains' },
+  risk: { zh: '講風險和小心的詞', en: 'words about risk and caution' },
+  care: { zh: '講關心和傷害的詞', en: 'words about care and harm' },
+  fair: { zh: '講公平的詞', en: 'words about fairness' },
+  loyal: { zh: '講忠誠和承諾的詞', en: 'words about loyalty and promises' },
+  authority: { zh: '講規定和尊重的詞', en: 'words about rules and respect' },
+  sanct: { zh: '講純淨和神聖的詞', en: 'words about purity and the sacred' },
+};
+// Pronouns read better as a sentence about who the text is about. {n} is the rate.
+const OBS_PRONOUN = {
+  i: { zh: ['你常寫到自己', '「我」的詞'], en: ['You write about yourself often', 'I-words'] },
+  we: { zh: ['你常寫到「我們」', '「我們」的詞'], en: ['You write about "we" often', 'we-words'] },
+  you: { zh: ['你常對著「你」說話', '「你」的詞'], en: ['You often address "you"', 'you-words'] },
+  other: { zh: ['你常寫到別人', '指別人的詞'], en: ['You write about other people often', 'words for other people'] },
+};
+// Rates are per 100 Chinese characters for Chinese text and per 100 words for English text.
+const OBS_UNIT = {
+  zh: { zh: '每 100 字', en: '每 100 個英文單字' },
+  en: { zh: 'per 100 Chinese characters', en: 'per 100 words' },
+};
+// The sentence templates. `counts`: no baseline, so the categories with the most hits.
+// `higher` / `lower`: against the person's own earlier kept texts.
+export const OBS_TEMPLATES = {
+  zh: {
+    title: '比較明顯的地方',
+    pronoun: (lead, name, unit, n) => `${lead}（${unit}約 ${n} 個${name}）。`,
+    counts: (phrase, unit, n) => `這段文字裡，${phrase}比較多（${unit}約 ${n} 個）。`,
+    higher: (phrase, unit, n, was) => `和你之前留下的文字比，這次${phrase}比較多（${unit}約 ${n} 個，之前約 ${was} 個）。`,
+    lower: (phrase, unit, n, was) => `和你之前留下的文字比，這次${phrase}比較少（${unit}約 ${n} 個，之前約 ${was} 個）。`,
+    basis: {
+      baseline: '這幾項是和你自己之前留下的文字差得最多的，不和其他人比較。',
+      counts: '這幾類只是出現次數最多的，沒有和任何人或任何標準比較。',
+      countsAfterBaseline: '和你之前留下的文字比，沒有哪一類明顯不同，所以這裡列的只是出現次數最多的幾類。',
+    },
+    none: '文字還不夠，還說不出哪裡比較明顯。',
+  },
+  en: {
+    title: 'What stood out',
+    pronoun: (lead, name, unit, n) => `${lead} (about ${n} ${name} ${unit}).`,
+    counts: (phrase, unit, n) => `In this text, ${phrase} are among the most frequent (about ${n} ${unit}).`,
+    higher: (phrase, unit, n, was) => `Compared with your earlier kept texts, there are more ${phrase} this time (about ${n} ${unit}; earlier about ${was}).`,
+    lower: (phrase, unit, n, was) => `Compared with your earlier kept texts, there are fewer ${phrase} this time (about ${n} ${unit}; earlier about ${was}).`,
+    basis: {
+      baseline: 'These are the categories furthest from your own earlier kept texts. Nothing is compared with other people.',
+      counts: 'These are simply the categories with the most hits. They are not compared with anyone or with any standard.',
+      countsAfterBaseline: 'No category differs clearly from your earlier kept texts, so these are simply the categories with the most hits.',
+    },
+    none: 'There is not enough text yet to say what stands out.',
+  },
+};
+
+const obsRate = (v) => (v < 0.95 ? v.toFixed(2) : v.toFixed(1));
+
+// Chooses up to three observations. `res` is one language's result from analyze(); `cmp` is
+// compare(res, earlier) or null.
+//  - Only categories that pass their minimum length AND have enough hits for a rate
+//    (rateShown) can be chosen: never a "not enough text" row, never an index or a sentiment
+//    score, never an Empath topic.
+//  - With a baseline: the categories whose interval does not overlap the earlier one, ordered
+//    by the gap between the two intervals relative to the two rates (within-person only).
+//  - docs/language-analysis/DESIGN.md section 7 lists no typical ranges (version 1 has no
+//    reference norms), so there is no "relative to typical" step.
+//  - Otherwise: the three categories with the most hits, and `mode` says so.
+// Returns { mode: 'baseline' | 'counts' | 'none', hadBaseline, items: [{ id, kind, value, earlier, count }] }.
+export function chooseObservations(res, cmp, max = 3) {
+  const ok = (res && res.scores ? res.scores : []).filter((s) => s.kind === 'pct' && s.enough && s.rateShown && !OBS_AGGREGATES.includes(s.id) && (OBS_PHRASE[s.id] || OBS_PRONOUN[s.id]));
+  const hadBaseline = !!cmp && Object.keys(cmp).length > 0;
+  const far = [];
+  for (const s of ok) {
+    const c = cmp && cmp[s.id];
+    if (!c || (c.verdict !== 'higher' && c.verdict !== 'lower') || !s.ci || !c.earlierCi) continue;
+    const gap = c.verdict === 'higher' ? s.ci[0] - c.earlierCi[1] : c.earlierCi[0] - s.ci[1];
+    far.push({ id: s.id, kind: c.verdict, value: s.value, earlier: c.earlier, count: s.count, distance: gap / Math.max(0.1, (s.value + c.earlier) / 2) });
+  }
+  if (far.length) {
+    far.sort((a, b) => b.distance - a.distance || (a.id < b.id ? -1 : 1));
+    return { mode: 'baseline', hadBaseline, items: far.slice(0, max) };
+  }
+  const top = ok
+    .slice()
+    .sort((a, b) => b.count - a.count || (a.id < b.id ? -1 : 1))
+    .slice(0, max)
+    .map((s) => ({ id: s.id, kind: 'counts', value: s.value, earlier: null, count: s.count }));
+  return { mode: top.length ? 'counts' : 'none', hadBaseline, items: top };
+}
+
+// One observation as a sentence. textLang is the language of the analysed text ('zh' | 'en').
+export function observationText(item, uiLang, textLang) {
+  const k = key(uiLang);
+  const T = OBS_TEMPLATES[k];
+  const unit = OBS_UNIT[k][textLang === 'en' ? 'en' : 'zh'];
+  const n = obsRate(item.value);
+  const pro = OBS_PRONOUN[item.id];
+  if (pro && item.kind === 'counts') return T.pronoun(pro[k][0], pro[k][1], unit, n);
+  const phrase = pro ? pro[k][1] : OBS_PHRASE[item.id][k];
+  if (item.kind === 'counts') return T.counts(phrase, unit, n);
+  return T[item.kind](phrase, unit, n, obsRate(item.earlier));
+}
+
+// ---------- validation status ----------
+// Numbers copied from lab/langval/RESULTS.md (section 1, preregistered run on the GoEmotions
+// training split and on CPED) and confirmed on held-back data in lab/langval/RETEST.md
+// (sections 2 and 3; no verdict changed). AUC = chance that a comment with the matching human
+// label has a higher category rate than a neutral comment; .50 is chance, 1.00 is perfect.
+// "Supported" there means the list fires where raters saw the emotion. It does not mean the
+// count measures how much of the emotion there is. Update these when the lab reruns.
+export const VALIDATION = {
+  en: {
+    corpus: 'GoEmotions',
+    auc: { posemo: 0.79, negemo: 0.72, anx: 0.78, anger: 0.68, sad: 0.69, grat: 0.93, affil: 0.76, loss: 0.81, apology: 0.94, tone: 0.87, vader: 0.88 }, // vader: RESULTS.md section 2, positive against negative comments
+    // RESULTS.md: only 77 grief comments, and 4.9% of comments with a hit carry the label
+    thin: ['loss'],
+  },
+  zh: {
+    corpus: 'CPED',
+    // RESULTS.md: the only supported Chinese row, on 204 lines of TV dialogue. The other six
+    // rows (.50 to .54) are "untested on text like Murmur's", so they are shown as not validated.
+    auc: { grat: 0.8 },
+    thin: ['grat'],
+  },
+};
+const VALID_TEXT = {
+  zh: {
+    en: (auc) => `和人工情緒標註比對過（英文）：AUC ${auc}。.50 等於亂猜，1.00 是完全分得開。`,
+    enThin: '用來比對的留言很少，而且這個詞表在其他話題上常誤算。',
+    enNone: '這一類還沒有和人工標註比對過。',
+    zhGrat: (auc) => `和人工情緒標註比對過（中文，只用了少量電視劇對白）：AUC ${auc}。.50 等於亂猜，1.00 是完全分得開。`,
+    zhNone: '中文還沒驗證',
+  },
+  en: {
+    en: (auc) => `Checked against human emotion labels (English): AUC ${auc}. .50 is chance and 1.00 is perfect.`,
+    enThin: 'The check rests on very few comments, and this list often miscounts on other topics.',
+    enNone: 'This category has not been checked against human labels yet.',
+    zhGrat: (auc) => `Checked against human emotion labels (Chinese, on a small set of TV dialogue only): AUC ${auc}. .50 is chance and 1.00 is perfect.`,
+    zhNone: 'Not yet validated for Chinese',
+  },
+};
+// The line shown next to a category name in the evidence view.
+// Returns { checked: boolean, text } for the language of the analysed text.
+export function validationNote(id, textLang, uiLang) {
+  const T = VALID_TEXT[key(uiLang)];
+  const v = VALIDATION[textLang === 'en' ? 'en' : 'zh'];
+  const auc = v.auc[id];
+  const shown = auc === undefined ? '' : auc.toFixed(2).replace(/^0/, '');
+  if (textLang === 'en') {
+    if (auc === undefined) return { checked: false, text: T.enNone };
+    return { checked: true, auc, text: T.en(shown) + (v.thin.includes(id) ? ' ' + T.enThin : '') };
+  }
+  if (auc === undefined) return { checked: false, text: T.zhNone };
+  return { checked: true, auc, text: T.zhGrat(shown) };
+}

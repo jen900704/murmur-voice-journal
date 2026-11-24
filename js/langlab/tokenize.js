@@ -7,7 +7,8 @@ import { ZH_S2T_SAFE, ZH_S2T_VARIANT } from './zh-s2t.js';
 
 const CJK_RUN = '[\\u3400-\\u9fff\\uf900-\\ufaff]+';
 const TOKEN_RE = new RegExp(`[A-Za-z\\u00c0-\\u024f]+(?:['\\u2019][A-Za-z]+)*|\\d+(?:[.,]\\d+)*|${CJK_RUN}`, 'g');
-const MASK_RE = /https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|[\w.+-]+@[\w-]+\.[\w.-]+|@[\w.]*\w|#[\p{L}\p{N}_]+/gu;
+// quantifiers are bounded so a long run of letters cannot make matching quadratic
+const MASK_RE = /https?:\/\/[^\s<>"']{1,2048}|www\.[^\s<>"']{1,2048}|[\w.+-]{1,64}@[\w-]{1,63}\.[\w.-]{1,190}|@[\w.]{0,63}\w|#[\p{L}\p{N}_]{1,100}/gu;
 
 export function maskSpans(text) {
   const out = [];

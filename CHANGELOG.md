@@ -6,6 +6,9 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Design pass: one spacing and type scale, quiet secondary actions on Today, the record button as the single focal point by day and the bedtime card by night, 44px targets, a calmer low-mood card; the language mirror reads like a notebook (what stood out in plain words, numbers secondary, short groups folded, validation status per category), the calm sheet centers on one breathing light, writing reads like a page.
+- Security review follow-ups: zip inflation and file sizes are capped, regexes in masking and markdown parsing are bounded, the service worker no longer stores files outside the release, "delete everything" clears every murmur-* key.
+
 - Voice evidence report on Trends (HTML and JSON): methods, validation status, usual range, recent values, mood links with Fisher z intervals and the multiple-comparison caveat, limits and references.
 - Language mirror engine 1.1.0: English wildcard exceptions (huge, yellow, health no longer count), Chinese degree-word guards no longer swallow words such as 難過, Simplified characters converted before matching; verdicts unchanged on held-out data (lab/langval/RETEST.md).
 - Demo videos in docs/demo.

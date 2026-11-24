@@ -219,7 +219,7 @@ export const STRINGS = {
     backupNow: 'Download backup',
     backupLater: 'Remind me next month',
     breatheLink: 'Breathe for a minute',
-    calmLink: 'When it gets too much',
+    calmLink: 'Too much right now',
     testedTitle: 'How this app is checked',
     testedItems: [
       ['Scripted conversations test the AI chat for safety and fidelity to each approach', 'lab/eval'],
