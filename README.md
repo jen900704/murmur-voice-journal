@@ -30,7 +30,7 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 - **Bedtime reminder.** Add a daily calendar event at a time you choose; Murmur sends no notifications.
 - **Something gentle.** A short, curated list of films, short films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them.
 
-**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses and shows help lines for the person's region (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every step. The check is a coarse safety net, tested against about 150 phrases, and will still miss some wording.
+**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses and shows help lines for the person's region (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every step. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
@@ -174,7 +174,7 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 
 **功能。** 聲音日記之外，還有：換個角度看看（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片；也可以「只想聽一段」直接開始）、寄一張晚安卡給一個人（卡片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。
 
-**安全。** 輸入的文字如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（台灣、美國或其他地方，可以切換）。寫下的內容不會被刪掉；如果只是誤判，可以按「我沒事，繼續」。每個步驟都能一鍵找到求助專線。這只是粗略的安全網，已用約 150 個句子測試，仍然可能漏掉某些說法。
+**安全。** 輸入的文字如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（台灣、美國或其他地方，可以切換）。寫下的內容不會被刪掉；如果只是誤判，可以按「我沒事，繼續」。每個步驟都能一鍵找到求助專線。這只是粗略的安全網，已用約 210 個句子測試，仍然可能漏掉某些說法。
 
 
 Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天說大約 30 秒的話，它會在你的裝置上算出音高、音高起伏、語速、停頓和聲音規律度。累積幾次之後，它會告訴你今天的聲音和你自己的平常範圍相比是高、低，還是差不多。如果你每次花兩秒標記心情和精神，它也會顯示你的聲音和你的感受之間的關聯。
