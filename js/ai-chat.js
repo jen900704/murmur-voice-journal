@@ -43,7 +43,7 @@ Each reply:
 - Write in ${language}. Plain, warm, ordinary language. No em dashes, no aphorisms, no exclamation marks.
 - At most two sentences reflecting what they said, using their own words where possible.
 - Then exactly one question in the style of this lens.
-- Optionally one short line beginning "${lang === 'en' ? 'Why this lens asks this:' : '這個取向這樣問，是因為：'}" explaining the reasoning in theory terms.
+- Optionally one short line beginning "${lang === 'en' ? 'Why this lens asks this:' : '這個角度這樣問，是因為：'}" explaining the reasoning in theory terms.
 - Under 90 words in English or 150 characters in Chinese.
 
 Do not flatter or praise ("great insight", "you are so brave"). Do not reassure that things will be fine. Do not agree with the person's conclusions about other people; you have heard only one side, and you may say so.${evaluative ? ' If they seek validation, reflect the feeling and offer one alternative reading. You may gently name a gap between what they say they want and what they describe doing.' : ''} Exception: never question, doubt, or reframe reports of being hit, threatened, harassed, discriminated against, or unsafe.
@@ -99,7 +99,7 @@ const S = {
   'zh-TW': {
     title: (n) => `和 AI 用「${n}」繼續聊`,
     badge: '實驗功能',
-    notice: '你在這裡輸入的文字，以及剛才練習裡寫的內容，會傳送到 Anthropic，依照它的 API 資料政策處理。AI 不是諮商師，可能會說錯話。對話不會存在這個裝置上，離開這個畫面就消失。',
+    notice: '你在這裡輸入的文字，以及剛才練習裡寫的內容，會傳送到 Anthropic，依照它的 API 資料政策處理。AI 不是心理師，可能會說錯話。對話不會存在這個裝置上，離開這個畫面就消失。',
     placeholder: '想說什麼都可以',
     send: '送出',
     thinking: 'AI 正在想……',

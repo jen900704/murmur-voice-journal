@@ -6,14 +6,14 @@ import { checkRisk, helpList } from './safety.js';
 
 const S = {
   'zh-TW': {
-    gentleTitle: '今晚來點溫和的',
-    gentleNote: '這些是有些人覺得溫和、有陪伴感的作品，不是治療。片單由 Murmur 整理，可能有錯，歡迎回報。',
+    gentleTitle: '今晚來點溫柔的',
+    gentleNote: '這些是有些人覺得溫柔、有陪伴感的作品，不是治療。清單由 Murmur 整理，可能有錯，歡迎回報。',
     all: '全部',
     types: { film: '電影', series: '影集', book: '書', musical: '音樂劇', opera: '歌劇', music: '音樂', short: '短片' },
     tones: { quiet: '安靜', warm: '溫暖', funny: '輕鬆好笑', 'good-cry': '想好好哭一場', companionship: '有人陪的感覺' },
     showHeavy: '也顯示內容較沉重的作品',
     cw: '內容提醒：',
-    cwNames: { death: '死亡', illness: '疾病', abuse: '虐待', violence: '暴力', suicide: '自殺', 'self-harm': '自傷', 'mental illness': '精神疾病', grief: '失落', war: '戰爭', genocide: '大屠殺', bullying: '霸凌', infidelity: '外遇', divorce: '離婚', 'panic attacks': '恐慌發作', 'social anxiety': '社交焦慮', 'sexual content': '性內容', 'parent-child conflict': '親子衝突', 'workplace sexism': '職場性別歧視' },
+    cwNames: { death: '死亡', illness: '疾病', abuse: '虐待', violence: '暴力', suicide: '自殺', 'self-harm': '自傷', 'mental illness': '精神疾病', grief: '哀傷', war: '戰爭', genocide: '大屠殺', bullying: '霸凌', infidelity: '外遇', divorce: '離婚', 'panic attacks': '恐慌發作', 'social anxiety': '社交焦慮', 'sexual content': '性內容', 'parent-child conflict': '親子衝突', 'workplace sexism': '職場性別歧視' },
     minutes: (m) => `${m} 分鐘`,
     close: '關閉',
     none: '沒有符合的作品。',
@@ -40,13 +40,13 @@ const S = {
     helpBodyShare: '你寫的內容聽起來可能很沉重。把它傳給信任的人是很好的事；如果需要，這些地方也隨時都在。再按一次「分享」就會送出。',
     lowRitual: '睡前儀式',
     lowLens: '換個角度看看',
-    lowHelp: '找人說話的資源',
+    lowHelp: '可以找人說話的地方',
     exchange: '寫下來，和別人交換這一題',
     exchangePlaceholder: '我的回答……',
     exchangeShare: '分享',
     exchangeCopied: '已複製，可以貼給對方',
     exchangeFrom: '有人想和你交換這一題',
-    exchangeText: (p, a, url) => `今天的小題：${p}\n\n我的回答：${a}\n\n你也來回答同一題：${url}`,
+    exchangeText: (p, a, url) => `今天的題目：${p}\n\n我的回答：${a}\n\n你也來回答同一題：${url}`,
   },
   en: {
     gentleTitle: 'Something gentle for tonight',

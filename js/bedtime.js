@@ -43,7 +43,7 @@ const SET_DOWN_GENERIC = {
 const SET_DOWN = {
   'zh-TW': [
     ['今天你寫下了{theme}。', 2],
-    ['它是真的，也值得被好好處理。只是不是現在。', 3],
+    ['它是真的，也值得好好處理。只是不是現在。', 3],
     ['想像把它放在床邊的桌上。明天早上它還會在那裡，你可以到時候再決定怎麼做。', 6],
   ],
   en: [
@@ -73,7 +73,7 @@ export const TRACKS = [
     id: 'person-centered',
     lens: 'person-centered',
     zh: {
-      name: '溫和地陪自己',
+      name: '溫柔地陪自己',
       style: '個人中心取向風格',
       core: [
         ['不管你今天感覺到什麼，都可以先讓它在這裡。', 4],
@@ -132,7 +132,7 @@ export const TRACKS = [
     lens: 'existential',
     zh: {
       name: '今天的一個小時刻',
-      style: '存在取向風格',
+      style: '存在主義取向風格',
       core: [
         ['今天你做了一些選擇。有些是你想要的，有些只是當下能做的。', 5],
         ['兩種都算數。', 4],

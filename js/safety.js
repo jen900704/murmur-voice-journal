@@ -132,8 +132,8 @@ const LINES = {
     { zh: '安心專線（24 小時，免付費）', en: '1925 mental health line (24 hours, free)', number: '1925' },
     { zh: '生命線（24 小時）', en: 'Lifeline (24 hours)', number: '1995' },
     { zh: '保護專線：家暴、性侵、兒少保護（24 小時）', en: '113 protection line: domestic violence, sexual assault, child protection (24 hours)', number: '113' },
-    { zh: '有立即危險：警察', en: 'Immediate danger: police', number: '110' },
-    { zh: '有立即危險：救護車', en: 'Immediate danger: ambulance', number: '119' },
+    { zh: '有立即危險：報警', en: 'Immediate danger: police', number: '110' },
+    { zh: '有立即危險：叫救護車', en: 'Immediate danger: ambulance', number: '119' },
     { zh: '張老師專線（非 24 小時）', en: 'Teacher Chang line (not 24 hours)', number: '1980' },
   ],
   US: [

@@ -88,7 +88,7 @@ test('a false alarm in the worry can continue with the text kept', async ({ page
 
 test('a shared prompt link opens that prompt by number, and ignores anything else', async ({ page }) => {
   await page.goto('/#ask=0');
-  await expect(page.locator('.prompt-text')).toHaveText('今天有什麼小事讓你注意到了？');
+  await expect(page.locator('.prompt-text')).toHaveText('今天你注意到了什麼小事？');
   await expect(page.locator('.exchange-from')).toBeVisible();
   await page.goto('/#ask=%E4%BD%A0%E5%A5%BD%');
   await page.reload();
@@ -117,7 +117,7 @@ test('a low mood check-in shows things that helped before', async ({ page }) => 
 
 test('gentle recommendations open from the lens tab and hide heavy works by default', async ({ page }) => {
   await page.goto('/#lens');
-  await page.getByRole('button', { name: /溫和的作品推薦/ }).click();
+  await page.getByRole('button', { name: /溫柔的作品推薦/ }).click();
   await expect(page.locator('.rec').first()).toBeVisible();
   const light = await page.locator('.rec').count();
   expect(light).toBeGreaterThan(15);
