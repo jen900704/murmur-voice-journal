@@ -2,6 +2,7 @@
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
 import { LENSES, TOPICS, lensById, lensesForTopic, fill, rewriteText } from './lenses.js';
 import { checkRisk, RESOURCES } from './safety.js';
+import { createAiChat } from './ai-chat.js';
 
 const S = {
   'zh-TW': {
@@ -14,6 +15,7 @@ const S = {
     deck: '理論卡',
     fit: '哪個透鏡適合我',
     saved: '我存下的練習',
+    aiContinue: '和 AI 用這個透鏡繼續聊（實驗功能）',
     gentle: '溫和的作品推薦（電影、書、音樂劇）',
     worryLabel: '用一兩句話寫下讓你在意的事',
     worryPlaceholder: '例如：我一直擔心報告做不好，晚上也睡不太好',
@@ -78,6 +80,7 @@ const S = {
     deck: 'Lens cards',
     fit: 'Which lens fits me',
     saved: 'My saved exercises',
+    aiContinue: 'Keep talking with AI through this lens (experimental)',
     gentle: 'Gentle recommendations (films, books, musicals)',
     worryLabel: 'In a sentence or two, what is on your mind?',
     worryPlaceholder: 'For example: I keep worrying my report is not good enough, and I am not sleeping well',
@@ -152,11 +155,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   };
   const L = () => S[getLang()] || S.en;
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
+  const ai = createAiChat({ h, add, getLang, db, onClose: () => go('summary') });
 
   async function load() {
     if (st.loaded) return;
     st.stats = (await db.getSetting('lensStats', {}).catch(() => ({}))) || {};
     st.sessions = await db.listLensSessions().catch(() => []);
+    st.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
     st.loaded = true;
     rerender();
   }
@@ -568,6 +573,21 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         ),
         h('button', { type: 'button', class: 'btn ghost', onclick: finish }, L().finish)
       ),
+      st.aiEnabled
+        ? h(
+            'button',
+            {
+              type: 'button',
+              class: 'link',
+              'data-key': 'ai-open',
+              onclick: () => {
+                ai.open(lens.id, { concern: st.concern, answers: st.answers.slice() });
+                go('ai');
+              },
+            },
+            L().aiContinue
+          )
+        : null,
     ];
   }
 
@@ -748,6 +768,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       saved,
       crisis,
       resources,
+      ai: () => ai.view(rerender),
     };
     const wrap = h('section', { class: 'view lens' });
     add(wrap, (stages[st.stage] || home)());
@@ -755,5 +776,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return wrap;
   }
 
-  return { view, go, reset: () => { reset(); st.stage = 'home'; } };
+  return {
+    view,
+    go,
+    reset: () => {
+      reset();
+      st.stage = 'home';
+    },
+    setAiEnabled: (v) => (st.aiEnabled = v),
+  };
 }

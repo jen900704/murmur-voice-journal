@@ -8,6 +8,7 @@ import { createLensView } from './lens-view.js';
 import { createNightView, isEvening } from './night-view.js';
 import { createExtras } from './extras.js';
 import { checkRisk } from './safety.js';
+import { MODELS as AI_MODELS } from './ai-chat.js';
 import { DAILY, promptOfDay } from './prompts.js';
 
 const MIN_SECONDS = 5;
@@ -871,6 +872,39 @@ function viewTrends() {
   return wrap;
 }
 
+// A daily calendar reminder for the bedtime ritual. There is no server for notifications,
+// so the person adds a recurring event to their own calendar.
+function reminderIcs(time) {
+  const [hh, mm] = time.split(':').map((v) => String(Number(v)).padStart(2, '0'));
+  const now = new Date();
+  const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+  const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const url = `${location.origin}${location.pathname}#today`;
+  const esc = (x) => x.replace(/[\\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Murmur//Bedtime reminder//EN',
+    'BEGIN:VEVENT',
+    `UID:murmur-bedtime-${stamp}@murmur`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${ymd}T${hh}${mm}00`,
+    'DURATION:PT10M',
+    'RRULE:FREQ=DAILY',
+    `SUMMARY:${esc(t('reminderTitle'))}`,
+    `DESCRIPTION:${esc(t('reminderBody') + ' ' + url)}`,
+    `URL:${url}`,
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${esc(t('reminderTitle'))}`,
+    'TRIGGER:PT0M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR',
+    '',
+  ].join('\r\n');
+}
+
 function download(name, text, type) {
   const blob = new Blob([text], { type });
   const a = h('a', { href: URL.createObjectURL(blob), download: name });
@@ -967,7 +1001,80 @@ function viewAbout() {
     h('h2', {}, t('notMedicalTitle')),
     h('p', {}, t('notMedicalBody')),
     h('div', { class: 'help' }, h('p', { class: 'help-title' }, t('helpTitle')), t('helpLines').map((line) => h('span', {}, line))),
+    h('h2', {}, t('experimentalTitle')),
+    h('p', { class: 'small' }, t('aiAbout')),
+    h(
+      'label',
+      { class: 'toggle' },
+      h('input', {
+        type: 'checkbox',
+        checked: state.aiEnabled,
+        'data-key': 'ai-enabled',
+        onchange: async (e) => {
+          state.aiEnabled = e.target.checked;
+          await db.setSetting('aiEnabled', state.aiEnabled);
+          if (lensView) lensView.setAiEnabled(state.aiEnabled);
+          render();
+        },
+      }),
+      h('span', {}, t('aiEnable'))
+    ),
+    state.aiEnabled
+      ? h(
+          'div',
+          { class: 'ai-settings' },
+          h('label', { for: 'ai-key' }, t('aiKeyLabel')),
+          h('input', {
+            id: 'ai-key',
+            type: 'password',
+            autocomplete: 'off',
+            spellcheck: 'false',
+            placeholder: state.aiKeySet ? t('aiKeySaved') : 'sk-ant-…',
+            onchange: async (e) => {
+              const v = e.target.value.trim();
+              if (!v) return;
+              await db.setSetting('aiKey', v);
+              state.aiKeySet = true;
+              e.target.value = '';
+              toast(t('aiKeyStored'));
+              render();
+            },
+          }),
+          h('label', { for: 'ai-model' }, t('aiModelLabel')),
+          h(
+            'select',
+            {
+              id: 'ai-model',
+              onchange: (e) => db.setSetting('aiModel', e.target.value),
+            },
+            AI_MODELS.map((m) => h('option', { value: m.id, selected: m.id === state.aiModel ? 'selected' : null }, m.label))
+          ),
+          state.aiKeySet
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'btn danger small-btn',
+                  onclick: async () => {
+                    await db.setSetting('aiKey', '');
+                    state.aiKeySet = false;
+                    render();
+                  },
+                },
+                t('aiKeyClear')
+              )
+            : null
+        )
+      : null,
     h('h2', {}, t('settingsTitle')),
+    h(
+      'div',
+      { class: 'reminder' },
+      h('label', { for: 'reminder-time' }, t('reminderLabel')),
+      h('input', { id: 'reminder-time', type: 'time', value: state.reminderTime || '22:30', onchange: (e) => (state.reminderTime = e.target.value) }),
+      h('button', { type: 'button', class: 'btn', 'data-key': 'reminder-ics', onclick: () => download('murmur-bedtime.ics', reminderIcs(state.reminderTime || '22:30'), 'text/calendar') }, t('reminderAdd'))
+    ),
+    h('p', { class: 'muted small' }, t('reminderHelp')),
     h(
       'label',
       { class: 'toggle' },
@@ -1157,6 +1264,9 @@ async function init() {
   const savedLang = await db.getSetting('lang', null).catch(() => null);
   setLang(savedLang || detectLang());
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
+  state.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
+  state.aiKeySet = !!(await db.getSetting('aiKey', '').catch(() => ''));
+  state.aiModel = await db.getSetting('aiModel', AI_MODELS[0].id).catch(() => AI_MODELS[0].id);
   state.entries = await db.listEntries().catch((e) => {
     if (e && e.message === 'blocked') setTimeout(() => toast(t('dbBlocked')), 300);
     return [];

@@ -1,6 +1,6 @@
 // Offline support. Network first, so a new release reaches people on the next load;
 // the cache is used only when the network is unavailable.
-const CACHE = 'murmur-v6';
+const CACHE = 'murmur-v7';
 const NETWORK_TIMEOUT_MS = 3000;
 const SHELL = [
   './',
@@ -22,6 +22,7 @@ const SHELL = [
   './js/night-view.js',
   './js/extras.js',
   './js/prompts.js',
+  './js/ai-chat.js',
   './data/recs.json',
   './fonts/bricolage-grotesque-latin-wght-normal.woff2',
   './icons/icon.svg',

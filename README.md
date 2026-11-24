@@ -22,6 +22,8 @@ The screenshots use the app's built-in synthetic demo data.
 - **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down track in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped; there are no streaks.
 - **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back.
 - **Daily prompt.** Everyone gets the same prompt on the same day, and you can swap answers with someone through a link.
+- **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: one reflection and one question per turn, the reasoning named, no praise or reassurance, only techniques suitable for self-help, and a stop with help lines if risk appears on either side. Uses your own API key.
+- **Bedtime reminder.** Add a daily calendar event at a time you choose; Murmur sends no notifications.
 - **Something gentle.** A short, curated list of films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them.
 
 **Safety.** Text typed into the theory lens, the bedtime ritual, and the kind-thing field is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match stops the exercise and shows help lines (Taiwan 1925, 1995, 1980, 113; US 988), and nothing from that step is saved. Help is always one tap away. The check is a coarse safety net and will miss some wording.
@@ -38,6 +40,7 @@ It is meant for self-reflection and for people curious about speech measurement.
 
 - Audio is decoded and analyzed in the browser, in a Web Worker. Nothing is uploaded.
 - Entries, recordings, theory-lens exercises you choose to save, bedtime notes, and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
+- The one exception is an experimental AI conversation that continues a theory-lens exercise. It is off by default, needs your own Anthropic API key (stored unencrypted in this browser), and sends only that conversation, the worry, and your answers in that exercise to Anthropic. Voice entries and bedtime notes are never sent, and the conversation is not saved.
 - You can keep only the measurements and not the audio (a setting), export everything as CSV or JSON, and delete everything at any time.
 
 ## What it measures
@@ -105,7 +108,8 @@ git clone https://github.com/jen900704/murmur-voice-journal
 cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
-npx playwright test           # browser tests (records through a fake microphone)
+npx playwright test           # browser tests: recording through a fake microphone, every feature,
+                              # a mocked AI API, and an axe-core WCAG 2.1 AA audit of each screen
 ```
 
 Microphone access requires `https` or `localhost`. The test suite needs no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
@@ -127,6 +131,7 @@ js/night-view.js      bedtime ritual screens
 js/postcard.js        procedural postcards
 js/extras.js          recommendations, nights, kindness jar, prompt exchange
 js/prompts.js         daily prompts
+js/ai-chat.js         experimental AI conversation (system prompt and safety rules)
 data/recs.json        curated recommendations
 sw.js                 offline cache
 tools/validate.sh     comparison with Praat on synthesized speech

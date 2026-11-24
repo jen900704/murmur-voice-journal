@@ -36,3 +36,15 @@ test('language switch persists across reloads', async ({ page }) => {
   await page.reload();
   await expect(page.locator('h1')).toContainText('低語日記');
 });
+
+test('bedtime reminder downloads a valid daily calendar event', async ({ page }) => {
+  await page.goto('/#about');
+  await page.fill('#reminder-time', '21:45');
+  const dl = page.waitForEvent('download');
+  await page.locator('[data-key="reminder-ics"]').click();
+  const { readFileSync } = await import('node:fs');
+  const ics = readFileSync(await (await dl).path(), 'utf8');
+  expect(ics).toContain('RRULE:FREQ=DAILY');
+  expect(ics).toMatch(/DTSTART:\d{8}T214500/);
+  expect(ics).toContain('BEGIN:VALARM');
+});
