@@ -15,19 +15,19 @@ const MAX_USER_TURNS = 10;
 // What each lens may and may not do in a self-guided conversation.
 const LENS_RULES = {
   psychoanalytic: ['notice repeating patterns ("when have you felt this before, with whom?"); explore what one part wants and another fears; ask how they usually make the feeling bearable, without interpreting it', 'free association, dream or transference interpretation, digging into childhood trauma'],
-  adlerian: ['"The Question" (what would be different if this were gone, and what might the problem help avoid); private logic ("I must ... to ..."); acting "as if"; encouragement focused on effort, belonging and contribution', 'interpreting early recollections or family constellation'],
-  existential: ['values and choice ("what does this worry say you care about?"); what can and cannot be chosen; one small step toward what matters', 'prompts about death, mortality or meaninglessness'],
+  adlerian: ['"The Question" (what would be different if this were gone, and what they are reaching for underneath it); private logic ("I must ... to ..."); acting "as if"; encouragement focused on effort, belonging and contribution', 'interpreting early recollections or family constellation'],
+  existential: ['values and choice ("what does this worry say you care about?"); what can and cannot be chosen, accepting the person\'s own words for limits (fate, 緣分, God\'s will); one small step toward what matters', 'prompts about death, mortality or meaninglessness'],
   'person-centered': ['accurate, non-evaluative reflection of feelings in the person\'s own words; asking what they need; trusting their direction', 'claiming to offer a relationship or unconditional positive regard; advice-giving'],
   gestalt: ['here-and-now awareness of body sensations and what they are doing right now, stopping body focus if it raises distress; "I" language ("I choose" instead of "I have to") when it fits', 'empty chair, unfinished business with abusers or the deceased, exaggeration exercises'],
   behavioral: ['functional analysis (antecedent, behavior, consequence); one tiny behavioral experiment or activity to schedule; tracking mood before and after', 'exposure, flooding, anything trauma-focused'],
   acceptance: ['noticing without judgement; defusion ("I notice I am having the thought that ..."); values-based small actions', 'telling someone to accept an unsafe or unfair situation'],
-  rebt: ['A-B-C; gently questioning absolute "musts" and turning them into preferences', 'forceful disputation, shame-attacking exercises'],
+  rebt: ['A-B-C; gently questioning only the absolute part of a "must" ("or it is all over"), keeping duties the person values (caring for parents, providing for family)', 'forceful disputation, shame-attacking exercises, treating valued family duties as irrational'],
   cognitive: ['catching the automatic thought; evidence for and against; "what would you tell a friend?"; coping self-statements', 'labelling the person\'s thinking as distorted or defective; core-belief or schema work'],
   reality: ['WDEP: what they want, what they are doing, self-evaluation, a small plan they control', 'implying their distress is a choice'],
-  feminist: ['separating personal from social and structural sources ("whose rule is this?"); gender-role and power analysis; reducing self-blame', 'pushing confrontation or social action; safety planning for abuse (route to help lines instead)'],
+  feminist: ['separating personal from social and structural sources (which expectations they share and which they only go along with); who has the final say; reducing self-blame', 'pushing confrontation or social action; safety planning for abuse (route to help lines instead)'],
   'solution-focused': ['scaling, exceptions, coping questions, what is already working', 'the miracle question when the topic is grief or hopelessness'],
   narrative: ['externalizing the problem with a name; mapping its influence; unique outcomes', 'externalizing harm the person has done to others'],
-  'family-systems': ['who else carries this worry and how it was passed down; noticing triangles; one "I" position statement', 'advising confrontation or cutting off family'],
+  'family-systems': ['who else carries this worry; noticing triangles; the person\'s own view written for themselves first, leaving whether, to whom and how to say it entirely to them (including indirect ways common in Taiwanese families)', 'advising confrontation or cutting off family; framing family obligations as unhealthy; anything that sounds like blaming parents'],
 };
 
 function systemPrompt(lens, lang, { last = false } = {}) {
