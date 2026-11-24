@@ -14,7 +14,7 @@ export const THEME_TRACK = { work: 'solution-focused', relationship: 'person-cen
 
 const THEME_TEXT = {
   'zh-TW': { work: '工作或學業的事', relationship: '關係裡的事', family: '家裡的事', health: '身體的事', future: '對以後的擔心', unsure: '那件說不太清楚的事', none: '今天的事' },
-  en: { work: 'the thing about work or school', relationship: 'the thing about a relationship', family: 'the thing about family', health: 'the thing about your body', future: 'the worry about what comes next', unsure: 'the thing that is hard to name', none: 'today' },
+  en: { work: 'something about work or school', relationship: 'something about a relationship', family: 'something about family', health: 'something about your health', future: 'a worry about what comes next', unsure: 'something that is hard to name', none: 'today' },
 };
 
 const OPEN = {
@@ -47,7 +47,7 @@ const SET_DOWN = {
     ['想像把它放在床邊的桌上。明天早上它還會在那裡，你可以到時候再決定怎麼做。', 6],
   ],
   en: [
-    ['Tonight you set down {theme}.', 2],
+    ['Tonight you wrote down {theme}.', 2],
     ['It is real, and it deserves attention. Just not right now.', 3],
     ['Imagine placing it on the table beside your bed. It will still be there in the morning, and you can decide what to do with it then.', 6],
   ],
@@ -63,7 +63,7 @@ const CLOSE = {
   en: [
     ['That is enough for tonight.', 3],
     ['You do not need to do this well, or figure anything out.', 3],
-    ['Let your breath come by itself, and let your body grow heavy.', 8],
+    ['Let your breath come on its own, and let your body grow heavy.', 8],
     ['Good night.', 2],
   ],
 };
@@ -89,7 +89,7 @@ export const TRACKS = [
       style: 'in the spirit of person-centered therapy',
       core: [
         ['Whatever you felt today can stay here for now.', 4],
-        ['There is no need to convince yourself you should feel differently.', 4],
+        ['You do not have to talk yourself out of feeling this way.', 4],
         ['If someone who really understood you were sitting nearby, they would not rush to give advice. They would just stay, and listen to how tiring today was.', 6],
         ['You can keep yourself company in the same way.', 5],
         ['Rest one hand on your chest or your belly, and feel it rise and fall with your breath.', 8],
@@ -149,7 +149,7 @@ export const TRACKS = [
         ['Today you made some choices. Some were what you wanted; some were simply what you could manage.', 5],
         ['Both count.', 4],
         ['Was there a small moment today when you felt more like yourself? If nothing comes to mind, that is fine.', 8],
-        ['Maybe a sentence, a warm drink, or a quiet stretch of walking.', 6],
+        ['Maybe something someone said, a warm drink, or a quiet walk.', 6],
         ['That moment says something about what you care about.', 6],
         ['Tomorrow you can choose again. Tonight, you only need to rest.', 8],
       ],
@@ -176,7 +176,7 @@ export const TRACKS = [
       style: 'in the spirit of narrative therapy',
       core: [
         ['Imagine the thing on your mind as a bag you have carried around all day.', 5],
-        ['It has its weight, and it holds what it wants to remind you of.', 4],
+        ['It is heavy, and it holds things it wants you to remember.', 4],
         ['It is late now. Set it on a chair outside your door.', 5],
         ['It will not disappear. Tomorrow, on your way out, you can decide whether to pick it up.', 6],
         ['It is part of your day, but not the whole of you.', 6],
@@ -204,8 +204,8 @@ export const TRACKS = [
       name: 'What went okay today',
       style: 'in the spirit of solution-focused therapy',
       core: [
-        ['Think back over today. Was there one thing, however small, that went reasonably well? If nothing comes to mind, that is fine.', 6],
-        ['Maybe eating a proper meal, answering a message, or getting through a hard stretch of time.', 6],
+        ['Think back over today. Was there one thing, however small, that went okay? If nothing comes to mind, that is fine.', 6],
+        ['Maybe eating a real meal, answering a message, or getting through a hard stretch of time.', 6],
         ['Whatever it was, you were the one who did it.', 6],
         ['You do not need a full answer. Just let that picture stay for a moment.', 8],
         ['The things you already know how to do will still be there tomorrow.', 6],
@@ -237,7 +237,7 @@ export const TRACKS = [
       style: 'in the spirit of psychoanalytic therapy',
       note: 'Lets pictures surface on their own. On a heavy night, another track is a better pick.',
       core: [
-        ['First, a way out: if a picture that comes up feels bad, open your eyes, look at three things in the room, and feel where your body meets the bed. That is enough for tonight.', 8],
+        ['First, a way out: if a picture that comes up is upsetting, open your eyes, look at three things in the room, and feel where your body meets the bed. That is enough for tonight.', 8],
         ['Tonight there is nothing to analyze. Let pictures from today drift up on their own.', 6],
         ['Maybe something you saw on the way, a meal, a sentence you heard. Whatever comes is fine; it does not have to make sense.', 8],
         ['If a picture carries a little feeling, you can look at it for a moment, then let it pass. No need to ask why.', 8],
@@ -266,7 +266,7 @@ export const TRACKS = [
       ],
     },
     en: {
-      name: "Setting down others' loads for tonight",
+      name: "Setting down other people's worries for tonight",
       style: 'in the spirit of family systems therapy',
       core: [
         ['Today you may have worried quite a lot on behalf of other people.', 6],
@@ -300,7 +300,7 @@ export const TRACKS = [
       name: 'Relaxing the body',
       style: 'progressive relaxation from behavior therapy',
       core: [
-        ['If any part of your body is injured or sore, just let that part relax without tensing it.', 3],
+        ['If any part of your body is injured or sore, skip the tensing there and just let it rest.', 3],
         ['Start with your feet. Gently curl your toes, hold for a moment, and let go.', 6],
         ['Notice the difference between tense and relaxed.', 4],
         ['Now your calves and thighs. Tense them a little, hold, and relax.', 7],
@@ -333,7 +333,7 @@ export const TRACKS = [
         ['Something you did today may have made someone\'s day a little easier, even if you did not see it.', 6],
         ['Maybe just a thank-you, or listening to someone all the way through. If you did not talk with anyone today, getting yourself through to tonight counts too.', 6],
         ['The effort you put in today was real, whatever came of it.', 6],
-        ['You do not have to be perfect to have your place.', 6],
+        ['You do not have to be perfect to belong.', 6],
         ['Tomorrow, maybe one more small thing for someone else, or for yourself.', 6],
         ['For now, let today end.', 8],
       ],
