@@ -1016,8 +1016,12 @@ async function renderDetail() {
       {
         type: 'button',
         class: 'btn danger',
-        onclick: async () => {
-          if (!confirm(t('confirmDelete'))) return;
+        onclick: async (ev) => {
+          // a double tap must not delete twice or step back through history twice
+          const btn = ev.currentTarget;
+          if (btn.dataset.busy) return;
+          btn.dataset.busy = '1';
+          if (!confirm(t('confirmDelete'))) return void delete btn.dataset.busy;
           await db.deleteEntry(e.id);
           state.entries = state.entries.filter((x) => x.id !== e.id);
           journalSearch.entryDeleted(e.id);
