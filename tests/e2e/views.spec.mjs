@@ -59,3 +59,14 @@ test('first visit shows three ways in; dismissing it is remembered', async ({ pa
   await expect(page.locator('.prompt-text')).toBeVisible();
   await expect(page.locator('.welcome')).toHaveCount(0);
 });
+
+test('breathing pacer starts, shows the phase, and stops when closed', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-key="welcome-close"]').click();
+  await page.locator('[data-key="breathe-link"]').click();
+  await page.locator('[data-key="breathe-start"]').click();
+  await expect(page.locator('.breathe-phase')).toHaveText(/Breathe in|吸氣/);
+  await expect(page.locator('.breathe-phase')).toHaveText(/Breathe out|吐氣/, { timeout: 6000 });
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sheet')).toBeHidden();
+});

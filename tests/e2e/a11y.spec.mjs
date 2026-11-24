@@ -51,6 +51,16 @@ const screens = [
     await page.locator('.lens-link').last().click();
     await page.locator('.rec').first().waitFor();
   }],
+  ['breathing pacer', async (page) => {
+    await page.goto('/');
+    await page.locator('[data-key="breathe-link"]').click();
+    await page.locator('[data-key="breathe-start"]').click();
+    await page.locator('.breathe-phase').filter({ hasText: /./ }).waitFor();
+  }],
+  ['welcome', async (page) => {
+    await page.goto('/');
+    await page.locator('.welcome').waitFor();
+  }],
 ];
 
 for (const [locale, scheme] of [

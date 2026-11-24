@@ -1572,3 +1572,53 @@ h3.sub {
   display: flex;
   align-items: center;
 }
+
+/* Today: small links under the record button */
+.today-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin-top: 6px;
+}
+
+/* breathing pacer */
+.breathe-stage {
+  display: grid;
+  place-items: center;
+  height: 220px;
+}
+.breathe-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--accent-soft), color-mix(in srgb, var(--accent) 35%, var(--accent-soft)));
+  transform: scale(0.55);
+}
+.breathe-circle.in {
+  transform: scale(1);
+  transition: transform 4s ease-in-out;
+}
+.breathe-circle.out {
+  transform: scale(0.55);
+  transition: transform 6s ease-in-out;
+}
+.breathe-phase {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-height: 1.6em;
+  margin: 4px 0 0;
+}
+.breathe-left {
+  text-align: center;
+  min-height: 1.4em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .breathe-circle,
+  .breathe-circle.in,
+  .breathe-circle.out {
+    transition: none;
+    transform: scale(0.8);
+  }
+}

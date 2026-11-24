@@ -1,6 +1,6 @@
 // Offline support. Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-v16';
+const CACHE = 'murmur-v17';
 const SHELL = [
   './',
   './index.html',
@@ -22,6 +22,7 @@ const SHELL = [
   './js/extras.js',
   './js/prompts.js',
   './js/ai-chat.js',
+  './js/breathe.js',
   './data/recs.json',
   './fonts/bricolage-grotesque-latin-wght-normal.woff2',
   './icons/icon.svg',

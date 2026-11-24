@@ -10,6 +10,7 @@ import { createExtras } from './extras.js';
 import { checkRisk } from './safety.js';
 import { MODELS as AI_MODELS } from './ai-chat.js';
 import { DAILY, promptOfDay } from './prompts.js';
+import { breatheSheet } from './breathe.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -559,7 +560,15 @@ function viewToday() {
     if (!state.entries.length) {
       add(wrap, h('button', { type: 'button', class: 'link center', onclick: loadDemo }, t('loadDemoShort')));
     }
-    if (!isEvening()) add(wrap, h('button', { type: 'button', class: 'link center night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink')));
+    add(
+      wrap,
+      h(
+        'div',
+        { class: 'today-links' },
+        h('button', { type: 'button', class: 'link', 'data-key': 'breathe-link', onclick: () => openSheet(breatheSheet({ h, getLang })) }, t('breatheLink')),
+        isEvening() ? null : h('button', { type: 'button', class: 'link night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink'))
+      )
+    );
     const recent = state.entries.filter(usable).slice(-7);
     if (recent.length) {
       add(wrap, 
