@@ -154,7 +154,7 @@ export async function clearAll() {
     t.objectStore('audio').clear();
     t.objectStore('lensSessions').clear();
     t.objectStore('nights').clear();
-    for (const k of ['lensStats', 'aiKey', 'aiEnabled', 'aiModel', 'nightKeep', 'lastBackup', 'welcomed']) t.objectStore('settings').delete(k);
+    for (const k of ['lensStats', 'aiKey', 'aiEnabled', 'aiModel', 'nightKeep', 'lastBackup', 'welcomed', 'policyOptIn', 'policyState', 'policyLog', 'policyRiskAt']) t.objectStore('settings').delete(k);
   });
 }
 

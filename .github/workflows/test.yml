@@ -9,6 +9,22 @@ jobs:
         with:
           node-version: 22
       - run: npm test
+  lab:
+    # research modules: multi-agent evaluation harness, bandit simulation and OPE, DLATK pipeline, MCP server
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install numpy
+      - run: python -m unittest discover lab/eval/tests
+      - run: python -m unittest discover lab/rl/tests
+      - run: python -m unittest discover lab/dlatk/tests
+      - run: cd lab/mcp && npm ci && npm test
   browser:
     runs-on: ubuntu-24.04
     steps:

@@ -1,0 +1,73 @@
+{
+  "1gram": {
+    "rows_dlatk": 2143,
+    "rows_fallback": 2143,
+    "rows_in_both": 2143,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "2gram": {
+    "rows_dlatk": 2936,
+    "rows_fallback": 2936,
+    "rows_in_both": 2936,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "3gram": {
+    "rows_dlatk": 2827,
+    "rows_fallback": 2827,
+    "rows_in_both": 2827,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "lexicon_vader_valence": {
+    "rows_dlatk": 38,
+    "rows_fallback": 38,
+    "rows_in_both": 38,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "lexicon_murmur_basic": {
+    "rows_dlatk": 60,
+    "rows_fallback": 60,
+    "rows_in_both": 60,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "lexicon_murmur_topics": {
+    "rows_dlatk": 83,
+    "rows_fallback": 83,
+    "rows_in_both": 83,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "1to3gram_filtered": {
+    "rows_dlatk": 3925,
+    "rows_fallback": 3925,
+    "rows_in_both": 3925,
+    "rows_only_dlatk": 0,
+    "rows_only_fallback": 0,
+    "counts_that_differ": 0,
+    "max_abs_diff_group_norm": 0.0
+  },
+  "correlations": {
+    "rows_dlatk": 718,
+    "rows_fallback": 718,
+    "rows_in_both": 718,
+    "max_abs_diff_rho": 1.11e-16,
+    "max_abs_diff_p": 2.3e-14,
+    "max_abs_diff_p_bh": 2.3e-14
+  }
+}

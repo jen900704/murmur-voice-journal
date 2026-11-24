@@ -2,8 +2,11 @@
 // Off by default. It needs the person's own Anthropic API key, kept only in this browser,
 // and it sends the conversation text to Anthropic. Voice entries and bedtime notes are never sent.
 // Nothing from the conversation is stored.
+// Before each call, a few passages of the app's own lens text are looked up for the latest
+// message (js/rag.js) and added to the system prompt. The journal is never read or sent.
 import { lensById } from './lenses.js';
 import { checkRisk, helpList as regionHelpList, hasHelpLine } from './safety.js';
+import { retrieve, referenceBlock, basedOn, stripCitations } from './rag.js';
 
 export const MODELS = [
   { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5' },
@@ -175,6 +178,8 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
     const chat = st.chat; // which conversation this send belongs to
     // risk language: pause with help first; the person can still send if it was something else
     if (!confirmed && checkRisk(text).risk) {
+      // the on-device learner must not explore or learn around a risky moment
+      import('./policy.js').then((m) => m.createPolicyStore(db).noteRisk()).catch(() => {});
       st.busy = false;
       st.pause = true;
       return rerender();
@@ -204,8 +209,13 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
       st.abort = new AbortController();
       const lens = lensById(st.lensId);
       // the person's earlier notes travel in the first user turn, fenced off as notes
-      const sent = st.messages.map((m, i) => (i === 0 ? { role: 'user', content: notesBlock(st.context) + m.content } : m));
-      const { text: reply, stopReason } = await callModel({ key, model, system: systemPrompt(lens, getLang(), { last: userTurns >= MAX_USER_TURNS }), messages: sent, signal: st.abort.signal });
+      // only role and content go out; a reply is sent back as the model wrote it, passage ids included
+      const sent = st.messages.map((m, i) => ({ role: m.role, content: i === 0 ? notesBlock(st.context) + m.content : m.raw || m.content }));
+      // passages are chosen from the app's own lens text, using the latest message alone
+      const lang = getLang();
+      const passages = retrieve(text, lens.id, { lang });
+      const system = systemPrompt(lens, lang, { last: userTurns >= MAX_USER_TURNS }) + referenceBlock(passages);
+      const { text: reply, stopReason } = await callModel({ key, model, system, messages: sent, signal: st.abort.signal });
       if (chat !== st.chat) return; // closed while waiting: drop the reply
       if (!reply || stopReason === 'refusal') {
         // an empty or refused reply ends the exercise and shows help, rather than breaking the chat
@@ -222,8 +232,10 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         st.messages.pop();
         st.draft = text;
       } else {
-        st.messages.push({ role: 'assistant', content: reply });
-        announce(reply);
+        // passage ids are taken out of what is shown; the safety checks above read the full reply
+        const shown = stripCitations(reply) || reply;
+        st.messages.push({ role: 'assistant', content: shown, raw: reply, basedOn: basedOn(passages, lang, reply) });
+        announce(shown);
         // the model was told to stop and give help lines when risk appears; respect that
         if (hasHelpLine(reply)) {
           st.ended = true;
@@ -286,7 +298,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         'div',
         // the view is rebuilt on every change, so new replies are announced through a persistent region instead
         { class: 'ai-log', role: 'log', 'aria-live': 'off' },
-        st.messages.map((m) => h('div', { class: `ai-msg ${m.role}` }, h('span', { class: 'ai-who' }, m.role === 'user' ? L().you : L().ai), h('p', {}, m.content))),
+        st.messages.map((m) => h('div', { class: `ai-msg ${m.role}` }, h('span', { class: 'ai-who' }, m.role === 'user' ? L().you : L().ai), h('p', {}, m.content), m.basedOn ? h('p', { class: 'ai-based' }, m.basedOn) : null)),
         st.busy ? h('p', { class: 'muted small' }, L().thinking) : null
       ),
       st.error ? h('p', { class: 'error', role: 'alert' }, st.error) : null,

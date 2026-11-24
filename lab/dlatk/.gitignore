@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# The work folder holds the SQLite database with the analyzed text.
+**/work/
+results/

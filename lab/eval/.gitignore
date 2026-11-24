@@ -1,0 +1,8 @@
+# model-call cache and run outputs stay local; one mock run is committed as an example
+.cache/
+runs/*
+!runs/example-mock/
+__pycache__/
+*.pyc
+# labels downloaded from annotate.html
+human_labels_*.jsonl

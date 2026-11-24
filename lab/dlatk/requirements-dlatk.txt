@@ -1,0 +1,24 @@
+# The environment in which DLATK was installed and run for this pipeline (Python 3.13.18,
+# Linux, 2026-11-24). DLATK 1.3.15 on PyPI does not start on Python 3.13, so DLATK is
+# installed from GitHub at a fixed commit (setup.py version 1.4.1).
+#
+#   python3 -m venv ~/dlatk-venv
+#   ~/dlatk-venv/bin/pip install -r requirements-dlatk.txt
+#
+dlatk @ git+https://github.com/dlatk/dlatk@bf01561c59e6d53480976c4ca7f93b679110d867
+# DLATK imports numpy.linalg.linalg, which NumPy removed after 2.2.
+numpy==2.2.6
+scipy==1.16.3
+scikit-learn==1.7.2
+pandas==2.3.3
+statsmodels==0.14.6
+patsy==0.5.6
+nltk==3.10.4
+python-dateutil==2.9.0.post0
+# DLATK imports a MySQL driver at start-up even when the SQLite engine is used.
+# PyMySQL is pure Python; no MySQL server or client library is needed.
+PyMySQL==1.2.4
+# Optional, for DLATK's own word clouds.
+matplotlib==3.11.2
+wordcloud==1.9.3
+pillow==13.0.0

@@ -13,6 +13,7 @@ import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 import { LENSES } from './lenses.js';
+import { createJournalSearch } from './search.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -318,6 +319,7 @@ async function savePending() {
     state.promptIndex = (state.promptIndex + 1) % prompts.length;
   }
   state.entries.push(entry);
+  journalSearch.entrySaved(entry);
   db.requestPersistence();
   state.pending = null;
   state.phase = 'idle';
@@ -717,6 +719,8 @@ function welcomeCard() {
 
 function viewJournal() {
   const wrap = h('section', { class: 'view journal' });
+  // search comes first; while a query is typed, its results replace the rest of the page
+  journalSearch.view(wrap);
   add(wrap, backupNote(), extras.weekCard());
   add(wrap, extras.modeChips(state.journalMode, (m) => {
     state.journalMode = m;
@@ -787,6 +791,7 @@ function silentSection() {
             if (!confirm(t('confirmDelete'))) return;
             await db.deleteEntry(e.id);
             state.entries = state.entries.filter((x) => x.id !== e.id);
+            journalSearch.entryDeleted(e.id);
             render();
           } }, t('deleteEntry'))
         )
@@ -910,6 +915,7 @@ async function renderDetail() {
           if (!confirm(t('confirmDelete'))) return;
           await db.deleteEntry(e.id);
           state.entries = state.entries.filter((x) => x.id !== e.id);
+          journalSearch.entryDeleted(e.id);
           state.detailOpener = null;
           close();
           render();
@@ -1184,7 +1190,9 @@ function exportCsv() {
 
 async function exportJson() {
   const [nights, lensSessions, lensStats] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => []), db.getSetting('lensStats', {}).catch(() => ({}))]);
-  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions, lensStats: cleanLensStats(lensStats) || {} };
+  // the learner's decision log and state travel with the backup when the feature has been used
+  const policy = await import('./policy.js').then((m) => m.createPolicyStore(db).exportForBackup()).catch(() => null);
+  const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions, lensStats: cleanLensStats(lensStats) || {}, ...(policy || {}) };
   if (!(await saveFile(`murmur-backup-${localDate()}.json`, JSON.stringify(data), 'application/json'))) return false;
   state.lastBackup = Date.now();
   db.setSetting('lastBackup', state.lastBackup).catch(() => {});
@@ -1297,6 +1305,7 @@ async function importJson(file) {
     const nights = await putNew((Array.isArray(data.nights) ? data.nights : []).map(cleanNight).filter(Boolean), await db.listNights().catch(() => []), db.saveNight);
     const sessions = await putNew((Array.isArray(data.lensSessions) ? data.lensSessions : []).map(cleanSession).filter(Boolean), await db.listLensSessions().catch(() => []), db.saveLensSession);
     const stats = cleanLensStats(data.lensStats);
+    if (data.policyLog || data.policyState) await import('./policy.js').then((m) => m.createPolicyStore(db).importFromBackup(data)).catch(() => {});
     if (lensView && lensView.active()) {
       // an exercise is in progress: leave it alone and bring the lens view up to date afterwards
       if (stats) lensImport = stats;
@@ -1492,6 +1501,7 @@ function viewAbout() {
             if (!confirm(t('confirmDeleteAll'))) return;
             await db.clearAll();
             state.entries = [];
+            journalSearch.reset();
             state.aiKeySet = false;
             state.aiEnabled = false;
             lensImport = null;
@@ -1545,6 +1555,16 @@ const extras = createExtras({
   goLens,
   startRitual: () => nightView.begin(),
   openBreathe: () => openSheet(breatheSheet({ h, getLang })),
+});
+// Search over the person's own writing. The index is held in memory only (js/search.js).
+const journalSearch = createJournalSearch({
+  h,
+  getLang,
+  db,
+  getEntries: () => state.entries,
+  openEntry: (id, opener) => openDetail(id, opener),
+  openSheet,
+  closeSheet,
 });
 const nightView = createNightView({
   h,
@@ -1739,7 +1759,7 @@ async function init() {
 // A new release waits until the app is reopened and idle, then reloads once, so a page never
 // mixes files from two releases and nothing being typed or played is interrupted.
 function isIdle() {
-  const typed = [...document.querySelectorAll('textarea, input[type="text"], input[type="password"]')].some((el) => el.value.trim());
+  const typed = [...document.querySelectorAll('textarea, input[type="text"], input[type="search"], input[type="password"]')].some((el) => el.value.trim());
   return state.phase === 'idle' && !nightView.busy() && !(lensView && lensView.active()) && $('#sheet').hidden && !typed;
 }
 

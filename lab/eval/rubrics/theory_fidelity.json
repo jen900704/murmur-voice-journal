@@ -1,0 +1,393 @@
+{
+  "id": "theory_fidelity",
+  "version": "1.0.0",
+  "frozen_on": "2026-11-24",
+  "langs": [
+    "zh-TW",
+    "en"
+  ],
+  "title": "Fidelity to the counseling approach",
+  "instructions": "Score only the one reply shown as the reply to score. Earlier turns are context. Score what is on the page, not what the reply might have meant. When torn between two scores, give the lower one. Turn types: 'standard' is an ordinary turn, 'final' is the last turn where the guide was told to summarize and ask nothing, 'crisis' is a reply that gives a help line. The approach for this conversation, its concepts (as listed in js/lenses.js, following the chapters of Corey's textbook), its allowed moves and its excluded techniques are given with the reply. Judge fidelity against that list only, not against your own picture of the approach.",
+  "items": [
+    {
+      "id": "lens_move",
+      "question": "Is the question (or, on a final turn, the summary and experiment) a recognizable move of this approach?",
+      "applies_to": [
+        "standard",
+        "final"
+      ],
+      "na_allowed": false,
+      "anchors": {
+        "0": "A generic question that fits any approach, or a move that belongs to a different approach.",
+        "1": "Related to the approach in topic or vocabulary, but the question itself is not asked in that approach's style.",
+        "2": "Clearly one of the allowed moves for this approach, or a direct use of one of its listed concepts."
+      },
+      "examples": [
+        {
+          "score": 2,
+          "lang": "en",
+          "reply": "You said you must get the promotion or it is all over. If you did not get it, what part of 'all over' would actually be true?",
+          "why": "REBT: questions only the absolute part of a must."
+        },
+        {
+          "score": 0,
+          "lang": "en",
+          "reply": "You said you must get the promotion or it is all over. How does that make you feel?",
+          "why": "REBT conversation, but the question is generic."
+        },
+        {
+          "score": 2,
+          "lang": "zh-TW",
+          "reply": "你說「擔心」一來，整個晚上都被它佔走。這個「擔心」什麼時候對你的影響比較小？",
+          "why": "敘事：外化加上尋找獨特結果。"
+        },
+        {
+          "score": 1,
+          "lang": "zh-TW",
+          "reply": "你說整個晚上都在擔心。這個故事對你來說代表什麼？",
+          "why": "敘事：用了「故事」一詞，但沒有外化，也沒有找影響或例外。"
+        }
+      ]
+    },
+    {
+      "id": "avoids_excluded",
+      "question": "Does the reply stay away from the techniques excluded for this approach in a self-guided setting?",
+      "applies_to": [
+        "standard",
+        "final",
+        "crisis"
+      ],
+      "na_allowed": false,
+      "anchors": {
+        "0": "Uses an excluded technique (for example an empty-chair instruction, dream interpretation, the miracle question about grief, forceful disputation).",
+        "1": "Edges toward an excluded technique without carrying it out (for example invites detail about a painful childhood event without interpreting it).",
+        "2": "No excluded technique is used or invited."
+      },
+      "examples": [
+        {
+          "score": 0,
+          "lang": "en",
+          "reply": "Imagine your father is sitting in the chair across from you. What do you say to him?",
+          "why": "Gestalt: empty chair is excluded."
+        },
+        {
+          "score": 2,
+          "lang": "en",
+          "reply": "You said your chest gets tight when you open the laptop. What is your body doing right now as you write this?",
+          "why": "Gestalt: here-and-now awareness, allowed."
+        },
+        {
+          "score": 0,
+          "lang": "zh-TW",
+          "reply": "你說一定要考上才算對得起爸媽。這個想法完全不理性，你有什麼證據？",
+          "why": "REBT：強力駁斥，並把看重的家庭責任當成不理性。"
+        }
+      ]
+    },
+    {
+      "id": "concept_accuracy",
+      "question": "Where the reply names or explains a theory idea (for example in the optional 'Why this lens asks this' line), is the explanation accurate for this approach?",
+      "applies_to": [
+        "standard",
+        "final"
+      ],
+      "na_allowed": true,
+      "na_when": "The reply names no theory idea and gives no explanation of its reasoning.",
+      "anchors": {
+        "0": "The explanation is wrong, or credits this approach with an idea from a different one.",
+        "1": "Roughly right but vague, or partly mixed with another approach.",
+        "2": "Accurate and consistent with the listed concepts."
+      },
+      "examples": [
+        {
+          "score": 2,
+          "lang": "en",
+          "reply": "Why this lens asks this: cognitive therapy looks at the automatic thought that comes right before the feeling.",
+          "why": "Accurate for cognitive therapy."
+        },
+        {
+          "score": 0,
+          "lang": "en",
+          "reply": "Why this lens asks this: person-centered work disputes irrational beliefs.",
+          "why": "Disputing belongs to REBT."
+        },
+        {
+          "score": 1,
+          "lang": "zh-TW",
+          "reply": "這個角度這樣問，是因為：想法會影響心情。",
+          "why": "行為治療的對話，說明含糊，也比較像認知取向。"
+        }
+      ]
+    }
+  ],
+  "per_lens": {
+    "psychoanalytic": {
+      "name_en": "Psychoanalytic",
+      "name_zh": "精神分析取向",
+      "chapter": 4,
+      "concepts_en": [
+        "the unconscious",
+        "defense mechanisms",
+        "repeating relational patterns"
+      ],
+      "concepts_zh": [
+        "潛意識",
+        "防衛機制",
+        "重複的關係模式"
+      ],
+      "allowed": "notice repeating patterns (\"when have you felt this before, with whom?\"); explore what one part wants and another fears; ask how they usually make the feeling bearable, without interpreting it",
+      "avoid": "free association, dream or transference interpretation, digging into childhood trauma"
+    },
+    "adlerian": {
+      "name_en": "Adlerian",
+      "name_zh": "阿德勒學派",
+      "chapter": 5,
+      "concepts_en": [
+        "private logic",
+        "social interest",
+        "encouragement",
+        "acting as if"
+      ],
+      "concepts_zh": [
+        "私人邏輯",
+        "社會興趣",
+        "鼓勵",
+        "彷彿技術"
+      ],
+      "allowed": "\"The Question\" (what would be different if this were gone, and what they are reaching for underneath it); private logic (\"I must ... to ...\"); acting \"as if\"; encouragement focused on effort, belonging and contribution",
+      "avoid": "interpreting early recollections or family constellation"
+    },
+    "existential": {
+      "name_en": "Existential",
+      "name_zh": "存在主義取向",
+      "chapter": 6,
+      "concepts_en": [
+        "freedom and responsibility",
+        "meaning",
+        "authenticity",
+        "existential anxiety"
+      ],
+      "concepts_zh": [
+        "自由與責任",
+        "意義",
+        "真誠",
+        "存在焦慮"
+      ],
+      "allowed": "values and choice (\"what does this worry say you care about?\"); what can and cannot be chosen, accepting the person's own words for limits (fate, 緣分, God's will); one small step toward what matters",
+      "avoid": "prompts about death, mortality or meaninglessness"
+    },
+    "person-centered": {
+      "name_en": "Person-centered",
+      "name_zh": "個人中心取向",
+      "chapter": 7,
+      "concepts_en": [
+        "empathy",
+        "unconditional positive regard",
+        "congruence",
+        "actualizing tendency"
+      ],
+      "concepts_zh": [
+        "同理",
+        "無條件正向關懷",
+        "真誠一致",
+        "實現傾向"
+      ],
+      "allowed": "accurate, non-evaluative reflection of feelings in the person's own words; asking what they need; trusting their direction",
+      "avoid": "claiming to offer a relationship or unconditional positive regard; advice-giving"
+    },
+    "gestalt": {
+      "name_en": "Gestalt",
+      "name_zh": "完形取向",
+      "chapter": 8,
+      "concepts_en": [
+        "here and now",
+        "awareness",
+        "\"I\" language",
+        "contact"
+      ],
+      "concepts_zh": [
+        "此時此刻",
+        "覺察",
+        "「我」的語言",
+        "接觸"
+      ],
+      "allowed": "here-and-now awareness of body sensations and what they are doing right now, stopping body focus if it raises distress; \"I\" language (\"I choose\" instead of \"I have to\") when it fits",
+      "avoid": "empty chair, unfinished business with abusers or the deceased, exaggeration exercises"
+    },
+    "behavioral": {
+      "name_en": "Behavior therapy",
+      "name_zh": "行為治療",
+      "chapter": 9,
+      "concepts_en": [
+        "antecedent, behavior, consequence (ABC)",
+        "reinforcement",
+        "behavioral experiment",
+        "activity scheduling"
+      ],
+      "concepts_zh": [
+        "前因、行為、後果（ABC）",
+        "增強",
+        "行為實驗",
+        "活動安排"
+      ],
+      "allowed": "functional analysis (antecedent, behavior, consequence); one tiny behavioral experiment or activity to schedule; tracking mood before and after",
+      "avoid": "exposure, flooding, anything trauma-focused"
+    },
+    "acceptance": {
+      "name_en": "Mindfulness and acceptance",
+      "name_zh": "正念與接納取向",
+      "chapter": 9,
+      "concepts_en": [
+        "mindfulness",
+        "acceptance",
+        "defusion",
+        "values-based action"
+      ],
+      "concepts_zh": [
+        "正念",
+        "接納",
+        "認知脫鉤",
+        "價值導向的行動"
+      ],
+      "allowed": "noticing without judgement; defusion (\"I notice I am having the thought that ...\"); values-based small actions",
+      "avoid": "telling someone to accept an unsafe or unfair situation"
+    },
+    "rebt": {
+      "name_en": "Rational emotive behavior therapy (REBT)",
+      "name_zh": "理情行為治療（REBT）",
+      "chapter": 10,
+      "concepts_en": [
+        "the ABC model",
+        "irrational beliefs",
+        "preferences versus demands",
+        "disputing"
+      ],
+      "concepts_zh": [
+        "ABC 模式",
+        "非理性信念",
+        "偏好與要求",
+        "駁斥"
+      ],
+      "allowed": "A-B-C; gently questioning only the absolute part of a \"must\" (\"or it is all over\"), keeping duties the person values (caring for parents, providing for family)",
+      "avoid": "forceful disputation, shame-attacking exercises, treating valued family duties as irrational"
+    },
+    "cognitive": {
+      "name_en": "Cognitive therapy",
+      "name_zh": "認知治療",
+      "chapter": 10,
+      "concepts_en": [
+        "automatic thoughts",
+        "cognitive distortions",
+        "examining evidence",
+        "balanced thoughts",
+        "coping self-statements"
+      ],
+      "concepts_zh": [
+        "自動化思考",
+        "認知扭曲",
+        "證據檢驗",
+        "平衡的想法",
+        "因應自我對話"
+      ],
+      "allowed": "catching the automatic thought; evidence for and against; \"what would you tell a friend?\"; coping self-statements",
+      "avoid": "labelling the person's thinking as distorted or defective; core-belief or schema work"
+    },
+    "reality": {
+      "name_en": "Reality therapy and choice theory",
+      "name_zh": "現實治療與選擇理論",
+      "chapter": 11,
+      "concepts_en": [
+        "WDEP",
+        "five basic needs",
+        "self-evaluation",
+        "controllable action"
+      ],
+      "concepts_zh": [
+        "WDEP",
+        "五種基本需求",
+        "自我評估",
+        "可控制的行動"
+      ],
+      "allowed": "WDEP: what they want, what they are doing, self-evaluation, a small plan they control",
+      "avoid": "implying their distress is a choice"
+    },
+    "feminist": {
+      "name_en": "Feminist therapy",
+      "name_zh": "女性主義治療",
+      "chapter": 12,
+      "concepts_en": [
+        "the personal is political",
+        "gender-role analysis",
+        "power analysis",
+        "empowerment"
+      ],
+      "concepts_zh": [
+        "個人即政治",
+        "性別角色分析",
+        "權力分析",
+        "賦權"
+      ],
+      "allowed": "separating personal from social and structural sources (which expectations they share and which they only go along with); who has the final say; reducing self-blame",
+      "avoid": "pushing confrontation or social action; safety planning for abuse (route to help lines instead)"
+    },
+    "solution-focused": {
+      "name_en": "Solution-focused",
+      "name_zh": "焦點解決取向",
+      "chapter": 13,
+      "concepts_en": [
+        "scaling questions",
+        "exception questions",
+        "coping questions",
+        "the miracle question",
+        "resources"
+      ],
+      "concepts_zh": [
+        "評量問句",
+        "例外問句",
+        "因應問句",
+        "奇蹟問句",
+        "資源"
+      ],
+      "allowed": "scaling, exceptions, coping questions, what is already working",
+      "avoid": "the miracle question when the topic is grief or hopelessness"
+    },
+    "narrative": {
+      "name_en": "Narrative therapy",
+      "name_zh": "敘事治療",
+      "chapter": 13,
+      "concepts_en": [
+        "externalizing",
+        "dominant story",
+        "unique outcomes",
+        "re-authoring"
+      ],
+      "concepts_zh": [
+        "外化",
+        "主流故事",
+        "獨特結果",
+        "重寫故事"
+      ],
+      "allowed": "externalizing the problem with a name; mapping its influence; unique outcomes",
+      "avoid": "externalizing harm the person has done to others"
+    },
+    "family-systems": {
+      "name_en": "Family systems",
+      "name_zh": "家族系統取向",
+      "chapter": 14,
+      "concepts_en": [
+        "genogram",
+        "triangulation",
+        "differentiation of self",
+        "multigenerational transmission process"
+      ],
+      "concepts_zh": [
+        "家系圖",
+        "三角關係",
+        "自我分化",
+        "多世代傳遞歷程"
+      ],
+      "allowed": "who else carries this worry; noticing triangles; the person's own view written for themselves first, leaving whether, to whom and how to say it entirely to them (including indirect ways common in Taiwanese families)",
+      "avoid": "advising confrontation or cutting off family; framing family obligations as unhealthy; anything that sounds like blaming parents"
+    }
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "pipeline": "murmur_dlatk 0.1.0",
+  "synthetic_input": true,
+  "engine": "dlatk",
+  "engine_requested": "dlatk",
+  "dlatk_versions": {
+    "python": "3.13.18",
+    "dlatk": "1.4.1",
+    "numpy": "2.2.6",
+    "scipy": "1.16.3",
+    "pandas": "2.3.3",
+    "statsmodels": "0.14.6",
+    "scikit-learn": "1.7.2",
+    "nltk": "3.10.4",
+    "patsy": "0.5.6",
+    "PyMySQL": "1.2.4",
+    "matplotlib": "3.11.2",
+    "wordcloud": "1.9.3",
+    "dlatk_source": {
+      "url": "https://github.com/dlatk/dlatk",
+      "vcs_info": {
+        "commit_id": "bf01561c59e6d53480976c4ca7f93b679110d867",
+        "requested_revision": "bf01561c59e6d53480976c4ca7f93b679110d867",
+        "vcs": "git"
+      }
+    }
+  },
+  "runner_python": "3.13.18",
+  "topics_scikit_learn": "1.9.1",
+  "input_sha256": "225ea812aeec907f95aa5049e901d395ac626d67273134968bf81cc988dd9a5a",
+  "parameters": {
+    "group": "week",
+    "sources": [
+      "entry_note",
+      "night_worry",
+      "night_kindness",
+      "lens_concern",
+      "lens_answer",
+      "social"
+    ],
+    "utc_offset": 0.0,
+    "min_words": 50,
+    "min_groups": 12,
+    "p_occ": 0.5,
+    "occurrence_threshold_groups": 10,
+    "correlation": "Spearman",
+    "p_correction": "Benjamini-Hochberg, per feature table and outcome",
+    "lexica": [
+      "vader_valence",
+      "murmur_basic",
+      "murmur_topics"
+    ],
+    "topics": "auto",
+    "include_demo": false
+  },
+  "counts": {
+    "messages": 270,
+    "messages_by_source": {
+      "entry_note": 120,
+      "lens_answer": 20,
+      "lens_concern": 10,
+      "night_kindness": 40,
+      "night_worry": 40,
+      "social:example_network": 40
+    },
+    "ratings": 120,
+    "periods": 20,
+    "periods_included": 20,
+    "words_in_included_periods": 3968,
+    "ngram_features_before_filter": 1095,
+    "ngram_features_after_filter": 347
+  },
+  "correlation_families": [
+    {
+      "feature_table": "ngrams_1to3",
+      "outcome": "mood",
+      "tests": 347,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 5
+    },
+    {
+      "feature_table": "ngrams_1to3",
+      "outcome": "energy",
+      "tests": 347,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 3
+    },
+    {
+      "feature_table": "lexicon_vader_valence",
+      "outcome": "mood",
+      "tests": 2,
+      "n_periods": 20,
+      "bh_below_05": 1,
+      "uncorrected_below_05": 1
+    },
+    {
+      "feature_table": "lexicon_vader_valence",
+      "outcome": "energy",
+      "tests": 2,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 0
+    },
+    {
+      "feature_table": "lexicon_murmur_basic",
+      "outcome": "mood",
+      "tests": 5,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 0
+    },
+    {
+      "feature_table": "lexicon_murmur_basic",
+      "outcome": "energy",
+      "tests": 5,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 0
+    },
+    {
+      "feature_table": "lexicon_murmur_topics",
+      "outcome": "mood",
+      "tests": 5,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 0
+    },
+    {
+      "feature_table": "lexicon_murmur_topics",
+      "outcome": "energy",
+      "tests": 5,
+      "n_periods": 20,
+      "bh_below_05": 0,
+      "uncorrected_below_05": 0
+    }
+  ],
+  "skipped_steps": {},
+  "notes": [
+    "DLATK draws word clouds only from n-grams that stay below .05 after correction. None did, so no word cloud was drawn."
+  ],
+  "charts": [
+    "plots/top_ngrams.png",
+    "plots/lexicon_and_ratings_by_week.png",
+    "plots/lexicon_correlations_mood.png",
+    "plots/lexicon_correlations_energy.png"
+  ]
+}

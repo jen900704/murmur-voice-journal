@@ -1,0 +1,135 @@
+{
+  "run_id": "example-mock",
+  "started_utc": "2026-11-24T13:15:05+00:00",
+  "harness_version": "0.1.0",
+  "git_commit": "db8f5bb69327e6fc8a593c8eaaa8de0e6c3e315e",
+  "python": "3.13.18",
+  "node": "v22.23.5",
+  "app_sources_sha256": {
+    "ai-chat.js": "f134bcda7b8776d5ce5541aeeb67885d52aa69fa215c172a0c6788d92a4e38fc",
+    "safety.js": "dd449acba2c408b6ddc7cf9f0344bf81234d064e5368ef3be4552edb963665eb",
+    "lenses.js": "51e12259ad58fde26366eb4fb5d43b2ed06e49727c8096e15045aece57bd0481",
+    "rag.js": "94b08d761ec33ff16266c7bd2abb3a65fed921f80987190db0dc763c0d578623"
+  },
+  "cases_file": "cases.json",
+  "cases_sha256": "7192a7ea289614b3193be2bbd4558e2b6ecf2965821d2de557b3de1b1f6bc23a",
+  "n_cases": 48,
+  "replicates": 1,
+  "seed": 20261124,
+  "counselor": {
+    "provider": "mock",
+    "model": "mock-counselor-1",
+    "temperature": null,
+    "temperature_note": "null means the provider default, which is what the app sends",
+    "app_model_setting": "claude-sonnet-5-5",
+    "max_tokens": "taken from each request the app builds",
+    "seed_applied": true,
+    "max_user_turns": 10
+  },
+  "judge": {
+    "provider": "mock",
+    "model": "mock-judge-1",
+    "temperature": 0.0,
+    "max_tokens": 800,
+    "seed_applied": true,
+    "max_attempts": 3,
+    "system_prompt_sha256": "f738c06f8d6eacc45a5b6940b36dbff93da1c67e994feebea0bd380d9df5ba25"
+  },
+  "judge_independence": "different_model",
+  "rubrics": {
+    "theory_fidelity": {
+      "version": "1.0.0",
+      "sha256": "45774252164c7c24f96dfc9aa2e359dd2b34d2505103c0d5859bb2524bcd403c"
+    },
+    "safety": {
+      "version": "1.0.0",
+      "sha256": "84eb622a8896f52c82f8b59fabcce34e75db024b4a7a7d86543aa83319223752"
+    },
+    "style": {
+      "version": "1.0.0",
+      "sha256": "edffc137d77a13a75ae1cb5097611169372dce92c492c8ac9afdaa5c6ec0a24c"
+    },
+    "cultural_fit": {
+      "version": "1.0.0",
+      "sha256": "9ca9b7a0e76b7932805ba478e6b73e67137baa9d6a5d87707b40b2992ba4e5b5"
+    }
+  },
+  "counselor_base_system_prompt_sha256": {
+    "psychoanalytic|zh-TW|standard": "7b5478b00893d936515d941b57d7c1e15523d19558e6609e5a1bf7ab08687011",
+    "psychoanalytic|zh-TW|final": "aa444bee785b3316613d7d0ed254db21224ecfa07513c79d27cd1a3a8292dc95",
+    "psychoanalytic|en|standard": "e66b5e108db3641a6ac8b7add688841cce4b99327b39568c55c5c03a6efcfaca",
+    "psychoanalytic|en|final": "f94e02a42c3d3c820c49aa51f4d8d1643091623ef287a68c1fb57d1d403c19ee",
+    "adlerian|zh-TW|standard": "6331d5c872df4fb020d6c95ac10161611881617bc44a687d0551dab0c800e6a6",
+    "adlerian|zh-TW|final": "fa4ebd9eb9957364630043a295fdfbf9d5eb0652ebc7cfe3a6930dba7ae43584",
+    "adlerian|en|standard": "8cdc1c83da43d8e3df7b686166598a403a48401476fb750db6017162a1da4284",
+    "adlerian|en|final": "878745874898e6a0bed98402f8ce23ef63398989d34aaaaee0bdf1b4fd8b87f6",
+    "existential|zh-TW|standard": "7b160b7f32092594969c616f033bac9406e41e33b26b6cf8e22232c064459972",
+    "existential|zh-TW|final": "f894f8319e2896a7ad9bae7805657f958193e957879c638bf966e9007a5a020f",
+    "existential|en|standard": "795ff7a9a4f817075969812a46975cefab93186bc1bcb5b8af5f09e6e8514803",
+    "existential|en|final": "caee51519066a08576d5ed1bc42db6766b99f3205d7fdfd00d68859b864083b5",
+    "person-centered|zh-TW|standard": "600844dd5f41fbc6b35c8ef8da2fe7ccdc4dccbbb9879e6eaf6542c7302ec70b",
+    "person-centered|zh-TW|final": "7654048d5167efbec2eb1c6439cddddef950a0a4130286d31dc60f821897214e",
+    "person-centered|en|standard": "81f401de23893aa8f559cec817a8295ffefc0533cc7be53ee41c61f4c68f0f1b",
+    "person-centered|en|final": "3cbc13cbeaa07ea91ab2021141acd835fff6eb0eaeb6ea8ab59df70d4a62951e",
+    "gestalt|zh-TW|standard": "25baac86721438dddb400c98037b0cafdbc8bd9184adf6ac492622f28f44186b",
+    "gestalt|zh-TW|final": "a7fd79ca024f798a90e4d697669183fc630bda07958e3ef0beb850d5a1e58a60",
+    "gestalt|en|standard": "b62d53c3865b4e7d30b4ee1cb59505f6bfac616b08f7e87d09b1a52291d94982",
+    "gestalt|en|final": "1a3104316aa673535f4d70d775948c2f8ed5090bdbbe6c0e34f5a9b8ddbcdf64",
+    "behavioral|zh-TW|standard": "e4b512aaa50f20f0f9416ff799f1d21382565ce6a1c21408684cb2748e36dad9",
+    "behavioral|zh-TW|final": "deea4e64fc430f5ef96d0a5ed7b51acc2ef5a8bab2053270c5d555cad46a8f3a",
+    "behavioral|en|standard": "f58ddc211db2d1ba3c30212d4c18310f19486af22fb1c02067c81530fe724063",
+    "behavioral|en|final": "ca5107a2495d1562a97ac4fe2309b0fc2229c1d653fd8033ed6fe8b56e20fa08",
+    "acceptance|zh-TW|standard": "df2788fedffee0dfc3a1d1f2e64dfac473ccb5791177b3b9d3dd48f295a0089f",
+    "acceptance|zh-TW|final": "6d5f118b0dc9703dc490129ac98c6e9b3e5e9e9f8c1f6f2da455aff369aaf089",
+    "acceptance|en|standard": "456b8752daec065875d65383062f324f42e2b32d1d60108b4a514a5d28ced10b",
+    "acceptance|en|final": "898ed3edb0019ed95ceaf645e44cc4badd47bf93f9a58b23d0f2df543f624a9a",
+    "rebt|zh-TW|standard": "96f2cf4e1dcdee9ad8aa17f8daba3182826459cb9546c9f45128f3fc34b337d3",
+    "rebt|zh-TW|final": "5771ccff5e652e6fca0e8446a8c16e1be86fe82b25ca78cac0da7d2703159efb",
+    "rebt|en|standard": "244d523238b290d4a807670d728fd81f3a71262e5b9cd6ab2879711a3d1c28ee",
+    "rebt|en|final": "fa13c104cde5de108fed507d090ee436cdeec4d4af6caa0d66b290ffd2e3d301",
+    "cognitive|zh-TW|standard": "7ca227600bedddc4955a7ea60235f595bfac4e2ab55ab21402c86dcd97b6153f",
+    "cognitive|zh-TW|final": "893bbdc4711e44d9ccb620a6205a4ff557d7691bc20ea0167ccace4e4dfc0b83",
+    "cognitive|en|standard": "dcde0730a35f91444796b708c9552571f750dd12c9cb64e7127de24d7380d7cc",
+    "cognitive|en|final": "71944802c81c9227a5db8d20ecc2ca0b70bf155984f1a8be8cd016b898048e1a",
+    "reality|zh-TW|standard": "7cfc530f7a2e6e75b66da71ab68f784b4386c92c6b32d411b42b5410e93d781c",
+    "reality|zh-TW|final": "557c7577fb508a9ae74868c333b198cef5bd55ce945ff85ca83e8528c366d27a",
+    "reality|en|standard": "6b89d20e24bb7d7f46a738e72801a95a7f2f71d848818632fff53fac1a92c07c",
+    "reality|en|final": "3f14a325b9c04a4a06adcd5fbbec83c63c6b533eee546cca0fb25ac5f49a53b0",
+    "feminist|zh-TW|standard": "94e0c13edcc34f860d8a188c40f6465a84bb4dc4ef93186f285cb9860cd8f349",
+    "feminist|zh-TW|final": "a2ffdd27312b3fd057f41e3ec370e96499670bce8cb214421d5a85f3b4c1bd2c",
+    "feminist|en|standard": "6b207bc72c1471df77d7512a6851f45e72509354bcc8b2f766918ac81a04b17a",
+    "feminist|en|final": "b11ece98c40c708ab47353d37ebc1cb2099751082937ddccb0ad19edffea1001",
+    "solution-focused|zh-TW|standard": "52c748a11c8fc8c4ed5957f368132c9624f3f832242f3ad90e8ce03c0cff27b6",
+    "solution-focused|zh-TW|final": "b1658d3d345219076da275a97dc56b591654b1b20cb567735115ae4949117a06",
+    "solution-focused|en|standard": "94f31349d1d5363f6a5ffb735210ec37b012e07e2b254c13d75d552e65ee95cd",
+    "solution-focused|en|final": "0f7a29cae1dff01a45dbbdd6695c1679dd2d7f7a513a905f62416681a8c3a6ef",
+    "narrative|zh-TW|standard": "a37c5e5f1b69e2bd42aec079b978eb998400d210b1ff3241c37adde674ffb936",
+    "narrative|zh-TW|final": "7b780f5917aca6020260960ade6ee6e988a2ec35242c27d3d6d822432379cdfc",
+    "narrative|en|standard": "06517dbd136afe6d18db927b6e4c8a7bb0247d47e300e96ff544704ac21650d9",
+    "narrative|en|final": "fa82cc03a03e6c992d488cccaef1ab45706cf23ee7dea28b5f1f9cc9021c4400",
+    "family-systems|zh-TW|standard": "7d7d444b16a898e0d11274e6c477700ee2bc3d79d2399af81158380ce924ca1a",
+    "family-systems|zh-TW|final": "944f923ca8be56f29eaf5b55b7068fef3dd6d16915d4fc31436f1c9fa78d42f8",
+    "family-systems|en|standard": "64b856e3d950bdde03b0cc68da882031025752ecebbcea295f224026cdb2a654",
+    "family-systems|en|final": "20d3e65f9797315b79cfddcbb6ccc628aca9ddb4e050782be95872bae82ac554"
+  },
+  "app_retrieval": true,
+  "app_help_region": {
+    "zh-TW": "TW",
+    "en": "US"
+  },
+  "concurrency": 4,
+  "case_timeout_s": 600.0,
+  "call_timeout_s": 60.0,
+  "max_retries": 4,
+  "judges_skipped": false,
+  "finished_utc": "2026-11-24T13:15:07+00:00",
+  "calls": {
+    "counselor and judge": {
+      "calls": 718,
+      "cache_hits": 0,
+      "retries": 0,
+      "errors": 0
+    }
+  },
+  "case_errors": []
+}

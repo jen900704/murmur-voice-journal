@@ -40,6 +40,10 @@ const PATTERNS = {
     /沒(?:有)?人(?:會)?在乎我/,
     /(?:留給|寫給)(?:家人|爸媽|爸爸|媽媽|大家|他們).{0,3}的(?:信|話)|遺言|交代後事/,
     /(?:頂樓|樓頂|天台|橋上|月台).{0,6}(?:想了很久|站了很久|往下看|邊緣)/,
+    // warning signs found missing by the eval harness (lab/eval): giving things away, leaving for good
+    /(?:喜歡|心愛|重要|珍惜|寶貝|所有|全部)的?(?:東西|物品|收藏|寵物).{0,8}(?:送人|送給|分送|送掉|送光|分給)/,
+    /(?:很遠|遠遠)的地方.{0,16}(?:不用|不要|不會|再也不)(?:再)?回來/,
+    /催吐|故意(?:吐出來|把.{0,4}吐掉)/,
     /\b(?:don'?t|can'?t)\s+see\s+(?:the|a|any)\s+point\s+(?:of|in)\s+(?:anything|living|life|going\s+on|it\s+all|being\s+here)\b/i,
     /\b(?:happier|better\s+off|easier)\s+(?:if\s+i\s+(?:wasn'?t|weren'?t|was\s+not|were\s+not)\s+(?:around|here|alive)|if\s+i\s+(?:was|were)\s+(?:gone|dead))\b/i,
     /\bthinking\s+(?:about|of)\s+ending\s+(?:it|things|everything)\b(?!\s+with)/i,
@@ -69,6 +73,9 @@ const PATTERNS = {
     /\bjump(?:ing)?\s+off\s+(?:a|the)\s+(?:bridge|roof|building)\b/i,
     /\b(?:took|take|taking)\s+(?:too\s+many|all\s+(?:of\s+)?my)\s+pills\b/i,
     /\boverdos(?!ed\s+on\s+(?:coffee|caffeine|sugar))/i,
+    /\bgiv(?:e|ing|en)\s+(?:all\s+)?(?:of\s+)?(?:my\s+)?(?:stuff|things|belongings|possessions)\s+away\b[^]{0,80}?\bwon'?t\s+(?:be\s+)?need(?:ing)?\b/i,
+    /\b(?:it\s+all|all\s+of\s+it|everything)\s+(?:to\s+)?stop\s+(?:for\s+good|forever)\b/i,
+    /\bmak(?:e|ing)\s+my\s?self\s+(?:throw\s+up|vomit|puke)\b/i,
   ],
   others: [
     { re: /(?:殺|杀|弄死|打死)(?:了|死)?(?:他|她|你|妳|他們|她們|他们|她们)/, notAfter: /(?:遊戲|游戏|game|電玩|副本|劇裡|剧里|小說|小说)[^，。,.]{0,8}$/i },

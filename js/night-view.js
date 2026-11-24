@@ -4,6 +4,10 @@ import { TRACKS, THEMES, THEME_TRACK, trackById, buildScript, BedtimePlayer, pic
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
 
+// The suggested-track policy (js/policy.js) is optional and off by default; loaded on its own
+// so the ritual still works if that one file cannot be fetched.
+const policyModule = import('./policy.js').catch(() => null);
+
 const S = {
   'zh-TW': {
     cardTitle: '睡前儀式',
@@ -138,6 +142,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   const st = { run: 0, preparing: false, stage: 'card', worry: '', theme: null, keep: true, kind: '', track: null, player: null, line: '', lineIndex: 0, paused: false, readAlong: false, postcard: null, jar: [], voiceName: null };
   const L = () => S[getLang()] || S.en;
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
+  // suggested track: mod and store once loaded, optIn, and dec for tonight's suggestion
+  const pol = { mod: null, store: null, optIn: undefined, dec: null, whyOpen: false };
+  const PT = () => pol.mod.policyText(getLang());
 
   function go(stage) {
     if (stage !== st.stage) st.helpOpen = false; // the help list closes when the step changes
@@ -205,6 +212,14 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.jar = nights.map((n) => n.kindness).filter(Boolean);
     markDone(nights);
     st.finishing = false;
+    st.riskSeen = false;
+    pol.dec = null;
+    pol.whyOpen = false;
+    pol.mod = pol.mod || (await policyModule);
+    if (pol.mod) {
+      pol.store = pol.store || pol.mod.createPolicyStore(db);
+      pol.optIn = await pol.store.optIn();
+    }
     voicesReady(); // start loading voices early
     if (run !== st.run) return null;
     if (!stay) go('worry');
@@ -214,6 +229,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   // Pause with help instead of deleting; the person can carry on if it was something else.
   function guard(text, onContinue) {
     if (checkRisk(text).risk) {
+      // from here on nothing tonight is used to adjust suggestions
+      st.riskSeen = true;
+      if (pol.store) pol.store.noteRisk();
       st.onContinue = onContinue;
       go('crisis');
       return false;
@@ -313,9 +331,65 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       input,
       ideas.length ? h('div', { class: 'jar-ideas' }, h('p', { class: 'muted small' }, L().kindIdeas), h('ul', { class: 'plain-list' }, ideas.map((k) => h('li', {}, k)))) : null,
       nav(() => {
-        if (guard(st.kind, () => go('tone'))) go('tone');
+        if (guard(st.kind, toTone)) toTone();
       }, { back: () => go('worry'), nextLabel: st.kind.trim() ? L().next : L().skip }),
     ];
+  }
+
+  // the usual order: the track suited to tonight's kind of worry, then the others as listed.
+  // 'drift' invites images to surface, so it is never suggested, only chosen on purpose.
+  function trackOrder() {
+    const first = THEME_TRACK[st.theme];
+    return TRACKS.map((t) => t.id).filter((id) => id !== 'drift').sort((a, b) => (b === first) - (a === first));
+  }
+
+  // Decides tonight's one suggested track, only when the person has switched this on. The gate
+  // (risk language, a low latest mood) is worked out here, outside the learner; a gated
+  // suggestion is the usual one. One decision per theme per night, however often the step is opened.
+  async function featureTrack() {
+    const context = st.theme || 'none';
+    if (!pol.mod || pol.optIn !== true) return (pol.dec = null); // off: nothing decided, nothing logged
+    if (pol.dec && pol.dec.context === context && !pol.dec.used) return;
+    pol.dec = null;
+    const [risk, evidence] = await Promise.all([pol.store.recentRisk(), pol.store.evidence('track', context)]);
+    const gated = pol.mod.gateReason({ optedIn: true, risk: st.riskSeen || risk, mood: latestMood(), surface: 'track', context });
+    const decision = pol.mod.decide({ eligible: trackOrder(), evidence, gated, seed: pol.mod.newSeed() });
+    if (!decision) return;
+    const record = pol.mod.makeRecord({ surface: 'track', context, decision });
+    await pol.store.log(record);
+    pol.dec = { id: record.id, context, action: decision.action, gated: decision.gated, used: null, answered: false };
+  }
+
+  async function toTone() {
+    if (st.toning) return;
+    st.toning = true;
+    const run = st.run;
+    try {
+      await featureTrack();
+    } catch (_) {
+      pol.dec = null;
+    } finally {
+      st.toning = false;
+    }
+    if (run === st.run) go('tone');
+  }
+
+  // after a track: one optional question, the only thing the suggestion ever learns from
+  function trackQuestion() {
+    const dec = pol.dec;
+    if (!dec || !dec.used || !pol.mod) return null;
+    if (dec.answered) return h('p', { class: 'muted small', role: 'status', 'data-key': 'track-helped-thanks' }, PT().thanks);
+    const answer = (reward) => {
+      dec.answered = true;
+      pol.store.rate(dec.id, { reward, allowLearning: !st.riskSeen && !pol.mod.isLowMood(latestMood()) }).catch(() => {});
+      rerender();
+    };
+    return h(
+      'div',
+      { class: 'track-helped' },
+      h('p', { class: 'small', id: 'track-helped-q' }, PT().trackQ),
+      h('div', { class: 'actions left', role: 'group', 'aria-labelledby': 'track-helped-q' }, h('button', { type: 'button', class: 'btn', 'data-key': 'track-helped-yes', onclick: () => answer(1) }, PT().trackYes), h('button', { type: 'button', class: 'btn', 'data-key': 'track-helped-no', onclick: () => answer(0) }, PT().trackNo))
+    );
   }
 
   function chooseFor() {
@@ -327,6 +401,10 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   }
 
   function tone() {
+    // with suggestions switched on and not gated, the policy's track takes the suggested place
+    const learned = pol.dec && !pol.dec.gated && pol.dec.context === (st.theme || 'none') ? pol.dec.action : null;
+    const suggestedId = learned || THEME_TRACK[st.theme];
+    const tag = learned && learned !== THEME_TRACK[st.theme] ? PT().trackTag : L().suggested;
     return [
       ...stepHead(3, L().toneTitle, L().toneHelp),
       h(
@@ -336,18 +414,20 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         // the track suited to tonight's kind of worry comes first, marked as a suggestion;
         // a few are shown at first so the choice is not a long list at bedtime
         [...TRACKS]
-          .sort((a, b) => (b.id === THEME_TRACK[st.theme]) - (a.id === THEME_TRACK[st.theme]))
+          .sort((a, b) => (b.id === suggestedId) - (a.id === suggestedId))
           .slice(0, st.allTracks ? TRACKS.length : 3)
           .map((t) =>
           h(
             'button',
-            { type: 'button', class: 'track' + (t.id === THEME_TRACK[st.theme] ? ' suggested' : ''), 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
-            t.id === THEME_TRACK[st.theme] ? h('span', { class: 'track-tag' }, L().suggested) : null,
+            { type: 'button', class: 'track' + (t.id === suggestedId ? ' suggested' : ''), 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
+            t.id === suggestedId ? h('span', { class: 'track-tag' }, tag) : null,
             h('strong', {}, t[lk()].name),
             h('span', {}, t[lk()].style),
             t[lk()].note ? h('span', { class: 'track-note' }, t[lk()].note) : null
           )
         ),
+        learned ? h('button', { type: 'button', class: 'link', 'data-key': 'policy-why', 'aria-expanded': pol.whyOpen ? 'true' : 'false', onclick: () => ((pol.whyOpen = !pol.whyOpen), rerender()) }, PT().why) : null,
+        learned && pol.whyOpen ? h('p', { class: 'muted small', 'data-key': 'policy-why-body' }, PT().whyBody) : null,
         st.allTracks ? null : h('button', { type: 'button', class: 'link', 'data-key': 'tracks-all', onclick: () => ((st.allTracks = true), rerender()) }, L().allTracks(TRACKS.length))
       ),
       h(
@@ -497,6 +577,11 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     st.finishing = true;
     try {
       const now = new Date();
+      // note which track was actually played, whether or not it was the suggested one
+      if (pol.dec && st.track && !pol.dec.used) {
+        pol.dec.used = st.track;
+        pol.store.setUsed(pol.dec.id, st.track).catch(() => {});
+      }
       const seed = `${now.toDateString()}-${st.track}-${st.kind}`;
       const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(now);
       const hasKind = st.kind.trim().length > 0;
@@ -575,6 +660,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           L().done
         )
       ),
+      trackQuestion(),
       sendCard(),
       openGentle ? h('button', { type: 'button', class: 'link', onclick: () => openGentle() }, L().gentle) : null,
     ];

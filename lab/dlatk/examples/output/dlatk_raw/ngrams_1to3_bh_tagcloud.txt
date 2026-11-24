@@ -1,0 +1,26 @@
+
+=========================
+Tag Cloud Data for energy
+---------------------------
+PositiveRs:
+------------
+rList has less than no items
+
+
+Negative Rs:
+-------------
+rList has less than no items
+
+
+=========================
+Tag Cloud Data for mood
+---------------------------
+PositiveRs:
+------------
+rList has less than no items
+
+
+Negative Rs:
+-------------
+rList has less than no items
+

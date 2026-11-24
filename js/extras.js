@@ -4,6 +4,10 @@ import { postcardSvg } from './postcard.js';
 import { trackById } from './bedtime.js';
 import { checkRisk, helpList } from './safety.js';
 
+// The featured-item policy (js/policy.js) is optional and off by default; loaded on its own
+// so these screens still work if that one file cannot be fetched.
+const policyModule = import('./policy.js').catch(() => null);
+
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
@@ -130,6 +134,66 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     ex.nights = await db.listNights().catch(() => []);
     ex.loaded = true;
     ex.jarPickFor = null; // a deleted night's kind thing must not linger on the low-mood card
+  }
+
+  // ---------- featured small action (only when the person switched suggestions on) ----------
+  const pol = { mod: null, store: null, optIn: undefined, loading: false, loaded: false, dec: null };
+
+  // the switch and the reset live on the lens page; start over here when either changes
+  if (typeof window !== 'undefined') window.addEventListener('murmur-policy', () => Object.assign(pol, { optIn: undefined, loading: false, loaded: false, dec: null }));
+
+  function loadPolicy() {
+    if (pol.loading) return;
+    pol.loading = true;
+    policyModule
+      .then(async (mod) => {
+        if (!mod) return;
+        pol.mod = mod;
+        pol.store = mod.createPolicyStore(db);
+        pol.optIn = await pol.store.optIn();
+      })
+      .catch(() => {})
+      .then(() => {
+        pol.loaded = true;
+        if (pol.optIn === true) render();
+      });
+  }
+
+  // The low-mood note only appears after a mood of 1 or 2, so this decision is always gated:
+  // the first small action is the one that would be first anyway, nothing is tried out, and
+  // the answer below it is kept in the decision log but never used to adjust anything.
+  function smallDecision(latest, things) {
+    if (!pol.loaded) loadPolicy();
+    if (pol.optIn !== true || !things.length) return null;
+    const all = L().smallThings;
+    const eligible = things.map((t) => `small-${all.indexOf(t)}`);
+    const id = `small-${latest.id}-${eligible[0]}`.slice(0, 80);
+    if (pol.dec && pol.dec.id === id) return pol.dec;
+    const dec = (pol.dec = { id, action: eligible[0], answered: false });
+    pol.store
+      .recentRisk()
+      .then((risk) => {
+        const gated = pol.mod.gateReason({ optedIn: true, risk, mood: latest.mood, surface: 'small', context: 'none' }) || 'low-mood';
+        const decision = pol.mod.decide({ eligible, gated, seed: pol.mod.newSeed() });
+        return pol.store.log(pol.mod.makeRecord({ surface: 'small', context: 'none', decision, id }));
+      })
+      .catch(() => {});
+    return dec;
+  }
+
+  function smallFeedback(dec) {
+    if (!dec) return null;
+    const PT = pol.mod.policyText(getLang());
+    if (dec.answered) return h('span', { class: 'muted small', role: 'status' }, ' ', PT.thanks);
+    const answer = (reward) => {
+      dec.answered = true;
+      pol.store
+        .setUsed(dec.id, dec.action)
+        .then(() => pol.store.rate(dec.id, { reward, allowLearning: false }))
+        .catch(() => {});
+      render();
+    };
+    return h('span', { class: 'small-feedback' }, ' ', h('button', { type: 'button', class: 'link', 'data-key': 'small-helped-yes', onclick: () => answer(1) }, PT.smallYes), ' ', h('button', { type: 'button', class: 'link', 'data-key': 'small-helped-no', onclick: () => answer(0) }, PT.smallNo));
   }
 
   // ---------- recommendations ----------
@@ -361,6 +425,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     const kinds = evening ? pick.slice(0, 1) : pick;
     // a pick cached in the afternoon may hold a daytime suggestion; not as the evening's only item
     const small = evening ? ex.smallPick.items.filter((t) => !/白天|daytime|便利商店|convenience/i.test(t)).slice(0, 1) : ex.smallPick.items;
+    const smallDec = smallDecision(latest, small);
     return h(
       'div',
       { class: 'low-card', role: 'note' },
@@ -368,7 +433,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       kinds.length ? h('p', { class: 'small' }, L().lowBody) : null,
       kinds.length ? h('ul', { class: 'plain-list' }, kinds.map((p) => h('li', {}, p.text))) : null,
       small.length ? h('p', { class: 'small' }, evening ? L().lowSmallOne : L().lowSmall) : null,
-      small.length ? h('ul', { class: 'plain-list' }, small.map((t) => h('li', {}, t))) : null,
+      small.length ? h('ul', { class: 'plain-list' }, small.map((t, i) => h('li', {}, t, i === 0 ? smallFeedback(smallDec) : null))) : null,
       h(
         'div',
         { class: 'low-links' },
@@ -449,6 +514,9 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   }
 
   function showHelp({ sharing = false } = {}) {
+    // risk language was just seen (in a note or an answer to share): only the time is kept, so
+    // that nothing is tried out or learned from for the next 36 hours
+    policyModule.then((mod) => mod && mod.createPolicyStore(db).noteRisk()).catch(() => {});
     openSheet(() => [
       h('h2', {}, L().helpTitle),
       h('p', {}, sharing ? L().helpBodyShare : L().helpBody),

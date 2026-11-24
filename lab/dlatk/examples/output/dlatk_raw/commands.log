@@ -1,0 +1,26 @@
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica --add_ngrams -n 1 2 3 --combine_feat_tables 1to3gram
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica --add_lex_table -l vader_valence --weighted_lexicon
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica --add_lex_table -l murmur_basic --weighted_lexicon
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica --add_lex_table -l murmur_topics --weighted_lexicon
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$1to3gram$msgs$week_id --feat_occ_filter --set_p_occ 0.5 --group_freq_thresh 50
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$1to3gram$msgs$week_id$0_5 --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --no_correction --output_name <out>/dlatk_raw/ngrams_1to3_uncorrected
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$1to3gram$msgs$week_id$0_5 --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --p_correction BH --output_name <out>/dlatk_raw/ngrams_1to3_bh --tagcloud --make_wordclouds
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_vader_valence_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --no_correction --output_name <out>/dlatk_raw/lexicon_vader_valence_uncorrected
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_vader_valence_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --p_correction BH --output_name <out>/dlatk_raw/lexicon_vader_valence_bh
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_murmur_basic_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --no_correction --output_name <out>/dlatk_raw/lexicon_murmur_basic_uncorrected
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_murmur_basic_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --p_correction BH --output_name <out>/dlatk_raw/lexicon_murmur_basic_bh
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_murmur_topics_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --no_correction --output_name <out>/dlatk_raw/lexicon_murmur_topics_uncorrected
+  exit code 0
+dlatkInterface.py -e sqlite -d <work>/murmur -t msgs -c week_id --lexicondb <work>/lexica -f feat$cat_murmur_topics_w$msgs$week_id$1gra --outcome_table outcomes --outcomes mood energy --correlate --spearman --csv --group_freq_thresh 50 --blacklist --feat_blacklist _intercept --p_correction BH --output_name <out>/dlatk_raw/lexicon_murmur_topics_bh
+  exit code 0

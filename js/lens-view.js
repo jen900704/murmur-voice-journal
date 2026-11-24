@@ -4,6 +4,10 @@ import { LENSES, TOPICS, TOPIC_COMMON, lensById, lensesForTopic, fill, rewriteTe
 import { checkRisk, helpList } from './safety.js';
 import { createAiChat } from './ai-chat.js';
 
+// The featured-row policy (js/policy.js) is optional and off by default. It is loaded on its
+// own so the lens screens still work if that one file cannot be fetched.
+const policyModule = import('./policy.js').catch(() => null);
+
 const S = {
   'zh-TW': {
     title: '換個角度看看',
@@ -182,8 +186,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     stats: {},
     sessions: [],
     loaded: false,
+    // featured row: mod and store once loaded, optIn (undefined until asked), dec for this pick
+    pol: { mod: null, store: null, optIn: undefined, dec: null, logCount: 0 },
   };
   const L = () => S[getLang()] || S.en;
+  const PT = () => st.pol.mod.policyText(getLang());
   const lk = () => (getLang() === 'en' ? 'en' : 'zh');
   const ai = createAiChat({ h, add, getLang, db, onClose: () => go('summary') });
 
@@ -200,6 +207,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.stats = (await db.getSetting('lensStats', {}).catch(() => ({}))) || {};
     st.sessions = await db.listLensSessions().catch(() => []);
     st.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
+    const mod = await policyModule;
+    if (mod) {
+      const store = mod.createPolicyStore(db);
+      st.pol = { mod, store, optIn: await store.optIn(), dec: null, logCount: (await store.getLog()).length };
+    }
     st.loaded = true;
     rerender();
   }
@@ -225,12 +237,17 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.step = 0;
     st.compare = [];
     st.rating = null;
+    st.riskSeen = false;
+    st.pol.dec = null;
   }
 
   // Text that suggests risk pauses the exercise and shows help. Nothing is deleted: if it
   // was something else (the check also matches some ordinary phrases), the person can go on.
   function guard(text, onContinue) {
     if (checkRisk(text).risk) {
+      // from here on nothing in this exercise is used to adjust suggestions
+      st.riskSeen = true;
+      if (st.pol.store) st.pol.store.noteRisk();
       st.crisisFrom = st.stage;
       st.onContinue = onContinue;
       go('crisis');
@@ -239,7 +256,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return true;
   }
 
-  function startLens(id) {
+  function startLens(id, fromPick = false) {
+    // the featured-row decision belongs to the pick list; note which lens was actually opened
+    const dec = st.pol.dec;
+    if (dec && fromPick) {
+      dec.used = id;
+      st.pol.store.setUsed(dec.id, id).catch(() => {});
+    } else st.pol.dec = null;
     st.lensId = id;
     st.answers = [];
     st.step = 0;
@@ -311,6 +334,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, L().savedCount(st.sessions.length))),
         openGentle ? h('button', { type: 'button', class: 'lens-link', onclick: openGentle }, h('strong', {}, L().gentle)) : null
       ),
+      policyPanel(),
     ];
   }
 
@@ -393,7 +417,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           st.compare = shuffle(pool).slice(0, 3).map((l) => l.id);
           go('compare');
         }),
-        option(L().pick, L().pickWhy, () => go('pick'))
+        option(L().pick, L().pickWhy, openPick)
       ),
       pool.length < LENSES.length ? h('p', { class: 'muted small' }, L().topicHidden) : null,
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('concern') }, L().back)),
@@ -440,6 +464,156 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   // one compact row per lens (mark, name, first sentence of its idea); tapping starts it
+  // the pick list's order: approaches often used for this kind of worry, then the other suitable ones
+  function expertOrder(topic) {
+    const all = lensesForTopic(topic);
+    const common = (TOPIC_COMMON[topic] || []).map(lensById).filter((l) => l && all.includes(l));
+    return { common, rest: all.filter((l) => !common.includes(l)) };
+  }
+
+  // Decides the one featured row, only when the person has switched this on. The safety gate
+  // (risk language, a low latest mood, a loss) is worked out here, outside the learner; a gated
+  // decision is simply the first lens of the usual order. If anything fails, no row is featured.
+  async function featureForPick() {
+    const p = st.pol;
+    p.dec = null;
+    p.whyOpen = false;
+    if (!p.mod || p.optIn !== true) return; // off: nothing is decided and nothing is logged
+    const { common, rest } = expertOrder(st.topic);
+    const [entries, risk, evidence] = await Promise.all([db.listEntries(), p.store.recentRisk(), p.store.evidence('lens', st.topic)]);
+    const gated = p.mod.gateReason({ optedIn: true, risk: st.riskSeen || risk, mood: p.mod.recentMood(entries), surface: 'lens', context: st.topic });
+    const decision = p.mod.decide({ eligible: [...common, ...rest].map((l) => l.id), evidence, gated, seed: p.mod.newSeed() });
+    if (!decision) return;
+    const record = p.mod.makeRecord({ surface: 'lens', context: st.topic, decision });
+    await p.store.log(record);
+    p.logCount++;
+    p.dec = { id: record.id, action: decision.action, gated: decision.gated, used: null };
+  }
+
+  async function openPick() {
+    if (st.picking) return;
+    st.picking = true;
+    try {
+      await featureForPick();
+    } catch (_) {
+      st.pol.dec = null;
+    } finally {
+      st.picking = false;
+    }
+    go('pick');
+  }
+
+  // tells the other screens (the low-mood note) that the switch or what was learned changed
+  const policyChanged = () => window.dispatchEvent(new Event('murmur-policy'));
+
+  // one line, shown until the person answers either way
+  function policyOptInCard() {
+    const p = st.pol;
+    if (!p.mod || p.optIn !== undefined) return null;
+    const answer = async (yes) => {
+      p.optIn = yes;
+      try {
+        await p.store.setOptIn(yes);
+        if (yes) await featureForPick();
+      } catch (_) {
+        p.dec = null;
+      }
+      policyChanged();
+      rerender();
+    };
+    return h(
+      'div',
+      { class: 'policy-optin', 'data-key': 'policy-optin' },
+      h('p', { class: 'muted small' }, PT().optInLine),
+      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn', 'data-key': 'policy-optin-yes', onclick: () => answer(true) }, PT().optInYes), h('button', { type: 'button', class: 'btn ghost', 'data-key': 'policy-optin-no', onclick: () => answer(false) }, PT().optInNo))
+    );
+  }
+
+  function policyWhy(gated) {
+    const p = st.pol;
+    return [
+      h('button', { type: 'button', class: 'link', 'data-key': 'policy-why', 'aria-expanded': p.whyOpen ? 'true' : 'false', onclick: () => ((p.whyOpen = !p.whyOpen), rerender()) }, PT().why),
+      p.whyOpen ? h('p', { class: 'muted small', 'data-key': 'policy-why-body' }, gated ? PT().whyBodyLocked : PT().whyBody) : null,
+    ];
+  }
+
+  // On the lens home page: the switch, what it does, the decision log as a file, and a reset.
+  function policyPanel() {
+    const p = st.pol;
+    if (!p.mod) return null;
+    return h(
+      'details',
+      { class: 'lens-more', 'data-key': 'policy-panel', open: p.panelOpen ? '' : null, ontoggle: (e) => (p.panelOpen = e.currentTarget.open) },
+      h('summary', {}, PT().panelTitle),
+      h('p', { class: 'muted small' }, PT().panelBody),
+      h(
+        'label',
+        { class: 'toggle' },
+        h('input', {
+          type: 'checkbox',
+          checked: p.optIn === true,
+          'data-key': 'policy-toggle',
+          onchange: async (e) => {
+            p.optIn = e.target.checked;
+            p.dec = null;
+            await p.store.setOptIn(p.optIn).catch(() => {});
+            policyChanged();
+            rerender();
+          },
+        }),
+        h('span', {}, PT().toggle)
+      ),
+      h('p', { class: 'muted small', 'data-key': 'policy-count' }, PT().logCount(p.logCount)),
+      h(
+        'div',
+        { class: 'actions left wrap' },
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'btn',
+            'data-key': 'policy-export',
+            onclick: async () => {
+              const log = (await p.store.getLog()).map(p.mod.cleanDecision).filter(Boolean);
+              if (!log.length) return toast(PT().exportEmpty);
+              const d = new Date();
+              const name = `murmur-decisions-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.csv`;
+              const url = URL.createObjectURL(new Blob(['\ufeff' + p.mod.decisionsCsv(log)], { type: 'text/csv' }));
+              const a = h('a', { href: url, download: name });
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 10000);
+            },
+          },
+          PT().exportCsv
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'btn ghost',
+            'data-key': 'policy-reset',
+            onclick: async () => {
+              if (!confirm(PT().resetConfirm)) return;
+              try {
+                await p.store.reset();
+              } catch (_) {
+                return toast(L().saveFailed);
+              }
+              p.dec = null;
+              p.logCount = 0;
+              policyChanged();
+              toast(PT().resetDone);
+              rerender();
+            },
+          },
+          PT().reset
+        )
+      )
+    );
+  }
+
   function lensRow(lens) {
     const c = lens[lk()];
     // first sentence (no lookbehind: older Safari cannot parse it)
@@ -447,18 +621,22 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     const first = m ? m[0] : c.idea;
     return h(
       'button',
-      { type: 'button', class: 'lens-row', 'data-key': `pick-${lens.id}`, style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}`, onclick: () => startLens(lens.id) },
+      { type: 'button', class: 'lens-row', 'data-key': `pick-${lens.id}`, style: `--lens-hue:${HUES[LENSES.indexOf(lens) % HUES.length]}`, onclick: () => startLens(lens.id, true) },
       lensMark(lens, 32),
       h('span', { class: 'lens-row-text' }, h('span', { class: 'lens-row-name' }, c.name), h('span', { class: 'lens-row-idea' }, first))
     );
   }
 
   function pick() {
-    const all = lensesForTopic(st.topic);
-    const common = (TOPIC_COMMON[st.topic] || []).map(lensById).filter((l) => l && all.includes(l));
-    const rest = all.filter((l) => !common.includes(l));
+    const order = expertOrder(st.topic);
+    // the featured lens gets its own row on top; the others keep their usual order below it
+    const dec = st.pol.dec;
+    const featured = dec ? [...order.common, ...order.rest].find((l) => l.id === dec.action) : null;
+    const common = order.common.filter((l) => l !== featured);
+    const rest = order.rest.filter((l) => l !== featured);
     return [
       h('h2', {}, L().pickTitle),
+      featured ? [h('h3', { class: 'lens-group' }, PT().featured), h('div', { class: 'lens-rows', 'data-key': 'policy-featured' }, lensRow(featured)), policyWhy(dec.gated)] : policyOptInCard(),
       common.length ? [h('h3', { class: 'lens-group' }, L().pickCommon), h('div', { class: 'lens-rows' }, common.map(lensRow)), h('h3', { class: 'lens-group' }, L().pickOthers)] : null,
       h('div', { class: 'lens-rows' }, rest.map(lensRow)),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('choose') }, L().back)),
@@ -668,7 +846,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
             class: 'btn',
             onclick: () => {
               commitRating();
-              const keep = { concern: st.concern, topic: st.topic };
+              const keep = { concern: st.concern, topic: st.topic, riskSeen: st.riskSeen };
               reset();
               Object.assign(st, keep);
               go('choose');
@@ -699,6 +877,18 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   }
 
   function commitRating() {
+    // The exercise ends here. If it began from the pick list while suggestions were on, its
+    // rating goes into the decision log (no rating stays "missing"), and it adjusts later
+    // suggestions only when nothing risky was written and the latest mood is not low.
+    const { dec, mod, store } = st.pol;
+    st.pol.dec = null;
+    if (dec && dec.used && dec.used === st.lensId && st.rating) {
+      const rating = st.rating;
+      const risky = st.riskSeen;
+      db.listEntries()
+        .then((entries) => store.rate(dec.id, { rating, allowLearning: !risky && !mod.isLowMood(mod.recentMood(entries)) }), () => store.rate(dec.id, { rating, allowLearning: false }))
+        .catch(() => {});
+    }
     if (!st.lensId || !st.rating) return;
     const s = (st.stats[st.lensId] = st.stats[st.lensId] || { used: 1, ratings: [] });
     s.ratings.push(st.rating);

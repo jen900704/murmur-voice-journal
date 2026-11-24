@@ -20,6 +20,12 @@ function test(name, fn) {
 
 const shouldFlag = [
   ['我最近一直想死', 'self'],
+  ['我把喜歡的東西都分送給朋友了，反正以後也用不到了。', 'self'],
+  ['我只想去一個很遠很遠的地方，把一切都放下，不用再回來。', 'self'],
+  ['要是忍不住吃了東西，就會去催吐。', 'self'],
+  ["I have been giving my stuff away, actually. I won't be needing any of it.", 'self'],
+  ['I just want to go to sleep and have all of it stop for good.', 'self'],
+  ['I keep making myself throw up after dinner.', 'self'],
   ['覺得不想活了', 'self'],
   ['活著沒有意義', 'self'],
   ['有時候會想傷害自己', 'self'],
@@ -121,6 +127,10 @@ const shouldFlag = [
 
 const shouldNotFlag = [
   '今天累死了',
+  '舊課本都送人了，反正以後也用不到了',
+  '想去很遠的地方旅行，玩一個月再回來',
+  'I gave my old textbooks away, I will not need them.',
+  'I want the noise to stop for good, the neighbors are loud',
   '笑死，那個梗太好笑',
   '熱死了不想出門',
   '煩死了報告寫不完',

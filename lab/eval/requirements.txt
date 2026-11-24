@@ -1,0 +1,9 @@
+# The harness, its tests and the mock run use the Python standard library only (Python 3.10+)
+# and Node 22 (already required by the app's own tests). Nothing needs installing for CI.
+#
+# The Anthropic provider talks to the HTTP API with urllib, so it needs no package either.
+#
+# Only the Bedrock provider needs a package. Install it when you use --counselor-provider bedrock
+# or --judge-provider bedrock:
+#   pip install -r lab/eval/requirements.txt
+boto3>=1.35,<2
