@@ -1,7 +1,7 @@
 // Offline support. The cache name is set by tools/bump-cache.mjs (npm run prepare-release).
 // Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-a40ed322f8';
+const CACHE = 'murmur-f8ac5e8e4c';
 const SHELL = [
   './',
   './index.html',
@@ -62,7 +62,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('murmur-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -81,9 +81,18 @@ self.addEventListener('fetch', (e) => {
         const shell = await cache.match('./index.html');
         if (shell) return shell;
       }
-      const res = await fetch(req);
-      if (res && res.ok) cache.put(req, res.clone());
-      return res;
+      try {
+        const res = await fetch(req);
+        if (res && res.status === 200) cache.put(req, res.clone()).catch(() => {});
+        return res;
+      } catch (err) {
+        // offline and this file was never cached (for example, the phone cleared storage)
+        if (req.mode !== 'navigate') throw err;
+        return new Response(
+          '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Murmur</title><body style="font:16px/1.6 system-ui;padding:2em;max-width:34em">Murmur 需要連上網路一次才能離線使用。請連線後重新整理。<br>Murmur needs to go online once before it works offline. Please reconnect and reload.<p>需要協助：台灣 1925 · US 988</p></body>',
+          { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
+      }
     })
   );
 });

@@ -827,6 +827,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       st.stage = 'home';
     },
     setAiEnabled: (v) => (st.aiEnabled = v),
+    // in the middle of an exercise or AI chat (not on the lens home page)
+    active: () => st.stage !== 'home' && st.stage !== 'deck' && st.stage !== 'saved' && st.stage !== 'lensinfo' && st.stage !== 'fit' && st.stage !== 'resources',
     reload: () => {
       reload();
       st.stage = 'home';

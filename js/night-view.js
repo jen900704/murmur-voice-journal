@@ -147,6 +147,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       await play(chooseFor());
     } finally {
       st.preparing = false;
+      if (st.stage === 'card') rerender();
     }
   }
 
@@ -211,7 +212,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function worry() {
     const ta = h('textarea', { id: 'night-worry', rows: '4', maxlength: '1000', placeholder: L().worryPlaceholder, oninput: (e) => {
       st.worry = e.target.value;
-      nextLabel(st.worry);
+      nextLabel(st.worry || (st.theme ? '-' : ''));
     } });
     ta.value = st.worry;
     return [
@@ -255,7 +256,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       ),
       nav(() => {
         if (guard(st.worry, () => go('kind'))) go('kind');
-      }, { back: () => { st.stage = 'card'; onExit(); }, nextLabel: st.worry.trim() ? L().next : L().skip }),
+      }, { back: () => { st.stage = 'card'; onExit(); }, nextLabel: st.worry.trim() || st.theme ? L().next : L().skip }),
     ];
   }
 
@@ -279,7 +280,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   function chooseFor() {
     const mood = latestMood();
     const gentle = ['person-centered', 'relaxation', 'acceptance'];
-    const pool = mood !== null && mood <= 3 ? gentle : TRACKS.map((t) => t.id);
+    // 'drift' invites images to surface, so it is only ever chosen on purpose
+    const pool = mood !== null && mood <= 3 ? gentle : TRACKS.map((t) => t.id).filter((id) => id !== 'drift');
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
@@ -295,7 +297,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             'button',
             { type: 'button', class: 'track', 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
             h('strong', {}, t[lk()].name),
-            h('span', {}, t[lk()].style)
+            h('span', {}, t[lk()].style),
+            t[lk()].note ? h('span', { class: 'track-note' }, t[lk()].note) : null
           )
         )
       ),
@@ -376,7 +379,8 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       h('div', { class: 'breath', 'aria-hidden': 'true' }),
       // only announce lines when they are not already being spoken aloud
       h('p', { class: 'night-line', id: 'night-line', 'aria-live': st.readAlong ? 'polite' : 'off' }, st.line || '…'),
-      h('div', { class: 'night-bar' }, h('div', { id: 'night-progress' })),
+      // keep the bar where it was when the view is rebuilt (opening help, changing voice)
+      h('div', { class: 'night-bar' }, h('div', { id: 'night-progress', style: st.player ? `width:${((st.lineIndex + 1) / st.player.script.length) * 100}%` : null })),
       st.readAlong ? h('p', { class: 'small night-dim' }, L().readAlong) : h('p', { class: 'small night-dim' }, L().playTitle),
       h(
         'div',
@@ -465,7 +469,9 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         lang: getLang(),
       };
       // the postcard still shows even if saving failed
+      const run = st.run;
       await db.saveNight(night).catch(() => {});
+      if (run !== st.run) return; // left during the save: do not reopen the ritual
       go('postcard');
     } finally {
       st.finishing = false;
@@ -610,7 +616,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       );
     add(wrap, (stages[st.stage] || worry)());
     // help lines one tap away on every step, as in the lens exercise (playback stays uncluttered)
-    if (st.stage !== 'crisis' && st.stage !== 'play')
+    if (st.stage !== 'crisis')
       add(
         wrap,
         h(
@@ -642,5 +648,6 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     } else if (st.stage === 'play') st.stage = 'tone';
   }
 
-  return { view, card, begin, active: () => st.stage !== 'card', stopAll };
+  // active: a ritual step is on screen; busy: that, or a track is getting ready to play
+  return { view, card, begin, active: () => st.stage !== 'card', busy: () => st.stage !== 'card' || st.preparing, stopAll };
 }

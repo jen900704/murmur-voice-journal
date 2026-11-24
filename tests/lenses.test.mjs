@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { buildContent } from '../tools/export-content.mjs';
-import { expectedCache } from '../tools/bump-cache.mjs';
+import { expectedCache, shellFiles } from '../tools/bump-cache.mjs';
 import { checkRisk, HELP_NUMBER } from '../js/safety.js';
 import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
 
@@ -243,6 +243,17 @@ test('no regex lookbehind in app code (Safari before 16.4 cannot parse it)', () 
 
 test('docs/content-review.md matches the content in the code (run node tools/export-content.mjs)', () => {
   assert.equal(readFileSync(new URL('../docs/content-review.md', import.meta.url), 'utf8'), buildContent());
+});
+
+test('every app file is in the service worker list, so edits to it change the cache name', () => {
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  const listed = new Set(shellFiles(sw));
+  const need = [];
+  for (const dir of ['js', 'css', 'data']) for (const f of readdirSync(new URL(`../${dir}/`, import.meta.url))) need.push(`${dir}/${f}`);
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  for (const m of html.matchAll(/(?:src|href)="([^"#:]+)"/g)) need.push(m[1].replace(/^\.\//, ''));
+  const missing = need.filter((f) => !listed.has(f));
+  assert.deepEqual(missing, []);
 });
 
 test('the service worker cache name matches the app files (run node tools/bump-cache.mjs)', () => {

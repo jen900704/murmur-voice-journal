@@ -1634,3 +1634,28 @@ h3.sub {
 .help .resource-list {
   font-weight: 400;
 }
+
+.track-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.view.night.playing .lens-help {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ece9ff;
+}
+.view.night.playing .lens-help .link {
+  color: #c7bdff;
+}
+.view.night.playing {
+  flex-direction: column;
+}
+.view.night.playing .night-leave {
+  align-self: flex-end;
+  color: #c7bdff;
+}
+.view.night.playing .lens-help,
+.view.night.playing .help-lines {
+  width: 100%;
+  max-width: 520px;
+  margin: 16px auto 0;
+}

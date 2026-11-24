@@ -637,6 +637,7 @@ function welcomeCard() {
 
 function viewJournal() {
   const wrap = h('section', { class: 'view journal' });
+  add(wrap, backupNote());
   add(wrap, extras.modeChips(state.journalMode, (m) => {
     state.journalMode = m;
     render();
@@ -648,7 +649,7 @@ function viewJournal() {
     add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
     return wrap;
   }
-  add(wrap, demoBanner(), backupNote(), h('p', { class: 'muted' }, t('entries', entries.length)));
+  add(wrap, demoBanner(), h('p', { class: 'muted' }, t('entries', entries.length)));
   const byMonth = new Map();
   for (const e of [...entries].reverse()) {
     const k = fmtDate(e.createdAt, { year: 'numeric', month: 'long' });
@@ -992,11 +993,17 @@ function download(name, text, type) {
   const a = h('a', { href: URL.createObjectURL(blob), download: name });
   document.body.appendChild(a);
   a.click();
+  // iOS can take a while to hand the file over; revoking too early loses it
   setTimeout(() => {
     URL.revokeObjectURL(a.href);
     a.remove();
-  }, 1000);
+  }, 60000);
 }
+
+const localDate = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 function csvEscape(v) {
   if (v === null || v === undefined) return '';
@@ -1042,9 +1049,22 @@ function exportCsv() {
 async function exportJson() {
   const [nights, lensSessions] = await Promise.all([db.listNights().catch(() => []), db.listLensSessions().catch(() => [])]);
   const data = { app: 'murmur', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, nights, lensSessions };
-  download(`murmur-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data), 'application/json');
+  const name = `murmur-backup-${localDate()}.json`;
+  const text = JSON.stringify(data);
+  // On phones, the share sheet is the reliable way to keep a file (Save to Files, Drive, mail).
+  const file = typeof File === 'function' ? new File([text], name, { type: 'application/json' }) : null;
+  if (file && matchMedia('(pointer: coarse)').matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+    } catch (_) {
+      return false; // cancelled: not backed up
+    }
+  } else {
+    download(name, text, 'application/json');
+  }
   state.lastBackup = Date.now();
   db.setSetting('lastBackup', state.lastBackup).catch(() => {});
+  return true;
 }
 
 // Everything lives on this one phone, and Safari can clear it. After some real entries, and
@@ -1257,6 +1277,7 @@ function viewAbout() {
             }
             nightView.stopAll(true);
             state.welcomed = false;
+            state.lastBackup = 0;
             await extras.loadNights();
             toast(t('deletedAll'));
             render();
@@ -1370,7 +1391,7 @@ function onHash() {
   closeDetailUI();
   if (TABS.includes(tab) && tab !== state.tab) {
     if (state.phase === 'recording') cancelRecording();
-    if (state.tab === 'today' && nightView.active()) nightView.stopAll();
+    if (state.tab === 'today' && nightView.busy()) nightView.stopAll();
     state.tab = tab;
     render();
     window.scrollTo(0, 0);
@@ -1416,7 +1437,8 @@ async function init() {
 // A new release waits until the app is reopened and idle, then reloads once, so a page never
 // mixes files from two releases and nothing being typed or played is interrupted.
 function isIdle() {
-  return state.phase === 'idle' && !nightView.active() && $('#sheet').hidden && !document.querySelector('textarea:not(:placeholder-shown), input[type="text"]:not(:placeholder-shown)');
+  const typed = [...document.querySelectorAll('textarea, input[type="text"], input[type="password"]')].some((el) => el.value.trim());
+  return state.phase === 'idle' && !nightView.busy() && !(lensView && lensView.active()) && $('#sheet').hidden && !typed;
 }
 
 async function setupUpdates() {
@@ -1426,20 +1448,34 @@ async function setupUpdates() {
   } catch (_) {
     return;
   }
-  let reloading = false;
   const hadController = !!navigator.serviceWorker.controller;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading || !hadController) return;
+  let reloading = false;
+  let pending = false;
+  const reloadIfIdle = () => {
+    if (!pending || reloading || !isIdle()) return;
     reloading = true;
     location.reload();
+  };
+  // Another tab may have applied the update; this tab reloads only once it is idle too.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return; // first install: nothing to reload
+    pending = true;
+    reloadIfIdle();
   });
   const applyIfIdle = () => {
     if (reg.waiting && navigator.serviceWorker.controller && isIdle()) reg.waiting.postMessage('skip-waiting');
   };
+  // a newly installed worker can be applied right away if the page is idle
+  reg.addEventListener('updatefound', () => {
+    const w = reg.installing;
+    if (w) w.addEventListener('statechange', () => w.state === 'installed' && applyIfIdle());
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
-    reg.update().then(applyIfIdle, () => {});
+    reloadIfIdle();
+    reg.update().catch(() => {}).finally(applyIfIdle);
   });
+  window.addEventListener('hashchange', () => setTimeout(reloadIfIdle, 0));
   applyIfIdle();
 }
 

@@ -1,7 +1,8 @@
 // Bedtime tracks: short wind-down scripts in the spirit of counseling theories that suit
 // the end of the day. Written for Murmur; not therapy, and not the words of any real person.
-// Theories that invite uncovering, disputing, or relationship analysis are left out of
-// bedtime on purpose: they are better done in daylight, in the Lens tab.
+// Disputing and analysis are left out of bedtime on purpose: they are better done in
+// daylight, in the lens exercise. The one psychoanalytic track ('drift') interprets nothing,
+// puts its way out before its invitation, and is never picked at random.
 //
 // A script is a list of [sentence, pause in seconds after it].
 // {theme} is replaced with a short phrase for what the person set down tonight.
@@ -216,12 +217,14 @@ export const TRACKS = [
     zh: {
       name: '讓畫面自己浮現',
       style: '精神分析取向風格',
+      note: '會讓畫面自己浮上來。今晚心情很重的話，選別段比較好。',
       core: [
+        ['先說好：如果浮上來的畫面讓你不舒服，就睜開眼睛，看看房間裡的三樣東西，感覺身體貼著床的地方。今晚到這裡就好。', 8],
         ['今晚不用分析什麼。讓今天的畫面，自己慢慢浮上來。', 6],
         ['也許是一張臉、一句話、一個房間。出現什麼都可以，不需要有道理。', 8],
-        ['如果某個畫面帶著比較強的感覺，就讓它待一下，不用追問為什麼。如果它太重，就換回呼吸，或停下來。', 8],
+        ['如果某個畫面帶著一點感覺，可以看它一下，再讓它過去。不用追問為什麼。', 8],
         ['心裡想要的，和心裡擔心的，常常同時存在。今晚兩個都可以先放著。', 8],
-        ['有些感覺，可能比今天更早就認識你了。今晚不用把它想清楚。', 8],
+        ['有些感覺，可能不是今天才有的。今晚不用弄清楚。', 8],
         ['睡著以後，心會用它自己的方式整理今天。你不用幫它。', 8],
         ['如果明天醒來還記得一點夢，可以寫下來看看。忘了也沒關係。', 10],
       ],
@@ -229,12 +232,14 @@ export const TRACKS = [
     en: {
       name: 'Letting images drift up',
       style: 'in the spirit of psychoanalytic therapy',
+      note: 'Lets pictures surface on their own. On a heavy night, another track is a better pick.',
       core: [
+        ['First, a way out: if a picture that comes up feels bad, open your eyes, look at three things in the room, and feel where your body meets the bed. That is enough for tonight.', 8],
         ['Tonight there is nothing to analyze. Let pictures from today drift up on their own.', 6],
         ['Maybe a face, a sentence, a room. Whatever comes is fine; it does not have to make sense.', 8],
-        ['If one picture carries a strong feeling, let it stay a moment without asking why. If it is too heavy, go back to your breath, or stop.', 8],
+        ['If a picture carries a little feeling, you can look at it for a moment, then let it pass. No need to ask why.', 8],
         ['What part of you wants and what part of you fears often sit side by side. Tonight both can wait.', 8],
-        ['Some feelings may have known you since long before today. Tonight you do not need to work them out.', 8],
+        ['Some feelings may not have started today. Tonight you do not need to work them out.', 8],
         ['Once you are asleep, your mind will sort the day in its own way. You do not have to help it.', 8],
         ['If you wake remembering a bit of a dream, you could write it down. If you forget, that is fine too.', 10],
       ],
@@ -245,29 +250,29 @@ export const TRACKS = [
     id: 'family-systems',
     lens: 'family-systems',
     zh: {
-      name: '把別人的擔子放回去',
+      name: '今晚先放下別人的擔子',
       style: '家族系統取向風格',
       core: [
         ['今天，你可能替別人擔心了不少。', 6],
         ['身邊的人的情緒，有時會像天氣一樣，飄到你身上。', 7],
         ['試著在心裡分成兩堆：哪些是你的，哪些是別人的。分不清楚也沒關係。', 9],
-        ['別人的那一堆，今晚先放回去給他們。這不是不在乎，是讓每個人拿著自己的那一份。', 9],
+        ['別人的那一堆，今晚先不用替他們拿著。這不是不在乎，你們的關係還在；只是今晚，每個人先拿著自己的那一份。', 9],
         ['你的那一堆，也不用今晚處理完。', 7],
         ['你可以關心他們，同時也照顧你自己。兩件事可以一起存在。', 8],
-        ['現在，只剩下你，和你躺著的地方。', 10],
+        ['現在，這裡有你，和你躺著的這張床。', 10],
       ],
     },
     en: {
-      name: "Handing back others' loads",
+      name: "Setting down others' loads for tonight",
       style: 'in the spirit of family systems therapy',
       core: [
         ['Today you may have worried quite a lot on behalf of other people.', 6],
         ["Other people's feelings can drift onto you, like weather.", 7],
         ["Try sorting them into two piles: what is yours, and what is theirs. If you can't tell, that is fine.", 9],
-        ["Tonight, hand their pile back to them. That is not the same as not caring; it lets each person hold their own share.", 9],
+        ["Tonight you do not need to carry their pile for them. That is not the same as not caring, and the relationship is still there; just for tonight, each person holds their own share.", 9],
         ['Your own pile does not need to be sorted out tonight either.', 7],
         ['You can care about them and look after yourself at the same time.', 8],
-        ['Now there is only you, and the place where you are lying.', 10],
+        ['Now there is you, and the bed you are lying in.', 10],
       ],
     },
   },

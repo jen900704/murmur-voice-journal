@@ -9,8 +9,12 @@ const root = new URL('../', import.meta.url);
 const SW = new URL('sw.js', root);
 
 export function shellFiles(swText) {
-  const list = swText.slice(swText.indexOf('const SHELL = ['), swText.indexOf('];', swText.indexOf('const SHELL = [')));
-  return [...list.matchAll(/'\.\/([^']*)'/g)].map((m) => m[1]).filter((f) => f && !f.endsWith('/'));
+  const start = swText.indexOf('const SHELL = [');
+  if (start < 0) throw new Error('sw.js: SHELL list not found');
+  const list = swText.slice(start, swText.indexOf('];', start));
+  const files = [...list.matchAll(/'\.\/([^']*)'/g)].map((m) => m[1]).filter((f) => f && !f.endsWith('/'));
+  if (files.length < 25) throw new Error(`sw.js: only ${files.length} files found in SHELL`);
+  return files;
 }
 
 export function expectedCache(swText) {
@@ -27,6 +31,8 @@ export function expectedCache(swText) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const sw = readFileSync(SW, 'utf8');
   const name = expectedCache(sw);
-  writeFileSync(SW, sw.replace(/const CACHE = '[^']*';/, `const CACHE = '${name}';`));
+  const next = sw.replace(/const CACHE = '[^']*';/, `const CACHE = '${name}';`);
+  if (!/const CACHE = '[^']*';/.test(sw)) throw new Error('sw.js: CACHE line not found');
+  writeFileSync(SW, next);
   console.log(name);
 }
