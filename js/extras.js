@@ -459,7 +459,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       return null;
     }
     const since = Date.now() - 7 * 86400000;
-    const entries = ((getState && getState().entries) || []).filter((e) => !e.demo && e.createdAt >= since);
+    const entries = ((getState && getState().entries) || []).filter((e) => !e.demo && e.features && e.createdAt >= since);
     const nights = ex.nights.filter((n) => n.createdAt >= since);
     const kinds = nights.map((n) => n.kindness).filter(Boolean);
     if (!entries.length && !nights.length) return null;

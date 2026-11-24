@@ -5,6 +5,8 @@
 The first public version, built and reviewed over one night. Each area below went through several independent reviews (code, clinical wording, cultural fit for Taiwan and the US, Taiwan Mandarin copy, and screenshot walkthroughs on a phone-sized screen), and the fixes that could be tested were given tests.
 
 ### Added
+
+- Silent check-in: mood, energy and a note without recording, for nights when speaking aloud is not possible. Listed in the journal, kept out of voice trends.
 - Voice journal with on-device prosody, a personal baseline, trends and mood and energy check-ins; preregistered validation against Praat on English speech, a robustness study, and an exploratory Mandarin pilot.
 - "Look at it from another angle" (換個角度看看): 14 counseling approaches from Corey's text as short self-reflection exercises, with compare, draw-a-card, a card deck and "which approach fits me".
 - Bedtime ritual with nine wind-down tracks (including a psychoanalytic "letting images drift up" and a family systems track), a suggested track for each kind of worry, "Just listen", and a pastel postcard.

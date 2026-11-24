@@ -1779,3 +1779,11 @@ h3.sub {
   font-weight: 600;
   min-height: 32px;
 }
+.silent-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.small-link {
+  font-size: 0.85rem;
+  min-height: 32px;
+}

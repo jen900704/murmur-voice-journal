@@ -278,14 +278,22 @@ async function savePending() {
     energy: p.energy,
     note: p.note.trim(),
     features: p.features,
-    featureVersion: FEATURE_VERSION,
+    featureVersion: p.silent ? 0 : FEATURE_VERSION,
     capture: p.capture || null,
-    hasAudio: state.keepAudio,
+    hasAudio: p.silent ? false : state.keepAudio,
+    silent: p.silent || undefined,
   };
+  // a silent check-in with nothing filled in is not worth keeping
+  if (p.silent && entry.mood === null && entry.energy === null && !entry.note) {
+    savePending.busy = false;
+    state.pending = null;
+    state.phase = 'idle';
+    return render();
+  }
   let message = t('saved');
   try {
     try {
-      await db.saveEntry(entry, state.keepAudio ? p.blob : null);
+      await db.saveEntry(entry, entry.hasAudio ? p.blob : null);
     } catch (err) {
       if (!state.keepAudio) throw err;
       // most often storage is full: keep the measurements without the audio
@@ -463,10 +471,13 @@ function viewToday() {
       render();
     };
     add(wrap, 
-      h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
-      qualityNote(f),
-      h('div', { class: 'rows' }, ['f0MedianHz', 'f0SdSt', 'speechRate', 'pauseRatio', 'periodicityDb'].map((k) => featureRow(k, f))),
-      n < BASELINE_MIN ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : h('p', { class: 'muted small' }, t('chanceNote')),
+      // a silent check-in has no voice to show: just the check-in itself
+      p.silent ? h('h2', {}, t('silentTitle')) : null,
+      p.silent ? h('p', { class: 'muted small' }, t('silentBody')) : null,
+      p.silent ? null : h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
+      p.silent ? null : qualityNote(f),
+      p.silent ? null : h('div', { class: 'rows' }, ['f0MedianHz', 'f0SdSt', 'speechRate', 'pauseRatio', 'periodicityDb'].map((k) => featureRow(k, f))),
+      p.silent ? null : n < BASELINE_MIN ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : h('p', { class: 'muted small' }, t('chanceNote')),
       h(
         'div',
         { class: 'checkin' },
@@ -578,6 +589,16 @@ function viewToday() {
   } else {
     if (state.phase === 'error') add(wrap, h('p', { class: 'error', role: 'alert' }, state.error));
     add(wrap, h('p', { class: 'hint' }, t('tapToRecord')));
+    // for nights when speaking aloud is not possible (family or roommates asleep nearby)
+    add(
+      wrap,
+      h('button', { type: 'button', class: 'link center', 'data-key': 'silent-checkin', onclick: () => {
+        state.pending = { silent: true, features: null, mood: null, energy: null, note: '' };
+        state.phase = 'result';
+        render();
+        window.scrollTo(0, 0);
+      } }, t('silentLink'))
+    );
     if (!state.entries.length) {
       add(wrap, h('button', { type: 'button', class: 'link center', onclick: loadDemo }, t('loadDemoShort')));
     }
@@ -680,7 +701,7 @@ function viewJournal() {
   if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
-    add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
+    add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')), silentSection());
     return wrap;
   }
   add(wrap, demoBanner(), h('p', { class: 'muted' }, t('entries', entries.length)));
@@ -714,7 +735,37 @@ function viewJournal() {
       )
     );
   }
+  add(wrap, silentSection());
   return wrap;
+}
+
+// Check-ins saved without a recording, newest first, each removable on its own.
+function silentSection() {
+  const list = state.entries.filter((e) => e.silent).slice(-30).reverse();
+  if (!list.length) return null;
+  const rating = (label, v) => (Number.isFinite(v) ? `${label} ${v}/7` : null);
+  return [
+    h('h2', { class: 'month' }, t('silentEntries')),
+    h(
+      'ul',
+      { class: 'plain-list silent-list' },
+      list.map((e) =>
+        h(
+          'li',
+          {},
+          h('span', { class: 'muted small' }, fmtDate(e.createdAt, { dateStyle: 'medium', timeStyle: 'short' }), ' · ', [rating(t('mood'), e.mood), rating(t('energy'), e.energy)].filter(Boolean).join(' · ')),
+          e.note ? h('span', {}, ' ', e.note) : null,
+          ' ',
+          h('button', { type: 'button', class: 'link small-link', 'data-key': `silent-del-${e.id}`, onclick: async () => {
+            if (!confirm(t('confirmDelete'))) return;
+            await db.deleteEntry(e.id);
+            state.entries = state.entries.filter((x) => x.id !== e.id);
+            render();
+          } }, t('deleteEntry'))
+        )
+      )
+    ),
+  ];
 }
 
 function openSheet(fn) {
@@ -1075,6 +1126,7 @@ function exportCsv() {
   const head = ['id', 'datetime', 'demo', 'mood', 'energy', 'note', 'prompt', ...keys, 'clipFraction', 'snrDb', 'qualityFlags', 'mimeType', 'autoGainControl', 'noiseSuppression', 'echoCancellation', 'featureVersion'];
   const lines = [head.join(',')];
   for (const e of state.entries) {
+    if (!e.features) continue; // silent check-ins have no measurements to export as CSV rows
     const q = e.features.quality || {};
     const c = e.capture || {};
     lines.push(

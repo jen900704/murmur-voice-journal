@@ -166,7 +166,7 @@ export async function importEntries(entries) {
   await tx('entries', 'readwrite', (t) => {
     const s = t.objectStore('entries');
     for (const e of entries) {
-      if (!e || typeof e.id !== 'string' || !Number.isFinite(e.createdAt) || !e.features) continue;
+      if (!e || typeof e.id !== 'string' || !Number.isFinite(e.createdAt) || (!e.features && !e.silent)) continue;
       if (existing.has(e.id)) continue;
       s.put(e);
       added++;

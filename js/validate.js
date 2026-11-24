@@ -35,8 +35,9 @@ function cleanFeatures(f) {
 
 export function cleanEntry(e) {
   if (!plain(e) || typeof e.id !== 'string' || !e.id || !isTime(e.createdAt)) return null;
-  const features = cleanFeatures(e.features);
-  if (!features) return null;
+  const silent = e.silent === true && (e.features === null || e.features === undefined);
+  const features = silent ? null : cleanFeatures(e.features);
+  if (!features && !silent) return null;
   return {
     id: e.id.slice(0, 80),
     createdAt: e.createdAt,
@@ -47,6 +48,7 @@ export function cleanEntry(e) {
     note: str(e.note, 400),
     demo: e.demo === true,
     features,
+    silent: silent || undefined,
     featureVersion: Number.isInteger(e.featureVersion) ? e.featureVersion : 0,
     hasAudio: false,
     capture: plain(e.capture) ? { mimeType: str(e.capture.mimeType, 60), sampleRate: num(e.capture.sampleRate), autoGainControl: e.capture.autoGainControl ?? null, noiseSuppression: e.capture.noiseSuppression ?? null, echoCancellation: e.capture.echoCancellation ?? null } : null,

@@ -20,6 +20,7 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 ## What is in it
 
 - **Voice journal.** Speak for about 30 seconds; see pitch, pace, pauses, and voice regularity against your own usual range.
+- **Silent check-in.** When speaking aloud is not possible, note mood, energy and one line without recording. These entries show in the journal but stay out of the voice trends.
 - **Theory lens** (換個角度看看 in Chinese). Write down a worry and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Compare three lenses side by side, collect lens cards, and see which ones you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
 - **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a wind-down track of about three to four minutes in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks.
 - **Goodnight card.** Send one pastel card to one person through your phone's share sheet. It carries only a line you pick, never what you wrote; there is no feed, count, or read receipt.
@@ -176,7 +177,7 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 
 ## 中文說明
 
-**功能。** 聲音日記之外，還有：換個角度看看（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片；也可以「只想聽一段」直接開始）、寄一張晚安明信片給一個人（明信片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。
+**功能。** 聲音日記之外，還有：不方便出聲時只記心情（不錄音，不進聲音趨勢）、換個角度看看（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片；也可以「只想聽一段」直接開始）、寄一張晚安明信片給一個人（明信片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。
 
 **安全。** 輸入的文字如果出現自殺、自傷、傷人或受虐的訊號，會先暫停並顯示你所在地區的求助專線（台灣、美國或其他地方，可以切換）。寫下的內容不會被刪掉；如果只是誤判，可以按「我不是那個意思，繼續」。每個步驟都能一鍵找到求助專線。這只是粗略的安全網，已用約 210 個句子測試，仍然可能漏掉某些說法。
 

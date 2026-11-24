@@ -145,3 +145,22 @@ test('a damaged backup imports what it can and every screen still opens', async 
   await page.locator('.lens-link', { hasText: /saved|存下/i }).click();
   await expect(page.locator('.lens-summary')).toHaveCount(1);
 });
+
+test('a silent check-in saves mood without a recording and shows in the journal, not in trends', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.prompt-text').waitFor();
+  const w = page.locator('[data-key="welcome-close"]');
+  if (await w.count()) await w.click();
+  await page.locator('[data-key="silent-checkin"]').click();
+  await page.locator('[data-key="mood-2"]').click();
+  await page.fill('#note', 'roommate asleep');
+  await page.locator('[data-key="save"]').click();
+  await expect(page.locator('.prompt-text')).toBeVisible();
+  await page.goto('/#journal');
+  await expect(page.locator('.silent-list')).toContainText('roommate asleep');
+  await page.goto('/#trends');
+  await expect(page.locator('.chart')).toHaveCount(0);
+  // the low-mood card picks it up
+  await page.goto('/#today');
+  await expect(page.locator('.low-card')).toBeVisible();
+});
