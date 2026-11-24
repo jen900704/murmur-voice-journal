@@ -400,15 +400,16 @@ export function analyze(input, sampleRate, opts = {}) {
   };
 }
 
-// Feature metadata used by the UI and exports.
+// Feature metadata used by the UI and exports. `confidence` summarizes the evidence in
+// docs/validation-results.md and docs/robustness-results.md.
 export const FEATURE_INFO = [
-  { key: 'f0MedianHz', unit: 'Hz', digits: 0, minSpan: 20 },
-  { key: 'f0SdSt', unit: 'st', digits: 1, minSpan: 1 },
-  { key: 'f0RangeSt', unit: 'st', digits: 1, minSpan: 2 },
-  { key: 'speechRate', unit: '/s', digits: 1, minSpan: 1 },
-  { key: 'articulationRate', unit: '/s', digits: 1, minSpan: 1 },
-  { key: 'pauseRatio', unit: '%', digits: 0, scale: 100, minSpan: 10 },
-  { key: 'meanPauseS', unit: 's', digits: 2, minSpan: 0.2 },
-  { key: 'intensitySdDb', unit: 'dB', digits: 1, minSpan: 2 },
-  { key: 'periodicityDb', unit: 'dB', digits: 1, minSpan: 2 },
+  { key: 'f0MedianHz', unit: 'Hz', digits: 0, minSpan: 20, confidence: 'high' },
+  { key: 'f0SdSt', unit: 'st', digits: 1, minSpan: 1, confidence: 'medium' },
+  { key: 'f0RangeSt', unit: 'st', digits: 1, minSpan: 2, confidence: 'low' },
+  { key: 'speechRate', unit: '/s', digits: 1, minSpan: 1, confidence: 'low' },
+  { key: 'articulationRate', unit: '/s', digits: 1, minSpan: 1, confidence: 'low' },
+  { key: 'pauseRatio', unit: '%', digits: 0, scale: 100, minSpan: 10, confidence: 'medium' },
+  { key: 'meanPauseS', unit: 's', digits: 2, minSpan: 0.2, confidence: 'medium' },
+  { key: 'intensitySdDb', unit: 'dB', digits: 1, minSpan: 2, confidence: 'low' },
+  { key: 'periodicityDb', unit: 'dB', digits: 1, minSpan: 2, confidence: 'medium' },
 ];

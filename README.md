@@ -1,6 +1,6 @@
 # Murmur · 低語日記
 
-A private voice journal that runs entirely in your browser. Speak for about 30 seconds a day, and Murmur measures your pitch, pitch movement, speaking rate, pauses, and voice regularity on your own device. Over time it shows how your voice changes compared with your own usual range, and, if you check in with a quick mood and energy rating, how your voice relates to how you feel.
+A private voice journal and wind-down companion that runs entirely in your browser. Speak for about 30 seconds a day, and Murmur measures your pitch, pitch movement, speaking rate, pauses, and voice regularity on your own device. Over time it shows how your voice changes compared with your own usual range, and, if you check in with a quick mood and energy rating, how your voice relates to how you feel.
 
 **Try it:** https://jen900704.github.io/murmur-voice-journal/
 (On a phone, add it to your home screen and it works like an app, including offline.)
@@ -15,6 +15,19 @@ A private voice journal that runs entirely in your browser. Speak for about 30 s
 
 The screenshots use the app's built-in synthetic demo data.
 
+## What is in it
+
+- **Voice journal.** Speak for about 30 seconds; see pitch, pace, pauses, and voice regularity against your own usual range.
+- **Theory lens.** Write down a worry and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Compare three lenses side by side, collect lens cards, and see which ones you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
+- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down track in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped; there are no streaks.
+- **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back.
+- **Daily prompt.** Everyone gets the same prompt on the same day, and you can swap answers with someone through a link.
+- **Something gentle.** A short, curated list of films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them.
+
+**Safety.** Text typed into the theory lens, the bedtime ritual, and the kind-thing field is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match stops the exercise and shows help lines (Taiwan 1925, 1995, 1980, 113; US 988), and nothing from that step is saved. Help is always one tap away. The check is a coarse safety net and will miss some wording.
+
+Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md).
+
 ## Why
 
 Speech features like pitch variability, speaking rate, and pausing appear throughout research on mood and mental health, but voices differ a lot between people. A number that is low for one person is ordinary for another. Murmur therefore never compares you with population norms. It compares you with yourself, and it lets you see whether your own voice tracks your own self-reports.
@@ -24,7 +37,7 @@ It is meant for self-reflection and for people curious about speech measurement.
 ## Privacy
 
 - Audio is decoded and analyzed in the browser, in a Web Worker. Nothing is uploaded.
-- Entries, recordings, and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
+- Entries, recordings, theory-lens exercises you choose to save, bedtime notes, and settings are stored in IndexedDB on your device. There are no accounts, analytics, trackers, or third-party requests. The only network requests are for the app's own files.
 - You can keep only the measurements and not the audio (a setting), export everything as CSV or JSON, and delete everything at any time.
 
 ## What it measures
@@ -47,6 +60,8 @@ Speech activity is found with an adaptive energy threshold placed between the re
 
 **Recording conditions.** The app asks the browser to switch off echo cancellation, noise suppression, and automatic gain control, because they change pitch and loudness dynamics, and records at 128 kbit/s. Browsers do not always comply, so each entry stores the settings the browser actually applied, the container format, the share of clipped samples, and an SNR estimate (median speech energy minus the noise floor). Recordings with more than 1% clipped samples or an SNR below 15 dB are flagged, kept in the journal, and left out of baselines, trends, and correlations. Features are computed from the browser's compressed recording (Opus or AAC), not from raw PCM.
 
+**What the evidence says about each feature.** Pitch is the best supported. Pause measures did well on clean read speech. Speaking rate, articulation rate, and pitch range should be read as rough, person-specific indices. Nothing here shows that any feature relates to mood.
+
 **Personal baseline.** Once you have 10 usable recordings, a value is compared with the median of your *earlier* recordings, scaled by the median absolute deviation (MAD × 1.4826). With few recordings the median and MAD are themselves uncertain, so the cut-off depends on how many you have: k(n) = 1.96 + 9.5 / (n − 1) scaled MADs, which is 3.02 at 10 recordings, 2.42 at 20, and 2.04 at 100. This formula was fitted to simulations so that, when nothing has changed and values are roughly normal, about 5% of new values per feature are flagged as clearly higher or lower than usual at any history size. Unit tests check the rate at 10, 15, 30, and 100 earlier recordings. The shaded "usual range" on the trend chart uses the same cut-off.
 
 **Voice and self-report.** Once 20 recordings have mood and energy ratings (1 to 7), Murmur shows Spearman correlations between each feature and each rating, with approximate 95% intervals from the Fisher z transform using the Bonett and Wright (2000) variance for Spearman's rho. A correlation is not shown when the feature has fewer than 5 distinct values or the ratings fewer than 3. The app says plainly that these are 18 correlations at once and that daily entries are not independent (shared drift, such as a week-long cold, inflates them), so the true uncertainty is larger than the intervals. Cells whose interval includes zero are greyed out.
@@ -55,7 +70,9 @@ Speech activity is found with an adaptive energy threshold placed between the re
 
 ## Validation
 
-`tools/validate.sh` synthesizes English and Mandarin speech with eSpeak NG and compares Murmur with Praat (via Parselmouth) and with the known syllable count.
+**Human speech (preregistered).** A protocol fixing metrics and thresholds was committed before any analysis ([`docs/validation-protocol.md`](docs/validation-protocol.md)). On 36 clips of recorded human speech, Murmur's pitch agrees closely with Praat (gross pitch error 1.8%, median fine error 4.6 cents) and pause detection found 39 of 39 pauses in 29 of 30 digit sequences. Voicing coverage, median pitch for some speakers, pitch range, and syllable counts missed their thresholds. Full results, including why, are in [`docs/validation-results.md`](docs/validation-results.md). A second preregistered study tested robustness to codecs, volume, automatic gain control, noise, reverberation, and telephone audio ([`docs/robustness-results.md`](docs/robustness-results.md)): phone codecs at 64 kbit/s and above, ±6 dB of gain, and automatic gain control left the features essentially unchanged, while background noise affected loudness movement, voice regularity, and the timing features. Every CSV column is defined in [`docs/codebook.md`](docs/codebook.md).
+
+**Synthesized speech.** `tools/validate.sh` synthesizes English and Mandarin speech with eSpeak NG and compares Murmur with Praat (via Parselmouth) and with the known syllable count.
 
 | File | F0 Murmur | F0 Praat | Syllables found | True syllables |
 |---|---|---|---|---|
@@ -88,6 +105,7 @@ git clone https://github.com/jen900704/murmur-voice-journal
 cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
+npx playwright test           # browser tests (records through a fake microphone)
 ```
 
 Microphone access requires `https` or `localhost`. The test suite needs no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
@@ -101,6 +119,15 @@ js/recorder.js        microphone capture, decoding, resampling to 16 kHz
 js/db.js              IndexedDB storage
 js/viz.js             voice shapes and charts (SVG)
 js/i18n.js            Traditional Chinese and English text
+js/lenses.js          theory-lens content (14 approaches, zh-TW and en)
+js/lens-view.js       theory-lens screens
+js/safety.js          risk-language check and help lines
+js/bedtime.js         bedtime scripts and the speech player
+js/night-view.js      bedtime ritual screens
+js/postcard.js        procedural postcards
+js/extras.js          recommendations, nights, kindness jar, prompt exchange
+js/prompts.js         daily prompts
+data/recs.json        curated recommendations
 sw.js                 offline cache
 tools/validate.sh     comparison with Praat on synthesized speech
 tools/make-demo.mjs   builds the synthetic demo data
@@ -131,6 +158,9 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 ---
 
 ## 中文說明
+
+**功能。** 聲音日記之外，還有：理論透鏡（用 14 個諮商學派的提問方式看同一個煩惱，屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、聽一段三到五分鐘的睡前引導、收一張粉彩明信片）、對自己好的小罐子、每日小題交換，以及附內容提醒的溫和作品推薦。輸入的文字如果出現自傷、傷人或受虐的訊號，練習會停下並顯示求助專線。
+
 
 Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天說大約 30 秒的話，它會在你的裝置上算出音高、音高起伏、語速、停頓和聲音規律度。累積幾次之後，它會告訴你今天的聲音和你自己的平常範圍相比是高、低，還是差不多。如果你每次花兩秒標記心情和精神，它也會顯示你的聲音和你的感受之間的關聯。
 

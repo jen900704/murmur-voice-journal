@@ -1,0 +1,1893 @@
+{
+ "referenceSpread": {
+  "f0MedianHz": 2.372159999999991,
+  "f0SdSt": 0.6671699999999996,
+  "f0RangeSt": 0.7413000000000006,
+  "speechRate": 0.06671700000000005,
+  "articulationRate": 0.08895600000000006,
+  "pauseRatio": 0.008895599999999965,
+  "meanPauseS": 0.0,
+  "intensitySdDb": 0.14826000000000078,
+  "periodicityDb": 0.5189099999999994
+ },
+ "conditions": {
+  "opus_24k": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.19999999999998863,
+     "ratio": 0.08431134493456992,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": -0.02999999999999936,
+     "medianAbsShift": 0.02999999999999936,
+     "ratio": 0.04046944556859482,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": -0.04999999999999982,
+     "medianAbsShift": 0.05999999999999961,
+     "ratio": 0.6744907594765903,
+     "band": "sensitive",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0020000000000000018,
+     "ratio": 0.22483025315886612,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.1200000000000001,
+     "medianAbsShift": 0.1200000000000001,
+     "ratio": 0.8093889113719107,
+     "band": "sensitive",
+     "tripRate": 0.09090909090909091
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.09999999999999964,
+     "ratio": 0.19271164556474102,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 51.3
+  },
+  "opus_64k": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.013489815189531604,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": -0.009999999999999787,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.11241512657943005,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.06744907594765773,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 72.0
+  },
+  "opus_128k": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 71.9
+  },
+  "aac_64k": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": -0.09999999999999432,
+     "medianAbsShift": 0.09999999999999432,
+     "ratio": 0.04215567246728496,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.013489815189531604,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.11241512657943005,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.009999999999999787,
+     "medianAbsShift": 0.019999999999999574,
+     "ratio": 0.13489815189531545,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 71.5
+  },
+  "aac_128k": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": -0.09999999999999432,
+     "medianAbsShift": 0.09999999999999432,
+     "ratio": 0.04215567246728496,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.010000000000000009,
+     "ratio": 0.01498868354392436,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.013489815189531604,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.11241512657943005,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0010000000000000009,
+     "ratio": 0.11241512657943306,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.009999999999999787,
+     "medianAbsShift": 0.02000000000000135,
+     "ratio": 0.13489815189532742,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 71.5
+  },
+  "gain_-12dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 59.7
+  },
+  "gain_-6dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 65.8
+  },
+  "gain_+6dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 1,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 78.1
+  },
+  "gain_+12dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 4,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.09999999999999432,
+     "ratio": 0.04215567246728496,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.010000000000000675,
+     "ratio": 0.014988683543925359,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.009999999999999787,
+     "ratio": 0.013489815189531604,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": -0.010000000000000231,
+     "medianAbsShift": 0.010000000000000675,
+     "ratio": 0.11241512657944004,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": -0.0020000000000000018,
+     "medianAbsShift": 0.0029999999999998916,
+     "ratio": 0.3372453797382867,
+     "band": "caution",
+     "tripRate": 0.09090909090909091
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.040000000000000036,
+     "ratio": 0.2697963037906369,
+     "band": "caution",
+     "tripRate": 0.09090909090909091
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    }
+   },
+   "snrEstimateMedian": 84.1
+  },
+  "agc_dynaudnorm": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.010000000000000231,
+     "ratio": 0.11241512657943505,
+     "band": "robust",
+     "tripRate": 0.09090909090909091
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0010000000000000009,
+     "ratio": 0.11241512657943306,
+     "band": "robust",
+     "tripRate": 0.18181818181818182
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.08999999999999986,
+     "ratio": 0.6070416835289315,
+     "band": "sensitive",
+     "tripRate": 0.18181818181818182
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    }
+   },
+   "snrEstimateMedian": 82.5
+  },
+  "white_30dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.010000000000000231,
+     "ratio": 0.014988683543924693,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.03000000000000025,
+     "ratio": 0.04046944556859601,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.1299999999999999,
+     "medianAbsShift": 0.1299999999999999,
+     "ratio": 1.4613966455326206,
+     "band": "sensitive",
+     "tripRate": 0.36363636363636365
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.02100000000000002,
+     "medianAbsShift": 0.02100000000000002,
+     "ratio": 2.3607176581680944,
+     "band": "sensitive",
+     "tripRate": 0.45454545454545453
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.03999999999999998,
+     "medianAbsShift": 0.03999999999999998,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -1.5499999999999998,
+     "medianAbsShift": 1.5499999999999998,
+     "ratio": 10.45460677188717,
+     "band": "sensitive",
+     "tripRate": 0.7272727272727273
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.6000000000000014,
+     "medianAbsShift": 0.6000000000000014,
+     "ratio": 1.1562698733884529,
+     "band": "sensitive",
+     "tripRate": 0.18181818181818182
+    }
+   },
+   "snrEstimateMedian": 29.8
+  },
+  "white_20dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.5999999999999943,
+     "medianAbsShift": 0.700000000000017,
+     "ratio": 0.2950897072710187,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.020000000000000018,
+     "ratio": 0.02997736708784872,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.019999999999999574,
+     "medianAbsShift": 0.129999999999999,
+     "ratio": 0.17536759746391326,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.030000000000000027,
+     "medianAbsShift": 0.03000000000000025,
+     "ratio": 0.44966050631773347,
+     "band": "caution",
+     "tripRate": 0.09090909090909091
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.6400000000000001,
+     "medianAbsShift": 0.6400000000000001,
+     "ratio": 7.194568101083678,
+     "band": "sensitive",
+     "tripRate": 0.5454545454545454
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.08499999999999996,
+     "medianAbsShift": 0.08499999999999996,
+     "ratio": 9.555285759251799,
+     "band": "sensitive",
+     "tripRate": 0.8181818181818182
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.07,
+     "medianAbsShift": 0.07,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -2.8099999999999996,
+     "medianAbsShift": 2.8099999999999996,
+     "ratio": 18.95319034129222,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.9000000000000004,
+     "medianAbsShift": 0.9000000000000004,
+     "ratio": 1.7344048100826759,
+     "band": "sensitive",
+     "tripRate": 0.2727272727272727
+    }
+   },
+   "snrEstimateMedian": 21.7
+  },
+  "white_15dB": {
+   "failed": 0,
+   "flaggedNoisy": 1,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 1.7999999999999972,
+     "medianAbsShift": 2.1999999999999886,
+     "ratio": 0.927424794280317,
+     "band": "sensitive",
+     "tripRate": 0.09090909090909091
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.010000000000000231,
+     "medianAbsShift": 0.06000000000000005,
+     "ratio": 0.08993210126354616,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": -0.09999999999999964,
+     "medianAbsShift": 0.3099999999999996,
+     "ratio": 0.41818427087548815,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.07000000000000006,
+     "medianAbsShift": 0.08000000000000007,
+     "ratio": 1.199094683513947,
+     "band": "sensitive",
+     "tripRate": 0.2727272727272727
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.9700000000000002,
+     "medianAbsShift": 0.9700000000000002,
+     "ratio": 10.90426727820495,
+     "band": "sensitive",
+     "tripRate": 0.6363636363636364
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.13,
+     "medianAbsShift": 0.13,
+     "ratio": 14.613966455326286,
+     "band": "sensitive",
+     "tripRate": 0.8181818181818182
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.09000000000000002,
+     "medianAbsShift": 0.09000000000000002,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -3.6899999999999995,
+     "medianAbsShift": 3.6899999999999995,
+     "ratio": 24.88870902468623,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.9000000000000004,
+     "medianAbsShift": 0.9000000000000004,
+     "ratio": 1.7344048100826759,
+     "band": "sensitive",
+     "tripRate": 0.36363636363636365
+    }
+   },
+   "snrEstimateMedian": 17.8
+  },
+  "white_10dB": {
+   "failed": 0,
+   "flaggedNoisy": 10,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 3.9000000000000057,
+     "medianAbsShift": 3.9000000000000057,
+     "ratio": 1.6440712262242092,
+     "band": "sensitive",
+     "tripRate": 0.45454545454545453
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.2400000000000002,
+     "medianAbsShift": 0.2400000000000002,
+     "ratio": 0.35972840505418463,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": -0.40999999999999925,
+     "medianAbsShift": 0.4499999999999993,
+     "ratio": 0.6070416835289342,
+     "band": "sensitive",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.21999999999999997,
+     "medianAbsShift": 0.21999999999999997,
+     "ratio": 3.297510379663351,
+     "band": "sensitive",
+     "tripRate": 0.5454545454545454
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.7000000000000002,
+     "medianAbsShift": 0.7000000000000002,
+     "ratio": 7.869058860560274,
+     "band": "sensitive",
+     "tripRate": 0.8181818181818182
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.16500000000000004,
+     "medianAbsShift": 0.16500000000000004,
+     "ratio": 18.548495885606442,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.10999999999999993,
+     "medianAbsShift": 0.1100000000000001,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -4.59,
+     "medianAbsShift": 4.59,
+     "ratio": 30.959125859975554,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": -0.20000000000000018,
+     "medianAbsShift": 0.8999999999999986,
+     "ratio": 1.7344048100826726,
+     "band": "sensitive",
+     "tripRate": 0.36363636363636365
+    }
+   },
+   "snrEstimateMedian": 13.8
+  },
+  "speechnoise_30dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.10000000000000853,
+     "ratio": 0.04215567246729095,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.009999999999999787,
+     "medianAbsShift": 0.010000000000000231,
+     "ratio": 0.014988683543924693,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.02999999999999936,
+     "ratio": 0.04046944556859482,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.0,
+     "ratio": 0.0,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.1299999999999999,
+     "medianAbsShift": 0.1299999999999999,
+     "ratio": 1.4613966455326206,
+     "band": "sensitive",
+     "tripRate": 0.2727272727272727
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.02100000000000002,
+     "medianAbsShift": 0.02100000000000002,
+     "ratio": 2.3607176581680944,
+     "band": "sensitive",
+     "tripRate": 0.45454545454545453
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.02999999999999997,
+     "medianAbsShift": 0.02999999999999997,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -1.5299999999999994,
+     "medianAbsShift": 1.5299999999999994,
+     "ratio": 10.319708619991847,
+     "band": "sensitive",
+     "tripRate": 0.6363636363636364
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.5999999999999996,
+     "medianAbsShift": 0.5999999999999996,
+     "ratio": 1.1562698733884496,
+     "band": "sensitive",
+     "tripRate": 0.18181818181818182
+    }
+   },
+   "snrEstimateMedian": 30.4
+  },
+  "speechnoise_20dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 0.5999999999999943,
+     "medianAbsShift": 0.5999999999999943,
+     "ratio": 0.25293403480372173,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.019999999999999574,
+     "medianAbsShift": 0.040000000000000036,
+     "ratio": 0.05995473417569744,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.16999999999999993,
+     "ratio": 0.22932685822204207,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.040000000000000036,
+     "medianAbsShift": 0.06999999999999984,
+     "ratio": 1.0492078480747002,
+     "band": "sensitive",
+     "tripRate": 0.0
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.56,
+     "medianAbsShift": 0.56,
+     "ratio": 6.2952470884482175,
+     "band": "sensitive",
+     "tripRate": 0.5454545454545454
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.07299999999999995,
+     "medianAbsShift": 0.07299999999999995,
+     "ratio": 8.206304240298602,
+     "band": "sensitive",
+     "tripRate": 0.8181818181818182
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.07,
+     "medianAbsShift": 0.07,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -2.7399999999999993,
+     "medianAbsShift": 2.7399999999999993,
+     "ratio": 18.481046809658604,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.9000000000000004,
+     "medianAbsShift": 0.9000000000000004,
+     "ratio": 1.7344048100826759,
+     "band": "sensitive",
+     "tripRate": 0.2727272727272727
+    }
+   },
+   "snrEstimateMedian": 22.5
+  },
+  "speechnoise_15dB": {
+   "failed": 0,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 1.6999999999999886,
+     "medianAbsShift": 2.0,
+     "ratio": 0.8431134493457471,
+     "band": "sensitive",
+     "tripRate": 0.09090909090909091
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.020000000000000018,
+     "medianAbsShift": 0.030000000000000027,
+     "ratio": 0.04496605063177308,
+     "band": "robust",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": -0.1299999999999999,
+     "medianAbsShift": 0.2699999999999996,
+     "ratio": 0.3642250101173605,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.07000000000000006,
+     "medianAbsShift": 0.07000000000000006,
+     "ratio": 1.0492078480747036,
+     "band": "sensitive",
+     "tripRate": 0.2727272727272727
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.7800000000000002,
+     "medianAbsShift": 0.7800000000000002,
+     "ratio": 8.768379873195734,
+     "band": "sensitive",
+     "tripRate": 0.6363636363636364
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.121,
+     "medianAbsShift": 0.121,
+     "ratio": 13.602230316111388,
+     "band": "sensitive",
+     "tripRate": 0.8181818181818182
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.07999999999999996,
+     "medianAbsShift": 0.07999999999999996,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -3.539999999999999,
+     "medianAbsShift": 3.539999999999999,
+     "ratio": 23.87697288547134,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.8000000000000007,
+     "medianAbsShift": 0.8000000000000007,
+     "ratio": 1.5416931645179348,
+     "band": "sensitive",
+     "tripRate": 0.36363636363636365
+    }
+   },
+   "snrEstimateMedian": 18.4
+  },
+  "speechnoise_10dB": {
+   "failed": 0,
+   "flaggedNoisy": 7,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 11,
+     "medianShift": 4.0,
+     "medianAbsShift": 4.0,
+     "ratio": 1.6862268986914941,
+     "band": "sensitive",
+     "tripRate": 0.45454545454545453
+    },
+    "f0SdSt": {
+     "n": 11,
+     "medianShift": -0.18000000000000016,
+     "medianAbsShift": 0.18000000000000016,
+     "ratio": 0.26979630379063846,
+     "band": "caution",
+     "tripRate": 0.0
+    },
+    "f0RangeSt": {
+     "n": 11,
+     "medianShift": -0.4299999999999997,
+     "medianAbsShift": 0.4299999999999997,
+     "ratio": 0.580062053149871,
+     "band": "sensitive",
+     "tripRate": 0.0
+    },
+    "speechRate": {
+     "n": 11,
+     "medianShift": -0.16999999999999993,
+     "medianAbsShift": 0.16999999999999993,
+     "ratio": 2.548076202467134,
+     "band": "sensitive",
+     "tripRate": 0.45454545454545453
+    },
+    "articulationRate": {
+     "n": 11,
+     "medianShift": 0.73,
+     "medianAbsShift": 0.73,
+     "ratio": 8.206304240298568,
+     "band": "sensitive",
+     "tripRate": 0.9090909090909091
+    },
+    "pauseRatio": {
+     "n": 11,
+     "medianShift": 0.15999999999999992,
+     "medianAbsShift": 0.15999999999999992,
+     "ratio": 17.986420252709266,
+     "band": "sensitive",
+     "tripRate": 0.9090909090909091
+    },
+    "meanPauseS": {
+     "n": 11,
+     "medianShift": 0.10000000000000003,
+     "medianAbsShift": 0.10000000000000003,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 11,
+     "medianShift": -4.42,
+     "medianAbsShift": 4.42,
+     "ratio": 29.81249156886535,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "periodicityDb": {
+     "n": 11,
+     "medianShift": 0.0,
+     "medianAbsShift": 0.20000000000000107,
+     "ratio": 0.3854232911294854,
+     "band": "caution",
+     "tripRate": 0.36363636363636365
+    }
+   },
+   "snrEstimateMedian": 14.4
+  },
+  "reverb_0.3s": {
+   "failed": 3,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 8,
+     "medianShift": 1.3499999999999943,
+     "medianAbsShift": 1.9500000000000028,
+     "ratio": 0.8220356131121046,
+     "band": "sensitive",
+     "tripRate": 0.25
+    },
+    "f0SdSt": {
+     "n": 8,
+     "medianShift": 0.06500000000000017,
+     "medianAbsShift": 0.4700000000000002,
+     "ratio": 0.7044681265644446,
+     "band": "sensitive",
+     "tripRate": 0.125
+    },
+    "f0RangeSt": {
+     "n": 8,
+     "medianShift": 0.2950000000000004,
+     "medianAbsShift": 1.9550000000000003,
+     "ratio": 2.6372588695534853,
+     "band": "sensitive",
+     "tripRate": 0.5
+    },
+    "speechRate": {
+     "n": 8,
+     "medianShift": -0.34500000000000003,
+     "medianAbsShift": 0.34500000000000003,
+     "ratio": 5.171095822653893,
+     "band": "sensitive",
+     "tripRate": 0.625
+    },
+    "articulationRate": {
+     "n": 8,
+     "medianShift": -0.6449999999999998,
+     "medianAbsShift": 0.6449999999999998,
+     "ratio": 7.250775664373391,
+     "band": "sensitive",
+     "tripRate": 0.875
+    },
+    "pauseRatio": {
+     "n": 8,
+     "medianShift": -0.030000000000000013,
+     "medianAbsShift": 0.030000000000000013,
+     "ratio": 3.3724537973829904,
+     "band": "sensitive",
+     "tripRate": 0.625
+    },
+    "meanPauseS": {
+     "n": 8,
+     "medianShift": -0.04999999999999999,
+     "medianAbsShift": 0.04999999999999999,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 8,
+     "medianShift": -0.2949999999999995,
+     "medianAbsShift": 0.32499999999999973,
+     "ratio": 2.192094968298921,
+     "band": "sensitive",
+     "tripRate": 0.25
+    },
+    "periodicityDb": {
+     "n": 8,
+     "medianShift": -2.6999999999999993,
+     "medianAbsShift": 2.6999999999999993,
+     "ratio": 5.203214430248024,
+     "band": "sensitive",
+     "tripRate": 1.0
+    }
+   },
+   "snrEstimateMedian": 43.55
+  },
+  "reverb_0.6s": {
+   "failed": 5,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 6,
+     "medianShift": 2.549999999999983,
+     "medianAbsShift": 5.6499999999999915,
+     "ratio": 2.381795494401732,
+     "band": "sensitive",
+     "tripRate": 0.5
+    },
+    "f0SdSt": {
+     "n": 6,
+     "medianShift": 0.6049999999999998,
+     "medianAbsShift": 0.615,
+     "ratio": 0.9218040379513472,
+     "band": "sensitive",
+     "tripRate": 0.3333333333333333
+    },
+    "f0RangeSt": {
+     "n": 6,
+     "medianShift": 2.5499999999999994,
+     "medianAbsShift": 2.905,
+     "ratio": 3.9187913125590144,
+     "band": "sensitive",
+     "tripRate": 0.5
+    },
+    "speechRate": {
+     "n": 6,
+     "medianShift": -0.595,
+     "medianAbsShift": 0.595,
+     "ratio": 8.918266708634974,
+     "band": "sensitive",
+     "tripRate": 0.8333333333333334
+    },
+    "articulationRate": {
+     "n": 6,
+     "medianShift": -1.1549999999999998,
+     "medianAbsShift": 1.1549999999999998,
+     "ratio": 12.983947119924446,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "pauseRatio": {
+     "n": 6,
+     "medianShift": -0.07700000000000001,
+     "medianAbsShift": 0.07700000000000001,
+     "ratio": 8.65596474661634,
+     "band": "sensitive",
+     "tripRate": 1.0
+    },
+    "meanPauseS": {
+     "n": 6,
+     "medianShift": -0.07,
+     "medianAbsShift": 0.07,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 6,
+     "medianShift": -0.9700000000000002,
+     "medianAbsShift": 0.9700000000000002,
+     "ratio": 6.54256036692294,
+     "band": "sensitive",
+     "tripRate": 0.8333333333333334
+    },
+    "periodicityDb": {
+     "n": 6,
+     "medianShift": -4.049999999999999,
+     "medianAbsShift": 4.049999999999999,
+     "ratio": 7.804821645372036,
+     "band": "sensitive",
+     "tripRate": 1.0
+    }
+   },
+   "snrEstimateMedian": 38.85
+  },
+  "telephone_band": {
+   "failed": 2,
+   "flaggedNoisy": 0,
+   "flaggedClipping": 0,
+   "features": {
+    "f0MedianHz": {
+     "n": 9,
+     "medianShift": 1.6000000000000085,
+     "medianAbsShift": 1.7999999999999972,
+     "ratio": 0.7588021044111712,
+     "band": "sensitive",
+     "tripRate": 0.3333333333333333
+    },
+    "f0SdSt": {
+     "n": 9,
+     "medianShift": 2.18,
+     "medianAbsShift": 2.18,
+     "ratio": 3.2675330125755075,
+     "band": "sensitive",
+     "tripRate": 0.6666666666666666
+    },
+    "f0RangeSt": {
+     "n": 9,
+     "medianShift": 11.530000000000001,
+     "medianAbsShift": 11.530000000000001,
+     "ratio": 15.553756913530274,
+     "band": "sensitive",
+     "tripRate": 0.7777777777777778
+    },
+    "speechRate": {
+     "n": 9,
+     "medianShift": -0.19000000000000017,
+     "medianAbsShift": 0.19000000000000017,
+     "ratio": 2.8478498733456243,
+     "band": "sensitive",
+     "tripRate": 0.3333333333333333
+    },
+    "articulationRate": {
+     "n": 9,
+     "medianShift": -0.1499999999999999,
+     "medianAbsShift": 0.22999999999999998,
+     "ratio": 2.585547911326946,
+     "band": "sensitive",
+     "tripRate": 0.4444444444444444
+    },
+    "pauseRatio": {
+     "n": 9,
+     "medianShift": 0.02200000000000002,
+     "medianAbsShift": 0.025000000000000022,
+     "ratio": 2.810378164485827,
+     "band": "sensitive",
+     "tripRate": 0.4444444444444444
+    },
+    "meanPauseS": {
+     "n": 9,
+     "medianShift": 0.019999999999999962,
+     "medianAbsShift": 0.030000000000000027,
+     "ratio": NaN,
+     "band": "sensitive",
+     "tripRate": null
+    },
+    "intensitySdDb": {
+     "n": 9,
+     "medianShift": 0.9000000000000004,
+     "medianAbsShift": 0.9000000000000004,
+     "ratio": 6.070416835289327,
+     "band": "sensitive",
+     "tripRate": 0.7777777777777778
+    },
+    "periodicityDb": {
+     "n": 9,
+     "medianShift": -1.299999999999999,
+     "medianAbsShift": 1.299999999999999,
+     "ratio": 2.50525139234164,
+     "band": "sensitive",
+     "tripRate": 0.4444444444444444
+    }
+   },
+   "snrEstimateMedian": 78.1
+  }
+ },
+ "notes": {},
+ "splitHalf": {
+  "f0MedianHz": {
+   "ratios": [
+    31.57459867799822,
+    1.3489815189531906,
+    1.812693916093355
+   ],
+   "median": 1.812693916093355
+  },
+  "f0SdSt": {
+   "ratios": [
+    2.368211999940046,
+    0.10492078480747018,
+    0.32975103796633526
+   ],
+   "median": 0.32975103796633526
+  },
+  "f0RangeSt": {
+   "ratios": [
+    7.486847430190199,
+    0.02697963037906321,
+    0.45865371644408415
+   ],
+   "median": 0.45865371644408415
+  },
+  "speechRate": {
+   "ratios": [
+    9.14309696179383,
+    5.395926075812755,
+    0.8993210126354603
+   ],
+   "median": 5.395926075812755
+  },
+  "articulationRate": {
+   "ratios": [
+    4.496605063177292,
+    2.023472278429786,
+    0.2248302531588651
+   ],
+   "median": 2.023472278429786
+  },
+  "pauseRatio": {
+   "ratios": [
+    6.857322721345411,
+    6.295247088448246,
+    3.147623544224121
+   ],
+   "median": 6.295247088448246
+  },
+  "meanPauseS": {
+   "ratios": [
+    NaN,
+    NaN,
+    NaN
+   ],
+   "median": NaN
+  },
+  "intensitySdDb": {
+   "ratios": [
+    0.47214353163361605,
+    8.633481721300381,
+    8.835828949143353
+   ],
+   "median": 8.633481721300381
+  },
+  "periodicityDb": {
+   "ratios": [
+    0.5781349366942264,
+    2.5052513923416435,
+    1.156269873388451
+   ],
+   "median": 1.156269873388451
+  }
+ },
+ "clean": {
+  "jfk": {
+   "f0MedianHz": 249.9,
+   "f0SdSt": 2.16,
+   "f0RangeSt": 7.14,
+   "speechRate": 2.16,
+   "articulationRate": 3.44,
+   "pauseRatio": 0.373,
+   "meanPauseS": 0.8,
+   "intensitySdDb": 6.75,
+   "periodicityDb": 8.7
+  },
+  "lj": {
+   "f0MedianHz": 186.2,
+   "f0SdSt": 4.72,
+   "f0RangeSt": 13.33,
+   "speechRate": 3.71,
+   "articulationRate": 4.53,
+   "pauseRatio": 0.18,
+   "meanPauseS": 0.45,
+   "intensitySdDb": 8.79,
+   "periodicityDb": 7.5
+  },
+  "libri_f": {
+   "f0MedianHz": 218,
+   "f0SdSt": 4.71,
+   "f0RangeSt": 14.02,
+   "speechRate": 3.79,
+   "articulationRate": 4.49,
+   "pauseRatio": 0.155,
+   "meanPauseS": 0.5,
+   "intensitySdDb": 5.87,
+   "periodicityDb": 9.7
+  },
+  "libri_m1": {
+   "f0MedianHz": 140.6,
+   "f0SdSt": 3.15,
+   "f0RangeSt": 9.39,
+   "speechRate": 3.18,
+   "articulationRate": 3.71,
+   "pauseRatio": 0.143,
+   "meanPauseS": 0.57,
+   "intensitySdDb": 8.02,
+   "periodicityDb": 9.7
+  },
+  "libri_m2": {
+   "f0MedianHz": 79.5,
+   "f0SdSt": 2.38,
+   "f0RangeSt": 7.88,
+   "speechRate": 2.58,
+   "articulationRate": 2.97,
+   "pauseRatio": 0.132,
+   "meanPauseS": 0.47,
+   "intensitySdDb": 6.72,
+   "periodicityDb": 6.1
+  },
+  "fsdd_george_0": {
+   "f0MedianHz": 159.8,
+   "f0SdSt": 3.1,
+   "f0RangeSt": 3.3,
+   "speechRate": 1.66,
+   "articulationRate": 3.15,
+   "pauseRatio": 0.474,
+   "meanPauseS": 0.44,
+   "intensitySdDb": 9.98,
+   "periodicityDb": 9.7
+  },
+  "fsdd_jackson_0": {
+   "f0MedianHz": 107.4,
+   "f0SdSt": 4,
+   "f0RangeSt": 4.88,
+   "speechRate": 1.43,
+   "articulationRate": 2.86,
+   "pauseRatio": 0.502,
+   "meanPauseS": 0.46,
+   "intensitySdDb": 8.44,
+   "periodicityDb": 7.5
+  },
+  "fsdd_lucas_0": {
+   "f0MedianHz": 116.6,
+   "f0SdSt": 1.93,
+   "f0RangeSt": 5.89,
+   "speechRate": 0.91,
+   "articulationRate": 2.58,
+   "pauseRatio": 0.646,
+   "meanPauseS": 0.63,
+   "intensitySdDb": 10.74,
+   "periodicityDb": 4.2
+  },
+  "fsdd_nicolas_0": {
+   "f0MedianHz": 121.8,
+   "f0SdSt": 2.24,
+   "f0RangeSt": 7.07,
+   "speechRate": 1.44,
+   "articulationRate": 3.1,
+   "pauseRatio": 0.536,
+   "meanPauseS": 0.4,
+   "intensitySdDb": 7.87,
+   "periodicityDb": 8
+  },
+  "fsdd_theo_0": {
+   "f0MedianHz": 138.1,
+   "f0SdSt": 1.76,
+   "f0RangeSt": 5.34,
+   "speechRate": 1.45,
+   "articulationRate": 3.29,
+   "pauseRatio": 0.56,
+   "meanPauseS": 0.41,
+   "intensitySdDb": 8.37,
+   "periodicityDb": 4.7
+  },
+  "fsdd_yweweler_0": {
+   "f0MedianHz": 116.8,
+   "f0SdSt": 2.81,
+   "f0RangeSt": 8.78,
+   "speechRate": 1.2,
+   "articulationRate": 3.07,
+   "pauseRatio": 0.61,
+   "meanPauseS": 0.46,
+   "intensitySdDb": 10.43,
+   "periodicityDb": 5.7
+  }
+ }
+}

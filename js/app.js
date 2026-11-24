@@ -797,7 +797,7 @@ function viewTrends() {
   const name = t('feat')[info.key][0];
   add(wrap, 
     h('h2', { class: 'metric-title' }, name),
-    h('p', { class: 'muted small' }, t('feat')[info.key][1]),
+    h('p', { class: 'muted small' }, t('feat')[info.key][1], ' ', h('span', { class: `conf conf-${info.confidence}` }, t('confidence')[info.confidence]), ' ', t('confidenceWhy')[info.key]),
     h(
       'div',
       { class: 'chart-wrap' },
@@ -950,7 +950,7 @@ function viewAbout() {
     h(
       'dl',
       { class: 'feature-list' },
-      FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0]), h('dd', {}, t('feat')[f.key][1])])
+      FEATURE_INFO.map((f) => [h('dt', {}, t('feat')[f.key][0], ' ', h('span', { class: `conf conf-${f.confidence}` }, t('confidence')[f.confidence])), h('dd', {}, t('feat')[f.key][1], ' ', h('span', { class: 'conf-why' }, t('confidenceWhy')[f.key]))])
     ),
     h('h2', {}, t('privacyTitle')),
     h('p', {}, t('privacyBody')),
