@@ -470,6 +470,11 @@ function viewToday() {
     const p = state.pending;
     const f = p.features;
     const n = pool({ demo: false }).length;
+    const early = n < BASELINE_MIN;
+    const numbers = () => [
+      h('div', { class: 'rows' }, ['f0MedianHz', 'f0SdSt', 'speechRate', 'pauseRatio', 'periodicityDb'].map((k) => featureRow(k, f))),
+      early ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : h('p', { class: 'muted small' }, t('chanceNote')),
+    ];
     const pick = (field) => (v, fromKey) => {
       p[field] = !fromKey && p[field] === v ? null : v;
       render();
@@ -480,8 +485,9 @@ function viewToday() {
       p.silent ? h('p', { class: 'muted small' }, t('silentBody')) : null,
       p.silent ? null : h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
       p.silent ? null : qualityNote(f),
-      p.silent ? null : h('div', { class: 'rows' }, ['f0MedianHz', 'f0SdSt', 'speechRate', 'pauseRatio', 'periodicityDb'].map((k) => featureRow(k, f))),
-      p.silent ? null : n < BASELINE_MIN ? h('p', { class: 'muted small' }, t('needMoreForBaseline', BASELINE_MIN - n)) : h('p', { class: 'muted small' }, t('chanceNote')),
+      // once there is a usual range the numbers say something, so they come first; before that they
+      // are raw values, folded below the check-in so a tired first visit ends in two taps
+      p.silent || early ? null : numbers(),
       h(
         'div',
         { class: 'checkin' },
@@ -516,7 +522,8 @@ function viewToday() {
           },
           t('discard')
         )
-      )
+      ),
+      p.silent || !early ? null : h('details', { class: 'about-more result-numbers' }, h('summary', { 'data-key': 'result-numbers' }, t('numbersTitle')), numbers())
     );
     return wrap;
   }

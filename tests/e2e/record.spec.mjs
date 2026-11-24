@@ -72,3 +72,13 @@ test('a note with risk language is kept, and help is shown', async ({ page }) =>
   expect(entries).toHaveLength(1);
   expect(entries[0].note).toBe('I want to die');
 });
+
+test('before there is a usual range, the first result leads with the check-in and folds the numbers', async ({ page }) => {
+  await page.goto('/');
+  await record(page);
+  await expect(page.locator('.result-head')).toBeVisible();
+  await expect(page.locator('.result-numbers')).not.toHaveAttribute('open', '');
+  await expect(page.locator('[data-key="save"]')).toBeInViewport();
+  await page.locator('[data-key="result-numbers"]').click();
+  await expect(page.locator('.rows .row').first()).toBeVisible();
+});

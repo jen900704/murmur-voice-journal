@@ -6,6 +6,8 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Until there are enough recordings for a usual range, the result screen shows the voice shape and the check-in first, with the raw numbers folded under "See the numbers".
+
 - Evening Today is calmer: the bedtime card comes first; after a low check-in, a short note follows with one kind thing, one small action, breathing and help. The whole bedtime ritual uses the dark palette, header and tabs included.
 
 - Silent check-in: mood, energy and a note without recording, for nights when speaking aloud is not possible. Listed in the journal, kept out of voice trends.
