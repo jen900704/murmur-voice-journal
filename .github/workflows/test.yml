@@ -24,6 +24,7 @@ jobs:
       - run: python -m unittest discover lab/eval/tests
       - run: python -m unittest discover lab/rl/tests
       - run: python -m unittest discover lab/dlatk/tests
+      - run: python -m unittest discover lab/langval/tests
       - run: cd lab/mcp && npm ci && npm test
   browser:
     runs-on: ubuntu-24.04

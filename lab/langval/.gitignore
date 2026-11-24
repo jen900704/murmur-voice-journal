@@ -1,0 +1,5 @@
+# corpora are fetched by fetch_data.py at pinned commits; only data/sample/ is committed
+data/raw/
+data/scored/
+__pycache__/
+*.pyc

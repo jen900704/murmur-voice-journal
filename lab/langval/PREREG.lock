@@ -1,0 +1,11 @@
+# Hashes of the plan, taken before the first scoring run.
+# locked_utc 2026-11-24T13:47:01Z  app_commit d458fbbda7cd2f75aae9b46f6a2e9e94b90ce626
+d4d4bfe1faab9065aa933f5b9504cef55e2905228fe33c5d9ed2d13f73d1c6a2  PREREG.md
+9da510ed4ec6ce877d59c5672af2a9004f6d572d0d66296d51797311d8f3b4e6  langval/hypotheses.py
+be06f1c245c87f6670dd9d24109787f4c4158a802e33c4cfd914b2e8e10b9661  score_texts.mjs
+5a1b7e9b781503528640ae159e2468a3710f5537c91e716188fe775258bee70a  ../../js/langlab/score.js
+1bcb4c55d386fd2022ae53aaf4a2fd321a75227465f1088882bb8e1ad70be711  ../../js/langlab/lexicon-en.js
+3525a407584859aa078385f110a71aef00736aaaff1d02b5b3a66f170edd9b2d  ../../js/langlab/lexicon-zh.js
+d5783e02591e9e4f85cf189eb373608f296c14d1171dc691cc750dd7fb4ce260  ../../js/langlab/tokenize.js
+92deb46115018e3653d27df5bdcc8f9135f5d0d47a0ca6f3662052dbe86a0674  ../../js/langlab/vader.js
+7d2dcb32fd24dbf5699b233f105fb3ed884cfa975c1fef06bd128d51aff7ce3b  ../../data/lexica/vader.json

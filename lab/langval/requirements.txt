@@ -1,0 +1,5 @@
+# analysis (the tests need only numpy and scipy)
+numpy
+scipy
+# Chinese part only: Simplified to Traditional conversion of CPED (Apache-2.0)
+opencc-python-reimplemented==0.1.7
