@@ -733,12 +733,13 @@ function viewJournal() {
               type: 'button',
               class: 'tile' + (e.demo ? ' is-demo' : ''),
               'data-key': `tile-${e.id}`,
-              'aria-label': fmtDate(e.createdAt, { dateStyle: 'long', timeStyle: 'short' }),
+              // the name is the date and time shown on the tile, so voice control can say what it sees
               onclick: (ev) => openDetail(e.id, ev.currentTarget),
             },
             glyph(e.features, 120, { width: '100%' }),
-            h('span', { class: 'tile-date', 'aria-hidden': 'true' }, fmtDate(e.createdAt, { month: 'numeric', day: 'numeric' })),
-            h('span', { class: 'tile-time', 'aria-hidden': 'true' }, fmtDate(e.createdAt, { hour: 'numeric', minute: '2-digit' }))
+            h('span', { class: 'tile-date' }, fmtDate(e.createdAt, { month: 'numeric', day: 'numeric' })),
+            ' ',
+            h('span', { class: 'tile-time' }, fmtDate(e.createdAt, { hour: 'numeric', minute: '2-digit' }))
           )
         )
       )

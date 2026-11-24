@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.use({ locale: 'zh-TW', serviceWorkers: 'allow' });
 
-test('after one visit the app works offline, with every screen from one cached release', async ({ page, context }) => {
+test('after one visit the app works offline, with every screen from one cached release', async ({ page, context, browserName }) => {
+  // Playwright's Linux WebKit cannot reload a page while context.setOffline is on ("internal error"),
+  // which is a limit of the test browser, not of Safari's service workers
+  test.skip(browserName === 'webkit', 'offline reload is not supported by Playwright WebKit on Linux');
   await page.goto('/?sw#today');
   await page.locator('.prompt-text').waitFor();
   // wait until the worker has installed every file, is active, and controls the page

@@ -38,8 +38,8 @@ export function glyph(features, size = 120, opts = {}) {
     width: opts.width || size,
     height: opts.width || size,
     class: 'glyph',
-    role: 'img',
-    'aria-label': opts.label || '',
+    // without a label the shape is decoration inside a labelled control, so keep it out of the tree
+    ...(opts.label ? { role: 'img', 'aria-label': opts.label } : { 'aria-hidden': 'true' }),
   });
   if (!contour.length) {
     svg.appendChild(el('circle', { cx: c, cy: c, r: base, class: 'glyph-shape' }));
