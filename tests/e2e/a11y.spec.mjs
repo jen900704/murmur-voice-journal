@@ -73,6 +73,28 @@ const screens = [
     await page.locator('[data-key="breathe-start"]').click();
     await page.locator('.breathe-phase').filter({ hasText: /./ }).waitFor();
   }],
+  ['crisis pause', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '最近真的不想活了');
+    await page.locator('[data-key="topic-self"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('.crisis').waitFor();
+  }],
+  ['compare three', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', 'work stress');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('.lens-option').nth(1).click();
+    await page.locator('.lens-card').first().waitFor();
+  }],
+  ['card deck', async (page) => {
+    await page.goto('/#lens');
+    await page.locator('.lens-link').first().click();
+    await page.locator('.deck-card').first().waitFor();
+  }],
   ['evening card', async (page) => {
     // 10 pm in the pinned time zone, so the evening card shows whenever the test runs
     await page.clock.setFixedTime(new Date('2026-11-24T22:00:00+08:00'));
