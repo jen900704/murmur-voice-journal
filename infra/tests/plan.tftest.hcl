@@ -93,7 +93,7 @@ run "eval_task_role_is_least_privilege" {
   variables {
     name                = "murmur-lab-eval"
     image_tag           = "v1"
-    command             = ["python3", "-m", "lab.eval.run", "--provider", "bedrock", "--cases", "lab/eval/cases"]
+    command             = ["python3", "lab/eval/run_eval.py", "--counselor-provider", "bedrock", "--judge-provider", "bedrock", "--cases", "lab/eval/cases/cases.json"]
     output_dir          = "lab/eval/runs"
     schedule_expression = "cron(0 9 ? * MON *)"
   }

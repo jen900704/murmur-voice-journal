@@ -172,3 +172,24 @@ test('a silent check-in saves mood without a recording and shows in the journal,
   await page.goto('/#today');
   await expect(page.locator('.low-card')).toBeVisible();
 });
+
+test('the language mirror opens from the Journal, analyzes pasted text and keeps the notice on top', async ({ page }) => {
+  await page.goto('/#journal');
+  await page.locator('[data-key="jmode-words"]').click();
+  await page.locator('[data-key="ll-text"]').fill('I miss my family and I keep thinking that I should have called. But maybe I just need rest, because I am tired. '.repeat(6));
+  await page.locator('[data-key="ll-analyze"]').click();
+  await expect(page.locator('[data-key="ll-notice"]')).toBeVisible();
+  await expect(page.locator('[data-key="ll-report-html"]')).toBeVisible();
+});
+
+test('calm and writing open from Today', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.prompt-text').waitFor();
+  const w = page.locator('[data-key="welcome-close"]');
+  if (await w.count()) await w.click();
+  await page.locator('[data-key="calm-link"]').click();
+  await expect(page.locator('#sheet')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.locator('[data-key="writing-link"]').click();
+  await expect(page.locator('#sheet [role="tablist"]')).toBeVisible();
+});

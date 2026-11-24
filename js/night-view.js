@@ -3,6 +3,7 @@
 import { TRACKS, THEMES, THEME_TRACK, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
+import { createFlowHistory } from './flow-history.js';
 
 // The suggested-track policy (js/policy.js) is optional and off by default; loaded on its own
 // so the ritual still works if that one file cannot be fetched.
@@ -233,6 +234,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       st.riskSeen = true;
       if (pol.store) pol.store.noteRisk();
       st.onContinue = onContinue;
+      st.crisisFrom = st.stage;
       go('crisis');
       return false;
     }
@@ -315,7 +317,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       ),
       nav(() => {
         if (guard(st.worry, () => go('kind'))) go('kind');
-      }, { back: () => { st.stage = 'card'; onExit(); }, nextLabel: st.worry.trim() || st.theme ? L().next : L().skip }),
+      }, { back: () => { st.stage = 'card'; flow.sync(); onExit(); }, nextLabel: st.worry.trim() || st.theme ? L().next : L().skip }),
     ];
   }
 
@@ -613,6 +615,23 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
     }
   }
 
+  // the postcard's Done button, and the phone's Back button on the postcard
+  function done() {
+    st.stage = 'card';
+    flow.sync();
+    st.doneAt = Math.max(st.doneAt || 0, st.nightAt || Date.now());
+    // draw Today now and put focus on the ritual's button there, so it does not
+    // fall to <body>; the render that follows onExit keeps it by data-key
+    rerender();
+    const next = document.querySelector('[data-key="night-start"], [data-key="night-link"]') || document.getElementById('main');
+    if (next) {
+      if (next.id === 'main') next.setAttribute('tabindex', '-1');
+      next.focus({ preventScroll: true });
+    }
+    onExit();
+    window.scrollTo(0, 0);
+  }
+
   function postcard() {
     const holder = h('div', { class: 'postcard', role: 'img', 'aria-label': isEvening() ? L().cardDone : L().cardDoneDay });
     holder.innerHTML = st.postcard;
@@ -642,20 +661,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             type: 'button',
             class: 'btn primary',
             'data-key': 'night-done',
-            onclick: () => {
-              st.stage = 'card';
-              st.doneAt = Math.max(st.doneAt || 0, st.nightAt || Date.now());
-              // draw Today now and put focus on the ritual's button there, so it does not
-              // fall to <body>; the render that follows onExit keeps it by data-key
-              rerender();
-              const next = document.querySelector('[data-key="night-start"], [data-key="night-link"]') || document.getElementById('main');
-              if (next) {
-                if (next.id === 'main') next.setAttribute('tabindex', '-1');
-                next.focus({ preventScroll: true });
-              }
-              onExit();
-              window.scrollTo(0, 0);
-            },
+            onclick: done,
           },
           L().done
         )
@@ -781,6 +787,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
               st.worry = '';
               st.kind = '';
               st.stage = 'card';
+              flow.sync();
               onExit();
             },
           },
@@ -802,6 +809,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         } }, L().leave)
       );
     add(wrap, (stages[st.stage] || worry)());
+    flow.sync(true); // the ritual is on screen: it owns one history entry (js/flow-history.js)
     // help lines one tap away on every step, as in the lens exercise (playback stays uncluttered)
     if (st.stage !== 'crisis')
       add(
@@ -836,8 +844,37 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
       st.theme = null;
       st.track = null;
       st.stage = 'card';
+      flow.sync();
     } else if (st.stage === 'play') st.stage = 'tone';
   }
+
+  // The phone's Back button: one step back, never out of the tab or the app. On the first step
+  // it does what "Leave the ritual" does; during a track it stops the sound and shows the
+  // track list; on the postcard (the night is already saved) it is the same as Done.
+  function goBack() {
+    if (st.stage === 'kind') go('worry');
+    else if (st.stage === 'tone') go('kind');
+    else if (st.stage === 'play') {
+      stopAll();
+      go('tone');
+    } else if (st.stage === 'crisis') {
+      // back to the step the pause came from; what was written there is still in the field
+      st.onContinue = null;
+      go(st.crisisFrom === 'kind' ? 'kind' : 'worry');
+    } else if (st.stage === 'postcard') done();
+    else {
+      stopAll(true);
+      onExit();
+    }
+  }
+
+  const flow = createFlowHistory({
+    name: 'night',
+    active: () => st.stage !== 'card',
+    visible: () => !!document.querySelector('.view.night'),
+    hashes: ['', '#', '#today'],
+    back: goBack,
+  });
 
   // active: a ritual step is on screen; busy: that, or a track is getting ready to play
   return { view, card, begin, active: () => st.stage !== 'card', busy: () => st.stage !== 'card' || st.preparing, stopAll };

@@ -37,4 +37,4 @@ RUN true \
 
 USER runner
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["python3", "-m", "lab.eval.run", "--provider", "bedrock", "--cases", "lab/eval/cases"]
+CMD ["python3", "lab/eval/run_eval.py", "--counselor-provider", "bedrock", "--judge-provider", "bedrock", "--cases", "lab/eval/cases/cases.json"]

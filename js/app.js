@@ -15,8 +15,6 @@ import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 import { LENSES } from './lenses.js';
 import { createJournalSearch } from './search.js';
 import { calmSheet } from './calm.js';
-import { writingSheet } from './writing.js';
-import { createLanguageView } from './language-view.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -734,7 +732,16 @@ function viewJournal() {
   if (state.journalMode === 'nights') return add(wrap, extras.nightsSection());
   if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
   if (state.journalMode === 'words') {
-    if (!languageView) languageView = createLanguageView({ h, add, getLang, toast, openSheet });
+    // the language mirror and its word lists load on first use
+    if (!languageView) {
+      import('./language-view.js')
+        .then(({ createLanguageView }) => {
+          languageView = createLanguageView({ h, add, getLang, toast, openSheet });
+          render();
+        })
+        .catch(() => toast(t('loadFailed')));
+      return add(wrap, h('p', { class: 'muted', role: 'status' }, t('loading')));
+    }
     return add(wrap, languageView.view());
   }
   const entries = state.entries.filter((e) => e.features && e.features.ok);
@@ -1573,7 +1580,9 @@ function openCalm() {
   openSheet(calmSheet({ h, getLang }));
 }
 // Writing by weight, with Pennebaker-style deep prompts and a closing (js/writing.js)
-function openWriting() {
+// loaded on first use, so the first visit stays light
+async function openWriting() {
+  const { writingSheet } = await import('./writing.js');
   openSheet(
     writingSheet({
       h,

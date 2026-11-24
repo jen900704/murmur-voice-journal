@@ -11,9 +11,9 @@ differs is the bug. Constants are collected in section 9.
 | `lens` | worry topic, one of `TOPICS` in `js/lenses.js` (`work, relationship, family, self, loss, other`) | lens ids from `lensesForTopic(topic)` | `TOPIC_COMMON[topic]` first, in that order, then every other eligible lens in `LENSES` order. `other` has no `TOPIC_COMMON` entry, so its expert order is `LENSES` order. |
 | `track` | bedtime theme, one of `THEMES` in `js/bedtime.js` (`work, relationship, family, health, future, unsure`), or `none` when nothing was set down | all 9 ids in `TRACKS` | `THEME_TRACK[theme]` first, then the other tracks in `TRACKS` order. `none` uses `TRACKS` order. |
 
-The track surface is specified here and simulated in the lab, but the app has no
-explicit track rating today. Until one exists, the in-app policy must stay off for
-tracks (expert order, nothing logged).
+The track surface is specified here and simulated in the lab. The app now asks an
+optional "did this help?" after playback, so the in-app policy runs for tracks too,
+with the psychoanalytic `drift` track excluded from the arms (8 arms).
 
 ## 2. Action
 

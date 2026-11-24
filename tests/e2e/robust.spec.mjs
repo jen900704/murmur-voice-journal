@@ -314,8 +314,7 @@ test.describe('double taps', () => {
 // ---------- history and hashes ----------
 test.describe('back button and hashes', () => {
   test('Back in the middle of the ritual goes one step back, not out of the ritual', async ({ page }) => {
-    test.fail();
-    // BUG: ritual steps are not in the history (js/night-view.js go()), so the phone's Back button leaves Today, or closes an installed app when Today was the first page; the text is only in memory. Fix: pushState per step and handle popstate, as the sheets do with #entry.
+    const errors = collectErrors(page);
     await page.goto('/#journal');
     await page.locator('#tabs a[href="#today"]').click();
     await skipWelcome(page);
@@ -323,11 +322,19 @@ test.describe('back button and hashes', () => {
     await page.fill('#night-worry', '心事');
     await page.locator('[data-key="night-next"]').click();
     await page.locator('#night-kind').waitFor();
+    await page.fill('#night-kind', '喝了熱茶');
     await page.goBack();
     await expect(page.locator('#night-worry')).toBeVisible();
+    // the text is kept, and focus is on the step's heading
+    await expect(page.locator('#night-worry')).toHaveValue('心事');
+    await expect(page.locator('.view.night h2')).toBeFocused();
+    expect(new URL(page.url()).hash).toBe('#today');
+    await page.locator('[data-key="night-next"]').click();
+    await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
+    expect(errors).toEqual([]);
   });
 
-  test('leaving the ritual with Back and returning keeps the text', async ({ page }) => {
+  test('leaving the ritual with a tab tap and returning keeps the text, by Back or by the tab', async ({ page }) => {
     const errors = collectErrors(page);
     await page.goto('/#journal');
     await page.locator('#tabs a[href="#today"]').click();
@@ -336,16 +343,139 @@ test.describe('back button and hashes', () => {
     await page.fill('#night-worry', '心事');
     await page.locator('[data-key="night-next"]').click();
     await page.fill('#night-kind', '喝了熱茶');
+    await page.locator('#tabs a[href="#trends"]').click();
+    await expect(page.locator('.view.trends')).toBeVisible();
     await page.goBack();
-    await expect(page.locator('.view.journal')).toBeVisible();
-    await page.goForward();
     await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
+    await page.locator('#tabs a[href="#trends"]').click();
+    await page.locator('#tabs a[href="#today"]').click();
+    await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
+    // Back still means one step back inside the ritual
+    await page.goBack();
+    await expect(page.locator('#night-worry')).toHaveValue('心事');
     expect(errors).toEqual([]);
   });
 
+  test('Back at the first step of the ritual leaves the ritual, not the tab; the next Back goes on as before', async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto('/#journal');
+    await page.locator('#tabs a[href="#today"]').click();
+    await skipWelcome(page);
+    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await page.locator('#night-worry').waitFor();
+    await page.goBack();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    await expect(page.locator('.view.night')).toHaveCount(0);
+    expect(new URL(page.url()).hash).toBe('#today');
+    await page.goBack();
+    await expect(page.locator('.view.journal')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('Back when Today was the first page stays in the app', async ({ page }) => {
+    await startRitual(page);
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('#night-kind').waitFor();
+    await page.goBack();
+    await expect(page.locator('#night-worry')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    expect(page.url()).toContain('localhost');
+  });
+
+  test('Back while a track plays stops it and shows the track list', async ({ page }) => {
+    // at normal speed, so the track is still playing when Back is pressed
+    await page.addInitScript(() => {
+      globalThis.__MURMUR_SPEED = 1;
+    });
+    await startRitual(page);
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('.track:not(.surprise)').first().click();
+    await expect(page.locator('.night-play')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('[data-key="track-surprise"]')).toBeVisible();
+    await expect(page.locator('.view.night h2')).toBeFocused();
+    // nothing was saved, and the track does not finish on its own afterwards
+    await page.waitForTimeout(1500);
+    await expect(page.locator('[data-key="track-surprise"]')).toBeVisible();
+    expect(await stored(page, 'nights')).toHaveLength(0);
+  });
+
+  test('a finished ritual leaves no extra history entry', async ({ page }) => {
+    await page.goto('/#journal');
+    await page.locator('#tabs a[href="#today"]').click();
+    await skipWelcome(page);
+    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('[data-key="night-skip-track"]').click();
+    await page.locator('[data-key="night-done"]').click();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => history.state)).toBeNull();
+    await page.goBack();
+    await expect(page.locator('.view.journal')).toBeVisible();
+  });
+
+  test('the Leave link removes the entry of the ritual too', async ({ page }) => {
+    await page.goto('/#journal');
+    await page.locator('#tabs a[href="#today"]').click();
+    await skipWelcome(page);
+    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('#night-kind').waitFor();
+    await page.locator('[data-key="night-leave"]').click();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => history.state)).toBeNull();
+    await page.goBack();
+    await expect(page.locator('.view.journal')).toBeVisible();
+  });
+
+  test('a sheet opened in the middle of the ritual closes on Back without changing the step', async ({ page }) => {
+    const errors = collectErrors(page);
+    await startRitual(page);
+    await page.fill('#night-worry', '心事');
+    await page.locator('[data-key="night-next"]').click();
+    await page.fill('#night-kind', '喝了熱茶');
+    // any sheet will do; the app opens them all the same way
+    await page.evaluate(() => (location.hash = '#entry'));
+    await page.goBack();
+    await expect(page.locator('#sheet')).toBeHidden();
+    await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
+    // a real sheet on the last step: the gentle list on the postcard
+    await page.locator('[data-key="night-next"]').click();
+    await page.locator('[data-key="night-skip-track"]').click();
+    await page.locator('.view.night .postcard').waitFor();
+    await page.locator('.view.night > button.link').last().click();
+    await expect(page.locator('#sheet')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('#sheet')).toBeHidden();
+    await expect(page.locator('.view.night .postcard')).toBeVisible();
+    await page.locator('.view.night > button.link').last().click();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#sheet')).toBeHidden();
+    await expect(page.locator('.view.night .postcard')).toBeVisible();
+    // and Back on the postcard is Done
+    await page.goBack();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('a reload in the middle of the ritual leaves no dead Back press', async ({ page }) => {
+    await page.goto('/#journal');
+    await page.locator('#tabs a[href="#today"]').click();
+    await skipWelcome(page);
+    await page.locator('[data-key="night-start"], [data-key="night-link"]').first().click();
+    await page.locator('#night-worry').waitFor();
+    await page.reload();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => history.state)).toBeNull();
+    await page.goBack();
+    await expect(page.locator('.view.journal')).toBeVisible();
+  });
+
   test('Back in the middle of a lens exercise goes one question back', async ({ page }) => {
-    test.fail();
-    // BUG: same as the ritual: js/lens-view.js go() keeps steps out of the history, so Back leaves the Lens tab.
+    const errors = collectErrors(page);
     await page.goto('/#today');
     await page.locator('#tabs a[href="#lens"]').click();
     await page.locator('[data-key="lens-start"]').click();
@@ -353,10 +483,105 @@ test.describe('back button and hashes', () => {
     await page.locator('[data-key="topic-work"]').click();
     await page.locator('[data-key="lens-concern-next"]').click();
     await page.getByRole('button', { name: /自己選/ }).click();
-    await page.locator('.lens-row').first().click();
+    await page.locator('[data-key="pick-cognitive"]').click();
     await page.locator('.lens-q').waitFor();
+    await page.fill('#lens-answer', '第一個回答');
+    await page.locator('[data-key="lens-next"]').click();
+    await expect(page.locator('.lens-step-head')).toContainText('2');
     await page.goBack();
     await expect(page.locator('.view.lens')).toBeVisible();
+    await expect(page.locator('#lens-answer')).toHaveValue('第一個回答');
+    await expect(page.locator('.lens-q')).toBeFocused();
+    // from the first question: the choice of lens, then the worry (still there), then the lens home
+    await page.goBack();
+    await expect(page.locator('.lens-options')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('#lens-concern')).toHaveValue('報告做不完');
+    await page.goBack();
+    await expect(page.locator('[data-key="lens-start"]')).toBeVisible();
+    expect(new URL(page.url()).hash).toBe('#lens');
+    // the worry is kept for the next start, and one more Back leaves the tab as before
+    await page.goBack();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('a finished lens exercise leaves no extra history entry; Back on the summary returns to the last question', async ({ page }) => {
+    await page.goto('/#today');
+    await page.locator('#tabs a[href="#lens"]').click();
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '報告做不完');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="pick-cognitive"]').click();
+    for (let i = 0; i < 6; i++) {
+      if (await page.locator('.lens-summary').count()) break;
+      const scale = page.locator('[data-key="scale-5"]');
+      if (await scale.count()) await scale.click();
+      else await page.fill('#lens-answer', `回答${i}`);
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await expect(page.locator('.lens-summary')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('.lens-q')).toBeVisible();
+    await page.locator('[data-key="lens-next"]').click();
+    await expect(page.locator('.lens-summary')).toBeVisible();
+    await page.locator('[data-key="lens-save"]').click();
+    await expect(page.locator('[data-key="lens-start"]')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => history.state)).toBeNull();
+    // going to the summary twice counted the lens once
+    expect((await stored(page, 'lensSessions')).length).toBe(1);
+    await page.locator('.lens-link').first().click();
+    await expect(page.locator('.deck-card.used .deck-meta')).toHaveText('用過 1 次');
+    await page.goBack();
+    await expect(page.locator('[data-key="lens-start"]')).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('.prompt-text')).toBeVisible();
+  });
+
+  test('a sheet opened in the middle of a lens exercise closes on Back without changing the question', async ({ page }) => {
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '報告做不完');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="pick-cognitive"]').click();
+    await page.fill('#lens-answer', '第一個回答');
+    await page.evaluate(() => (location.hash = '#entry'));
+    await page.goBack();
+    await expect(page.locator('#sheet')).toBeHidden();
+    await expect(page.locator('#lens-answer')).toHaveValue('第一個回答');
+    expect(new URL(page.url()).hash).toBe('#lens');
+    await page.goBack();
+    await expect(page.locator('.lens-options')).toBeVisible();
+  });
+
+  test('Back in the AI conversation of a lens ends the chat and returns to the summary', async ({ page }) => {
+    await page.route('https://api.anthropic.com/**', (route) => route.fulfill({ json: { content: [{ type: 'text', text: '好的。' }] } }));
+    await page.goto('/#about');
+    await page.locator('[data-key="ai-enabled"]').check();
+    await page.fill('#ai-key', 'sk-ant-test');
+    await page.locator('#ai-key').press('Tab');
+    await expect(page.locator('#ai-key')).toHaveAttribute('placeholder', /已儲存/);
+    await page.locator('#tabs a[href="#lens"]').click();
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', '報告做不完');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.getByRole('button', { name: /自己選/ }).click();
+    await page.locator('[data-key="pick-cognitive"]').click();
+    for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {
+      await page.fill('#lens-answer', `回答${i}`);
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await page.locator('[data-key="ai-open"]').click();
+    await page.locator('#ai-input').waitFor();
+    await page.goBack();
+    await expect(page.locator('.lens-summary')).toBeVisible();
+    await expect(page.locator('#ai-input')).toHaveCount(0);
+    expect(new URL(page.url()).hash).toBe('#lens');
   });
 
   test('Back closes a sheet and keeps the page under it; Escape does the same and focus returns', async ({ page }) => {

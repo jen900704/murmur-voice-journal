@@ -41,7 +41,7 @@ flowchart LR
     ECR[(ECR<br/>eval image)]
     SCH[EventBridge Scheduler<br/>weekly, off by default]
     subgraph VPC["VPC, public subnets, no inbound"]
-      TASK[ECS Fargate task<br/>python3 -m lab.eval.run]
+      TASK[ECS Fargate task<br/>python3 lab/eval/run_eval.py]
     end
     BR[Amazon Bedrock<br/>named models only]
     S3R[(S3 results<br/>encrypted, versioned, private)]

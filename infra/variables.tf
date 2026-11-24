@@ -83,7 +83,7 @@ variable "eval_image_tag" {
 variable "eval_command" {
   description = "Command the container runs. The entrypoint uploads the output folder to S3 afterwards."
   type        = list(string)
-  default     = ["python3", "-m", "lab.eval.run", "--provider", "bedrock", "--cases", "lab/eval/cases"]
+  default     = ["python3", "lab/eval/run_eval.py", "--counselor-provider", "bedrock", "--judge-provider", "bedrock", "--cases", "lab/eval/cases/cases.json"]
 }
 
 variable "eval_output_dir" {

@@ -3,6 +3,7 @@
 import { LENSES, TOPICS, TOPIC_COMMON, lensById, lensesForTopic, fill, rewriteText, isNonAnswer } from './lenses.js';
 import { checkRisk, helpList } from './safety.js';
 import { createAiChat } from './ai-chat.js';
+import { createFlowHistory } from './flow-history.js';
 
 // The featured-row policy (js/policy.js) is optional and off by default. It is loaded on its
 // own so the lens screens still work if that one file cannot be fetched.
@@ -239,6 +240,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.rating = null;
     st.riskSeen = false;
     st.pol.dec = null;
+    st.counted = false;
   }
 
   // Text that suggests risk pauses the exercise and shows help. Nothing is deleted: if it
@@ -267,6 +269,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.answers = [];
     st.step = 0;
     st.rating = null;
+    st.counted = false;
     go('step');
   }
 
@@ -658,9 +661,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         st.stage = 'step';
         if (isLast) {
           // a lens counts as used once its exercise is finished, not when it is opened
-          const s = (st.stats[st.lensId] = st.stats[st.lensId] || { used: 0, ratings: [] });
-          s.used++;
-          db.setSetting('lensStats', st.stats);
+          // (once: Back from the summary and Next again is still the same exercise)
+          if (!st.counted) {
+            st.counted = true;
+            const s = (st.stats[st.lensId] = st.stats[st.lensId] || { used: 0, ratings: [] });
+            s.used++;
+            db.setSetting('lensStats', st.stats);
+          }
           go('summary');
         }
         else {
@@ -1128,9 +1135,45 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       body = [h('p', { class: 'error', role: 'alert' }, L().broken), ...home()];
     }
     add(wrap, body);
+    // any page below the lens home owns one history entry; back on the home page it is removed
+    flow.sync(true);
     if (st.stage !== 'crisis' && st.stage !== 'resources') add(wrap, helpBar());
     return wrap;
   }
+
+  // The phone's Back button: what the Back button on each page does, so it never leaves the
+  // Lens tab from inside an exercise. From the first page it goes to the lens home page, and
+  // the worry typed so far stays in its field.
+  function goBack() {
+    const s = st.stage;
+    if (s === 'choose') go('concern');
+    else if (s === 'drawn' || s === 'compare' || s === 'pick') go('choose');
+    else if (s === 'step') {
+      if (st.step === 0) go('choose');
+      else {
+        st.step--;
+        go('step');
+      }
+    } else if (s === 'summary') {
+      // back to the last question, answers kept
+      st.step = Math.max(0, lensById(st.lensId)[lk()].steps.length - 1);
+      go('step');
+    } else if (s === 'ai') ai.close(); // ends the chat as its own End button does
+    else if (s === 'lensinfo') go('deck');
+    else if (s === 'crisis') {
+      st.onContinue = null;
+      go(st.crisisFrom && st.crisisFrom !== 'crisis' ? st.crisisFrom : 'home');
+    } else if (s === 'resources') go(st.prevStage && st.prevStage !== 'resources' ? st.prevStage : 'home');
+    else go('home');
+  }
+
+  const flow = createFlowHistory({
+    name: 'lens',
+    active: () => st.stage !== 'home',
+    visible: () => !!document.querySelector('.view.lens'),
+    hashes: ['#lens'],
+    back: goBack,
+  });
 
   return {
     view,
@@ -1138,6 +1181,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     reset: () => {
       reset();
       st.stage = 'home';
+      flow.sync();
     },
     setAiEnabled: (v) => (st.aiEnabled = v),
     // in the middle of an exercise or AI chat (not on the lens home page)
@@ -1149,6 +1193,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     reload: () => {
       reload();
       st.stage = 'home';
+      flow.sync();
     },
   };
 }
