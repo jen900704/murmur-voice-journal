@@ -386,6 +386,17 @@ export function analyze(input, sampleRate, opts = {}) {
     periodicityDb: round(median(periodicity), 1),
     quality,
     contour,
+    // frame-level output for validation scripts only (not stored by the app)
+    ...(o.returnFrames
+      ? {
+          frames: {
+            hopS: o.hopMs / 1000,
+            f0: Array.from(f0s, (v, f) => (voiced[f] ? Math.round(v * 100) / 100 : null)),
+            firstSpeech,
+            lastSpeech,
+          },
+        }
+      : {}),
   };
 }
 

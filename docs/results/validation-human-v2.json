@@ -1,0 +1,1481 @@
+{
+ "clips": {
+  "jfk": {
+   "durationS": 11.0,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0037313432835820895,
+   "fineCentsMedian": 3.8307423217334007,
+   "voicingDisagreement": 0.2730806608357629,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.2730806608357629,
+   "murmur": {
+    "f0MedianHz": 249.9,
+    "f0SdSt": 2.16,
+    "f0RangeSt": 7.14,
+    "periodicityDb": 8.7,
+    "syllables": 23,
+    "pauseCount": 5,
+    "speechRate": 2.16,
+    "articulationRate": 3.44,
+    "voicedFraction": 0.485
+   },
+   "praat": {
+    "f0MedianHz": 237.06948492596123,
+    "f0SdSt": 3.262384526329729,
+    "f0RangeSt": 8.937393253410193,
+    "hnrDb": 11.163424628236022
+   },
+   "medianDiffSt": 0.912491127070794,
+   "sdDiffSt": -1.102384526329729,
+   "rangeDiffSt": -1.7973932534101928,
+   "quality": {
+    "clipFraction": 0.0006,
+    "noiseFloorDb": -38.9,
+    "snrDb": 25.7,
+    "flags": []
+   },
+   "syllablesTrue": 28,
+   "syllablesMissingWords": [],
+   "syllableRelErr": -0.17857142857142858
+  },
+  "lj": {
+   "durationS": 7.66,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 5.1212741578520635,
+   "voicingDisagreement": 0.13811420982735723,
+   "murmurOnlyVoiced": 0.0026560424966799467,
+   "praatOnlyVoiced": 0.13545816733067728,
+   "murmur": {
+    "f0MedianHz": 186.2,
+    "f0SdSt": 4.72,
+    "f0RangeSt": 13.33,
+    "periodicityDb": 7.5,
+    "syllables": 28,
+    "pauseCount": 3,
+    "speechRate": 3.71,
+    "articulationRate": 4.53,
+    "voicedFraction": 0.494
+   },
+   "praat": {
+    "f0MedianHz": 169.81837029376254,
+    "f0SdSt": 4.738266641723844,
+    "f0RangeSt": 13.707293104892642,
+    "hnrDb": 13.406316868330565
+   },
+   "medianDiffSt": 1.594326484805606,
+   "sdDiffSt": -0.0182666417238444,
+   "rangeDiffSt": -0.377293104892642,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -66.8,
+    "snrDb": 40.4,
+    "flags": []
+   },
+   "syllablesTrue": 26,
+   "syllablesMissingWords": [
+    "thereunder"
+   ],
+   "syllableRelErr": 0.07692307692307693
+  },
+  "ldc": {
+   "durationS": 2.92,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.012121212121212121,
+   "fineCentsMedian": 1.7904236581215336,
+   "voicingDisagreement": 0.07984790874524715,
+   "murmurOnlyVoiced": 0.0076045627376425855,
+   "praatOnlyVoiced": 0.07224334600760456,
+   "murmur": {
+    "f0MedianHz": 196.5,
+    "f0SdSt": 2.05,
+    "f0RangeSt": 6.17,
+    "periodicityDb": 12.7,
+    "syllables": 11,
+    "pauseCount": 0,
+    "speechRate": 4.18,
+    "articulationRate": 4.18,
+    "voicedFraction": 0.645
+   },
+   "praat": {
+    "f0MedianHz": 196.69393444848055,
+    "f0SdSt": 2.4863514262117308,
+    "f0RangeSt": 6.4982856162394,
+    "hnrDb": 15.15035246911127
+   },
+   "medianDiffSt": -0.017077880318453253,
+   "sdDiffSt": -0.43635142621173095,
+   "rangeDiffSt": -0.3282856162394001,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -80.5,
+    "snrDb": 35.6,
+    "flags": []
+   },
+   "syllablesTrue": 13,
+   "syllablesMissingWords": [],
+   "syllableRelErr": -0.15384615384615385
+  },
+  "libri_f": {
+   "durationS": 13.91,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.026622296173044926,
+   "fineCentsMedian": 10.39281771124779,
+   "voicingDisagreement": 0.16009280742459397,
+   "murmurOnlyVoiced": 0.0007733952049497294,
+   "praatOnlyVoiced": 0.15931941221964424,
+   "murmur": {
+    "f0MedianHz": 218,
+    "f0SdSt": 4.71,
+    "f0RangeSt": 14.02,
+    "periodicityDb": 9.7,
+    "syllables": 49,
+    "pauseCount": 4,
+    "speechRate": 3.79,
+    "articulationRate": 4.49,
+    "voicedFraction": 0.621
+   },
+   "praat": {
+    "f0MedianHz": 212.12073253993339,
+    "f0SdSt": 5.585220343511663,
+    "f0RangeSt": 14.422768096464381,
+    "hnrDb": 11.778727238658496
+   },
+   "medianDiffSt": 0.47330999021177433,
+   "sdDiffSt": -0.8752203435116632,
+   "rangeDiffSt": -0.4027680964643814,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -55.1,
+    "snrDb": 25.3,
+    "flags": []
+   }
+  },
+  "libri_m1": {
+   "durationS": 16.75,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 4.258177661432533,
+   "voicingDisagreement": 0.20261845386533667,
+   "murmurOnlyVoiced": 0.0006234413965087282,
+   "praatOnlyVoiced": 0.20199501246882792,
+   "murmur": {
+    "f0MedianHz": 140.6,
+    "f0SdSt": 3.15,
+    "f0RangeSt": 9.39,
+    "periodicityDb": 9.7,
+    "syllables": 51,
+    "pauseCount": 4,
+    "speechRate": 3.18,
+    "articulationRate": 3.71,
+    "voicedFraction": 0.599
+   },
+   "praat": {
+    "f0MedianHz": 141.0798323886111,
+    "f0SdSt": 3.6668760987445412,
+    "f0RangeSt": 9.882338566889231,
+    "hnrDb": 13.698124567589064
+   },
+   "medianDiffSt": -0.058982069499009526,
+   "sdDiffSt": -0.5168760987445413,
+   "rangeDiffSt": -0.49233856688923083,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -74.5,
+    "snrDb": 49.4,
+    "flags": []
+   }
+  },
+  "libri_m2": {
+   "durationS": 14.84,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 8.300749254891393,
+   "voicingDisagreement": 0.15867158671586715,
+   "murmurOnlyVoiced": 0.0051660516605166054,
+   "praatOnlyVoiced": 0.15350553505535056,
+   "murmur": {
+    "f0MedianHz": 79.5,
+    "f0SdSt": 2.38,
+    "f0RangeSt": 7.88,
+    "periodicityDb": 6.1,
+    "syllables": 37,
+    "pauseCount": 4,
+    "speechRate": 2.58,
+    "articulationRate": 2.97,
+    "voicedFraction": 0.423
+   },
+   "praat": {
+    "f0MedianHz": 80.03389636488245,
+    "f0SdSt": 6.081586333574019,
+    "f0RangeSt": 8.992324019935396,
+    "hnrDb": 8.363730370891505
+   },
+   "medianDiffSt": -0.11587543929914546,
+   "sdDiffSt": -3.701586333574019,
+   "rangeDiffSt": -1.1123240199353956,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -52.6,
+    "snrDb": 33,
+    "flags": []
+   }
+  },
+  "conv": {
+   "durationS": 30.0,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.02848344880677444,
+   "fineCentsMedian": 4.67926959397909,
+   "voicingDisagreement": 0.11687335588124766,
+   "murmurOnlyVoiced": 0.010898158586997369,
+   "praatOnlyVoiced": 0.10597519729425028,
+   "murmur": {
+    "f0MedianHz": 195.3,
+    "f0SdSt": 3.36,
+    "f0RangeSt": 11.69,
+    "periodicityDb": 13.4,
+    "syllables": 83,
+    "pauseCount": 3,
+    "speechRate": 3.01,
+    "articulationRate": 3.68,
+    "voicedFraction": 0.686
+   },
+   "praat": {
+    "f0MedianHz": 191.6725598968603,
+    "f0SdSt": 3.7416692062272596,
+    "f0RangeSt": 12.155367134373932,
+    "hnrDb": 17.23861621023328
+   },
+   "medianDiffSt": 0.32457762733106676,
+   "sdDiffSt": -0.38166920622725975,
+   "rangeDiffSt": -0.46536713437393296,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -71.5,
+    "snrDb": 36.2,
+    "flags": []
+   }
+  },
+  "fsdd_george_0": {
+   "durationS": 36.26,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.03981042654028436,
+   "fineCentsMedian": 2.1118634025288947,
+   "voicingDisagreement": 0.1300386526780784,
+   "murmurOnlyVoiced": 0.027609055770292656,
+   "praatOnlyVoiced": 0.10242959690778575,
+   "murmur": {
+    "f0MedianHz": 159.8,
+    "f0SdSt": 3.1,
+    "f0RangeSt": 3.3,
+    "periodicityDb": 9.7,
+    "syllables": 60,
+    "pauseCount": 39,
+    "speechRate": 1.66,
+    "articulationRate": 3.15,
+    "voicedFraction": 0.607
+   },
+   "praat": {
+    "f0MedianHz": 159.4272365613875,
+    "f0SdSt": 2.533913078970181,
+    "f0RangeSt": 3.143223112912864,
+    "hnrDb": 12.986187716022467
+   },
+   "medianDiffSt": 0.04043145299505113,
+   "sdDiffSt": 0.566086921029819,
+   "rangeDiffSt": 0.156776887087136,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.1,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.25,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_george_1": {
+   "durationS": 36.3,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.013537906137184115,
+   "fineCentsMedian": 2.484762706135642,
+   "voicingDisagreement": 0.12437948152233866,
+   "murmurOnlyVoiced": 0.031991174848317705,
+   "praatOnlyVoiced": 0.09238830667402095,
+   "murmur": {
+    "f0MedianHz": 157.3,
+    "f0SdSt": 2.26,
+    "f0RangeSt": 3.42,
+    "periodicityDb": 10.2,
+    "syllables": 58,
+    "pauseCount": 39,
+    "speechRate": 1.6,
+    "articulationRate": 3,
+    "voicedFraction": 0.633
+   },
+   "praat": {
+    "f0MedianHz": 157.05347635590857,
+    "f0SdSt": 1.265294840828831,
+    "f0RangeSt": 2.9132280757016247,
+    "hnrDb": 13.421730579594177
+   },
+   "medianDiffSt": 0.027153522778988304,
+   "sdDiffSt": 0.9947051591711689,
+   "rangeDiffSt": 0.5067719242983753,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.2,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.20833333333333334,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_george_2": {
+   "durationS": 34.73,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.009784735812133072,
+   "fineCentsMedian": 2.4656199365752682,
+   "voicingDisagreement": 0.12395503026808878,
+   "murmurOnlyVoiced": 0.025944076102623233,
+   "praatOnlyVoiced": 0.09801095416546556,
+   "murmur": {
+    "f0MedianHz": 158.6,
+    "f0SdSt": 1.71,
+    "f0RangeSt": 2.6,
+    "periodicityDb": 9.9,
+    "syllables": 57,
+    "pauseCount": 39,
+    "speechRate": 1.64,
+    "articulationRate": 3.17,
+    "voicedFraction": 0.619
+   },
+   "praat": {
+    "f0MedianHz": 158.65176386732767,
+    "f0SdSt": 0.9858572530167027,
+    "f0RangeSt": 2.4541238318755774,
+    "hnrDb": 13.517467625252786
+   },
+   "medianDiffSt": -0.005649479727523499,
+   "sdDiffSt": 0.7241427469832973,
+   "rangeDiffSt": 0.14587616812442272,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.8,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.1875,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_george_3": {
+   "durationS": 33.71,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.004690431519699813,
+   "fineCentsMedian": 1.9291030726232465,
+   "voicingDisagreement": 0.11764705882352941,
+   "murmurOnlyVoiced": 0.020499108734402853,
+   "praatOnlyVoiced": 0.09714795008912656,
+   "murmur": {
+    "f0MedianHz": 159.7,
+    "f0SdSt": 1.39,
+    "f0RangeSt": 3.08,
+    "periodicityDb": 10.7,
+    "syllables": 54,
+    "pauseCount": 39,
+    "speechRate": 1.6,
+    "articulationRate": 3.17,
+    "voicedFraction": 0.665
+   },
+   "praat": {
+    "f0MedianHz": 159.84711278282057,
+    "f0SdSt": 0.8829092687920312,
+    "f0RangeSt": 2.765374823295062,
+    "hnrDb": 13.278203073365866
+   },
+   "medianDiffSt": -0.015940477411760412,
+   "sdDiffSt": 0.5070907312079687,
+   "rangeDiffSt": 0.31462517670493817,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.1,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_george_4": {
+   "durationS": 35.68,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.02712160979877515,
+   "fineCentsMedian": 3.0279839790008762,
+   "voicingDisagreement": 0.14506172839506173,
+   "murmurOnlyVoiced": 0.03170594837261504,
+   "praatOnlyVoiced": 0.11335578002244669,
+   "murmur": {
+    "f0MedianHz": 159.7,
+    "f0SdSt": 2.78,
+    "f0RangeSt": 3.39,
+    "periodicityDb": 10.9,
+    "syllables": 63,
+    "pauseCount": 39,
+    "speechRate": 1.77,
+    "articulationRate": 3.33,
+    "voicedFraction": 0.665
+   },
+   "praat": {
+    "f0MedianHz": 159.45367524439044,
+    "f0SdSt": 1.0050178519124946,
+    "f0RangeSt": 3.2018606412651422,
+    "hnrDb": 13.858066421767077
+   },
+   "medianDiffSt": 0.026723545538914095,
+   "sdDiffSt": 1.7749821480875052,
+   "rangeDiffSt": 0.18813935873485788,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.1,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.3125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_jackson_0": {
+   "durationS": 35.79,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.04645476772616137,
+   "fineCentsMedian": 7.301463417317546,
+   "voicingDisagreement": 0.14965034965034965,
+   "murmurOnlyVoiced": 0.0036363636363636364,
+   "praatOnlyVoiced": 0.14601398601398602,
+   "murmur": {
+    "f0MedianHz": 107.4,
+    "f0SdSt": 4,
+    "f0RangeSt": 4.88,
+    "periodicityDb": 7.5,
+    "syllables": 51,
+    "pauseCount": 39,
+    "speechRate": 1.43,
+    "articulationRate": 2.86,
+    "voicedFraction": 0.467
+   },
+   "praat": {
+    "f0MedianHz": 105.58804684870012,
+    "f0SdSt": 3.2541111812911505,
+    "f0RangeSt": 4.8857281350695985,
+    "hnrDb": 10.914920378489194
+   },
+   "medianDiffSt": 0.29456964536069563,
+   "sdDiffSt": 0.7458888187088495,
+   "rangeDiffSt": -0.005728135069598572,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 95.6,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.0625,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_jackson_1": {
+   "durationS": 35.63,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.021573604060913704,
+   "fineCentsMedian": 2.9299671140072316,
+   "voicingDisagreement": 0.17813992694577127,
+   "murmurOnlyVoiced": 0.015734756954200617,
+   "praatOnlyVoiced": 0.16240516999157067,
+   "murmur": {
+    "f0MedianHz": 108.3,
+    "f0SdSt": 2.47,
+    "f0RangeSt": 3.82,
+    "periodicityDb": 8,
+    "syllables": 45,
+    "pauseCount": 39,
+    "speechRate": 1.26,
+    "articulationRate": 2.48,
+    "voicedFraction": 0.466
+   },
+   "praat": {
+    "f0MedianHz": 107.40952085845544,
+    "f0SdSt": 4.2684223364778004,
+    "f0RangeSt": 14.919852084257826,
+    "hnrDb": 11.437370031027772
+   },
+   "medianDiffSt": 0.14293634893982698,
+   "sdDiffSt": -1.7984223364778003,
+   "rangeDiffSt": -11.099852084257826,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 95.7,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.0625,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_jackson_2": {
+   "durationS": 36.5,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.07427055702917772,
+   "fineCentsMedian": 3.8194855557757674,
+   "voicingDisagreement": 0.18672881820674528,
+   "murmurOnlyVoiced": 0.009322731011790512,
+   "praatOnlyVoiced": 0.17740608719495476,
+   "murmur": {
+    "f0MedianHz": 109.4,
+    "f0SdSt": 5.18,
+    "f0RangeSt": 20.4,
+    "periodicityDb": 7.4,
+    "syllables": 43,
+    "pauseCount": 39,
+    "speechRate": 1.18,
+    "articulationRate": 2.35,
+    "voicedFraction": 0.432
+   },
+   "praat": {
+    "f0MedianHz": 107.7008855478127,
+    "f0SdSt": 4.449464515277991,
+    "f0RangeSt": 11.575561514220396,
+    "hnrDb": 10.993676389671199
+   },
+   "medianDiffSt": 0.2709915113271961,
+   "sdDiffSt": 0.7305354847220089,
+   "rangeDiffSt": 8.824438485779602,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 95.5,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.10416666666666667,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_jackson_3": {
+   "durationS": 36.0,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.09876543209876543,
+   "fineCentsMedian": 8.644878957139188,
+   "voicingDisagreement": 0.1582313681868743,
+   "murmurOnlyVoiced": 0.007508342602892102,
+   "praatOnlyVoiced": 0.1507230255839822,
+   "murmur": {
+    "f0MedianHz": 110.9,
+    "f0SdSt": 5.88,
+    "f0RangeSt": 22.94,
+    "periodicityDb": 6.9,
+    "syllables": 41,
+    "pauseCount": 39,
+    "speechRate": 1.14,
+    "articulationRate": 2.31,
+    "voicedFraction": 0.426
+   },
+   "praat": {
+    "f0MedianHz": 108.32886587326216,
+    "f0SdSt": 3.4134730414293872,
+    "f0RangeSt": 5.073522975753349,
+    "hnrDb": 10.786698818788397
+   },
+   "medianDiffSt": 0.40609971958375013,
+   "sdDiffSt": 2.4665269585706127,
+   "rangeDiffSt": 17.866477024246652,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 95.6,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.14583333333333334,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_jackson_4": {
+   "durationS": 35.22,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.05305039787798409,
+   "fineCentsMedian": 3.0225750265456144,
+   "voicingDisagreement": 0.14951677089255258,
+   "murmurOnlyVoiced": 0.007674815235929506,
+   "praatOnlyVoiced": 0.14184195565662308,
+   "murmur": {
+    "f0MedianHz": 111.7,
+    "f0SdSt": 4.1,
+    "f0RangeSt": 12.8,
+    "periodicityDb": 7.3,
+    "syllables": 43,
+    "pauseCount": 39,
+    "speechRate": 1.22,
+    "articulationRate": 2.48,
+    "voicedFraction": 0.451
+   },
+   "praat": {
+    "f0MedianHz": 109.65974797860835,
+    "f0SdSt": 4.268010321196621,
+    "f0RangeSt": 6.8800335220075794,
+    "hnrDb": 10.85250030767733
+   },
+   "medianDiffSt": 0.3191414722762431,
+   "sdDiffSt": -0.16801032119662107,
+   "rangeDiffSt": 5.919966477992421,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 95.8,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.10416666666666667,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_lucas_0": {
+   "durationS": 38.47,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 9.722398128537263,
+   "voicingDisagreement": 0.0783289817232376,
+   "murmurOnlyVoiced": 0.014882506527415143,
+   "praatOnlyVoiced": 0.06344647519582246,
+   "murmur": {
+    "f0MedianHz": 116.6,
+    "f0SdSt": 1.93,
+    "f0RangeSt": 5.89,
+    "periodicityDb": 4.2,
+    "syllables": 35,
+    "pauseCount": 39,
+    "speechRate": 0.91,
+    "articulationRate": 2.58,
+    "voicedFraction": 0.388
+   },
+   "praat": {
+    "f0MedianHz": 113.23638628227434,
+    "f0SdSt": 2.827517241227401,
+    "f0RangeSt": 8.438124381782501,
+    "hnrDb": 10.87760598745487
+   },
+   "medianDiffSt": 0.5067620908455694,
+   "sdDiffSt": -0.8975172412274011,
+   "rangeDiffSt": -2.5481243817825012,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.2708333333333333,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_lucas_1": {
+   "durationS": 38.45,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.01598173515981735,
+   "fineCentsMedian": 6.2427666161455395,
+   "voicingDisagreement": 0.08403597526700393,
+   "murmurOnlyVoiced": 0.013771781899943788,
+   "praatOnlyVoiced": 0.07026419336706015,
+   "murmur": {
+    "f0MedianHz": 115.9,
+    "f0SdSt": 2.65,
+    "f0RangeSt": 9.05,
+    "periodicityDb": 4.3,
+    "syllables": 33,
+    "pauseCount": 39,
+    "speechRate": 0.86,
+    "articulationRate": 2.35,
+    "voicedFraction": 0.386
+   },
+   "praat": {
+    "f0MedianHz": 115.15524496231666,
+    "f0SdSt": 2.8099571518089217,
+    "f0RangeSt": 9.414750624782187,
+    "hnrDb": 10.999754983595471
+   },
+   "medianDiffSt": 0.11160532148173274,
+   "sdDiffSt": -0.15995715180892178,
+   "rangeDiffSt": -0.3647506247821859,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.4,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.3125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_lucas_2": {
+   "durationS": 38.47,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 8.212574774445304,
+   "voicingDisagreement": 0.1336297071129707,
+   "murmurOnlyVoiced": 0.014382845188284518,
+   "praatOnlyVoiced": 0.1192468619246862,
+   "murmur": {
+    "f0MedianHz": 97.7,
+    "f0SdSt": 4.19,
+    "f0RangeSt": 12.44,
+    "periodicityDb": 3.1,
+    "syllables": 28,
+    "pauseCount": 39,
+    "speechRate": 0.73,
+    "articulationRate": 2.05,
+    "voicedFraction": 0.248
+   },
+   "praat": {
+    "f0MedianHz": 99.2982745076907,
+    "f0SdSt": 4.068521275098155,
+    "f0RangeSt": 12.42622933026962,
+    "hnrDb": 8.745174236751154
+   },
+   "medianDiffSt": -0.2809210352000804,
+   "sdDiffSt": 0.12147872490184497,
+   "rangeDiffSt": 0.01377066973037877,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.6,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.4166666666666667,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_lucas_3": {
+   "durationS": 38.76,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 15.445324862941362,
+   "voicingDisagreement": 0.1286231884057971,
+   "murmurOnlyVoiced": 0.015786749482401656,
+   "praatOnlyVoiced": 0.11283643892339544,
+   "murmur": {
+    "f0MedianHz": 92.4,
+    "f0SdSt": 4.67,
+    "f0RangeSt": 13.16,
+    "periodicityDb": 2.5,
+    "syllables": 22,
+    "pauseCount": 39,
+    "speechRate": 0.57,
+    "articulationRate": 1.55,
+    "voicedFraction": 0.235
+   },
+   "praat": {
+    "f0MedianHz": 92.04317917581805,
+    "f0SdSt": 3.801145764302579,
+    "f0RangeSt": 12.711925496195803,
+    "hnrDb": 8.0521332163901
+   },
+   "medianDiffSt": 0.06698443755489336,
+   "sdDiffSt": 0.8688542356974209,
+   "rangeDiffSt": 0.44807450380419667,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.5416666666666666,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_lucas_4": {
+   "durationS": 38.5,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 8.526224588095353,
+   "voicingDisagreement": 0.15402658326817825,
+   "murmurOnlyVoiced": 0.017982799061767005,
+   "praatOnlyVoiced": 0.13604378420641125,
+   "murmur": {
+    "f0MedianHz": 92.1,
+    "f0SdSt": 4.37,
+    "f0RangeSt": 12.45,
+    "periodicityDb": 3.5,
+    "syllables": 21,
+    "pauseCount": 39,
+    "speechRate": 0.55,
+    "articulationRate": 1.46,
+    "voicedFraction": 0.248
+   },
+   "praat": {
+    "f0MedianHz": 95.50183011163226,
+    "f0SdSt": 3.795088348684898,
+    "f0RangeSt": 11.543725878026265,
+    "hnrDb": 8.575555416560022
+   },
+   "medianDiffSt": -0.6279266833649046,
+   "sdDiffSt": 0.574911651315102,
+   "rangeDiffSt": 0.906274121973734,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 91.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.5625,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_nicolas_0": {
+   "durationS": 29.22,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 5.027465190784905,
+   "voicingDisagreement": 0.12744090441932168,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.12744090441932168,
+   "murmur": {
+    "f0MedianHz": 121.8,
+    "f0SdSt": 2.24,
+    "f0RangeSt": 7.07,
+    "periodicityDb": 8,
+    "syllables": 42,
+    "pauseCount": 39,
+    "speechRate": 1.44,
+    "articulationRate": 3.1,
+    "voicedFraction": 0.507
+   },
+   "praat": {
+    "f0MedianHz": 121.76962451143275,
+    "f0SdSt": 3.01041122305549,
+    "f0RangeSt": 7.750052219998025,
+    "hnrDb": 11.670508446347023
+   },
+   "medianDiffSt": 0.004318032713854336,
+   "sdDiffSt": -0.7704112230554898,
+   "rangeDiffSt": -0.680052219998025,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_nicolas_1": {
+   "durationS": 29.71,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.004335260115606936,
+   "fineCentsMedian": 2.9606013265674886,
+   "voicingDisagreement": 0.10414560161779575,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.10414560161779575,
+   "murmur": {
+    "f0MedianHz": 119.2,
+    "f0SdSt": 2.35,
+    "f0RangeSt": 6.92,
+    "periodicityDb": 7.7,
+    "syllables": 41,
+    "pauseCount": 39,
+    "speechRate": 1.38,
+    "articulationRate": 2.91,
+    "voicedFraction": 0.491
+   },
+   "praat": {
+    "f0MedianHz": 120.24990477936969,
+    "f0SdSt": 3.0890844406778215,
+    "f0RangeSt": 9.17541146124637,
+    "hnrDb": 12.06395490097181
+   },
+   "medianDiffSt": -0.15181818946452097,
+   "sdDiffSt": -0.7390844406778214,
+   "rangeDiffSt": -2.2554114612463696,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 89.9,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.14583333333333334,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_nicolas_2": {
+   "durationS": 30.15,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.014245014245014245,
+   "fineCentsMedian": 2.8849221593387355,
+   "voicingDisagreement": 0.11790102955828628,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.11790102955828628,
+   "murmur": {
+    "f0MedianHz": 119.9,
+    "f0SdSt": 2.68,
+    "f0RangeSt": 6.82,
+    "periodicityDb": 7.7,
+    "syllables": 42,
+    "pauseCount": 39,
+    "speechRate": 1.39,
+    "articulationRate": 2.91,
+    "voicedFraction": 0.487
+   },
+   "praat": {
+    "f0MedianHz": 120.93458215609905,
+    "f0SdSt": 2.696431506953431,
+    "f0RangeSt": 7.397196943543705,
+    "hnrDb": 11.767461324739395
+   },
+   "medianDiffSt": -0.14874233235141787,
+   "sdDiffSt": -0.016431506953430652,
+   "rangeDiffSt": -0.5771969435437043,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.4,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_nicolas_3": {
+   "durationS": 30.32,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.020249221183800622,
+   "fineCentsMedian": 12.783563325842007,
+   "voicingDisagreement": 0.12681638044914134,
+   "murmurOnlyVoiced": 0.00033025099075297226,
+   "praatOnlyVoiced": 0.12648612945838839,
+   "murmur": {
+    "f0MedianHz": 122.5,
+    "f0SdSt": 2.94,
+    "f0RangeSt": 7,
+    "periodicityDb": 6.9,
+    "syllables": 42,
+    "pauseCount": 39,
+    "speechRate": 1.39,
+    "articulationRate": 2.9,
+    "voicedFraction": 0.444
+   },
+   "praat": {
+    "f0MedianHz": 122.07204510273776,
+    "f0SdSt": 3.0004495461478853,
+    "f0RangeSt": 8.889565023593889,
+    "hnrDb": 11.263804971076981
+   },
+   "medianDiffSt": 0.060586715497890964,
+   "sdDiffSt": -0.060449546147885336,
+   "rangeDiffSt": -1.8895650235938888,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 89.5,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_nicolas_4": {
+   "durationS": 29.61,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.005649717514124294,
+   "fineCentsMedian": 3.0884607696489024,
+   "voicingDisagreement": 0.09469056476158269,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.09469056476158269,
+   "murmur": {
+    "f0MedianHz": 119.1,
+    "f0SdSt": 2.23,
+    "f0RangeSt": 6.16,
+    "periodicityDb": 8.2,
+    "syllables": 45,
+    "pauseCount": 39,
+    "speechRate": 1.52,
+    "articulationRate": 3.29,
+    "voicedFraction": 0.518
+   },
+   "praat": {
+    "f0MedianHz": 119.76156241403169,
+    "f0SdSt": 2.628031485420098,
+    "f0RangeSt": 7.335013180708685,
+    "hnrDb": 12.164848057486239
+   },
+   "medianDiffSt": -0.09589841862836579,
+   "sdDiffSt": -0.3980314854200979,
+   "rangeDiffSt": -1.1750131807086852,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 90.8,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.0625,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_theo_0": {
+   "durationS": 28.32,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 5.40919727785242,
+   "voicingDisagreement": 0.16195190947666196,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.16195190947666196,
+   "murmur": {
+    "f0MedianHz": 138.1,
+    "f0SdSt": 1.76,
+    "f0RangeSt": 5.34,
+    "periodicityDb": 4.7,
+    "syllables": 41,
+    "pauseCount": 39,
+    "speechRate": 1.45,
+    "articulationRate": 3.29,
+    "voicedFraction": 0.339
+   },
+   "praat": {
+    "f0MedianHz": 130.18225626427164,
+    "f0SdSt": 3.079028308280088,
+    "f0RangeSt": 7.932492829726755,
+    "hnrDb": 9.357589382450762
+   },
+   "medianDiffSt": 1.0221659502528269,
+   "sdDiffSt": -1.3190283082800882,
+   "rangeDiffSt": -2.592492829726755,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 72,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.14583333333333334,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_theo_1": {
+   "durationS": 29.02,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 8.699686843743233,
+   "voicingDisagreement": 0.14906832298136646,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.14906832298136646,
+   "murmur": {
+    "f0MedianHz": 133.3,
+    "f0SdSt": 2.03,
+    "f0RangeSt": 7.36,
+    "periodicityDb": 5.5,
+    "syllables": 43,
+    "pauseCount": 39,
+    "speechRate": 1.48,
+    "articulationRate": 3.27,
+    "voicedFraction": 0.393
+   },
+   "praat": {
+    "f0MedianHz": 130.31157270186355,
+    "f0SdSt": 2.4804199043530986,
+    "f0RangeSt": 8.218197178847632,
+    "hnrDb": 10.72628093945099
+   },
+   "medianDiffSt": 0.39253881674250124,
+   "sdDiffSt": -0.45041990435309875,
+   "rangeDiffSt": -0.8581971788476315,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 72,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.10416666666666667,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_theo_2": {
+   "durationS": 28.76,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 5.375405415068243,
+   "voicingDisagreement": 0.16225626740947074,
+   "murmurOnlyVoiced": 0.0,
+   "praatOnlyVoiced": 0.16225626740947074,
+   "murmur": {
+    "f0MedianHz": 136.8,
+    "f0SdSt": 2.67,
+    "f0RangeSt": 7.74,
+    "periodicityDb": 5.2,
+    "syllables": 46,
+    "pauseCount": 39,
+    "speechRate": 1.6,
+    "articulationRate": 3.51,
+    "voicedFraction": 0.365
+   },
+   "praat": {
+    "f0MedianHz": 130.43642569441002,
+    "f0SdSt": 3.943412249567306,
+    "f0RangeSt": 9.63747048965017,
+    "hnrDb": 9.645741757784263
+   },
+   "medianDiffSt": 0.8246570060529592,
+   "sdDiffSt": -1.273412249567306,
+   "rangeDiffSt": -1.8974704896501695,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 71.2,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.041666666666666664,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_theo_3": {
+   "durationS": 29.78,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 13.120737642569999,
+   "voicingDisagreement": 0.16509751176866175,
+   "murmurOnlyVoiced": 0.0003362474781439139,
+   "praatOnlyVoiced": 0.16476126429051782,
+   "murmur": {
+    "f0MedianHz": 140,
+    "f0SdSt": 2.72,
+    "f0RangeSt": 9.42,
+    "periodicityDb": 5.7,
+    "syllables": 46,
+    "pauseCount": 39,
+    "speechRate": 1.55,
+    "articulationRate": 3.28,
+    "voicedFraction": 0.374
+   },
+   "praat": {
+    "f0MedianHz": 131.13064431778108,
+    "f0SdSt": 3.3846877973604728,
+    "f0RangeSt": 10.173116113376523,
+    "hnrDb": 10.141307865048846
+   },
+   "medianDiffSt": 1.133063453188683,
+   "sdDiffSt": -0.6646877973604726,
+   "rangeDiffSt": -0.7531161133765227,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 71.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.041666666666666664,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_theo_4": {
+   "durationS": 32.85,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 4.61737884008283,
+   "voicingDisagreement": 0.13075281926242,
+   "murmurOnlyVoiced": 0.0015239256324291375,
+   "praatOnlyVoiced": 0.12922889362999085,
+   "murmur": {
+    "f0MedianHz": 131.4,
+    "f0SdSt": 2.25,
+    "f0RangeSt": 7.46,
+    "periodicityDb": 7.1,
+    "syllables": 54,
+    "pauseCount": 40,
+    "speechRate": 1.64,
+    "articulationRate": 3.39,
+    "voicedFraction": 0.459
+   },
+   "praat": {
+    "f0MedianHz": 129.83475996182412,
+    "f0SdSt": 2.443745211448158,
+    "f0RangeSt": 7.726134230118333,
+    "hnrDb": 11.003512227095221
+   },
+   "medianDiffSt": 0.2074631475378652,
+   "sdDiffSt": -0.19374521144815793,
+   "rangeDiffSt": -0.26613423011833337,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 71.6,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": 0.125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.02564102564102564
+  },
+  "fsdd_yweweler_0": {
+   "durationS": 29.2,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 13.439818244869532,
+   "voicingDisagreement": 0.15397805212620028,
+   "murmurOnlyVoiced": 0.008916323731138546,
+   "praatOnlyVoiced": 0.14506172839506173,
+   "murmur": {
+    "f0MedianHz": 116.8,
+    "f0SdSt": 2.81,
+    "f0RangeSt": 8.78,
+    "periodicityDb": 5.7,
+    "syllables": 35,
+    "pauseCount": 39,
+    "speechRate": 1.2,
+    "articulationRate": 3.07,
+    "voicedFraction": 0.323
+   },
+   "praat": {
+    "f0MedianHz": 118.82168377501694,
+    "f0SdSt": 2.8849775844438112,
+    "f0RangeSt": 9.16996017889825,
+    "hnrDb": 9.185234684438253
+   },
+   "medianDiffSt": -0.2970943612394876,
+   "sdDiffSt": -0.0749775844438112,
+   "rangeDiffSt": -0.3899601788982512,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 78.5,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.2708333333333333,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_yweweler_1": {
+   "durationS": 28.81,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 7.240241527158329,
+   "voicingDisagreement": 0.15055632823365786,
+   "murmurOnlyVoiced": 0.01043115438108484,
+   "praatOnlyVoiced": 0.14012517385257303,
+   "murmur": {
+    "f0MedianHz": 122.5,
+    "f0SdSt": 3.01,
+    "f0RangeSt": 8.87,
+    "periodicityDb": 6.1,
+    "syllables": 33,
+    "pauseCount": 39,
+    "speechRate": 1.15,
+    "articulationRate": 2.87,
+    "voicedFraction": 0.358
+   },
+   "praat": {
+    "f0MedianHz": 125.08296430339801,
+    "f0SdSt": 2.945661374645075,
+    "f0RangeSt": 8.885051686496325,
+    "hnrDb": 9.479123305578547
+   },
+   "medianDiffSt": -0.36124278656382103,
+   "sdDiffSt": 0.06433862535492496,
+   "rangeDiffSt": -0.015051686496326155,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 80.1,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.3125,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_yweweler_2": {
+   "durationS": 29.31,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 3.745186755420159,
+   "voicingDisagreement": 0.11820977109668603,
+   "murmurOnlyVoiced": 0.0013665869490946361,
+   "praatOnlyVoiced": 0.11684318414759139,
+   "murmur": {
+    "f0MedianHz": 116.6,
+    "f0SdSt": 2.23,
+    "f0RangeSt": 7.14,
+    "periodicityDb": 6.8,
+    "syllables": 37,
+    "pauseCount": 39,
+    "speechRate": 1.26,
+    "articulationRate": 3.2,
+    "voicedFraction": 0.434
+   },
+   "praat": {
+    "f0MedianHz": 117.85325386646399,
+    "f0SdSt": 2.83864393834508,
+    "f0RangeSt": 8.018096129594198,
+    "hnrDb": 10.572478362252419
+   },
+   "medianDiffSt": -0.18508563182625437,
+   "sdDiffSt": -0.6086439383450801,
+   "rangeDiffSt": -0.8780961295941987,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 78.4,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.22916666666666666,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_yweweler_3": {
+   "durationS": 30.02,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 9.695246218879952,
+   "voicingDisagreement": 0.1277518345563709,
+   "murmurOnlyVoiced": 0.003669112741827885,
+   "praatOnlyVoiced": 0.12408272181454302,
+   "murmur": {
+    "f0MedianHz": 114.6,
+    "f0SdSt": 1.95,
+    "f0RangeSt": 6.33,
+    "periodicityDb": 5.9,
+    "syllables": 37,
+    "pauseCount": 39,
+    "speechRate": 1.23,
+    "articulationRate": 2.97,
+    "voicedFraction": 0.382
+   },
+   "praat": {
+    "f0MedianHz": 114.64482473864413,
+    "f0SdSt": 2.0780898431201322,
+    "f0RangeSt": 6.336000746342691,
+    "hnrDb": 10.36714532773308
+   },
+   "medianDiffSt": -0.006770239185001969,
+   "sdDiffSt": -0.12808984312013227,
+   "rangeDiffSt": -0.006000746342690988,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 76.8,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.22916666666666666,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  },
+  "fsdd_yweweler_4": {
+   "durationS": 28.84,
+   "ok": true,
+   "reason": null,
+   "gpe": 0.0,
+   "fineCentsMedian": 4.010269804259929,
+   "voicingDisagreement": 0.13307852675469076,
+   "murmurOnlyVoiced": 0.010423905489923557,
+   "praatOnlyVoiced": 0.1226546212647672,
+   "murmur": {
+    "f0MedianHz": 114.9,
+    "f0SdSt": 2.15,
+    "f0RangeSt": 7.06,
+    "periodicityDb": 7.1,
+    "syllables": 30,
+    "pauseCount": 39,
+    "speechRate": 1.04,
+    "articulationRate": 2.64,
+    "voicedFraction": 0.432
+   },
+   "praat": {
+    "f0MedianHz": 116.92168344755687,
+    "f0SdSt": 2.273729661895001,
+    "f0RangeSt": 7.074249289991755,
+    "hnrDb": 10.503102657684291
+   },
+   "medianDiffSt": -0.3019645014998815,
+   "sdDiffSt": -0.12372966189500101,
+   "rangeDiffSt": -0.014249289991755454,
+   "quality": {
+    "clipFraction": 0,
+    "noiseFloorDb": -120,
+    "snrDb": 78.3,
+    "flags": []
+   },
+   "syllablesTrue": 48,
+   "syllableRelErr": -0.375,
+   "pausesTrue": 39,
+   "pauseRelErr": 0.0
+  }
+ },
+ "pooled": {
+  "frames": 105082,
+  "bothVoiced": 21791,
+  "gpe": 0.01753017300720481,
+  "fineCentsMedian": 4.5585486453702355,
+  "voicingDisagreement": 0.13828248415523114,
+  "murmurOnlyVoiced": 0.010058811214099465,
+  "praatOnlyVoiced": 0.12822367294113168
+ },
+ "notes": [],
+ "periodicityVsPraatHnr": {
+  "spearman": 0.8862131143428792,
+  "n": 36
+ }
+}
