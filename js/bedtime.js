@@ -363,7 +363,7 @@ export function scriptSeconds(script, charsPerSecond) {
 // When no voice is available, the same script plays as on-screen read-along text.
 export function pickVoice(lang, preferredName) {
   if (typeof speechSynthesis === 'undefined') return null;
-  const voices = speechSynthesis.getVoices();
+  const voices = speechSynthesis.getVoices().filter((v) => v.localService !== false); // on-device only
   if (preferredName) {
     const v = voices.find((x) => x.name === preferredName);
     if (v) return v;
@@ -373,7 +373,7 @@ export function pickVoice(lang, preferredName) {
   const fallback = lang === 'en' ? /^en/i : /^(zh|cmn)(?![-_](HK|MO))/i;
   const ok = (v) => !/yue|HK|MO/i.test(v.lang);
   return (
-    voices.find((v) => want.test(v.lang) && ok(v) && /premium|enhanced|natural/i.test(v.name)) ||
+    voices.find((v) => want.test(v.lang) && ok(v) && /premium|enhanced/i.test(v.name)) ||
     voices.find((v) => want.test(v.lang) && ok(v)) ||
     voices.find((v) => fallback.test(v.lang) && ok(v)) ||
     null
@@ -383,7 +383,9 @@ export function pickVoice(lang, preferredName) {
 export function voicesFor(lang) {
   if (typeof speechSynthesis === 'undefined') return [];
   const re = lang === 'en' ? /^en/i : /^(zh|cmn)/i;
-  return speechSynthesis.getVoices().filter((v) => re.test(v.lang) && !/yue|HK|MO/i.test(v.lang));
+  // only voices that run on the device: online voices (Chrome's "Google" voices, Edge's
+  // "Natural" voices) would send the script, which mentions tonight's worry, to a server
+  return speechSynthesis.getVoices().filter((v) => re.test(v.lang) && !/yue|HK|MO/i.test(v.lang) && v.localService !== false);
 }
 
 // iOS Safari only allows speech that starts inside a user gesture. Call this synchronously

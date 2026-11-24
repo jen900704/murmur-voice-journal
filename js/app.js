@@ -97,12 +97,14 @@ function usable(e) {
 function hasReal() {
   return state.entries.some((e) => !e.demo && usable(e));
 }
-function pool({ before } = {}) {
-  const real = hasReal();
+// The entries a value is compared with. A real recording is only ever compared with real
+// ones, and a demo entry only with demo ones; Trends shows demo data until real data exists.
+function pool({ before, demo } = {}) {
+  const useDemo = demo === undefined ? !hasReal() : demo;
   return state.entries.filter(
     (e) =>
       usable(e) &&
-      (real ? !e.demo : true) &&
+      !!e.demo === useDemo &&
       !(e.features.quality && e.features.quality.flags && e.features.quality.flags.length) &&
       (before === undefined || e.createdAt < before)
   );
@@ -137,7 +139,13 @@ async function runAnalysis(samples) {
         w.postMessage({ samples, sampleRate: TARGET_SR });
       });
     } catch (_) {
-      worker = false; // fall back to the main thread below
+      // stop the worker so it does not keep running next to the fallback below
+      try {
+        w.terminate();
+      } catch (e) {
+        /* already gone */
+      }
+      worker = false;
     }
   }
   const { analyze } = await import('./features.js');
@@ -182,6 +190,13 @@ async function startRecording() {
   }
   state.levels.fill(0);
   state.phase = 'recording';
+  // If the microphone is taken away (a call, another app, the phone locked), end here: a
+  // silent tail would otherwise be measured as pauses.
+  const rec = state.recorder;
+  rec.onInterrupt(() => {
+    if (state.recorder !== rec || state.phase !== 'recording') return;
+    rec.elapsed() >= MIN_SECONDS ? stopRecording(true) : cancelRecording();
+  });
   // The time limit runs on a timer, not on animation frames, which pause in background tabs.
   state.maxTimer = setTimeout(() => stopRecording(true), MAX_SECONDS * 1000);
   render();
@@ -231,9 +246,11 @@ async function stopRecording(force = false) {
     }
   } catch (err) {
     state.phase = 'error';
-    state.error = err.message === 'short' ? t('tooShort') : t('analysisFailed') + (err.message || err);
+    const msg = (err && err.message) || String(err);
+    state.error = msg === 'short' ? t('tooShort') : t('analysisFailed') + msg;
+  } finally {
+    render();
   }
-  render();
 }
 
 function cancelRecording() {
@@ -394,13 +411,13 @@ function focusKey(key) {
   if (n) n.focus();
 }
 
-function baselineFor(key, value, before) {
-  const hist = pool({ before }).map((e) => e.features[key]);
+function baselineFor(key, value, before, demo = false) {
+  const hist = pool({ before, demo }).map((e) => e.features[key]);
   return personalBaseline(hist, value, BASELINE_MIN);
 }
 
-function featureRow(key, features, before) {
-  const b = baselineFor(key, features[key], before);
+function featureRow(key, features, before, demo = false) {
+  const b = baselineFor(key, features[key], before, demo);
   return h(
     'div',
     { class: 'row' },
@@ -439,7 +456,7 @@ function viewToday() {
   if (state.phase === 'result' && state.pending) {
     const p = state.pending;
     const f = p.features;
-    const n = pool().length;
+    const n = pool({ demo: false }).length;
     const pick = (field) => (v, fromKey) => {
       p[field] = !fromKey && p[field] === v ? null : v;
       render();
@@ -802,7 +819,7 @@ async function renderDetail() {
       ? h('p', { class: 'muted' }, [e.mood ? `${t('mood')} ${e.mood}/7` : null, e.energy ? `${t('energy')} ${e.energy}/7` : null].filter(Boolean).join('　'))
       : null,
     audioSlot,
-    h('div', { class: 'rows' }, FEATURE_INFO.map((info) => featureRow(info.key, f, e.createdAt))),
+    h('div', { class: 'rows' }, FEATURE_INFO.map((info) => featureRow(info.key, f, e.createdAt, !!e.demo))),
     h(
       'button',
       {
@@ -1439,6 +1456,11 @@ async function init() {
     history.replaceState(null, '', '#today');
   }
   window.addEventListener('hashchange', onHash);
+  // leaving the app mid-recording ends the recording (iOS silences the microphone in the background)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'hidden' || state.phase !== 'recording' || !state.recorder) return;
+    state.recorder.elapsed() >= MIN_SECONDS ? stopRecording(true) : cancelRecording();
+  });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#sheet').hidden) {
       if (location.hash === '#entry') history.back();

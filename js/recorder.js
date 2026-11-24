@@ -75,7 +75,7 @@ export class Recorder {
 
   // 0..1 level for the live ring
   level() {
-    if (!this.analyser) return 0;
+    if (!this.analyser || !this.analyser.getFloatTimeDomainData) return 0;
     this.analyser.getFloatTimeDomainData(this.buf);
     let s = 0;
     for (let i = 0; i < this.buf.length; i++) s += this.buf[i] * this.buf[i];
@@ -87,16 +87,38 @@ export class Recorder {
     return this.startedAt ? (performance.now() - this.startedAt) / 1000 : 0;
   }
 
+  // Resolves with the recording, or null if nothing was captured. Never hangs: if the
+  // recorder already stopped (the microphone was taken by a call) or onstop never fires,
+  // whatever was captured so far is used.
   stop() {
     return new Promise((resolve) => {
-      if (!this.rec || this.rec.state === 'inactive') return resolve(null);
-      this.rec.onstop = () => {
-        const blob = new Blob(this.chunks, { type: this.rec.mimeType || 'audio/webm' });
+      const finish = () => {
+        clearTimeout(this.stopTimer);
+        if (this.rec) this.rec.onstop = null;
+        const type = (this.rec && this.rec.mimeType) || 'audio/webm';
+        const blob = this.chunks.length ? new Blob(this.chunks, { type }) : null;
         this.cleanup();
         resolve(blob);
       };
-      this.rec.stop();
+      if (!this.rec || this.rec.state === 'inactive') return finish();
+      this.rec.onstop = finish;
+      this.stopTimer = setTimeout(finish, 3000);
+      try {
+        this.rec.stop();
+      } catch (_) {
+        finish();
+      }
     });
+  }
+
+  // Called when the microphone is lost (phone call, another app, unplugged).
+  onInterrupt(fn) {
+    const track = this.stream && this.stream.getAudioTracks()[0];
+    if (track) {
+      track.addEventListener('ended', fn);
+      track.addEventListener('mute', fn);
+    }
+    if (this.rec) this.rec.onerror = fn;
   }
 
   cancel() {
@@ -118,8 +140,10 @@ export class Recorder {
 
 function decodeWith(ctx, ab) {
   return new Promise((resolve, reject) => {
-    const p = ctx.decodeAudioData(ab, resolve, reject);
-    if (p && p.then) p.then(resolve, reject);
+    // old WebKit calls the error callback with null
+    const fail = (e) => reject(e || new Error('decode'));
+    const p = ctx.decodeAudioData(ab, resolve, fail);
+    if (p && p.then) p.then(resolve, fail);
   });
 }
 
@@ -153,11 +177,26 @@ export async function decodeToMono16k(blob) {
     if (ctx.state !== 'closed') ctx.close().catch(() => {});
   }
   const frames = Math.ceil(decoded.duration * TARGET_SR);
-  const off = new OAC(1, frames, TARGET_SR);
-  const src = off.createBufferSource();
-  src.buffer = decoded;
-  src.connect(off.destination);
-  src.start();
-  const rendered = await off.startRendering();
-  return rendered.getChannelData(0).slice();
+  try {
+    const off = new OAC(1, frames, TARGET_SR);
+    const src = off.createBufferSource();
+    src.buffer = decoded;
+    src.connect(off.destination);
+    src.start();
+    const rendered = await off.startRendering();
+    return rendered.getChannelData(0).slice();
+  } catch (_) {
+    // older Safari cannot render at 16 kHz: average down by hand (fine for speech analysis)
+    const x = mixDown(decoded);
+    const ratio = decoded.sampleRate / TARGET_SR;
+    const out = new Float32Array(Math.floor(x.length / ratio));
+    for (let i = 0; i < out.length; i++) {
+      const a = Math.floor(i * ratio);
+      const b = Math.max(a + 1, Math.floor((i + 1) * ratio));
+      let s = 0;
+      for (let j = a; j < b; j++) s += x[j];
+      out[i] = s / (b - a);
+    }
+    return out;
+  }
 }
