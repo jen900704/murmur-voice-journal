@@ -51,6 +51,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 16px/1.6 var(--body);
+  min-height: 100vh;
   min-height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(var(--tabs-h) + env(safe-area-inset-bottom) + 24px) env(safe-area-inset-left);
 }
@@ -167,6 +168,7 @@ button {
 }
 .btn.danger {
   color: var(--danger);
+  border-color: var(--danger);
   border-color: color-mix(in srgb, var(--danger) 35%, transparent);
   background: transparent;
 }
@@ -241,6 +243,7 @@ button {
   cursor: pointer;
   display: grid;
   place-items: center;
+  box-shadow: 0 10px 30px -12px rgba(88, 71, 201, 0.5);
   box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--accent) 70%, transparent);
   transition: transform 0.15s ease;
 }
@@ -691,6 +694,7 @@ audio {
   justify-content: center;
   gap: 4px;
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -770,6 +774,7 @@ audio {
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 12px;
+  background: var(--surface);
   background: color-mix(in srgb, var(--amber) 16%, var(--surface));
   font-size: 14px;
   line-height: 1.5;
@@ -801,6 +806,7 @@ audio {
   margin: 12px 0 4px;
   padding: 12px 14px;
   border-radius: 12px;
+  background: var(--surface);
   background: color-mix(in srgb, var(--danger) 10%, var(--surface));
   font-size: 14px;
   line-height: 1.5;
@@ -1306,6 +1312,7 @@ h3.sub {
   margin: 16px 0 0;
   padding: 16px 18px;
   border-radius: 18px;
+  background: var(--surface);
   background: color-mix(in srgb, var(--amber) 12%, var(--surface));
 }
 .low-card h3 {
@@ -1427,6 +1434,7 @@ h3.sub {
   outline-color: #c7bdff;
 }
 .rec-cw {
+  color: var(--ink);
   color: color-mix(in srgb, var(--amber) 70%, var(--ink));
 }
 
@@ -1592,6 +1600,7 @@ h3.sub {
   width: 180px;
   height: 180px;
   border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--accent-soft), var(--accent));
   background: radial-gradient(circle at 40% 35%, var(--accent-soft), color-mix(in srgb, var(--accent) 35%, var(--accent-soft)));
   transform: scale(0.55);
 }
