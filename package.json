@@ -7,7 +7,8 @@
   "scripts": {
     "test": "node tests/features.test.mjs && node tests/stats.test.mjs && node tests/lenses.test.mjs",
     "serve": "python3 -m http.server 8080",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
+    "test:webkit": "playwright test --project=webkit",
     "prepare-release": "node tools/export-content.mjs && node tools/bump-cache.mjs"
   },
   "license": "MIT",

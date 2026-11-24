@@ -18,9 +18,24 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
+      - run: npx playwright test --project=chromium
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
+          path: test-results/
+  webkit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit
+      - run: npx playwright test --project=webkit
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-webkit
           path: test-results/
