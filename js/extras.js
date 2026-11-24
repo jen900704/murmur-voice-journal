@@ -352,22 +352,23 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     // general small actions, not other users' posts: something outside oneself, with nothing to compare against
     if (!ex.smallPick || ex.smallPick.lang !== getLang()) {
       // no walking outside suggested late at night
-      const late = new Date().getHours() >= 21 || new Date().getHours() < 6;
+      const late = new Date().getHours() >= 20 || new Date().getHours() < 6;
       const things = L().smallThings.filter((t) => !(late && /白天|daytime|便利商店|convenience/i.test(t)));
       ex.smallPick = { lang: getLang(), items: things.sort(() => Math.random() - 0.5).slice(0, 3) };
     }
     // in the evening the bedtime card sits right above, so this stays short: one kind thing, one
     // small action, breathing and help, and no second way into the ritual or the lenses
     const kinds = evening ? pick.slice(0, 1) : pick;
-    const small = evening ? ex.smallPick.items.slice(0, 1) : ex.smallPick.items;
+    // a pick cached in the afternoon may hold a daytime suggestion; not as the evening's only item
+    const small = evening ? ex.smallPick.items.filter((t) => !/白天|daytime|便利商店|convenience/i.test(t)).slice(0, 1) : ex.smallPick.items;
     return h(
       'div',
       { class: 'low-card', role: 'note' },
       h('h3', {}, L().lowTitle),
       kinds.length ? h('p', { class: 'small' }, L().lowBody) : null,
       kinds.length ? h('ul', { class: 'plain-list' }, kinds.map((p) => h('li', {}, p.text))) : null,
-      h('p', { class: 'small' }, evening ? L().lowSmallOne : L().lowSmall),
-      h('ul', { class: 'plain-list' }, small.map((t) => h('li', {}, t))),
+      small.length ? h('p', { class: 'small' }, evening ? L().lowSmallOne : L().lowSmall) : null,
+      small.length ? h('ul', { class: 'plain-list' }, small.map((t) => h('li', {}, t))) : null,
       h(
         'div',
         { class: 'low-links' },

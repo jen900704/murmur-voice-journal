@@ -1770,10 +1770,6 @@ h3.sub {
   text-wrap: pretty;
 }
 
-/* help numbers on the dark playback screen: the light accent is for text on dark, not on the white button */
-.view.night.playing .btn.call {
-  color: #3f2fb0;
-}
 .sheet {
   padding-top: 0;
 }

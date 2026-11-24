@@ -523,7 +523,7 @@ function viewToday() {
           t('discard')
         )
       ),
-      p.silent || !early ? null : h('details', { class: 'about-more result-numbers' }, h('summary', { 'data-key': 'result-numbers' }, t('numbersTitle')), numbers())
+      p.silent || !early ? null : h('details', { class: 'about-more result-numbers', open: p.numbersOpen ? '' : null, ontoggle: (e) => (p.numbersOpen = e.currentTarget.open) }, h('summary', { 'data-key': 'result-numbers' }, t('numbersTitle')), numbers())
     );
     return wrap;
   }
@@ -533,8 +533,12 @@ function viewToday() {
   const welcoming = idle && !state.welcomed && !state.entries.length;
   // in the evening the bedtime card comes first, and a low check-in adds a short note under it
   const evening = idle && isEvening() && !welcoming;
-  if (evening) add(wrap, nightView.card());
-  if (idle) add(wrap, extras.lowMoodCard(latestRated(), { evening }));
+  // at the lowest rating the note, with help first, stays on top even in the evening
+  const lowest = latestRated();
+  const helpFirst = lowest && lowest.mood <= 1;
+  if (evening && !helpFirst) add(wrap, nightView.card());
+  if (idle) add(wrap, extras.lowMoodCard(lowest, { evening }));
+  if (evening && helpFirst) add(wrap, nightView.card());
   if (idle) add(wrap, iosInstallNote());
   add(wrap, 
     h(

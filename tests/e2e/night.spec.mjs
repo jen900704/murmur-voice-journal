@@ -234,3 +234,21 @@ test('in the evening the bedtime card comes first, a low check-in adds a short n
   await page.locator('[data-key="night-leave"], .night-leave').first().click();
   await expect(page.locator('html')).not.toHaveClass(/night-mode/);
 });
+
+test('in the evening, the lowest check-in keeps the note with help above the bedtime card', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-11-24T20:30:00+08:00') });
+  await page.goto('/');
+  await skipWelcome(page);
+  await page.locator('[data-key="silent-checkin"]').click();
+  await page.locator('[data-key="mood-1"]').click();
+  await page.locator('[data-key="save"]').click();
+  await expect(page.locator('.low-card')).toBeVisible();
+  const lowFirst = await page.evaluate(() => {
+    const night = document.querySelector('.night-card');
+    const low = document.querySelector('.low-card');
+    return !!(low.compareDocumentPosition(night) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  expect(lowFirst).toBe(true);
+  await expect(page.locator('.low-card .low-links button').first()).toHaveText('可以找人說話的地方');
+  await expect(page.locator('.low-card')).not.toContainText(/白天|便利商店/);
+});

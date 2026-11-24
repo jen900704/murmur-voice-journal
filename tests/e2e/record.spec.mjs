@@ -81,4 +81,7 @@ test('before there is a usual range, the first result leads with the check-in an
   await expect(page.locator('[data-key="save"]')).toBeInViewport();
   await page.locator('[data-key="result-numbers"]').click();
   await expect(page.locator('.rows .row').first()).toBeVisible();
+  // picking a mood keeps the numbers open
+  await page.locator('[data-key="mood-3"]').click();
+  await expect(page.locator('.rows .row').first()).toBeVisible();
 });
