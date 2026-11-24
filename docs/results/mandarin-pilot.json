@@ -5,6 +5,8 @@
       "sha256": "c7b31d6dbe7cc6a716dded00550db5b50940bf209e424e4ad207b12e657c8ff6",
       "durationS": 3.48,
       "bothVoiced": 102,
+      "murmurVoicedInSpan": 141,
+      "pairedMedianRatio": 1.0012,
       "grossErrorRate": 0.0,
       "medianFineCents": 10.8,
       "murmur": {
@@ -22,6 +24,8 @@
       "sha256": "96724a113240d1f82c6ded1334122f0176b96c9226ccd3c919e625bcfd2a3ede",
       "durationS": 6.76,
       "bothVoiced": 355,
+      "murmurVoicedInSpan": 376,
+      "pairedMedianRatio": 1.0013,
       "grossErrorRate": 0.0028,
       "medianFineCents": 25.6,
       "murmur": {

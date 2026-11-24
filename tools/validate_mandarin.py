@@ -74,6 +74,8 @@ for cid, m in zip(CLIPS, murmur(paths)):
         "sha256": sums[cid],
         "durationS": round(len(xs[cid]) / SR, 2),
         "bothVoiced": len(both),
+        "murmurVoicedInSpan": sum(1 for f in range(fr["firstSpeech"], fr["lastSpeech"] + 1) if fr["f0"][f]),
+        "pairedMedianRatio": round(float(np.median([a / b for a, b in both])), 4) if both else None,
         "grossErrorRate": round(sum(gross) / len(both), 4) if both else None,
         "medianFineCents": round(float(np.median(cents)), 1) if cents else None,
         "murmur": {k: m.get(k) for k in ("f0MedianHz", "f0SdSt", "f0RangeSt")},
