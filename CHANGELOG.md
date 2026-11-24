@@ -6,6 +6,8 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Evening Today is calmer: the bedtime card comes first; after a low check-in, a short note follows with one kind thing, one small action, breathing and help. The whole bedtime ritual uses the dark palette, header and tabs included.
+
 - Silent check-in: mood, energy and a note without recording, for nights when speaking aloud is not possible. Listed in the journal, kept out of voice trends.
 - Voice journal with on-device prosody, a personal baseline, trends and mood and energy check-ins; preregistered validation against Praat on English speech, a robustness study, and an exploratory Mandarin pilot.
 - "Look at it from another angle" (換個角度看看): 14 counseling approaches from Corey's text as short self-reflection exercises, with compare, draw-a-card, a card deck and "which approach fits me".

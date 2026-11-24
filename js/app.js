@@ -523,10 +523,12 @@ function viewToday() {
 
   const idle = state.phase === 'idle' || state.phase === 'error';
   if (idle && !state.welcomed && !state.entries.length) add(wrap, welcomeCard());
-  if (idle) add(wrap, extras.lowMoodCard(latestRated()));
-  if (idle) add(wrap, iosInstallNote());
   const welcoming = idle && !state.welcomed && !state.entries.length;
-  if (idle && isEvening() && !welcoming) add(wrap, nightView.card());
+  // in the evening the bedtime card comes first, and a low check-in adds a short note under it
+  const evening = idle && isEvening() && !welcoming;
+  if (evening) add(wrap, nightView.card());
+  if (idle) add(wrap, extras.lowMoodCard(latestRated(), { evening }));
+  if (idle) add(wrap, iosInstallNote());
   add(wrap, 
     h(
       'div',
@@ -1466,6 +1468,9 @@ function render() {
   if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db, openGentle: () => extras.openGentle() });
   const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView.view, about: viewAbout };
   main.appendChild(views[state.tab]());
+  // the bedtime ritual dims the whole screen, header and tabs included, whatever the system theme
+  const night = state.tab === 'today' && nightView.active();
+  document.documentElement.classList.toggle('night-mode', night);
   const nav = $('#tabs');
   nav.setAttribute('aria-label', t('sections'));
   nav.innerHTML = '';

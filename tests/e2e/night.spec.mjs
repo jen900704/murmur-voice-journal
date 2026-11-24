@@ -211,3 +211,26 @@ test('the journal shows a quiet look back at the last seven days, and nothing wh
   await expect(page.locator('.week-card')).toContainText('做了 1 次睡前儀式');
   await expect(page.locator('.week-card')).toContainText('散步回家');
 });
+
+test('in the evening the bedtime card comes first, a low check-in adds a short note, and the ritual is dark', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-11-24T22:30:00+08:00') });
+  await page.goto('/');
+  await skipWelcome(page);
+  await page.locator('[data-key="silent-checkin"]').click();
+  await page.locator('[data-key="mood-2"]').click();
+  await page.locator('[data-key="save"]').click();
+  await expect(page.locator('.low-card')).toBeVisible();
+  // the bedtime card sits above the low-mood note, which has no second way into the ritual
+  const order = await page.evaluate(() => {
+    const night = document.querySelector('.night-card');
+    const low = document.querySelector('.low-card');
+    return night.compareDocumentPosition(low) & Node.DOCUMENT_POSITION_FOLLOWING;
+  });
+  expect(order).toBeTruthy();
+  await expect(page.locator('.low-card button', { hasText: '睡前儀式' })).toHaveCount(0);
+  await expect(page.locator('.low-card li')).toHaveCount(1);
+  await page.locator('[data-key="night-start"]').click();
+  await expect(page.locator('html')).toHaveClass(/night-mode/);
+  await page.locator('[data-key="night-leave"], .night-leave').first().click();
+  await expect(page.locator('html')).not.toHaveClass(/night-mode/);
+});

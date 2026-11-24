@@ -38,6 +38,21 @@
   }
 }
 
+/* during the bedtime ritual, the dark palette regardless of the system theme */
+:root.night-mode {
+  --bg: #16142a;
+  --surface: #201d38;
+  --ink: #edebf7;
+  --muted: #a39fbd;
+  --line: #34304f;
+  --accent: #a092ff;
+  --accent-ink: #16142a;
+  --accent-soft: #2d2757;
+  --amber: #e9a94a;
+  --danger: #ff7d90;
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }
