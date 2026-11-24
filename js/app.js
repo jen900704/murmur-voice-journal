@@ -5,6 +5,9 @@ import { personalBaseline, baselineK, spearman, fmtR, mad, distinctCount } from 
 import { glyph, ringPath, lineChart } from './viz.js';
 import * as db from './db.js';
 import { createLensView } from './lens-view.js';
+import { createNightView, isEvening } from './night-view.js';
+import { createExtras } from './extras.js';
+import { DAILY, promptOfDay } from './prompts.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -29,6 +32,9 @@ const state = {
   detailId: null,
   detailOpener: null,
   detailUrl: null,
+  sheetFn: null,
+  journalMode: 'voice',
+  askPrompt: null,
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -239,11 +245,11 @@ async function savePending() {
   if (state.phase !== 'result' || !state.pending || savePending.busy) return;
   savePending.busy = true;
   const p = state.pending;
-  const prompts = STRINGS[getLang()].prompts;
+  const prompts = DAILY[getLang()] || DAILY.en;
   const entry = {
     id: uid(),
     createdAt: Date.now(),
-    prompt: prompts[state.promptIndex % prompts.length],
+    prompt: state.askPrompt || prompts[state.promptIndex % prompts.length],
     lang: getLang(),
     mood: p.mood,
     energy: p.energy,
@@ -380,9 +386,23 @@ function qualityNote(features) {
   return h('p', { class: 'quality-note', role: 'note' }, flags.map((f) => t('quality_' + f)).join(' '), ' ', t('qualityExcluded'));
 }
 
+function latestMood() {
+  for (let i = state.entries.length - 1; i >= 0; i--) {
+    const e = state.entries[i];
+    if (!e.demo && Number.isFinite(e.mood)) return Date.now() - e.createdAt < 36 * 3600 * 1000 ? e.mood : null;
+  }
+  return null;
+}
+
+function latestRated() {
+  for (let i = state.entries.length - 1; i >= 0; i--) if (!state.entries[i].demo && Number.isFinite(state.entries[i].mood)) return state.entries[i];
+  return null;
+}
+
 function viewToday() {
-  const prompts = STRINGS[getLang()].prompts;
-  const prompt = prompts[state.promptIndex % prompts.length];
+  if (nightView.active()) return nightView.view();
+  const prompts = DAILY[getLang()] || DAILY.en;
+  const prompt = state.askPrompt || prompts[state.promptIndex % prompts.length];
   const wrap = h('section', { class: 'view today' });
 
   if (state.phase === 'result' && state.pending) {
@@ -437,6 +457,9 @@ function viewToday() {
     return wrap;
   }
 
+  const idle = state.phase === 'idle' || state.phase === 'error';
+  if (idle) add(wrap, extras.lowMoodCard(latestRated()));
+  if (idle && isEvening()) add(wrap, nightView.card());
   add(wrap, 
     h(
       'div',
@@ -451,13 +474,15 @@ function viewToday() {
               class: 'link',
               'data-key': 'new-prompt',
               onclick: () => {
+                state.askPrompt = null;
                 state.promptIndex = (state.promptIndex + 1) % prompts.length;
                 render();
               },
             },
             t('newPrompt')
           )
-        : null
+        : null,
+      state.phase === 'idle' || state.phase === 'error' ? extras.exchangeBox(prompt, !!state.askPrompt) : null
     )
   );
 
@@ -504,6 +529,7 @@ function viewToday() {
     if (!state.entries.length) {
       add(wrap, h('button', { type: 'button', class: 'link center', onclick: loadDemo }, t('loadDemoShort')));
     }
+    if (!isEvening()) add(wrap, h('button', { type: 'button', class: 'link center night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink')));
     const recent = state.entries.filter(usable).slice(-7);
     if (recent.length) {
       add(wrap, 
@@ -533,6 +559,12 @@ function viewToday() {
 
 function viewJournal() {
   const wrap = h('section', { class: 'view journal' });
+  add(wrap, extras.modeChips(state.journalMode, (m) => {
+    state.journalMode = m;
+    render();
+  }));
+  if (state.journalMode === 'nights') return add(wrap, extras.nightsSection());
+  if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
     add(wrap, h('p', { class: 'empty' }, t('journalEmpty')), h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
@@ -572,7 +604,35 @@ function viewJournal() {
   return wrap;
 }
 
+function openSheet(fn) {
+  state.sheetFn = fn;
+  state.detailId = null;
+  const a = document.activeElement;
+  state.detailOpener = a && a.dataset ? a.dataset.key || null : null;
+  if (location.hash !== '#entry') location.hash = '#entry';
+  renderSheet();
+}
+
+function closeSheet() {
+  if (location.hash === '#entry') history.back();
+  else closeDetailUI();
+}
+
+function renderSheet() {
+  const sheet = $('#sheet');
+  if (!state.sheetFn) return;
+  sheet.hidden = false;
+  sheet.innerHTML = '';
+  setBackgroundInert(true);
+  const body = h('div', { class: 'sheet-body', role: 'dialog', 'aria-modal': 'true' }, h('button', { type: 'button', class: 'link back', onclick: closeSheet }, t('back')));
+  add(body, state.sheetFn(renderSheet));
+  sheet.appendChild(body);
+  body.querySelector('.back').focus();
+  sheet.onkeydown = null;
+}
+
 function openDetail(id, opener) {
+  state.sheetFn = null;
   state.detailId = id;
   state.detailOpener = opener && opener.dataset ? opener.dataset.key || null : null;
   location.hash = '#entry';
@@ -982,6 +1042,37 @@ function viewAbout() {
 // ---------- shell ----------
 const TABS = ['today', 'journal', 'trends', 'lens', 'about'];
 let lensView = null;
+function goLens(stage) {
+  if (!lensView) render();
+  lensView.go(stage);
+  if (location.hash !== '#lens') location.hash = '#lens';
+}
+const extras = createExtras({
+  h,
+  add,
+  getLang,
+  render: () => render(),
+  toast,
+  db,
+  getState: () => state,
+  openSheet,
+  closeSheet,
+  goLens,
+  startRitual: () => nightView.begin(),
+});
+const nightView = createNightView({
+  h,
+  add,
+  getLang,
+  rerender: () => render(),
+  toast,
+  db,
+  onExit: () => {
+    extras.loadNights().then(() => render());
+  },
+  latestMood,
+  openGentle: () => extras.openGentle(),
+});
 
 function render() {
   // keep keyboard focus on the same control across re-renders
@@ -994,7 +1085,7 @@ function render() {
   $('.skip').textContent = t('skip');
   const main = $('#main');
   main.innerHTML = '';
-  if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db });
+  if (!lensView) lensView = createLensView({ h, add, getLang, rerender: render, toast, db, openGentle: () => extras.openGentle() });
   const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView.view, about: viewAbout };
   main.appendChild(views[state.tab]());
   const nav = $('#tabs');
@@ -1019,10 +1110,18 @@ function render() {
 
 function onHash() {
   const tab = location.hash.replace('#', '');
+  if (tab.startsWith('ask=')) {
+    state.askPrompt = decodeURIComponent(tab.slice(4)).slice(0, 200);
+    history.replaceState(null, '', '#today');
+    state.tab = 'today';
+    render();
+    return;
+  }
   if (tab === 'entry') {
     // reached with the Forward button after closing a detail view
     if ($('#sheet').hidden) {
-      if (state.detailId && state.entries.some((e) => e.id === state.detailId)) renderDetail();
+      if (state.sheetFn) renderSheet();
+      else if (state.detailId && state.entries.some((e) => e.id === state.detailId)) renderDetail();
       else history.replaceState(null, '', '#' + state.tab);
     }
     return;
@@ -1030,6 +1129,7 @@ function onHash() {
   closeDetailUI();
   if (TABS.includes(tab) && tab !== state.tab) {
     if (state.phase === 'recording') cancelRecording();
+    if (state.tab === 'today' && nightView.active()) nightView.stopAll();
     state.tab = tab;
     render();
     window.scrollTo(0, 0);
@@ -1043,10 +1143,15 @@ async function init() {
   setLang(savedLang || detectLang());
   state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
   state.entries = await db.listEntries().catch(() => []);
-  state.promptIndex = Math.floor(Math.random() * STRINGS[getLang()].prompts.length);
+  state.promptIndex = promptOfDay(getLang()).index;
   const tab = location.hash.replace('#', '');
   state.tab = TABS.includes(tab) ? tab : 'today';
   if (tab === 'entry') history.replaceState(null, '', '#today');
+  if (tab.startsWith('ask=')) {
+    state.askPrompt = decodeURIComponent(tab.slice(4)).slice(0, 200);
+    state.tab = 'today';
+    history.replaceState(null, '', '#today');
+  }
   window.addEventListener('hashchange', onHash);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#sheet').hidden) {

@@ -14,6 +14,7 @@ const S = {
     deck: '理論卡',
     fit: '哪個透鏡適合我',
     saved: '我存下的練習',
+    gentle: '溫和的作品推薦（電影、書、音樂劇）',
     worryLabel: '用一兩句話寫下讓你在意的事',
     worryPlaceholder: '例如：我一直擔心報告做不好，晚上也睡不太好',
     topicLabel: '它比較接近哪一類？',
@@ -77,6 +78,7 @@ const S = {
     deck: 'Lens cards',
     fit: 'Which lens fits me',
     saved: 'My saved exercises',
+    gentle: 'Gentle recommendations (films, books, musicals)',
     worryLabel: 'In a sentence or two, what is on your mind?',
     worryPlaceholder: 'For example: I keep worrying my report is not good enough, and I am not sleeping well',
     topicLabel: 'Which is it closest to?',
@@ -134,7 +136,7 @@ const S = {
 
 const HUES = [262, 200, 28, 340, 160, 220, 120, 8, 300, 185, 45, 320, 95, 240];
 
-export function createLensView({ h, add, getLang, rerender, toast, db }) {
+export function createLensView({ h, add, getLang, rerender, toast, db, openGentle }) {
   const st = {
     stage: 'home',
     concern: '',
@@ -269,7 +271,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db }) {
         { class: 'lens-home-links' },
         h('button', { type: 'button', class: 'lens-link', onclick: () => go('deck') }, h('strong', {}, L().deck), h('span', {}, L().explored(explored))),
         h('button', { type: 'button', class: 'lens-link', onclick: () => go('fit') }, h('strong', {}, L().fit)),
-        h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, String(st.sessions.length)))
+        h('button', { type: 'button', class: 'lens-link', onclick: () => go('saved') }, h('strong', {}, L().saved), h('span', {}, String(st.sessions.length))),
+        openGentle ? h('button', { type: 'button', class: 'lens-link', onclick: openGentle }, h('strong', {}, L().gentle)) : null
       ),
     ];
   }
@@ -747,5 +750,5 @@ export function createLensView({ h, add, getLang, rerender, toast, db }) {
     return wrap;
   }
 
-  return { view, reset: () => { reset(); st.stage = 'home'; } };
+  return { view, go, reset: () => { reset(); st.stage = 'home'; } };
 }

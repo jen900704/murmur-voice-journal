@@ -1,6 +1,6 @@
 // IndexedDB storage. Everything stays in this browser on this device.
 const DB_NAME = 'murmur';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise;
 
@@ -17,6 +17,7 @@ function open() {
       if (!db.objectStoreNames.contains('audio')) db.createObjectStore('audio');
       if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings');
       if (!db.objectStoreNames.contains('lensSessions')) db.createObjectStore('lensSessions', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('nights')) db.createObjectStore('nights', { keyPath: 'id' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -86,10 +87,11 @@ export async function deleteAudio(id) {
 }
 
 export async function clearAll() {
-  await tx(['entries', 'audio', 'lensSessions', 'settings'], 'readwrite', (t) => {
+  await tx(['entries', 'audio', 'lensSessions', 'nights', 'settings'], 'readwrite', (t) => {
     t.objectStore('entries').clear();
     t.objectStore('audio').clear();
     t.objectStore('lensSessions').clear();
+    t.objectStore('nights').clear();
     t.objectStore('settings').delete('lensStats');
   });
 }
@@ -142,4 +144,20 @@ export async function requestPersistence() {
     /* not supported */
   }
   return false;
+}
+
+// Bedtime ritual records: worry text (only if the person chose to keep it), the kind thing,
+// the track, and the postcard seed. Never pooled with voice measurements.
+export async function saveNight(night) {
+  await tx('nights', 'readwrite', (t) => t.objectStore('nights').put(night));
+}
+
+export async function listNights() {
+  const db = await open();
+  const all = await req2p(db.transaction('nights').objectStore('nights').getAll());
+  return all.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function deleteNight(id) {
+  await tx('nights', 'readwrite', (t) => t.objectStore('nights').delete(id));
 }

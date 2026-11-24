@@ -1,0 +1,850 @@
+{
+ "note": "Curated for Murmur. Tags describe tone, not conditions. Nothing here is treatment. Please report errors.",
+ "items": [
+  {
+   "id": "totoro",
+   "type": "film",
+   "title": {
+    "zh": "龍貓",
+    "en": "My Neighbor Totoro",
+    "orig": "となりのトトロ"
+   },
+   "creator": "Hayao Miyazaki",
+   "year": 1988,
+   "minutes": 86,
+   "tones": [
+    "warm",
+    "quiet"
+   ],
+   "cw": [
+    "illness"
+   ],
+   "why": {
+    "zh": "節奏很慢，充滿夏天和雨的聲音，適合想安靜一下的晚上。",
+    "en": "Slow and full of summer and rain sounds; good for a quiet evening."
+   }
+  },
+  {
+   "id": "spirited-away",
+   "type": "film",
+   "title": {
+    "zh": "神隱少女",
+    "en": "Spirited Away",
+    "orig": "千と千尋の神隠し"
+   },
+   "creator": "Hayao Miyazaki",
+   "year": 2001,
+   "minutes": 125,
+   "tones": [
+    "warm",
+    "companionship"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "一個害怕的孩子在陌生世界裡慢慢找到勇氣。",
+    "en": "A frightened child slowly finds courage in a strange world."
+   }
+  },
+  {
+   "id": "inside-out",
+   "type": "film",
+   "title": {
+    "zh": "腦筋急轉彎",
+    "en": "Inside Out",
+    "orig": "Inside Out"
+   },
+   "creator": "Pete Docter",
+   "year": 2015,
+   "minutes": 95,
+   "tones": [
+    "funny",
+    "good-cry"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "把情緒畫成角色，最後讓悲傷也有它的位置。",
+    "en": "Emotions as characters, ending with sadness earning its place."
+   }
+  },
+  {
+   "id": "soul",
+   "type": "film",
+   "title": {
+    "zh": "靈魂急轉彎",
+    "en": "Soul",
+    "orig": "Soul"
+   },
+   "creator": "Pete Docter",
+   "year": 2020,
+   "minutes": 100,
+   "tones": [
+    "warm",
+    "good-cry"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "關於熱情和日常小事，哪一個才是活著的理由。",
+    "en": "On passion, ordinary moments, and which one makes life worth living."
+   }
+  },
+  {
+   "id": "coco",
+   "type": "film",
+   "title": {
+    "zh": "可可夜總會",
+    "en": "Coco",
+    "orig": "Coco"
+   },
+   "creator": "Lee Unkrich",
+   "year": 2017,
+   "minutes": 105,
+   "tones": [
+    "warm",
+    "good-cry"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "家人、記憶和音樂，很適合想念某個人的時候。",
+    "en": "Family, memory, and music, for when you are missing someone."
+   }
+  },
+  {
+   "id": "good-will-hunting",
+   "type": "film",
+   "title": {
+    "zh": "心靈捕手",
+    "en": "Good Will Hunting",
+    "orig": "Good Will Hunting"
+   },
+   "creator": "Gus Van Sant",
+   "year": 1997,
+   "minutes": 126,
+   "tones": [
+    "good-cry",
+    "companionship"
+   ],
+   "cw": [
+    "abuse",
+    "violence"
+   ],
+   "why": {
+    "zh": "一段慢慢建立的治療關係，很多諮商學生的入門電影。",
+    "en": "A therapeutic relationship built slowly; a classic for counseling students."
+   }
+  },
+  {
+   "id": "our-little-sister",
+   "type": "film",
+   "title": {
+    "zh": "海街日記",
+    "en": "Our Little Sister",
+    "orig": "海街diary"
+   },
+   "creator": "Hirokazu Kore-eda",
+   "year": 2015,
+   "minutes": 128,
+   "tones": [
+    "quiet",
+    "warm"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "四姊妹在海邊小鎮的日常，溫柔地處理家族的缺口。",
+    "en": "Four sisters' everyday life by the sea, gently handling a family's gaps."
+   }
+  },
+  {
+   "id": "little-forest",
+   "type": "film",
+   "title": {
+    "zh": "小森食光",
+    "en": "Little Forest",
+    "orig": "リトル・フォレスト"
+   },
+   "creator": "Junichi Mori",
+   "year": 2014,
+   "minutes": null,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "回到鄉下煮飯、種田，幾乎沒有劇情，很適合放空。",
+    "en": "Cooking and farming in the countryside, almost no plot; good for unwinding."
+   }
+  },
+  {
+   "id": "walter-mitty",
+   "type": "film",
+   "title": {
+    "zh": "白日夢冒險王",
+    "en": "The Secret Life of Walter Mitty",
+    "orig": "The Secret Life of Walter Mitty"
+   },
+   "creator": "Ben Stiller",
+   "year": 2013,
+   "minutes": 114,
+   "tones": [
+    "warm",
+    "funny"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "一個很會做白日夢的人，終於走出去。畫面很開闊。",
+    "en": "A daydreamer finally steps out into the world; wide, open scenery."
+   }
+  },
+  {
+   "id": "paddington-2",
+   "type": "film",
+   "title": {
+    "zh": "",
+    "en": "Paddington 2",
+    "orig": "Paddington 2"
+   },
+   "creator": "Paul King",
+   "year": 2017,
+   "minutes": 104,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "一隻相信別人善意的熊，很難不被療癒。",
+    "en": "A bear who believes in people's kindness; hard not to feel better."
+   }
+  },
+  {
+   "id": "cinema-paradiso",
+   "type": "film",
+   "title": {
+    "zh": "新天堂樂園",
+    "en": "Cinema Paradiso",
+    "orig": "Nuovo Cinema Paradiso"
+   },
+   "creator": "Giuseppe Tornatore",
+   "year": 1988,
+   "minutes": 155,
+   "tones": [
+    "good-cry",
+    "warm"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "關於童年、電影和一段跨世代的友誼。",
+    "en": "On childhood, cinema, and a friendship across generations."
+   }
+  },
+  {
+   "id": "amelie",
+   "type": "film",
+   "title": {
+    "zh": "艾蜜莉的異想世界",
+    "en": "Amélie",
+    "orig": "Le Fabuleux Destin d'Amélie Poulain"
+   },
+   "creator": "Jean-Pierre Jeunet",
+   "year": 2001,
+   "minutes": 122,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [
+    "sexual content"
+   ],
+   "why": {
+    "zh": "一個害羞的人，用小小的善意改變身邊的人。",
+    "en": "A shy person changing those around her through small kindnesses."
+   }
+  },
+  {
+   "id": "yi-yi",
+   "type": "film",
+   "title": {
+    "zh": "一一",
+    "en": "Yi Yi",
+    "orig": "一一"
+   },
+   "creator": "Edward Yang",
+   "year": 2000,
+   "minutes": 173,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [
+    "illness",
+    "infidelity"
+   ],
+   "why": {
+    "zh": "台北一家人的一年，安靜地看見每個人的孤單。",
+    "en": "A year in the life of a Taipei family, quietly seeing each person's loneliness."
+   }
+  },
+  {
+   "id": "reply-1988",
+   "type": "series",
+   "title": {
+    "zh": "請回答1988",
+    "en": "Reply 1988",
+    "orig": "응답하라 1988"
+   },
+   "creator": "Shin Won-ho",
+   "year": 2015,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "funny",
+    "companionship"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "一條巷子裡五個家庭的日常，像被鄰居照顧著。",
+    "en": "Five families in one alley; it feels like being looked after by neighbours."
+   }
+  },
+  {
+   "id": "midnight-diner",
+   "type": "series",
+   "title": {
+    "zh": "深夜食堂",
+    "en": "Midnight Diner",
+    "orig": "深夜食堂"
+   },
+   "creator": "Joji Matsuoka",
+   "year": 2009,
+   "minutes": 25,
+   "tones": [
+    "quiet",
+    "companionship"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "每集一道菜、一個客人的故事，短短一集剛好睡前看。",
+    "en": "One dish and one customer's story per episode; short enough for bedtime."
+   }
+  },
+  {
+   "id": "daily-dose",
+   "type": "series",
+   "title": {
+    "zh": "精神病房也會迎來清晨",
+    "en": "Daily Dose of Sunshine",
+    "orig": "정신병동에도 아침이 와요"
+   },
+   "creator": "Lee Jae-gyu",
+   "year": 2023,
+   "minutes": null,
+   "tones": [
+    "good-cry",
+    "companionship"
+   ],
+   "cw": [
+    "suicide",
+    "self-harm",
+    "mental illness"
+   ],
+   "why": {
+    "zh": "從精神科病房護理師的角度看見病人，也看見照顧者自己。",
+    "en": "A psychiatric ward seen through a nurse's eyes, including the carers' own struggles."
+   }
+  },
+  {
+   "id": "ted-lasso",
+   "type": "series",
+   "title": {
+    "zh": "",
+    "en": "Ted Lasso",
+    "orig": "Ted Lasso"
+   },
+   "creator": "Jason Sudeikis, Bill Lawrence",
+   "year": 2020,
+   "minutes": 30,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [
+    "panic attacks",
+    "divorce"
+   ],
+   "why": {
+    "zh": "一個樂觀的教練，後來也學會面對自己的焦慮和求助。",
+    "en": "An upbeat coach who later learns to face his own anxiety and ask for help."
+   }
+  },
+  {
+   "id": "someday",
+   "type": "series",
+   "title": {
+    "zh": "想見你",
+    "en": "Someday or One Day",
+    "orig": "想見你"
+   },
+   "creator": "Huang Tien-jen",
+   "year": 2019,
+   "minutes": null,
+   "tones": [
+    "good-cry"
+   ],
+   "cw": [
+    "death",
+    "violence",
+    "bullying"
+   ],
+   "why": {
+    "zh": "台灣穿越劇，關於想念和被理解。劇情較重。",
+    "en": "A Taiwanese time-travel drama about longing and being understood. Heavier themes."
+   }
+  },
+  {
+   "id": "world-between-us",
+   "type": "series",
+   "title": {
+    "zh": "我們與惡的距離",
+    "en": "The World Between Us",
+    "orig": "我們與惡的距離"
+   },
+   "creator": "Lin Chun-yang",
+   "year": 2019,
+   "minutes": null,
+   "tones": [
+    "companionship"
+   ],
+   "cw": [
+    "violence",
+    "mental illness",
+    "grief"
+   ],
+   "why": {
+    "zh": "從加害者、受害者和精神疾病家屬的角度看同一件事。內容沉重，適合精神好的時候。",
+    "en": "One tragedy seen by victims' families, the perpetrator's family, and people with mental illness. Heavy; better for a day with energy."
+   }
+  },
+  {
+   "id": "courage-disliked",
+   "type": "book",
+   "title": {
+    "zh": "被討厭的勇氣",
+    "en": "The Courage to Be Disliked",
+    "orig": "嫌われる勇気"
+   },
+   "creator": "Ichiro Kishimi, Fumitake Koga",
+   "year": 2013,
+   "minutes": null,
+   "tones": [
+    "companionship"
+   ],
+   "cw": [],
+   "lens": "adlerian",
+   "why": {
+    "zh": "用對話的方式介紹阿德勒心理學，好讀。",
+    "en": "An accessible dialogue introducing Adlerian psychology."
+   }
+  },
+  {
+   "id": "mans-search",
+   "type": "book",
+   "title": {
+    "zh": "活出意義來",
+    "en": "Man's Search for Meaning",
+    "orig": "…trotzdem Ja zum Leben sagen"
+   },
+   "creator": "Viktor E. Frankl",
+   "year": 1946,
+   "minutes": null,
+   "tones": [
+    "companionship"
+   ],
+   "cw": [
+    "genocide",
+    "death"
+   ],
+   "lens": "existential",
+   "why": {
+    "zh": "意義治療的起點，寫於集中營經驗之後。內容沉重。",
+    "en": "The starting point of logotherapy, written after the camps. Heavy."
+   }
+  },
+  {
+   "id": "talk-to-someone",
+   "type": "book",
+   "title": {
+    "zh": "也許你該找人聊聊",
+    "en": "Maybe You Should Talk to Someone",
+    "orig": "Maybe You Should Talk to Someone"
+   },
+   "creator": "Lori Gottlieb",
+   "year": 2019,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "companionship"
+   ],
+   "cw": [
+    "illness",
+    "death"
+   ],
+   "why": {
+    "zh": "一位治療師自己也去接受治療的故事，讓諮商變得不那麼陌生。",
+    "en": "A therapist goes to therapy herself; makes counseling feel less strange."
+   }
+  },
+  {
+   "id": "toad",
+   "type": "book",
+   "title": {
+    "zh": "蛤蟆先生去看心理師",
+    "en": "Counselling for Toads",
+    "orig": "Counselling for Toads"
+   },
+   "creator": "Robert de Board",
+   "year": 1997,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "companionship"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "用童話角色走過一段諮商歷程，以溝通分析為基礎。",
+    "en": "A storybook walk through counseling, based on transactional analysis."
+   }
+  },
+  {
+   "id": "little-prince",
+   "type": "book",
+   "title": {
+    "zh": "小王子",
+    "en": "The Little Prince",
+    "orig": "Le Petit Prince"
+   },
+   "creator": "Antoine de Saint-Exupéry",
+   "year": 1943,
+   "minutes": null,
+   "tones": [
+    "quiet",
+    "good-cry"
+   ],
+   "cw": [
+    "death"
+   ],
+   "why": {
+    "zh": "短短一本，適合睡前一次讀一章。",
+    "en": "Short enough to read a chapter a night."
+   }
+  },
+  {
+   "id": "boy-mole",
+   "type": "book",
+   "title": {
+    "zh": "男孩、鼴鼠、狐狸與馬",
+    "en": "The Boy, the Mole, the Fox and the Horse",
+    "orig": "The Boy, the Mole, the Fox and the Horse"
+   },
+   "creator": "Charlie Mackesy",
+   "year": 2019,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "quiet"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "手繪圖加上幾句話，翻幾頁就好。",
+    "en": "Hand drawings and a few lines per page; a few pages is enough."
+   }
+  },
+  {
+   "id": "namiya",
+   "type": "book",
+   "title": {
+    "zh": "解憂雜貨店",
+    "en": "The Miracles of the Namiya General Store",
+    "orig": "ナミヤ雑貨店の奇蹟"
+   },
+   "creator": "Keigo Higashino",
+   "year": 2012,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "companionship"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "寫信給雜貨店問煩惱的人，和回信的人。",
+    "en": "People who write to a shop about their worries, and the replies they get."
+   }
+  },
+  {
+   "id": "emotional-blackmail",
+   "type": "book",
+   "title": {
+    "zh": "情緒勒索",
+    "en": "Emotional Blackmail (Chinese)",
+    "orig": "情緒勒索"
+   },
+   "creator": "周慕姿",
+   "year": 2017,
+   "minutes": null,
+   "tones": [
+    "companionship"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "台灣心理師寫的，幫你看清家人和伴侶間的情緒壓力。",
+    "en": "By a Taiwanese psychologist; helps name emotional pressure in families and couples."
+   }
+  },
+  {
+   "id": "miracle-mindfulness",
+   "type": "book",
+   "title": {
+    "zh": "正念的奇蹟",
+    "en": "The Miracle of Mindfulness",
+    "orig": "The Miracle of Mindfulness"
+   },
+   "creator": "Thich Nhat Hanh",
+   "year": 1975,
+   "minutes": null,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [],
+   "lens": "acceptance",
+   "why": {
+    "zh": "很短的正念入門，包含洗碗時的練習。",
+    "en": "A short introduction to mindfulness, including practice while washing dishes."
+   }
+  },
+  {
+   "id": "sound-of-music",
+   "type": "musical",
+   "title": {
+    "zh": "真善美",
+    "en": "The Sound of Music",
+    "orig": "The Sound of Music"
+   },
+   "creator": "Richard Rodgers, Oscar Hammerstein II",
+   "year": 1959,
+   "minutes": null,
+   "tones": [
+    "warm",
+    "funny"
+   ],
+   "cw": [
+    "war"
+   ],
+   "why": {
+    "zh": "熟悉的歌，很適合心情需要被拉一把的時候。",
+    "en": "Familiar songs, for when your mood needs a lift."
+   }
+  },
+  {
+   "id": "les-mis",
+   "type": "musical",
+   "title": {
+    "zh": "悲慘世界",
+    "en": "Les Misérables",
+    "orig": "Les Misérables"
+   },
+   "creator": "Claude-Michel Schönberg, Alain Boublil",
+   "year": 1980,
+   "minutes": null,
+   "tones": [
+    "good-cry"
+   ],
+   "cw": [
+    "death",
+    "suicide",
+    "war"
+   ],
+   "why": {
+    "zh": "關於寬恕和重新開始。適合想好好哭一場的時候。",
+    "en": "On forgiveness and starting over. For when you want a good cry."
+   }
+  },
+  {
+   "id": "next-to-normal",
+   "type": "musical",
+   "title": {
+    "zh": "",
+    "en": "Next to Normal",
+    "orig": "Next to Normal"
+   },
+   "creator": "Tom Kitt, Brian Yorkey",
+   "year": 2008,
+   "minutes": null,
+   "tones": [
+    "good-cry",
+    "companionship"
+   ],
+   "cw": [
+    "mental illness",
+    "grief",
+    "suicide"
+   ],
+   "why": {
+    "zh": "一個家庭面對母親的躁鬱症和失落。內容沉重。",
+    "en": "A family living with a mother's bipolar disorder and grief. Heavy."
+   }
+  },
+  {
+   "id": "dear-evan-hansen",
+   "type": "musical",
+   "title": {
+    "zh": "",
+    "en": "Dear Evan Hansen",
+    "orig": "Dear Evan Hansen"
+   },
+   "creator": "Benj Pasek, Justin Paul",
+   "year": 2015,
+   "minutes": null,
+   "tones": [
+    "good-cry"
+   ],
+   "cw": [
+    "suicide",
+    "social anxiety"
+   ],
+   "why": {
+    "zh": "關於社交焦慮和被看見的渴望。內容沉重。",
+    "en": "On social anxiety and wanting to be seen. Heavy."
+   }
+  },
+  {
+   "id": "mamma-mia",
+   "type": "musical",
+   "title": {
+    "zh": "媽媽咪呀！",
+    "en": "Mamma Mia!",
+    "orig": "Mamma Mia!"
+   },
+   "creator": "Catherine Johnson (book), ABBA songs",
+   "year": 1999,
+   "minutes": null,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "整齣都是 ABBA 的歌，輕鬆明亮。",
+    "en": "All ABBA songs; light and bright."
+   }
+  },
+  {
+   "id": "magic-flute",
+   "type": "opera",
+   "title": {
+    "zh": "魔笛",
+    "en": "The Magic Flute",
+    "orig": "Die Zauberflöte"
+   },
+   "creator": "Wolfgang Amadeus Mozart",
+   "year": 1791,
+   "minutes": null,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "童話般的歌劇，很適合第一次看歌劇。",
+    "en": "A fairy-tale opera; a good first opera."
+   }
+  },
+  {
+   "id": "elisir",
+   "type": "opera",
+   "title": {
+    "zh": "愛情靈藥",
+    "en": "The Elixir of Love",
+    "orig": "L'elisir d'amore"
+   },
+   "creator": "Gaetano Donizetti",
+   "year": 1832,
+   "minutes": null,
+   "tones": [
+    "funny",
+    "warm"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "輕鬆的喜歌劇，有一首很有名的詠嘆調〈偷灑一滴淚〉。",
+    "en": "A light comic opera with the famous aria \"Una furtiva lagrima\"."
+   }
+  },
+  {
+   "id": "richter-sleep",
+   "type": "music",
+   "title": {
+    "zh": "",
+    "en": "Sleep",
+    "orig": "Sleep"
+   },
+   "creator": "Max Richter",
+   "year": 2015,
+   "minutes": null,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "作曲家專門為睡眠寫的八小時音樂，也有一小時版本。",
+    "en": "Eight hours of music written for sleep; there is also a one-hour version."
+   }
+  },
+  {
+   "id": "una-mattina",
+   "type": "music",
+   "title": {
+    "zh": "",
+    "en": "Una Mattina",
+    "orig": "Una Mattina"
+   },
+   "creator": "Ludovico Einaudi",
+   "year": 2004,
+   "minutes": null,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "安靜的鋼琴專輯，適合當背景。",
+    "en": "A quiet piano album that works as background."
+   }
+  },
+  {
+   "id": "merry-christmas",
+   "type": "music",
+   "title": {
+    "zh": "",
+    "en": "Merry Christmas Mr. Lawrence",
+    "orig": "Merry Christmas Mr. Lawrence"
+   },
+   "creator": "Ryuichi Sakamoto",
+   "year": 1983,
+   "minutes": null,
+   "tones": [
+    "quiet"
+   ],
+   "cw": [],
+   "why": {
+    "zh": "坂本龍一最廣為人知的鋼琴旋律之一。",
+    "en": "One of Ryuichi Sakamoto's best-known piano melodies."
+   }
+  }
+ ]
+}
