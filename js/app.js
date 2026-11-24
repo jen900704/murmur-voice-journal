@@ -1471,19 +1471,31 @@ function onHash() {
 }
 
 async function init() {
-  const savedLang = await db.getSetting('lang', null).catch(() => null);
+  // read everything at once rather than one setting after another, so Today appears sooner
+  const get = (k, d) => db.getSetting(k, d).catch(() => d);
+  const [savedLang, keepAudio, welcomed, lastBackup, installNoted, aiEnabled, aiKey, aiModel, entries] = await Promise.all([
+    get('lang', null),
+    get('keepAudio', true),
+    get('welcomed', false),
+    get('lastBackup', 0),
+    get('installNoted', false),
+    get('aiEnabled', false),
+    get('aiKey', ''),
+    get('aiModel', AI_MODELS[0].id),
+    db.listEntries().catch((e) => {
+      if (e && e.message === 'blocked') setTimeout(() => toast(t('dbBlocked')), 300);
+      return [];
+    }),
+  ]);
   setLang(savedLang || detectLang());
-  state.keepAudio = await db.getSetting('keepAudio', true).catch(() => true);
-  state.welcomed = (await db.getSetting('welcomed', false).catch(() => false)) === true;
-  state.lastBackup = await db.getSetting('lastBackup', 0).catch(() => 0);
-  state.installNoted = (await db.getSetting('installNoted', false).catch(() => false)) === true;
-  state.aiEnabled = (await db.getSetting('aiEnabled', false).catch(() => false)) === true;
-  state.aiKeySet = !!(await db.getSetting('aiKey', '').catch(() => ''));
-  state.aiModel = await db.getSetting('aiModel', AI_MODELS[0].id).catch(() => AI_MODELS[0].id);
-  state.entries = await db.listEntries().catch((e) => {
-    if (e && e.message === 'blocked') setTimeout(() => toast(t('dbBlocked')), 300);
-    return [];
-  });
+  state.keepAudio = keepAudio;
+  state.welcomed = welcomed === true;
+  state.lastBackup = lastBackup;
+  state.installNoted = installNoted === true;
+  state.aiEnabled = aiEnabled === true;
+  state.aiKeySet = !!aiKey;
+  state.aiModel = aiModel;
+  state.entries = entries;
   state.promptIndex = promptOfDay(getLang()).index;
   const tab = location.hash.replace('#', '');
   state.tab = TABS.includes(tab) ? tab : 'today';
