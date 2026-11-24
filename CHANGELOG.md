@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-24 (afternoon): 換角度 becomes the core
+
+- The lens summary quotes the person's answers question by question; no sentences are built around them. Topics and bedtime worry themes can be combined.
+- Model help, optional: questions reworded for the worry, one follow-up that picks up their own phrase, a closing written for their situation. On-device model first, the person's own key second, reviewed text otherwise. Every output is checked field by field (exact quotes, no praise, no diagnosis words, no em dashes, risk screen, allowlisted pictures); failures fall back to the reviewed text. `lab/eval/llm` runs an adversarial check in `npm test`.
+- Heaviness 0 to 10 before and after; suggestions with the matched words; a keepsake card drawn from what the person wrote, with weather from the kind of feeling and a short animation; earlier looks at the same worry and what this angle added; an optional step back; an if-then plan asked about once on the next visit; a plain look back over saved exercises.
+- Wording: approach (取向), not therapy (治療); the AI chat says it is AI, not a person, not a therapist. Notes and sources in `docs/wording-and-law.md` (not legal advice).
+- On-device research donation package and data-over-time design (`js/donation.js`, `docs/data-lifecycle.md`); no upload exists.
+- Repository: README leads with 換角度; PRIVACY, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT, CITATION.cff, AGENTS.md, issue templates.
+
 ## 2026-11-24
 
 The first public version, built and reviewed over one night. Each area below went through several independent reviews (code, clinical wording, cultural fit for Taiwan and the US, Taiwan Mandarin copy, and screenshot walkthroughs on a phone-sized screen), and the fixes that could be tested were given tests.
