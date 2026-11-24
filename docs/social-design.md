@@ -34,7 +34,7 @@ Anything where one user's words reach another user inside the app needs a server
 
 ## "One kind thing I did for myself" with other people
 
-The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. The low-day card also offers three small general actions (a warm drink, two minutes at a window, one line to someone), written by Murmur rather than posted by users, so there is no one to compare with. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
+The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. The low-day card also offers three small general actions (a warm drink, two minutes at a window, a sticker to someone), written by Murmur rather than posted by users, so there is no one to compare with. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
 
 ## Platform options
 

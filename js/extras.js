@@ -40,7 +40,7 @@ const S = {
     lowBodyEmpty: '可以試試這些，也可以什麼都不做。',
     lowSmall: '心情低落時，有些人覺得這些小事有一點幫助。挑一件就好，不做也沒關係：',
     lowBreathe: '呼吸一分鐘',
-    smallThings: ['喝一杯溫的東西', '看看窗外兩分鐘', '洗把臉，或沖個熱水澡', '傳一句話給一個人，不用解釋為什麼', '喝點水，或吃一點東西', '把一個小地方收乾淨，例如桌角', '聽一首以前喜歡的歌', '換一套舒服的衣服', '白天的話，走到巷口再走回來', '摸摸寵物，或抱著一個軟的東西', '把明天最小的一件事寫下來，然後先放著', '早一點躺下，不用馬上睡著'],
+    smallThings: ['喝一杯溫的東西', '看看窗外兩分鐘', '洗把臉，或沖個熱水澡', '傳個貼圖給一個人，或在喜歡的貼文按個讚', '喝點水，或吃一點東西', '把一個小地方收乾淨，例如桌角', '聽一首以前喜歡的歌', '換一套舒服的衣服', '白天的話，走到巷口再走回來', '摸摸寵物，或抱著一個軟的東西', '把明天最小的一件事寫下來，然後先放著', '早一點躺下，不用馬上睡著', '去便利商店買個熱的', '如果你有信仰，上個香、禱告或念一段經'],
     lowDismiss: '先不用',
     helpTitle: '想先讓你知道這些',
     helpBody: '你寫的筆記裡，有些字詞可能代表你現在很辛苦。筆記已經照常存在這個裝置上。如果你想找人說話，這些地方隨時都在。',
@@ -90,7 +90,7 @@ const S = {
     lowBodyEmpty: 'You could try one of these, or nothing at all.',
     lowSmall: 'Small things many people say help a little when they feel low. Pick one, or none:',
     lowBreathe: 'Breathe for a minute',
-    smallThings: ['Drink something warm', 'Look out of a window for two minutes', 'Wash your face or take a warm shower', 'Send one line to someone, no explanation needed', 'Drink some water, or eat a little', 'Clear one small spot, like a corner of the desk', 'Play a song you used to love', 'Change into something comfortable', 'In the daytime, walk to the end of the street and back', 'Pet an animal, or hold something soft', 'Write down the smallest task for tomorrow, then leave it', 'Lie down a little early; no need to fall asleep right away'],
+    smallThings: ['Drink something warm', 'Look out of a window for two minutes', 'Wash your face or take a warm shower', 'Send a sticker to someone, or like a post you enjoyed', 'Drink some water, or eat a little', 'Clear one small spot, like a corner of the desk', 'Play a song you used to love', 'Change into something comfortable', 'In the daytime, walk to the end of the street and back', 'Pet an animal, or hold something soft', 'Write down the smallest task for tomorrow, then leave it', 'Lie down a little early; no need to fall asleep right away', 'Get something warm from a convenience store', 'If you have a faith, pray, light incense, or read a passage'],
     lowDismiss: 'Not now',
     helpTitle: 'Before you go on',
     helpBody: 'Some words in your note can mean things are very hard right now. The note was saved on this device as usual. If you want to talk to someone, these are always available.',
@@ -339,7 +339,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     if (!ex.smallPick || ex.smallPick.lang !== getLang()) {
       // no walking outside suggested late at night
       const late = new Date().getHours() >= 21 || new Date().getHours() < 6;
-      const things = L().smallThings.filter((t) => !(late && /白天|daytime/i.test(t)));
+      const things = L().smallThings.filter((t) => !(late && /白天|daytime|便利商店|convenience/i.test(t)));
       ex.smallPick = { lang: getLang(), items: things.sort(() => Math.random() - 0.5).slice(0, 3) };
     }
     return h(
