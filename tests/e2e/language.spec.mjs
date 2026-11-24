@@ -54,6 +54,7 @@ test.describe('language mirror', () => {
     expect(await sheet.locator('.ll-excerpt').first().textContent()).toContain('我們');
     await sheet.locator('.back').click();
     // a folded section opens on request; a short-text category says so and is not shown as a number
+    await page.locator('[data-key="ll-locked"] > summary').click();
     await page.locator('[data-key="ll-group-moral"] > summary').click();
     await expect(page.locator('[data-key="score-care"]')).toContainText('文字還不夠');
     expect(w.outside).toEqual([]);
@@ -76,6 +77,7 @@ test.describe('language mirror', () => {
     await expect(items.first()).toContainText(/^你常寫到自己（每 100 字約 [\d.]+ 個「我」的詞）。/);
     // never built from a row that says "not enough text", and never from a count too small for a rate
     const ids = await items.evaluateAll((els) => els.map((e) => e.dataset.key.slice(4)));
+    await page.locator('[data-key="ll-locked"] > summary').click();
     for (const g of ['thinking', 'feelings', 'social', 'power', 'loss', 'drives', 'moral', 'style', 'topics']) await page.locator(`[data-key="ll-group-${g}"] > summary`).click();
     for (const m of await page.locator('.ll-more > summary').all()) await m.click();
     for (const id of ids) {
@@ -98,22 +100,46 @@ test.describe('language mirror', () => {
     await expect(page.locator('[data-key="ll-obs"]')).toHaveAttribute('data-mode', 'none');
     await expect(page.locator('[data-key="ll-obs"] .ll-obs-item')).toHaveCount(0);
     await expect(page.locator('[data-key="ll-obs"]')).toContainText('文字還不夠');
-    // even the first group is one quiet line now, and it still opens
+    // every group waits behind the one line, which says how many and the nearest amount; the first group still opens from there
+    const locked = page.locator('[data-key="ll-locked"]');
+    await expect(locked).not.toHaveAttribute('open', '');
+    const all = await page.locator('.ll-group').count();
+    expect(all).toBeGreaterThan(1);
+    await expect(locked.locator('> .ll-group')).toHaveCount(all);
+    await expect(locked.locator('> summary')).toHaveText(new RegExp(`^這 ${all} 組都需要更多文字（約 50 個單位，目前 \\d+）$`));
     const core = page.locator('[data-key="ll-group-core"]');
     await expect(core).not.toHaveAttribute('open', '');
-    await expect(core.locator('summary')).toContainText('這一組需要更多文字（約 50 個單位，目前');
-    await core.locator('summary').click();
+    await expect(core.locator('> summary')).toBeHidden();
+    await locked.locator('> summary').click();
+    await expect(core.locator('> summary')).toHaveText('代名詞與否定');
+    // a group that needs a different amount from the line above says its own
+    await expect(page.locator('[data-key="ll-group-moral"] > summary')).toContainText('約 1000 個單位');
+    await core.locator('> summary').click();
     await expect(page.locator('[data-key="score-i"]')).toContainText('文字還不夠');
   });
 
-  test('groups: all-short groups are one quiet line that opens; mixed groups put passing rows first behind one toggle', async ({ page }) => {
+  test('groups: all-short groups share one line and one disclosure, and each still opens; mixed groups put passing rows first behind one toggle', async ({ page }) => {
     await page.goto(HARNESS);
     await page.fill('#ll-text', ZH_TEXT);
     await page.locator('[data-key="ll-analyze"]').click();
-    // every row of this group is below its minimum: one line, closed, and it still opens and closes
+    // groups where every row is below its minimum: one line for all of them, with the count and both amounts
+    const locked = page.locator('[data-key="ll-locked"]');
+    await expect(locked).toHaveCount(1);
+    await expect(locked).not.toHaveAttribute('open', '');
+    const nLocked = await page.locator('.ll-group-short').count();
+    expect(nLocked).toBeGreaterThan(0);
+    await expect(locked.locator('> .ll-group-short')).toHaveCount(nLocked);
+    await expect(locked.locator('> summary')).toHaveText(new RegExp(`^還有 ${nLocked} 組需要更多文字（約 \\d+ 個單位，目前 344）$`));
+    // the old per-group sentence is gone, and no locked group sits outside the disclosure
+    expect(await page.locator('.view.language').textContent()).not.toContain('這一組需要更多文字');
+    await expect(page.locator('.ll-group:not(.ll-group-short)')).toHaveCount((await page.locator('.ll-group').count()) - nLocked);
+    await expect(locked.locator('.ll-group:not(.ll-group-short)')).toHaveCount(0);
+    // one of them: listed by name only once the line is opened, and it still opens and closes
     const moral = page.locator('[data-key="ll-group-moral"]');
     await expect(moral).toHaveClass(/ll-group-short/);
-    await expect(moral.locator('> summary')).toContainText(/這一組需要更多文字（約 \d+ 個單位，目前 344）/);
+    await expect(moral.locator('> summary')).toBeHidden();
+    await locked.locator('> summary').click();
+    await expect(moral.locator('> summary')).toBeVisible();
     await expect(moral.locator('.ll-more')).toHaveCount(0);
     await expect(page.locator('[data-key="score-care"]')).toBeHidden();
     await moral.locator('> summary').click();
@@ -134,10 +160,13 @@ test.describe('language mirror', () => {
     await expect(more.locator('.ll-row').first()).toBeHidden();
     await more.locator('summary').click();
     for (const r of await more.locator('.ll-row').all()) await expect(r).toContainText('文字還不夠');
-    // both stay open across a redraw
+    // these stay open across a redraw
+    await moral.locator('> summary').click();
     await page.locator('[data-key="score-i"]').click();
     await page.locator('#sheet .back').click();
     await expect(more.locator('.ll-row').first()).toBeVisible();
+    await expect(locked).toHaveAttribute('open', '');
+    await expect(page.locator('[data-key="score-care"]')).toBeVisible();
     // the first group, all passing, has no toggle
     await expect(page.locator('[data-key="ll-group-core"] .ll-more')).toHaveCount(0);
   });
@@ -171,6 +200,7 @@ test.describe('language mirror', () => {
       return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING;
     });
     expect(order).toBeTruthy();
+    if (await page.locator('[data-key="ll-locked"] [data-key="ll-group-loss"]').count()) await page.locator('[data-key="ll-locked"] > summary').click();
     await page.locator('[data-key="ll-group-loss"] > summary').click();
     await expect(page.locator('[data-key="ll-group-loss"] .ll-help a[href="tel:1925"]')).toBeVisible();
     await expect(page.locator('[data-key="score-i"]')).toBeVisible();
@@ -220,7 +250,24 @@ test.describe('language mirror', () => {
   test('import an X archive: files listed, time series with a table, report downloads', async ({ page }) => {
     const w = watch(page);
     await page.goto(HARNESS);
-    await page.setInputFiles('#ll-file', [fx('x-long/data/tweets.js'), fx('instagram/posts_1.json')]);
+    // the browser's own English file control is not shown; a button and a line in the page's language are
+    const pick = page.locator('#ll-file');
+    await expect(page.getByLabel('或選擇檔案')).toHaveAttribute('type', 'file');
+    expect(await pick.evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
+    await expect(page.locator('.ll-file-btn')).toHaveText('選擇檔案');
+    await expect(page.locator('#ll-file-names')).toHaveText('尚未選擇檔案');
+    // the real input still covers the button, so a tap on the button reaches it, and so does the keyboard
+    expect(await page.evaluate(() => {
+      const r = document.querySelector('.ll-file-btn').getBoundingClientRect();
+      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2).id;
+    })).toBe('ll-file');
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), pick.click()]);
+    expect(chooser.isMultiple()).toBe(true);
+    await pick.focus();
+    await expect(pick).toBeFocused();
+    const [byKey] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Enter')]);
+    await byKey.setFiles([fx('x-long/data/tweets.js'), fx('instagram/posts_1.json')]);
+    await expect(page.locator('#ll-file-names')).toHaveText('tweets.js、posts_1.json');
     await expect(page.locator('.ll-files li')).toHaveCount(2);
     await expect(page.locator('.ll-files')).toContainText('X 貼文，168 則');
     await expect(page.locator('.ll-files')).toContainText('Instagram 貼文，2 則');
@@ -266,8 +313,11 @@ test.describe('language mirror', () => {
     await expect(page.locator('.ll-files li')).toHaveCount(3);
     await expect(page.locator('.ll-files')).not.toContainText('message_1.json');
     await expect(page.locator('.ll-status')).toContainText('broken.json：讀不出來');
+    await expect(page.locator('#ll-file-names')).toHaveText('export.zip、comments.json、broken.json');
     await page.locator('[data-key="ll-analyze"]').click();
     await page.locator('[data-key="ll-lang-zh"]').click();
+    // two short posts: this group has too little text, so it is listed behind the one line
+    await page.locator('[data-key="ll-locked"] > summary').click();
     await page.locator('[data-key="ll-group-social"] > summary').click();
     await page.locator('[data-key="score-friend"]').click();
     // repaired text is shown, and the hashtag and mention are displayed but not counted
@@ -281,6 +331,9 @@ test.describe('language mirror', () => {
     await page.goto(HARNESS + '?lang=en');
     await expect(page.getByLabel('Paste text')).toBeVisible();
     await expect(page.getByLabel('Or choose files')).toBeVisible();
+    await expect(page.getByLabel('Or choose files', { exact: true })).toHaveAttribute('data-key', 'll-file');
+    await expect(page.locator('.ll-file-btn')).toHaveText('Choose files');
+    await expect(page.locator('#ll-file-names')).toHaveText('No file chosen');
     let axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations.map((v) => v.id)).toEqual([]);
     await page.locator('[data-key="ll-analyze"]').click();
@@ -291,6 +344,8 @@ test.describe('language mirror', () => {
     await expect(page.locator('[data-key="score-i"]')).toContainText('per 100 words, 90% interval');
     await expect(page.locator('[data-key="ll-obs"] .ll-obs-item').first()).toHaveText(/^You write about yourself often \(about [\d.]+ I-words per 100 words\)\./);
     expect(await page.locator('[data-key="ll-obs"]').textContent()).not.toMatch(/good|bad|healthy|worr(y|ying) (sign|level)|should|anxi|disorder|symptom/i);
+    await expect(page.locator('[data-key="ll-locked"] > summary')).toHaveText(/^\d+ more groups? needs? more text \(about \d+ units, you have \d+\)$/);
+    await page.locator('[data-key="ll-locked"] > summary').click();
     for (const g of ['thinking', 'feelings', 'social', 'power', 'loss', 'drives', 'moral', 'style', 'topics']) await page.locator(`[data-key="ll-group-${g}"] > summary`).click();
     await expect(page.locator('[data-key="score-analytic"]')).toContainText('interval');
     await expect(page.locator('[data-key="score-status"]')).toBeVisible();

@@ -183,7 +183,8 @@ export function postcardSvg({ seed, line, label, date, brand = 'Murmur' }) {
     .map(() => `<ellipse cx="${(r() * W).toFixed(0)}" cy="${(r() * H).toFixed(0)}" rx="${(80 + r() * 120).toFixed(0)}" ry="${(60 + r() * 90).toFixed(0)}" fill="#fff" opacity=".22"/>`)
     .join('');
   const { lines, size, lh } = fitText(line);
-  const fontStack = `ui-rounded, 'Hiragino Maru Gothic ProN', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
+  // the app's display stack (--display in css/style.css), so the card reads as part of the app
+  const fontStack = `'Bricolage', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
   // short text sits where it always did; a tall block starts just under the label instead
   const textY = Math.max(165 - ((lines.length - 1) * lh) / 2, (label ? 104 : 70) + size);
   const text = lines.map((l, i) => `<text x="300" y="${textY + i * lh}" font-size="${size}" font-weight="600" fill="${p.ink}" font-family="${fontStack}">${esc(l)}</text>`).join('');

@@ -50,7 +50,14 @@ const S = {
     skipped: (n) => `有 ${n} 則是其他語言，沒有計分。`,
     simplified: '有些文字看起來是簡體中文。這些類別是照繁體中文（台灣用語）寫的。簡體字會先逐字轉成繁體再比對，所以和台灣用語不同的說法還是會漏掉。',
     unvalidated: '這些詞表是為這個 app 寫的，不是 LIWC。只有英文的幾個感受類別和人工情緒標註比對過，中文幾乎都還沒驗證。點開每一類可以看到。',
-    groupShort: (need, have) => `這一組需要更多文字（約 ${need} 個單位，目前 ${have}）`,
+    lockedSome: (n) => `還有 ${n} 組需要更多文字`,
+    lockedAll: (n) => (n === 1 ? '這一組需要更多文字' : `這 ${n} 組都需要更多文字`),
+    lockedNeed: (need, have) => `（約 ${need} 個單位，目前 ${have}）`,
+    groupNeed: (need) => `約 ${need} 個單位`,
+    filePick: '選擇檔案',
+    fileNonePicked: '尚未選擇檔案',
+    fileMore: (names, n) => `${names}，還有 ${n} 個`,
+    fileSep: '、',
     moreShort: (n) => `還有 ${n} 項文字不夠`,
     riskTitle: '先說一件事',
     riskBody: '這些文字裡，有些地方提到想死、受到傷害，或想傷害別人。舊的文字可能是在說已經過去的時候。如果其中有任何一點是你現在的狀況，這些電話可以打：',
@@ -149,7 +156,14 @@ const S = {
     skipped: (n) => `${n} ${n === 1 ? 'item was' : 'items were'} in another language and not scored.`,
     simplified: 'Some of the text looks like Simplified Chinese. The categories were written for Traditional Chinese (Taiwan usage). Simplified characters are converted one by one before matching, so wording that differs from Taiwan usage is still missed.',
     unvalidated: 'These word lists were written for this app, and they are not LIWC. Only a few English feeling categories have been checked against human emotion labels; almost none of the Chinese ones have. Each category says which when you open it.',
-    groupShort: (need, have) => `This group needs more text (about ${need} units, has ${have})`,
+    lockedSome: (n) => `${n} more ${n === 1 ? 'group needs' : 'groups need'} more text`,
+    lockedAll: (n) => (n === 1 ? 'This group needs more text' : `All ${n} groups need more text`),
+    lockedNeed: (need, have) => ` (about ${need} units, you have ${have})`,
+    groupNeed: (need) => `about ${need} units`,
+    filePick: 'Choose files',
+    fileNonePicked: 'No file chosen',
+    fileMore: (names, n) => `${names}, and ${n} more`,
+    fileSep: ', ',
     moreShort: (n) => `${n} more ${n === 1 ? 'needs' : 'need'} more text`,
     riskTitle: 'One thing first',
     riskBody: 'Some of this text mentions wanting to die, being hurt, or hurting someone. Older writing may describe a time that has passed. If any of it is true for you now, these lines are open:',
@@ -245,6 +259,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     screen: 'home',
     text: '',
     files: [],
+    picked: [],
     imported: [],
     notes: [],
     busy: '',
@@ -311,6 +326,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
 
   async function readFiles(fileList) {
     st.busy = L().reading;
+    for (const f of fileList) if (!st.picked.includes(f.name)) st.picked.push(f.name);
     draw();
     for (const f of fileList) {
       if (/\.zip$/i.test(f.name)) {
@@ -388,7 +404,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
       multiple: true,
       accept: '.txt,.md,.csv,.json,.js,.car,.zip,text/plain,application/json,text/csv,application/zip',
       'data-key': 'll-file',
-      'aria-describedby': 'll-file-hint',
+      'aria-describedby': 'll-file-names ll-file-hint',
       onchange: (e) => {
         const list = [...e.target.files];
         if (list.length) readFiles(list);
@@ -402,7 +418,15 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
       h('label', { class: 'll-label', for: 'll-text' }, s.pasteLabel),
       ta,
       h('label', { class: 'll-label', for: 'll-file' }, s.fileLabel),
-      file,
+      // the real file input lies, transparent, over a button drawn in the page's language:
+      // it still takes the click, the keyboard, a dropped file and the label
+      h(
+        'div',
+        { class: 'll-pick' },
+        file,
+        h('span', { class: 'll-file-btn', 'aria-hidden': 'true' }, s.filePick),
+        h('span', { id: 'll-file-names', class: 'll-file-names' + (st.picked.length ? ' on' : ''), 'data-key': 'll-file-names' }, pickedText())
+      ),
       h('p', { id: 'll-file-hint', class: 'muted small' }, s.fileHint + ' ' + (zipSupported() ? s.zipHint : s.zipNo)),
       st.files.length
         ? h(
@@ -410,13 +434,21 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
             { class: 'll-files' },
             h('p', { class: 'll-label' }, s.filesRead),
             h('ul', {}, st.files.map((f) => h('li', {}, s.fileRow(f.name, s.kinds[f.kind] || f.kind, f.items)))),
-            h('button', { type: 'button', class: 'link', 'data-key': 'll-clear', onclick: () => ((st.files = []), (st.imported = []), (st.notes = []), draw()) }, s.clearFiles)
+            h('button', { type: 'button', class: 'link', 'data-key': 'll-clear', onclick: () => ((st.files = []), (st.picked = []), (st.imported = []), (st.notes = []), draw()) }, s.clearFiles)
           )
         : null,
       h('div', { class: 'll-status', role: 'status', 'aria-live': 'polite' }, st.busy ? h('p', {}, st.busy) : null, st.notes.map((n) => h('p', { class: 'll-note' }, n))),
       h('button', { type: 'button', class: 'btn primary', 'data-key': 'll-analyze', disabled: !!st.busy, onclick: run }, s.analyze),
       keptList(),
     ];
+  }
+
+  // the names just chosen, in the page's language; a long selection is cut after three
+  function pickedText() {
+    const s = L();
+    if (!st.picked.length) return s.fileNonePicked;
+    const names = st.picked.slice(0, 3).join(s.fileSep);
+    return st.picked.length > 3 ? s.fileMore(names, st.picked.length - 3) : names;
   }
 
   function keptList() {
@@ -561,7 +593,12 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
       );
     }
     // collapsible sections: the closed-class basics start open, the rest open on request
+    // groups where no row has enough text do not get a line each: they wait together behind
+    // one line that says how many there are, and each still opens from there
     const used = new Set();
+    const have = Math.floor(res.gateUnits);
+    const locked = [];
+    let shown = 0;
     for (const g of GROUPS) {
       const rows = g.ids.map((id) => findScore(res, id)).filter(Boolean);
       if (!rows.length) continue;
@@ -589,8 +626,9 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
               : null,
           ];
       const isOpen = allShort ? st.open.has(g.id) : st.closed.has(g.id) ? false : !!g.tier1 || st.open.has(g.id);
-      out.push(
-        h(
+      const need = allShort ? Math.min(...short.map(needOf)) : 0;
+      if (!allShort) shown++;
+      const group = h(
           'details',
           {
             class: 'll-group' + (allShort ? ' ll-group-short' : ''),
@@ -602,10 +640,29 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
               else st.open.delete(g.id), st.closed.add(g.id);
             },
           },
-          h('summary', {}, h('span', { class: 'll-group-name' }, groupLabel(g.id, getLang()), allShort ? h('span', { class: 'll-group-need' }, s.groupShort(Math.min(...short.map(needOf)), Math.floor(res.gateUnits))) : null)),
+          h('summary', {}, h('span', { class: 'll-group-name' }, groupLabel(g.id, getLang()), allShort ? h('span', { class: 'll-group-need' }) : null)),
           h('p', { class: 'muted small' }, groupNote(g.id, getLang())),
           g.id === 'loss' && st.risk ? h('div', { class: 'll-help', role: 'note' }, h('p', {}, s.lossHelp), helpList(h, getLang())) : null,
           body
+        );
+      if (allShort) locked.push({ node: group, need });
+      else out.push(group);
+    }
+    if (locked.length) {
+      // the nearest amount of text that would unlock something
+      const needs = locked.map((d) => d.need);
+      const next = Math.min(...(needs.some((n) => n > have) ? needs.filter((n) => n > have) : needs));
+      for (const d of locked) {
+        const slot = d.node.querySelector('.ll-group-need');
+        if (d.need === next) slot.remove();
+        else slot.textContent = s.groupNeed(d.need);
+      }
+      out.push(
+        h(
+          'details',
+          { class: 'll-locked', open: st.open.has('locked'), 'data-key': 'll-locked', ontoggle: (e) => e.target === e.currentTarget && (e.currentTarget.open ? st.open.add('locked') : st.open.delete('locked')) },
+          h('summary', {}, h('span', { class: 'll-locked-line' }, shown ? s.lockedSome(locked.length) : s.lockedAll(locked.length), h('span', { class: 'll-locked-need' }, s.lockedNeed(next, have)))),
+          locked.map((d) => d.node)
         )
       );
     }
@@ -626,7 +683,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   }
 
   function restart() {
-    Object.assign(st, { text: '', files: [], imported: [], notes: [], analysis: null, earlier: null, risk: false, items: [], keptThis: false });
+    Object.assign(st, { text: '', files: [], picked: [], imported: [], notes: [], analysis: null, earlier: null, risk: false, items: [], keptThis: false });
     st.open.clear();
     st.closed.clear();
     go('home');

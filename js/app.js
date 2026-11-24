@@ -488,7 +488,7 @@ function viewToday() {
       // a silent check-in has no voice to show: just the check-in itself
       p.silent ? h('h2', { tabindex: '-1', 'data-key': 'silent-title' }, t('silentTitle')) : null,
       p.silent ? h('p', { class: 'muted small' }, t('silentBody')) : null,
-      p.silent ? null : h('div', { class: 'result-head' }, glyph(f, 200, { width: 168, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
+      p.silent ? null : h('div', { class: 'result-head' }, glyph(f, 200, { width: 120, label: t('shapeLabel') }), h('h2', {}, t('yourVoiceToday'))),
       p.silent ? null : qualityNote(f),
       // once there is a usual range the numbers say something, so they come first; before that they
       // are raw values, folded below the check-in so a tired first visit ends in two taps
@@ -512,7 +512,7 @@ function viewToday() {
       ),
       h(
         'div',
-        { class: 'actions' },
+        { class: 'actions result-actions' },
         h('button', { class: 'btn primary', type: 'button', 'data-key': 'save', onclick: savePending }, t('save')),
         h(
           'button',
@@ -542,7 +542,10 @@ function viewToday() {
   const lowest = latestRated();
   const helpFirst = lowest && lowest.mood <= 1;
   if (evening && !helpFirst) add(wrap, nightView.card());
-  if (idle) add(wrap, extras.lowMoodCard(lowest, { evening }));
+  // the low-mood card offers breathing, writing and (by day) the ritual itself; the row under
+  // the record button then leaves those out, so each action appears once on the screen
+  const lowCard = idle ? extras.lowMoodCard(lowest, { evening }) : null;
+  if (lowCard) add(wrap, lowCard);
   if (evening && helpFirst) add(wrap, nightView.card());
   if (idle) add(wrap, iosInstallNote());
   add(wrap, 
@@ -625,20 +628,21 @@ function viewToday() {
         focusKey('silent-title');
       } }, t('silentLink'))
     );
-    if (!state.entries.length) {
-      add(wrap, h('button', { type: 'button', class: 'link center', onclick: loadDemo }, t('loadDemoShort')));
-    }
     add(
       wrap,
       h(
         'div',
         { class: 'today-links' },
-        h('button', { type: 'button', class: 'link', 'data-key': 'breathe-link', onclick: () => openSheet(breatheSheet({ h, getLang })) }, t('breatheLink')),
+        lowCard ? null : h('button', { type: 'button', class: 'link', 'data-key': 'breathe-link', onclick: () => openSheet(breatheSheet({ h, getLang })) }, t('breatheLink')),
         h('button', { type: 'button', class: 'link', 'data-key': 'calm-link', onclick: openCalm }, t('calmLink')),
-        h('button', { type: 'button', class: 'link', 'data-key': 'writing-link', onclick: openWriting }, t('writingLink')),
-        isEvening() ? null : h('button', { type: 'button', class: 'link night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink'))
+        lowCard ? null : h('button', { type: 'button', class: 'link', 'data-key': 'writing-link', onclick: openWriting }, t('writingLink')),
+        lowCard || isEvening() ? null : h('button', { type: 'button', class: 'link night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink'))
       )
     );
+    // the demo offer is for a first visit only; it sits last and quiet, so "just your mood" stays the one text link
+    if (!state.entries.length) {
+      add(wrap, h('button', { type: 'button', class: 'link center demo-offer', onclick: loadDemo }, t('loadDemoShort')));
+    }
     const recent = state.entries.filter(usable).slice(-7);
     if (recent.length) {
       add(wrap, 
@@ -722,6 +726,10 @@ function viewJournal() {
   const wrap = h('section', { class: 'view journal' });
   // search comes first; while a query is typed, its results replace the rest of the page
   journalSearch.view(wrap);
+  // one compact field: the label stays for screen readers and doubles as the placeholder
+  const searchInput = wrap.querySelector('#journal-search-input');
+  const searchLabel = wrap.querySelector('label[for="journal-search-input"]');
+  if (searchInput && searchLabel) searchInput.placeholder = searchLabel.textContent;
   add(wrap, backupNote(), extras.weekCard());
   add(wrap, extras.modeChips(state.journalMode, (m) => {
     state.journalMode = m;
@@ -1029,7 +1037,8 @@ function viewTrends() {
   const name = t('feat')[info.key][0];
   add(wrap, 
     h('h2', { class: 'metric-title' }, name),
-    h('p', { class: 'muted small' }, t('feat')[info.key][1], ' ', h('span', { class: `conf conf-${info.confidence}` }, t('confidence')[info.confidence]), ' ', t('confidenceWhy')[info.key]),
+    h('p', { class: 'conf-line' }, h('span', { class: `conf conf-${info.confidence}` }, t('confidence')[info.confidence])),
+    h('p', { class: 'muted small' }, t('feat')[info.key][1], ' ', t('confidenceWhy')[info.key]),
     h(
       'div',
       { class: 'chart-wrap' },

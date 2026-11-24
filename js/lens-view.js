@@ -779,7 +779,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('summary', {}, L().moreAbout),
           h('h3', {}, L().concepts),
           h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
-          h('p', { class: 'muted small' }, L().people, '：', (lk() === 'zh' && lens.peopleZh) || lens.people),
+          h('p', { class: 'muted small' }, L().people, lk() === 'zh' ? '：' : ': ', (lk() === 'zh' && lens.peopleZh) || lens.people),
           h('p', { class: 'muted small' }, L().reading(lens.chapter))
         )
       ),
@@ -952,7 +952,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('p', { class: 'tags' }, c.concepts.map((k) => h('span', { class: 'tag' }, k))),
         h('h3', {}, L().misses),
         h('p', {}, c.misses),
-        h('p', { class: 'muted small' }, L().people, '：', (lk() === 'zh' && l.peopleZh) || l.people),
+        h('p', { class: 'muted small' }, L().people, lk() === 'zh' ? '：' : ': ', (lk() === 'zh' && l.peopleZh) || l.people),
         h('p', { class: 'muted small' }, L().reading(l.chapter))
       ),
       h(

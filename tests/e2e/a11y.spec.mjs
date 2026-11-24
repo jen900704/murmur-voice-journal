@@ -231,6 +231,8 @@ const screens = [
   ['language mirror empty', openMirror],
   ['language mirror results', async (page) => {
     await mirrorResults(page);
+    // groups still short of text sit behind one line; open it first
+    await key(page, 'll-locked').locator('> summary').click();
     await key(page, 'll-group-moral').locator('> summary').click();
     await key(page, 'll-group-moral').locator('.ll-row').first().waitFor();
   }],

@@ -2476,3 +2476,245 @@ h3.sub {
   font-size: 14px;
   box-shadow: 0 10px 24px -12px rgba(20, 16, 50, 0.45);
 }
+
+/* ==========================================================================
+   Fresh-eyes review
+   ========================================================================== */
+
+/* ---------- check-in scale ---------- */
+/* rings start and end exactly over the end labels; the 44px tap area hangs 3px past them */
+.scale {
+  justify-content: space-between;
+  margin-inline: -3px;
+}
+.scale-dot::before {
+  border-color: var(--muted);
+  border-color: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+.scale-dot.on::before {
+  border-color: var(--amber);
+}
+.lens-rate .scale {
+  justify-content: space-between;
+  gap: 0;
+  max-width: 340px;
+}
+.scale-num {
+  border-radius: 50%;
+  padding: 0;
+}
+/* nothing above the first row of a card but the card's own padding */
+.checkin > :first-child,
+.checkin > :first-child > :first-child {
+  margin-top: 0;
+}
+
+/* ---------- actions: primary first, from the left edge, everywhere ---------- */
+.actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+/* the two screens that are centered as a whole keep their buttons centered */
+.breathe-flow .actions,
+.night-play .actions {
+  justify-content: center;
+}
+
+/* ---------- Today: one text link, then one quiet row ---------- */
+.today-links {
+  margin-top: var(--s4);
+}
+.today-links .link {
+  color: var(--muted);
+}
+.today-links .link:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  min-width: 0;
+}
+.today > .link.center.demo-offer {
+  margin-top: var(--s3);
+  color: var(--muted);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+}
+
+/* ---------- result: Save stays in reach ---------- */
+.result-head {
+  margin-top: 0;
+}
+.result-head h2 {
+  margin: var(--s1) 0 0;
+}
+.result-head + .checkin {
+  margin-top: var(--s3);
+}
+.result-actions {
+  position: sticky;
+  bottom: calc(var(--tabs-h) + env(safe-area-inset-bottom) + 1px);
+  z-index: 5;
+  margin: 0 -20px var(--s4);
+  padding: var(--s3) 20px;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+/* keyboard focus never lands under the bar */
+:root:has(.result-actions) {
+  scroll-padding-bottom: calc(var(--tabs-h) + env(safe-area-inset-bottom) + 96px);
+}
+
+/* ---------- journal: compact search, even mode row ---------- */
+.journal-search label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.search-row input {
+  height: 44px;
+  padding: 0 14px;
+}
+.search-row input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+/* the helper text floats under the empty, focused field: it never pushes the page down, so
+   nothing moves under a finger, and a tap on what it covers still goes through */
+.journal-search {
+  position: relative;
+}
+#journal-search-hint {
+  display: none;
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  margin: 0;
+  padding: var(--s2) 14px;
+  border-radius: var(--r-s);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line), 0 10px 24px -14px rgba(20, 16, 50, 0.45);
+  pointer-events: none;
+}
+.journal-search:has(#journal-search-input:focus:placeholder-shown) #journal-search-hint {
+  display: block;
+}
+.journal-modes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  overflow: visible;
+}
+.journal-modes .seg-btn {
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: normal;
+  text-align: center;
+}
+
+/* ---------- postcards: softer on a dark page ---------- */
+.sheet-body > .postcard {
+  margin: var(--s4) 0 20px;
+}
+:root.night-mode .postcard svg,
+:root.night-mode .night-thumb svg {
+  filter: brightness(0.88) saturate(0.9);
+}
+@media (prefers-color-scheme: dark) {
+  .postcard svg,
+  .night-thumb svg {
+    filter: brightness(0.88) saturate(0.9);
+  }
+}
+
+/* ---------- playback orb: the calm orb's light, breathing slowly ---------- */
+.view.night.playing .breath {
+  width: 180px;
+  height: 180px;
+  margin: 36px auto 40px;
+  background: radial-gradient(circle at 42% 36%, #7468c4 0%, #554b96 52%, #2f2a5a 100%);
+  box-shadow:
+    0 0 36px 6px rgba(160, 146, 255, 0.3),
+    0 0 90px 34px rgba(160, 146, 255, 0.12);
+  animation: orb-breathe 8s ease-in-out infinite;
+}
+@keyframes orb-breathe {
+  0%,
+  100% {
+    transform: scale(0.86);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- toast: at the top, clear of every control ---------- */
+.toast {
+  top: calc(16px + env(safe-area-inset-top));
+  bottom: auto;
+  transform: translate(-50%, -12px);
+  text-align: center;
+}
+.toast.show {
+  transform: translate(-50%, 0);
+}
+@media (prefers-color-scheme: dark) {
+  .toast {
+    background: #f3f0ff;
+    color: #16142a;
+  }
+}
+:root.night-mode .toast {
+  background: #f3f0ff;
+  color: #16142a;
+}
+
+/* ---------- small consistency ---------- */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+}
+/* lens marks sit inside the violet palette instead of fourteen saturated hues */
+/* each lens keeps its own tint, but the hue wheel is squeezed to a quarter around violet (205 to 295) */
+.lens-mark {
+  --mark-hue: calc(250 + (var(--lens-hue) - 180) * 0.25);
+}
+.lens-mark ellipse {
+  fill: hsl(var(--mark-hue) 34% 60% / 0.14);
+  stroke: hsl(var(--mark-hue) 30% 50%);
+}
+@media (prefers-color-scheme: dark) {
+  .lens-mark ellipse {
+    stroke: hsl(var(--mark-hue) 40% 76%);
+  }
+}
+.lens-home-links {
+  grid-auto-rows: 1fr;
+}
+@media (prefers-color-scheme: dark) {
+  .demo-banner,
+  .low-card {
+    background: color-mix(in srgb, var(--amber) 14%, var(--surface));
+  }
+}
+:root.night-mode .demo-banner,
+:root.night-mode .low-card {
+  background: color-mix(in srgb, var(--amber) 14%, var(--surface));
+}
+/* how sure a measure is: a chip on its own line above the explanation */
+.conf-line {
+  margin: var(--s1) 0 6px;
+  line-height: 1;
+}
+.conf-line + p {
+  margin-top: 0;
+}

@@ -645,6 +645,16 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
           'button',
           {
             type: 'button',
+            class: 'btn primary',
+            'data-key': 'night-done',
+            onclick: done,
+          },
+          L().done
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
             class: 'btn',
             onclick: async () => {
               const png = await postcardPng(st.postcard);
@@ -654,16 +664,6 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
             },
           },
           L().savePng
-        ),
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'btn primary',
-            'data-key': 'night-done',
-            onclick: done,
-          },
-          L().done
         )
       ),
       trackQuestion(),

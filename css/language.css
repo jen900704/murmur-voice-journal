@@ -40,16 +40,36 @@
   color: var(--muted, #6b6784);
   opacity: 1;
 }
-.ll-file {
-  display: block;
-  width: 100%;
-  font: inherit;
-  font-size: 14px;
-  color: var(--muted, #6b6784);
+/* The browser draws a file input in its own language ("Choose Files"). The input is kept,
+   transparent, over the whole control, so the click, the keyboard, a dropped file and the
+   label all still reach it; what is seen is a button and the chosen names in the page's
+   language. */
+.ll-pick {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
   min-height: 44px;
+  margin-bottom: 10px;
+}
+.ll-file {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
 }
 .ll-file::file-selector-button {
-  font: inherit;
+  cursor: pointer;
+}
+.ll-file-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
   font-size: 15px;
   font-weight: 600;
   color: var(--ink, #24213b);
@@ -58,14 +78,30 @@
   border-radius: 999px;
   min-height: 44px;
   padding: 0 18px;
-  margin-inline-end: 12px;
-  cursor: pointer;
+}
+.ll-file:hover + .ll-file-btn {
+  border-color: var(--accent, #5847c9);
+}
+.ll-file:focus-visible + .ll-file-btn {
+  outline: 3px solid var(--accent, #5847c9);
+  outline-offset: 2px;
+}
+.ll-file-names {
+  flex: 1 1 8em;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted, #6b6784);
+  overflow-wrap: anywhere;
+}
+.ll-file-names.on {
+  color: var(--ink, #24213b);
 }
 .ll-text:focus-visible,
-.ll-file:focus-visible,
 .ll-row:focus-visible,
 .ll-obs-item:focus-visible,
 .ll-more > summary:focus-visible,
+.ll-locked > summary:focus-visible,
 .ll-excerpts:focus-visible,
 .ll-group > summary:focus-visible,
 .ll-series select:focus-visible {
@@ -240,7 +276,48 @@
 .ll-rows {
   margin: 0;
 }
-/* a group with nothing to show yet: one quiet line, no card, still opens */
+/* groups with nothing to show yet: one line for all of them. It opens a plain list of
+   their names, and each name still opens its rows. */
+.ll-locked {
+  margin: 18px 0 0;
+  border-top: 1px solid var(--line, #dcd9e8);
+  border-bottom: 1px solid var(--line, #dcd9e8);
+}
+.ll-locked > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+  min-height: 52px;
+  padding: 8px 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--muted, #6b6784);
+  font-variant-numeric: tabular-nums;
+  border-radius: 8px;
+}
+.ll-locked > summary::-webkit-details-marker {
+  display: none;
+}
+.ll-locked > summary::after {
+  content: '›';
+  flex: none;
+  font: 400 1.4rem/1 var(--body, inherit);
+  color: var(--muted, #6b6784);
+  transition: transform 0.15s;
+}
+.ll-locked[open] > summary::after {
+  transform: rotate(90deg);
+}
+.ll-locked-line {
+  min-width: 0;
+}
+/* the amounts break as one piece, so no number is left alone on a line */
+.ll-locked-need {
+  display: inline-block;
+}
 .ll-group-name {
   min-width: 0;
 }
@@ -254,7 +331,7 @@
 .ll-group-short:not([open]) {
   background: none;
   border-color: transparent;
-  border-bottom-color: var(--line, #dcd9e8);
+  border-top-color: var(--line, #dcd9e8);
   border-radius: 0;
   margin: 0;
 }
@@ -265,6 +342,9 @@
 }
 .ll-group-short:not([open]) > summary::after {
   color: var(--muted, #6b6784);
+}
+.ll-locked > .ll-group-short[open] {
+  margin: 10px 0;
 }
 /* "N more need more text": the rows without enough text, behind one toggle */
 .ll-more {
@@ -550,6 +630,7 @@ mark.ll-hit.neg {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .ll-locked > summary::after,
   .ll-group > summary::after {
     transition: none;
   }

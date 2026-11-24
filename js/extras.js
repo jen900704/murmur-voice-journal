@@ -363,7 +363,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       card,
       n.worry ? [h('h3', {}, L().worry), h('blockquote', { class: 'detail-note' }, n.worry)] : null,
       n.kindness ? [h('h3', {}, L().kind), h('p', {}, n.kindness)] : null,
-      tr ? h('p', { class: 'muted small' }, L().track, '：', tr[getLang() === 'en' ? 'en' : 'zh'].name) : null,
+      tr ? h('p', { class: 'muted small' }, L().track, getLang() === 'en' ? ': ' : '：', tr[getLang() === 'en' ? 'en' : 'zh'].name) : null,
       h(
         'div',
         { class: 'actions left' },
