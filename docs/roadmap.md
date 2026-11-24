@@ -17,7 +17,7 @@
 ## Needs the owner's review
 
 - The recommendation list: Taiwan titles, years, and content notes (`data/recs.json`). Titles that were uncertain are left blank.
-- The theory-lens questions and bedtime scripts, against how the approaches are taught in the program (`js/lenses.js`, `js/bedtime.js`). A faculty member or supervisor reading them before wider sharing would help.
+- The theory-lens questions and bedtime scripts, against how the approaches are taught in the program (`js/lenses.js`, `js/bedtime.js`). A faculty member or supervisor reading them before wider sharing would help. All of it, in Chinese with checkboxes, is in [`content-review.md`](content-review.md) (regenerate with `node tools/export-content.mjs`).
 - Whether to mention the app to the program or site supervisor, since it carries a counseling student's name.
 
 ## Needs a decision
