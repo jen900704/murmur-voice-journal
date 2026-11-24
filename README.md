@@ -30,7 +30,7 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 
 **Safety.** Text typed into the theory lens, the bedtime ritual, and the kind-thing field is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match stops the exercise and shows help lines (Taiwan 1925, 1995, 1980, 113; US 988), and nothing from that step is saved. Help is always one tap away. The check is a coarse safety net and will miss some wording.
 
-Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md).
+Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Why
 
