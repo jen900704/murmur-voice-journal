@@ -24,6 +24,7 @@ const SHELL = [
   './js/lens-llm.js',
   './js/donation.js',
   './js/lookback.js',
+  './js/mascot.js',
   './js/night-view.js',
   './js/extras.js',
   './js/prompts.js',
