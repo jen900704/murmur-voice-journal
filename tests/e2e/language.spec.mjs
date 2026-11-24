@@ -4,6 +4,16 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 
+// Folded inside a closed <details>. Playwright's WebKit reports such content as visible, so the
+// tests check the closed ancestor directly instead of toBeHidden().
+const folded = (loc) =>
+  loc.evaluate((el) => {
+    for (let d = el.parentElement; d; d = d.parentElement) {
+      if (d.tagName === 'DETAILS' && !d.open && !(el.tagName === 'SUMMARY' && el.parentElement === d)) return true;
+    }
+    return false;
+  });
+
 // The language mirror, tested through a harness page that mounts js/language-view.js with
 // stand-ins for the app's helpers (tests/e2e/language-harness.html).
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -109,7 +119,7 @@ test.describe('language mirror', () => {
     await expect(locked.locator('> summary')).toHaveText(new RegExp(`^這 ${all} 組都需要更多文字（約 50 個單位，目前 \\d+）$`));
     const core = page.locator('[data-key="ll-group-core"]');
     await expect(core).not.toHaveAttribute('open', '');
-    await expect(core.locator('> summary')).toBeHidden();
+    expect(await folded(core.locator('> summary'))).toBe(true);
     await locked.locator('> summary').click();
     await expect(core.locator('> summary')).toHaveText('代名詞與否定');
     // a group that needs a different amount from the line above says its own
@@ -137,15 +147,15 @@ test.describe('language mirror', () => {
     // one of them: listed by name only once the line is opened, and it still opens and closes
     const moral = page.locator('[data-key="ll-group-moral"]');
     await expect(moral).toHaveClass(/ll-group-short/);
-    await expect(moral.locator('> summary')).toBeHidden();
+    expect(await folded(moral.locator('> summary'))).toBe(true);
     await locked.locator('> summary').click();
     await expect(moral.locator('> summary')).toBeVisible();
     await expect(moral.locator('.ll-more')).toHaveCount(0);
-    await expect(page.locator('[data-key="score-care"]')).toBeHidden();
+    expect(await folded(page.locator('[data-key="score-care"]'))).toBe(true);
     await moral.locator('> summary').click();
     await expect(page.locator('[data-key="score-care"]')).toContainText('文字還不夠');
     await moral.locator('> summary').click();
-    await expect(page.locator('[data-key="score-care"]')).toBeHidden();
+    expect(await folded(page.locator('[data-key="score-care"]'))).toBe(true);
     // a group with some passing rows: those first, then one toggle for the rest
     const social = page.locator('[data-key="ll-group-social"]');
     await expect(social).not.toHaveClass(/ll-group-short/);
@@ -157,7 +167,7 @@ test.describe('language mirror', () => {
     const n = await more.locator('.ll-row').count();
     expect(n).toBeGreaterThan(0);
     await expect(more.locator('summary')).toHaveText(`還有 ${n} 項文字不夠`);
-    await expect(more.locator('.ll-row').first()).toBeHidden();
+    expect(await folded(more.locator('.ll-row').first())).toBe(true);
     await more.locator('summary').click();
     for (const r of await more.locator('.ll-row').all()) await expect(r).toContainText('文字還不夠');
     // these stay open across a redraw
