@@ -1,6 +1,12 @@
-# Connecting with other people: design notes (not built yet)
+# Connecting with other people: design notes
 
-Murmur currently has no server, and everything stays on the device. People can already share what they choose through their phone's own share sheet: a postcard image, or an answer to the daily prompt with a link that lets the other person answer the same prompt. That covers sharing with people someone already knows, without Murmur storing anything.
+Murmur currently has no server, and everything stays on the device. People can already share what they choose through their phone's own share sheet:
+
+- a bedtime postcard image;
+- a goodnight card to one person, carrying only a fixed line they pick (never what they wrote that night);
+- an answer to the daily prompt, with a link that opens the same prompt for the other person.
+
+That covers sharing with people someone already knows, without Murmur storing anything, and with no counts, feeds, or read receipts.
 
 Anything where one user's words reach another user inside the app needs a server, accounts, and someone responsible for moderation. This note sets out what that would take before any of it is built.
 
@@ -28,8 +34,15 @@ Anything where one user's words reach another user inside the app needs a server
 
 ## "One kind thing I did for myself" with other people
 
-The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
+The private kindness jar already brings someone's own past kind acts back on low days, which avoids comparison entirely. The low-day card also offers three small general actions (a warm drink, two minutes at a window, one line to someone), written by Murmur rather than posted by users, so there is no one to compare with. If shared kind acts are ever added, they should appear as anonymous, small, ordinary ideas ("someone went to bed early"), matched to the reader's energy level, never as posts by named people, and never with counts.
 
 ## Platform options
 
 Supabase or Firebase would both work for invite-code pairs with row-level security. Either needs the owner's own account and a privacy policy. A decision on this belongs to the owner.
+
+## Questions for the owner before step 1
+
+1. Who is the first audience: partners, close friends, or a class or group you run?
+2. Are you willing to be named as the person responsible for the shared space, and how quickly could you respond to a report?
+3. Is it acceptable that pairs would need a small server (and that the "nothing leaves the device" promise becomes "nothing leaves the device except what you send to your pair")?
+4. Should a supervisor or the program know before it launches, given that the app carries a counseling student's name?
