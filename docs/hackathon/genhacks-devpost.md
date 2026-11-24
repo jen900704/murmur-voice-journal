@@ -27,11 +27,16 @@ Most people who are stressed or low never reach a diagnosis or a counselor. They
 - **Theory lens (換個角度看看).** Write down a worry and look at it through one of 14 counseling approaches from Corey's textbook. Each asks three or four questions in its own style, then shows what it noticed, a small experiment, and what that approach might miss.
 - **Bedtime ritual.** Set the worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down in the spirit of a counseling approach, read by the phone's own voice. You get a pastel postcard. No streaks.
 - **A low-mood note.** After a low check-in, a few of your own kind things come back, with one small action, a breathing pacer and where to find someone to talk to. Nothing from other users, so there is nothing to compare against.
-- **Safety.** Risk language anywhere pauses the flow and shows help lines for Taiwan, the US or elsewhere.
+- **Language mirror.** Paste your own writing or import your own Instagram, Facebook, X, Threads or Reddit export, and see transparent language analysis on the device: every number shows the exact words behind it, an interval, what it cannot tell you, and a downloadable evidence report. The English categories were checked against 43,396 human-labeled comments (GoEmotions, AUC .68 to .94).
+- **Too much right now / Write it out.** One button into breathing, grounding and self-compassion phrases; writing prompts by weight with Pennebaker-style deep writing.
+- **Search and grounded AI.** Search everything you wrote, on the device. The optional AI conversation retrieves only from vetted lens content and cites it.
+- **Safety.** Risk language anywhere pauses the flow and shows help lines for Taiwan, the US or elsewhere. A multi-agent evaluation found seven kinds of warning signs the screen missed; they are fixed.
 
 ## How we built it
 
-Vanilla JavaScript and Web APIs, no framework and no server. Audio is analyzed in a Web Worker (YIN pitch tracking, intensity-peak syllable rate); entries live in IndexedDB; a service worker makes it work offline. Speech synthesis uses on-device voices only. The voice features were checked against Praat on synthetic and recorded speech. Tests: unit tests, Playwright browser tests in Chromium and WebKit, an offline test, and an axe-core WCAG 2.1 AA audit, all in CI.
+Vanilla JavaScript and Web APIs, no framework and no server for the app. Audio is analyzed in a Web Worker (YIN pitch tracking, intensity-peak syllable rate). Entries live in IndexedDB; a service worker makes it work offline. Search is BM25 over mixed Chinese and English. An opt-in Thompson-sampling bandit chooses one featured item with logged propensities, and never explores near risk or low mood.
+
+Around the app: a multi-agent evaluation harness (scripted users, the app's real code in Node, rubric judges on Anthropic or AWS Bedrock, judge-human agreement), a preregistered bandit simulation with off-policy evaluation, a DLATK pipeline, a construct-validity study of the language categories, a read-only MCP server for the vetted content, and Terraform for an AWS evaluation runner. Tests: unit, Playwright in Chromium and WebKit, an accessibility audit of 31 screens in two themes, robustness, and lab tests, all in CI.
 
 ## Challenges
 
@@ -55,7 +60,7 @@ Testing with real users in Taiwan and the US, recorded Mandarin speech to valida
 
 ## Built with
 
-javascript, web-audio-api, indexeddb, service-worker, web-speech-api, playwright, axe-core, github-pages
+javascript, web-audio-api, indexeddb, service-worker, web-speech-api, python, dlatk, aws, terraform, amazon-bedrock, anthropic, mcp, playwright, axe-core, github-actions, github-pages
 
 ## Links
 
