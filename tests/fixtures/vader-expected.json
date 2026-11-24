@@ -1,0 +1,187 @@
+{
+ "version": "3.3.2",
+ "cases": [
+  {
+   "text": "VADER is smart, handsome, and funny.",
+   "neg": 0.0,
+   "neu": 0.254,
+   "pos": 0.746,
+   "compound": 0.8316
+  },
+  {
+   "text": "VADER is smart, handsome, and funny!",
+   "neg": 0.0,
+   "neu": 0.248,
+   "pos": 0.752,
+   "compound": 0.8439
+  },
+  {
+   "text": "VADER is very smart, handsome, and funny.",
+   "neg": 0.0,
+   "neu": 0.299,
+   "pos": 0.701,
+   "compound": 0.8545
+  },
+  {
+   "text": "VADER is VERY SMART, handsome, and FUNNY.",
+   "neg": 0.0,
+   "neu": 0.246,
+   "pos": 0.754,
+   "compound": 0.9227
+  },
+  {
+   "text": "VADER is VERY SMART, handsome, and FUNNY!!!",
+   "neg": 0.0,
+   "neu": 0.233,
+   "pos": 0.767,
+   "compound": 0.9342
+  },
+  {
+   "text": "VADER is VERY SMART, uber handsome, and FRIGGIN FUNNY!!!",
+   "neg": 0.0,
+   "neu": 0.294,
+   "pos": 0.706,
+   "compound": 0.9469
+  },
+  {
+   "text": "VADER is not smart, handsome, nor funny.",
+   "neg": 0.646,
+   "neu": 0.354,
+   "pos": 0.0,
+   "compound": -0.7424
+  },
+  {
+   "text": "The book was good.",
+   "neg": 0.0,
+   "neu": 0.508,
+   "pos": 0.492,
+   "compound": 0.4404
+  },
+  {
+   "text": "At least it isn't a horrible book.",
+   "neg": 0.0,
+   "neu": 0.678,
+   "pos": 0.322,
+   "compound": 0.431
+  },
+  {
+   "text": "The book was only kind of good.",
+   "neg": 0.0,
+   "neu": 0.697,
+   "pos": 0.303,
+   "compound": 0.3832
+  },
+  {
+   "text": "The plot was good, but the characters are uncompelling and the dialog is not great.",
+   "neg": 0.327,
+   "neu": 0.579,
+   "pos": 0.094,
+   "compound": -0.7042
+  },
+  {
+   "text": "Today SUX!",
+   "neg": 0.779,
+   "neu": 0.221,
+   "pos": 0.0,
+   "compound": -0.5461
+  },
+  {
+   "text": "Today only kinda sux! But I'll get by, lol",
+   "neg": 0.127,
+   "neu": 0.556,
+   "pos": 0.317,
+   "compound": 0.5249
+  },
+  {
+   "text": "Make sure you :) or :D today!",
+   "neg": 0.0,
+   "neu": 0.294,
+   "pos": 0.706,
+   "compound": 0.8633
+  },
+  {
+   "text": "Not bad at all",
+   "neg": 0.0,
+   "neu": 0.513,
+   "pos": 0.487,
+   "compound": 0.431
+  },
+  {
+   "text": "I am so happy today, the walk was lovely.",
+   "neg": 0.0,
+   "neu": 0.45,
+   "pos": 0.55,
+   "compound": 0.8605
+  },
+  {
+   "text": "I never thought this would be so hard.",
+   "neg": 0.21,
+   "neu": 0.79,
+   "pos": 0.0,
+   "compound": -0.2183
+  },
+  {
+   "text": "No good news yet, nor any bad news.",
+   "neg": 0.214,
+   "neu": 0.533,
+   "pos": 0.253,
+   "compound": 0.1139
+  },
+  {
+   "text": "It was the least helpful meeting ever.",
+   "neg": 0.28,
+   "neu": 0.72,
+   "pos": 0.0,
+   "compound": -0.3252
+  },
+  {
+   "text": "Without a doubt, a great day.",
+   "neg": 0.0,
+   "neu": 0.392,
+   "pos": 0.608,
+   "compound": 0.7359
+  },
+  {
+   "text": "Why would they do that???",
+   "neg": 0.0,
+   "neu": 1.0,
+   "pos": 0.0,
+   "compound": 0.0
+  },
+  {
+   "text": "The food was to die for.",
+   "neg": 0.438,
+   "neu": 0.562,
+   "pos": 0.0,
+   "compound": -0.5994
+  },
+  {
+   "text": "I do not hate it.",
+   "neg": 0.0,
+   "neu": 0.572,
+   "pos": 0.428,
+   "compound": 0.4585
+  },
+  {
+   "text": "nothing here",
+   "neg": 0.0,
+   "neu": 1.0,
+   "pos": 0.0,
+   "compound": 0.0
+  },
+  {
+   "text": "A quiet day 😁 after all",
+   "neg": 0.0,
+   "neu": 0.75,
+   "pos": 0.25,
+   "compound": 0.4588
+  },
+  {
+   "text": "I can't say I am sad, but I am tired and a little worried.",
+   "neg": 0.429,
+   "neu": 0.571,
+   "pos": 0.0,
+   "compound": -0.8053
+  }
+ ]
+}

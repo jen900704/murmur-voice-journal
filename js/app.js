@@ -14,6 +14,9 @@ import { breatheSheet } from './breathe.js';
 import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 import { LENSES } from './lenses.js';
 import { createJournalSearch } from './search.js';
+import { calmSheet } from './calm.js';
+import { writingSheet } from './writing.js';
+import { createLanguageView } from './language-view.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -635,6 +638,8 @@ function viewToday() {
         'div',
         { class: 'today-links' },
         h('button', { type: 'button', class: 'link', 'data-key': 'breathe-link', onclick: () => openSheet(breatheSheet({ h, getLang })) }, t('breatheLink')),
+        h('button', { type: 'button', class: 'link', 'data-key': 'calm-link', onclick: openCalm }, t('calmLink')),
+        h('button', { type: 'button', class: 'link', 'data-key': 'writing-link', onclick: openWriting }, t('writingLink')),
         isEvening() ? null : h('button', { type: 'button', class: 'link night-link', 'data-key': 'night-link', onclick: () => nightView.begin() }, t('bedtimeLink'))
       )
     );
@@ -728,6 +733,10 @@ function viewJournal() {
   }));
   if (state.journalMode === 'nights') return add(wrap, extras.nightsSection());
   if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
+  if (state.journalMode === 'words') {
+    if (!languageView) languageView = createLanguageView({ h, add, getLang, toast, openSheet });
+    return add(wrap, languageView.view());
+  }
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
     const silentOnly = state.entries.some((e) => e.silent);
@@ -1500,6 +1509,8 @@ function viewAbout() {
           onclick: async () => {
             if (!confirm(t('confirmDeleteAll'))) return;
             await db.clearAll();
+            // texts kept in the language mirror live in their own small database
+            await import('./langlab/store.js').then((m) => m.clearLanguageData()).catch(() => {});
             state.entries = [];
             journalSearch.reset();
             state.aiKeySet = false;
@@ -1554,8 +1565,32 @@ const extras = createExtras({
   closeSheet,
   goLens,
   startRitual: () => nightView.begin(),
-  openBreathe: () => openSheet(breatheSheet({ h, getLang })),
+  openBreathe: () => openCalm(),
+  openWriting: () => openWriting(),
 });
+// "I'm panicking": breathing, then grounding, then self-compassion phrases (js/calm.js)
+function openCalm() {
+  openSheet(calmSheet({ h, getLang }));
+}
+// Writing by weight, with Pennebaker-style deep prompts and a closing (js/writing.js)
+function openWriting() {
+  openSheet(
+    writingSheet({
+      h,
+      getLang,
+      db,
+      toast,
+      onSaved: (entry) => {
+        state.entries.push(entry);
+        journalSearch.entrySaved(entry);
+        render();
+      },
+      onUpdated: (entry) => journalSearch.entrySaved(entry),
+    })
+  );
+}
+// The language mirror: on-device analysis of the person's own writing (js/langlab)
+let languageView = null;
 // Search over the person's own writing. The index is held in memory only (js/search.js).
 const journalSearch = createJournalSearch({
   h,

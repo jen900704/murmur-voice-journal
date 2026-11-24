@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>calm test harness</title>
+    <!-- Test only. Opens calmSheet (or breatheSheet with ?sheet=breathe) in a stand-in for the
+         app's sheet, with the same h() and the same focus rule as renderSheet in js/app.js. -->
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/calm.css" />
+  </head>
+  <body>
+    <main id="main" tabindex="-1"></main>
+    <div id="sheet" class="sheet" hidden></div>
+    <script type="module">
+      import { calmSheet } from '../../js/calm.js';
+      import { breatheSheet } from '../../js/breathe.js';
+
+      function h(tag, attrs = {}, ...children) {
+        const n = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v === undefined || v === null || v === false) continue;
+          if (k === 'class') n.className = v;
+          else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+          else n.setAttribute(k, v === true ? '' : v);
+        }
+        for (const c of children.flat(Infinity)) {
+          if (c === null || c === undefined || c === false) continue;
+          n.appendChild(c instanceof Node ? c : document.createTextNode(String(c)));
+        }
+        return n;
+      }
+      const q = new URLSearchParams(location.search);
+      const lang = q.get('lang') === 'en' ? 'en' : 'zh-TW';
+      document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant-TW';
+      const getLang = () => lang;
+      const sheetFn = (q.get('sheet') === 'breathe' ? breatheSheet : calmSheet)({ h, getLang });
+
+      function renderSheet() {
+        const sheet = document.getElementById('sheet');
+        const a = document.activeElement;
+        const keepKey = !sheet.hidden && a && sheet.contains(a) && a.dataset ? a.dataset.key : null;
+        sheet.hidden = false;
+        sheet.innerHTML = '';
+        const body = h('div', { class: 'sheet-body', role: 'dialog', 'aria-modal': 'true' }, h('button', { type: 'button', class: 'link back', onclick: () => ((sheet.hidden = true), (sheet.innerHTML = '')) }, lang === 'en' ? 'Back' : '返回'));
+        body.append(...[sheetFn(renderSheet)].flat(Infinity).filter((k) => k !== null && k !== undefined && k !== false));
+        const head = body.querySelector('h2');
+        if (head) {
+          head.id = 'sheet-title';
+          body.setAttribute('aria-labelledby', head.id);
+        }
+        sheet.appendChild(body);
+        const again = keepKey && body.querySelector(`[data-key="${CSS.escape(keepKey)}"]`);
+        (again || body.querySelector('.back')).focus();
+      }
+      renderSheet();
+      document.body.dataset.ready = '1';
+    </script>
+  </body>
+</html>

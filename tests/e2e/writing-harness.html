@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Writing mode harness</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+  </head>
+  <body>
+    <!--
+      Test page for js/writing.js and the low-mood card in js/extras.js, without the rest of the
+      app. Storage is an array in memory. Options: ?lang=en, and window.__seed (entries) or
+      window.__low ({ mood, energy }) set before the page loads.
+    -->
+    <main id="main">
+      <div id="card"></div>
+      <button type="button" id="open" class="btn">open</button>
+    </main>
+    <div id="sheet" class="sheet" hidden></div>
+    <div id="toast" role="status"></div>
+    <script type="module">
+      import { writingSheet } from '../../js/writing.js';
+      import { createExtras } from '../../js/extras.js';
+
+      const lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'zh-TW';
+      const getLang = () => lang;
+
+      // the same element helper as js/app.js
+      function h(tag, attrs = {}, ...children) {
+        const n = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v === undefined || v === null || v === false) continue;
+          if (k === 'class') n.className = v;
+          else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+          else n.setAttribute(k, v === true ? '' : v);
+        }
+        for (const c of children.flat(Infinity)) {
+          if (c === null || c === undefined || c === false) continue;
+          n.appendChild(c instanceof Node ? c : document.createTextNode(String(c)));
+        }
+        return n;
+      }
+      const add = (parent, ...kids) => (parent.append(...kids.flat(Infinity).filter((k) => k !== null && k !== undefined && k !== false)), parent);
+
+      const stored = (window.__stored = [...(window.__seed || [])]);
+      const settings = {};
+      window.__saved = [];
+      window.__updated = [];
+      window.__toasts = [];
+      const db = {
+        saveEntry: async (e) => {
+          if (window.__failSave) throw new Error('full');
+          stored.push(structuredClone(e));
+          return e;
+        },
+        updateEntry: async (e) => {
+          const i = stored.findIndex((x) => x.id === e.id);
+          stored[i] = structuredClone(e);
+        },
+        listEntries: async () => stored.map((e) => structuredClone(e)),
+        listNights: async () => [],
+        getSetting: async (k, fallback) => (k in settings ? settings[k] : fallback),
+        setSetting: async (k, v) => void (settings[k] = v),
+      };
+      const toast = (msg) => {
+        window.__toasts.push(msg);
+        document.getElementById('toast').textContent = msg;
+      };
+
+      const sheet = document.getElementById('sheet');
+      let sheetFn = null;
+      function renderSheet() {
+        if (!sheetFn) return;
+        const a = document.activeElement;
+        const keepKey = a && sheet.contains(a) && a.dataset ? a.dataset.key : null;
+        sheet.hidden = false;
+        sheet.innerHTML = '';
+        const body = h('div', { class: 'sheet-body', role: 'dialog', 'aria-modal': 'true' }, h('button', { type: 'button', class: 'link back', onclick: closeSheet }, 'back'));
+        add(body, sheetFn(renderSheet));
+        sheet.appendChild(body);
+        const again = keepKey && body.querySelector(`[data-key="${CSS.escape(keepKey)}"]`);
+        if (again) again.focus();
+      }
+      function openSheet(fn) {
+        sheetFn = fn;
+        renderSheet();
+      }
+      function closeSheet() {
+        sheetFn = null;
+        sheet.hidden = true;
+        sheet.innerHTML = '';
+      }
+
+      const openWriting = () =>
+        openSheet(
+          writingSheet({
+            h,
+            getLang,
+            db,
+            toast,
+            onSaved: (entry) => window.__saved.push(structuredClone(entry)),
+            onUpdated: (entry) => window.__updated.push(structuredClone(entry)),
+          })
+        );
+      document.getElementById('open').addEventListener('click', openWriting);
+
+      // the low-mood card on its own
+      if (window.__low) {
+        const latest = { id: 'low-1', createdAt: Date.now() - 60000, silent: true, features: null, note: '', ...window.__low };
+        const card = document.getElementById('card');
+        const draw = () => {
+          card.innerHTML = '';
+          add(card, extras.lowMoodCard(latest, { evening: window.__evening === true }));
+        };
+        const extras = createExtras({ h, add, getLang, render: () => draw(), toast, db, getState: () => ({ entries: [latest] }), openSheet, closeSheet, goLens: () => {}, startRitual: () => {}, openBreathe: () => {}, openWriting: window.__noWriting ? undefined : openWriting });
+        draw();
+      }
+      document.documentElement.dataset.ready = '1';
+    </script>
+  </body>
+</html>

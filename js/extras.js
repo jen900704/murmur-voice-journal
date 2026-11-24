@@ -33,7 +33,7 @@ const S = {
     minutes: (m) => `${m} 分鐘`,
     close: '關閉',
     none: '沒有符合的作品。',
-    modes: { voice: '聲音', nights: '夜晚', jar: '小罐子' },
+    modes: { voice: '聲音', nights: '夜晚', jar: '小罐子', words: '語言鏡' },
     nightsEmpty: '還沒有夜晚的紀錄。晚上在「今天」可以開始睡前儀式。',
     jarTitle: '對自己好的小罐子',
     jarIntro: '你寫過的、對自己好的事。低潮的時候，可以從這裡抽一張。',
@@ -50,7 +50,16 @@ const S = {
     lowSmall: '心情低落時，有些人覺得這些小事有一點幫助。挑一件就好，不做也沒關係：',
     lowSmallOne: '如果想做點什麼，這件小事有些人覺得有幫助；不做也沒關係：',
     lowBreathe: '呼吸一分鐘',
-    smallThings: ['喝一杯溫的東西', '看看窗外兩分鐘', '洗把臉，或沖個熱水澡', '傳個貼圖給一個人，或在喜歡的貼文按個讚', '喝點水，或吃一點東西', '把一個小地方收乾淨，例如桌角', '聽一首以前喜歡的歌', '換一套舒服的衣服', '白天的話，走到巷口再走回來', '摸摸寵物，或抱著一個軟的東西', '把明天最小的一件事寫下來，然後先放著', '早一點躺下，不用馬上睡著', '去便利商店買個熱的', '如果你有信仰，上個香、禱告或念一段經'],
+    // small actions by the latest energy rating (1-2 tired, 3-5 middle, 6-7 some energy);
+    // anything with 白天 or 便利商店 is left out late at night
+    small: {
+      tired: ['喝一杯溫的東西', '躺著聽一首以前喜歡的歌', '換一套舒服的衣服', '蓋上毯子，或抱著一個軟的東西', '洗把臉', '看看窗外兩分鐘', '喝點水，或吃一點東西', '早一點躺下，不用馬上睡著'],
+      mid: ['沖個熱水澡', '泡一杯茶，慢慢喝完', '傳個貼圖給一個人，或在喜歡的貼文按個讚', '把一個小地方收乾淨，例如桌角', '把明天最小的一件事寫下來，然後先放著', '摸摸寵物，或幫植物澆水', '白天的話，走到巷口再走回來', '去便利商店買個熱的', '如果你有信仰，上個香、禱告或念一段經'],
+      up: ['伸展十分鐘', '煮一樣簡單的東西', '傳訊息或打電話給一個想到的人', '洗一批衣服，或換一張床單', '整理一個抽屜', '做一件放了很久的小事，做五分鐘就停', '白天的話，出門走十五分鐘', '白天的話，去一個喜歡的地方坐一下，例如公園或書店'],
+    },
+    lowEnergyNote: { tired: '依你記下的精力，挑的是不太花力氣的。', mid: '', up: '依你記下的精力，挑的是可以動一動的。' },
+    lowWrite: '寫一寫',
+    weekWriting: (n) => `寫了 ${n} 篇文字`,
     lowDismiss: '先不用',
     helpTitle: '想先讓你知道這些',
     helpBody: '你寫的筆記裡，有些字詞可能代表你現在很辛苦。筆記已經照常存在這個裝置上。如果你想找人說話，這些地方隨時都在。',
@@ -89,7 +98,7 @@ const S = {
     minutes: (m) => `${m} min`,
     close: 'Close',
     none: 'Nothing matches.',
-    modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar' },
+    modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar', words: 'Language mirror' },
     nightsEmpty: 'No nights yet. In the evening, start the bedtime ritual from Today.',
     jarTitle: 'Kindness jar',
     jarIntro: 'Kind things you have done for yourself. On a low day, draw one from here.',
@@ -106,7 +115,14 @@ const S = {
     lowSmall: 'Small things many people say help a little when they feel low. Pick one, or none:',
     lowSmallOne: 'If you want to do something, many people find this helps a little. Or do nothing at all:',
     lowBreathe: 'Breathe for a minute',
-    smallThings: ['Drink something warm', 'Look out a window for two minutes', 'Wash your face or take a warm shower', 'Text someone an emoji or a GIF, or like a post you enjoyed', 'Drink some water, or eat a little', 'Clear one small spot, like a corner of your desk', 'Play a song you used to love', 'Change into something comfortable', 'In the daytime, walk to the end of the block and back', 'Pet an animal, or hold something soft', 'Write down the smallest task for tomorrow, then leave it', 'Lie down a little early; no need to fall asleep right away', 'Pick up something warm from a coffee shop or convenience store', 'If you have a faith, pray, meditate, or read a passage'],
+    small: {
+      tired: ['Drink something warm', 'Lie down and play a song you used to love', 'Change into something comfortable', 'Pull a blanket over you, or hold something soft', 'Wash your face', 'Look out a window for two minutes', 'Drink some water, or eat a little', 'Lie down a little early; no need to fall asleep right away'],
+      mid: ['Take a warm shower', 'Make a cup of tea and drink it slowly', 'Text someone an emoji or a GIF, or like a post you enjoyed', 'Clear one small spot, like a corner of your desk', 'Write down the smallest task for tomorrow, then leave it', 'Pet an animal, or water a plant', 'In the daytime, walk to the end of the block and back', 'Pick up something warm from a coffee shop or convenience store', 'If you have a faith, pray, meditate, or read a passage'],
+      up: ['Stretch for ten minutes', 'Cook one simple thing', 'Text or call someone who comes to mind', 'Run one load of laundry, or change the sheets', 'Sort out one drawer', 'Take one small task you have put off and stop after five minutes', 'In the daytime, go out for a fifteen-minute walk', 'In the daytime, sit for a while somewhere you like, such as a park or a bookstore'],
+    },
+    lowEnergyNote: { tired: 'Going by your energy rating, these take very little effort.', mid: '', up: 'Going by your energy rating, these involve moving a little.' },
+    lowWrite: 'Write it out',
+    weekWriting: (n) => `${n} written ${n === 1 ? 'piece' : 'pieces'}`,
     lowDismiss: 'Not now',
     helpTitle: 'Before you go on',
     helpBody: 'Some words in your note can mean things are very hard right now. The note was saved on this device as usual. If you want to talk to someone, these are always available.',
@@ -126,7 +142,16 @@ const S = {
 const HEAVY = new Set(['suicide', 'self-harm', 'abuse', 'genocide', 'violence', 'mental illness', 'war', 'sexual content']);
 const TYPE_HUE = { film: 262, series: 200, book: 28, musical: 340, opera: 300, music: 160, short: 90 };
 
-export function createExtras({ h, add, getLang, render, toast, db, getState, openSheet, closeSheet, goLens, startRitual, openBreathe }) {
+// Which list of small actions fits an energy rating of 1 to 7. No rating means the middle list.
+export const ENERGY_LEVELS = ['tired', 'mid', 'up'];
+export function energyLevel(energy) {
+  if (!Number.isFinite(energy)) return 'mid';
+  return energy <= 2 ? 'tired' : energy >= 6 ? 'up' : 'mid';
+}
+// suggestions that mean going outside: not offered late at night
+const OUTSIDE = /白天|daytime|便利商店|convenience/i;
+
+export function createExtras({ h, add, getLang, render, toast, db, getState, openSheet, closeSheet, goLens, startRitual, openBreathe, openWriting }) {
   const L = () => S[getLang()] || S.en;
   const ex = { recs: null, type: 'all', tone: null, heavy: false, nights: [], loaded: false, jarPick: null, exchangeOpen: false, exchangeText: '' };
 
@@ -165,7 +190,8 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   function smallDecision(latest, things) {
     if (!pol.loaded) loadPolicy();
     if (pol.optIn !== true || !things.length) return null;
-    const all = L().smallThings;
+    // one numbering across the three lists, so an id names the same action at any energy level
+    const all = ENERGY_LEVELS.flatMap((k) => L().small[k]);
     const eligible = things.map((t) => `small-${all.indexOf(t)}`);
     const id = `small-${latest.id}-${eligible[0]}`.slice(0, 80);
     if (pol.dec && pol.dec.id === id) return pol.dec;
@@ -293,7 +319,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     return h(
       'div',
       { class: 'seg journal-modes', role: 'tablist' },
-      ['voice', 'nights', 'jar'].map((m) =>
+      ['voice', 'nights', 'jar', 'words'].map((m) =>
         h('button', { type: 'button', role: 'tab', 'aria-selected': mode === m ? 'true' : 'false', class: 'seg-btn' + (mode === m ? ' on' : ''), 'data-key': `jmode-${m}`, onclick: () => setMode(m) }, L().modes[m])
       )
     );
@@ -396,6 +422,19 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   }
 
   // ---------- low mood ----------
+  // The energy rating of the check-in the card is about; if that one has none, the most recent
+  // rating from the last 36 hours.
+  function latestEnergy(latest) {
+    if (Number.isFinite(latest.energy)) return latest.energy;
+    const entries = (getState && getState().entries) || [];
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const e = entries[i];
+      if (e.demo || !Number.isFinite(e.energy)) continue;
+      return Date.now() - e.createdAt < 36 * 3600 * 1000 ? e.energy : null;
+    }
+    return null;
+  }
+
   function lowMoodCard(latest, { evening = false } = {}) {
     if (!latest || !Number.isFinite(latest.mood) || latest.mood > 2) return null;
     if (ex.lowDismissed === latest.id) return null;
@@ -414,25 +453,27 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     if (!ex.jarPickFor || ex.jarPickFor.id !== latest.id) ex.jarPickFor = { id: latest.id, items: items.sort(() => Math.random() - 0.5).slice(0, 3) };
     const pick = ex.jarPickFor.items;
     // general small actions, not other users' posts: something outside oneself, with nothing to compare against
-    if (!ex.smallPick || ex.smallPick.lang !== getLang()) {
+    // matched to the latest energy rating: a tired person is not handed a walk
+    const level = energyLevel(latestEnergy(latest));
+    if (!ex.smallPick || ex.smallPick.lang !== getLang() || ex.smallPick.level !== level) {
       // no walking outside suggested late at night
       const late = new Date().getHours() >= 20 || new Date().getHours() < 6;
-      const things = L().smallThings.filter((t) => !(late && /白天|daytime|便利商店|convenience/i.test(t)));
-      ex.smallPick = { lang: getLang(), items: things.sort(() => Math.random() - 0.5).slice(0, 3) };
+      const things = L().small[level].filter((t) => !(late && OUTSIDE.test(t)));
+      ex.smallPick = { lang: getLang(), level, items: things.sort(() => Math.random() - 0.5).slice(0, 3) };
     }
     // in the evening the bedtime card sits right above, so this stays short: one kind thing, one
     // small action, breathing and help, and no second way into the ritual or the lenses
     const kinds = evening ? pick.slice(0, 1) : pick;
     // a pick cached in the afternoon may hold a daytime suggestion; not as the evening's only item
-    const small = evening ? ex.smallPick.items.filter((t) => !/白天|daytime|便利商店|convenience/i.test(t)).slice(0, 1) : ex.smallPick.items;
+    const small = evening ? ex.smallPick.items.filter((t) => !OUTSIDE.test(t)).slice(0, 1) : ex.smallPick.items;
     const smallDec = smallDecision(latest, small);
     return h(
       'div',
-      { class: 'low-card', role: 'note' },
+      { class: 'low-card', role: 'note', 'data-energy': level },
       h('h3', {}, L().lowTitle),
       kinds.length ? h('p', { class: 'small' }, L().lowBody) : null,
       kinds.length ? h('ul', { class: 'plain-list' }, kinds.map((p) => h('li', {}, p.text))) : null,
-      small.length ? h('p', { class: 'small' }, evening ? L().lowSmallOne : L().lowSmall) : null,
+      small.length ? h('p', { class: 'small' }, evening ? L().lowSmallOne : L().lowSmall, !evening && L().lowEnergyNote[level] ? ' ' + L().lowEnergyNote[level] : null) : null,
       small.length ? h('ul', { class: 'plain-list' }, small.map((t, i) => h('li', {}, t, i === 0 ? smallFeedback(smallDec) : null))) : null,
       h(
         'div',
@@ -440,6 +481,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
         // at the lowest rating, finding a person to talk to comes first
         latest.mood <= 1 ? h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp) : null,
         openBreathe ? h('button', { type: 'button', class: 'link', onclick: openBreathe }, L().lowBreathe) : null,
+        openWriting ? h('button', { type: 'button', class: 'link', 'data-key': 'low-write', onclick: () => openWriting() }, L().lowWrite) : null,
         evening ? null : h('button', { type: 'button', class: 'link', onclick: startRitual }, L().lowRitual),
         evening ? null : h('button', { type: 'button', class: 'link', onclick: () => goLens('home') }, L().lowLens),
         latest.mood <= 1 ? null : h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp),
@@ -537,13 +579,17 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     }
     const since = Date.now() - 7 * 86400000;
     const entries = ((getState && getState().entries) || []).filter((e) => !e.demo && e.features && e.createdAt >= since);
-    const silent = ((getState && getState().entries) || []).filter((e) => !e.demo && e.silent && e.createdAt >= since);
+    const quiet = ((getState && getState().entries) || []).filter((e) => !e.demo && e.silent && e.createdAt >= since);
+    // a saved text from writing mode carries its prompt; a mood check-in without a recording does not
+    const silent = quiet.filter((e) => !e.prompt);
+    const written = quiet.filter((e) => e.prompt);
     const nights = ex.nights.filter((n) => n.createdAt >= since);
     const kinds = nights.map((n) => n.kindness).filter(Boolean);
-    if (!entries.length && !silent.length && !nights.length) return null;
+    if (!entries.length && !quiet.length && !nights.length) return null;
     const parts = [];
     if (entries.length) parts.push(L().weekVoice(entries.length));
     if (silent.length) parts.push(L().weekSilent(silent.length));
+    if (written.length) parts.push(L().weekWriting(written.length));
     if (nights.length) parts.push(L().weekNights(nights.length));
     return h(
       'details',

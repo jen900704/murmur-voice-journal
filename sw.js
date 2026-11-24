@@ -1,7 +1,7 @@
 // Offline support. The cache name is set by tools/bump-cache.mjs (npm run prepare-release).
 // Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-0ed6d2814f';
+const CACHE = 'murmur-3beefeb3e2';
 const SHELL = [
   './',
   './index.html',
@@ -28,6 +28,24 @@ const SHELL = [
   './js/policy.js',
   './js/search.js',
   './js/rag.js',
+  './js/calm.js',
+  './js/writing.js',
+  './js/language-view.js',
+  './js/langlab/importers.js',
+  './js/langlab/lexicon-en.js',
+  './js/langlab/lexicon-zh.js',
+  './js/langlab/meta.js',
+  './js/langlab/report.js',
+  './js/langlab/score.js',
+  './js/langlab/store.js',
+  './js/langlab/tokenize.js',
+  './js/langlab/vader.js',
+  './js/langlab/zip.js',
+  './data/lexica/vader.json',
+  './data/lexica/NOTICE.txt',
+  './css/calm.css',
+  './css/language.css',
+  './css/writing.css',
   './data/recs.json',
   './fonts/bricolage-grotesque-latin-wght-normal.woff2',
   './icons/icon.svg',

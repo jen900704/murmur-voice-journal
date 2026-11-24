@@ -6,6 +6,11 @@ The first public version, built and reviewed over one night. Each area below wen
 
 ### Added
 
+- Language mirror: on-device analysis of the person's own writing and of their own social media exports, with word-level evidence, intervals, limits and a downloadable evidence report (js/langlab, js/language-view.js). Literature, licenses and design in docs/language-analysis.
+- "When it gets too much": breathing, grounding and self-compassion phrases in one flow (js/calm.js).
+- "Write it out": writing by weight with Pennebaker-style deep prompts and a closing (js/writing.js); the low-mood note's small action now follows the latest energy rating.
+- Risk screen also catches past tense in English ("I wanted to die").
+
 - Copy pass on interface text and daily prompts (same names for the same features everywhere; prompts that work on a bad day and assume no family closeness, money or job). Inside a lens question, an earlier answer is cut short, and a blank one reads as "it".
 
 - Content passes: theory-lens summaries reframed so any answer reads naturally, long questions shortened, attributions checked against Corey (for example WDEP credited to Wubbolding building on Glasser); bedtime scripts split into shorter spoken lines with more pause time and fewer characters a speech voice may misread; recommendations fact-checked (Taiwan titles, creators, years, runtimes) with content notes added. Titles without a confirmed Taiwan release name show the original title.

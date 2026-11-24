@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>語言鏡 test harness</title>
+    <!-- Test only. Mounts js/language-view.js with small stand-ins for the app's h(), add(),
+         toast() and openSheet(), so the view can be tested before app.js is wired. -->
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/language.css" />
+  </head>
+  <body>
+    <main id="main" tabindex="-1"></main>
+    <div id="sheet" class="sheet" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="language-harness.js"></script>
+  </body>
+</html>

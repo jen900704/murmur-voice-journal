@@ -45,7 +45,7 @@ export function cleanEntry(e) {
     lang: str(e.lang, 10),
     mood: rating(e.mood),
     energy: rating(e.energy),
-    note: str(e.note, 400),
+    note: str(e.note, 4000), // written pieces (js/writing.js) can run long
     demo: e.demo === true,
     features,
     silent: silent || undefined,

@@ -308,7 +308,14 @@ test('every app file is in the service worker list, so edits to it change the ca
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   const listed = new Set(shellFiles(sw));
   const need = [];
-  for (const dir of ['js', 'css', 'data']) for (const f of readdirSync(new URL(`../${dir}/`, import.meta.url))) need.push(`${dir}/${f}`);
+  // walk subfolders too (js/langlab, data/lexica)
+  const walk = (dir) => {
+    for (const f of readdirSync(new URL(`../${dir}/`, import.meta.url), { withFileTypes: true })) {
+      if (f.isDirectory()) walk(`${dir}/${f.name}`);
+      else need.push(`${dir}/${f.name}`);
+    }
+  };
+  for (const dir of ['js', 'css', 'data']) walk(dir);
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   for (const m of html.matchAll(/(?:src|href)="([^"#:]+)"/g)) need.push(m[1].replace(/^\.\//, ''));
   const missing = need.filter((f) => !listed.has(f));
@@ -321,10 +328,10 @@ test('the service worker cache name matches the app files (run node tools/bump-c
 });
 
 test('backup records are checked before they are stored', () => {
-  const ok = { id: 'a', createdAt: 1.7e12, mood: 3, energy: 9, note: 'x'.repeat(900), features: { ok: true, f0MedianHz: 200, quality: { flags: ['noisy', 3] }, contour: [{ f0: 200, e: 40 }, 'x', { f0: 'y', e: 3 }] } };
+  const ok = { id: 'a', createdAt: 1.7e12, mood: 3, energy: 9, note: 'x'.repeat(5000), features: { ok: true, f0MedianHz: 200, quality: { flags: ['noisy', 3] }, contour: [{ f0: 200, e: 40 }, 'x', { f0: 'y', e: 3 }] } };
   const e = cleanEntry(ok);
   assert.equal(e.energy, null);
-  assert.equal(e.note.length, 400);
+  assert.equal(e.note.length, 4000);
   assert.deepEqual(e.features.quality.flags, ['noisy']);
   assert.deepEqual(e.features.contour, [{ f0: 200, e: 40 }, { f0: null, e: 0 }, { f0: null, e: 3 }]);
   assert.equal(cleanEntry({ ...ok, createdAt: 9e15 }), null);

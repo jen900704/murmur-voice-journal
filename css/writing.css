@@ -1,0 +1,113 @@
+/* Writing mode (js/writing.js). Loaded by that module the first time the sheet opens. */
+.writing-tabs {
+  margin: 12px 0 14px;
+  width: max-content;
+  max-width: 100%;
+}
+.writing-tabs .seg-btn {
+  min-width: 64px;
+  min-height: 40px;
+}
+.writing-label {
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+.writing-note {
+  margin: 0 0 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  background: color-mix(in srgb, var(--amber) 12%, var(--surface));
+}
+.writing-note h3 {
+  margin: 0 0 6px;
+}
+.writing-note .plain-list {
+  margin-bottom: 8px;
+}
+.writing-help summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  min-height: 40px;
+  padding: 8px 0;
+}
+.writing-prompts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.writing-prompt {
+  appearance: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  line-height: 1.55;
+  min-height: 44px;
+}
+.writing-prompt.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.writing-area {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+.writing-area p {
+  margin: 0;
+}
+.writing-chosen {
+  padding-left: 12px;
+  border-left: 3px solid var(--accent);
+  line-height: 1.55;
+}
+.writing-day-n {
+  font-weight: 600;
+}
+.writing-text,
+.writing-input {
+  width: 100%;
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.writing-text {
+  min-height: 40vh;
+  line-height: 1.7;
+  resize: vertical;
+}
+.writing-input {
+  min-height: 44px;
+}
+.writing-fields {
+  display: grid;
+  gap: 8px;
+}
+.writing-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.writing-timer .link {
+  text-align: left;
+}
+.writing-timer-line {
+  margin: 0;
+}
+.writing-count {
+  flex: none;
+  padding-top: 10px;
+  font-variant-numeric: tabular-nums;
+}

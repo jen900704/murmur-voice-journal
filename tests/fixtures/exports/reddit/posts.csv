@@ -1,0 +1,4 @@
+id,permalink,date,ip,subreddit,gildings,title,url,body
+abc,https://www.reddit.com/r/test/1,2021-03-04 12:34:56 UTC,203.0.113.7,test,0,"A question, with a comma",,"First line
+second line with ""quotes"" inside"
+abd,https://www.reddit.com/r/test/2,2021-03-05 01:00:00 UTC,203.0.113.7,test,0,Deleted one,,[deleted]

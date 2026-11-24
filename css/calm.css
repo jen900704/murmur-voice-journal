@@ -1,0 +1,173 @@
+/* Calm now: breathing with a hold, 5-4-3-2-1 grounding, phrases to say to oneself.
+   Loaded after style.css; the breathing circle itself is styled there. */
+
+/* the circle: a glow that grows with the in-breath, and the seconds left in the middle */
+.breathe-circle {
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 0 transparent;
+}
+.breathe-circle.in,
+.breathe-circle.hold {
+  box-shadow: 0 0 46px 14px var(--accent-soft);
+  box-shadow: 0 0 46px 14px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.breathe-circle.in {
+  transition:
+    transform 4s ease-in-out,
+    box-shadow 4s ease-in-out;
+}
+.breathe-circle.hold {
+  transform: scale(1);
+}
+.breathe-circle.out {
+  box-shadow: 0 0 10px 2px transparent;
+  transition:
+    transform 6s ease-in-out,
+    box-shadow 6s ease-in-out;
+}
+.breathe-count {
+  font-family: var(--display);
+  font-size: 2.6rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.breathe-patterns {
+  justify-content: center;
+  padding: 6px 0 0;
+}
+.breathe-flow .toggle.calm-voice {
+  justify-content: center;
+  align-items: center;
+  margin: 14px 0 4px;
+  color: var(--muted);
+}
+.breathe-flow .toggle.calm-voice input {
+  margin-top: 0;
+}
+
+/* the one large button */
+.btn.calm-start {
+  width: 100%;
+  min-height: 96px;
+  padding: 22px 20px;
+  border-radius: 24px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.breathe-flow.compact .actions {
+  margin-top: 8px;
+}
+
+/* big text for one thing at a time */
+.calm-big {
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+  margin: 10px 0 6px;
+}
+.breathe-phase.calm-big {
+  min-height: 0;
+}
+.breathe-handoff,
+.ground {
+  text-align: center;
+  padding: 18px 0 4px;
+}
+.ground-progress {
+  margin: 0;
+}
+.ground-num {
+  font-family: var(--display);
+  font-size: 5.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  margin: 10px 0 4px;
+}
+.ground-hint,
+.breathe-handoff .muted {
+  margin: 0 0 6px;
+}
+.calm-actions {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.calm-actions .calm-next {
+  width: 100%;
+  min-height: 60px;
+  font-size: 1.15rem;
+}
+
+/* phrases */
+.calm-phrases {
+  margin: 26px 0 0;
+  padding: 16px 18px 12px;
+  border-radius: 18px;
+  background: var(--surface);
+}
+.calm-phrases h3 {
+  margin: 0 0 4px;
+}
+.calm-picked {
+  min-height: 3em;
+  margin: 8px 0 10px;
+}
+.calm-picked:empty {
+  display: none;
+}
+.calm-phrase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.calm-phrase-list li + li {
+  border-top: 1px solid var(--line);
+}
+.calm-phrase {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+  text-align: start;
+  cursor: pointer;
+}
+.calm-phrase.on {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.calm-body-note {
+  margin: 22px 0 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+}
+.calm-help {
+  margin: 4px 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe-circle,
+  .breathe-circle.in,
+  .breathe-circle.hold,
+  .breathe-circle.out {
+    transition: none;
+    transform: scale(0.8);
+    box-shadow: none;
+  }
+}

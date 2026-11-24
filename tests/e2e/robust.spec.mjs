@@ -162,7 +162,7 @@ test.describe('backup import', () => {
     });
     await importFile(page, data);
     const [big] = await storedEntries(page);
-    expect(big.note.length).toBeLessThanOrEqual(400);
+    expect(big.note.length).toBeLessThanOrEqual(4000);
     expect(big.mood).toBeNull();
     const [night] = await stored(page, 'nights');
     expect(night.worry.length).toBeLessThanOrEqual(1000);
