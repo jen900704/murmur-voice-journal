@@ -231,7 +231,7 @@ test('lenses unsuited to loss are excluded for that topic', () => {
 
 
 test('help numbers are matched as whole numbers only', () => {
-  for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '(911)']) assert.ok(HELP_NUMBER.test(t), t);
+  for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '(911)', 'Samaritans on 116 123', 'Lifeline 13 11 14']) assert.ok(HELP_NUMBER.test(t), t);
   for (const t of ['我 1988 年出生', '民國 113 年', '113年的計畫', 'on 9/11', '21130', '1925/1/1']) assert.ok(!HELP_NUMBER.test(t), t);
 });
 

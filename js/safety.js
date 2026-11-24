@@ -123,7 +123,9 @@ export function checkRisk(text) {
 }
 
 // Help lines given in model replies, as whole numbers (not inside 1988 or 2113, not 113 年).
-export const HELP_NUMBER = /(?:^|[^\d/])(?:1925|1995|1980|113|988|911)(?![\d/]|\s*年)/;
+// Also common lines elsewhere (UK and Ireland 116 123, Australia 13 11 14, text 741741, 112, 999),
+// so a reply that gives a local number for someone outside Taiwan and the US is not held back.
+export const HELP_NUMBER = /(?:^|[^\d/])(?:1925|1995|1980|113|988|911|116\s?123|13\s?11\s?14|741741|112|999)(?![\d/]|\s*年)/;
 
 // Help lines by region. Shown for the region the person picks (a guess from the time zone
 // at first), so a person in Taiwan does not have to read past US numbers in a hard moment.
