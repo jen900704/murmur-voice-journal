@@ -149,7 +149,7 @@ export const TRACKS = [
     },
     en: {
       name: 'Keeping yourself company',
-      style: 'in the spirit of person-centered therapy',
+      style: 'in the spirit of the person-centered approach',
       core: [
         ['Whatever you felt today can stay here for now.', 5],
         ['You do not have to talk yourself out of feeling this way.', 5],
@@ -215,7 +215,7 @@ export const TRACKS = [
     },
     en: {
       name: 'A small moment from today',
-      style: 'in the spirit of existential therapy',
+      style: 'in the spirit of the existential approach',
       core: [
         ['Today you made some choices.', 3],
         ['Some were what you wanted. Some were simply what you could manage.', 5],
@@ -233,7 +233,7 @@ export const TRACKS = [
     lens: 'narrative',
     zh: {
       name: '讓煩惱先放在門外',
-      style: '敘事治療風格',
+      style: '敘事取向風格',
       many: { 0: '想像今晚心上的這幾件事，都裝在一個包包裡。你今天一路都帶著它。' },
       core: [
         ['想像那件讓你在意的事，是一個包包。你今天一路都帶著它。', 5],
@@ -248,7 +248,7 @@ export const TRACKS = [
     },
     en: {
       name: 'Setting the worry outside the door',
-      style: 'in the spirit of narrative therapy',
+      style: 'in the spirit of the narrative approach',
       many: { 0: 'Imagine the things on your mind packed into one bag you have carried around all day.' },
       core: [
         ['Imagine the thing on your mind as a bag you have carried around all day.', 5],
@@ -280,7 +280,7 @@ export const TRACKS = [
     },
     en: {
       name: 'What went okay today',
-      style: 'in the spirit of solution-focused therapy',
+      style: 'in the spirit of the solution-focused approach',
       core: [
         ['Think back over today. Was there one thing, however small, that went okay?', 7],
         ['If nothing comes to mind, that is fine.', 4],
@@ -319,7 +319,7 @@ export const TRACKS = [
     },
     en: {
       name: 'Letting images drift up',
-      style: 'in the spirit of psychoanalytic therapy',
+      style: 'in the spirit of the psychoanalytic approach',
       note: 'Lets pictures surface on their own. On a heavy night, another track is a better pick.',
       core: [
         ['First, a way out. If a picture that comes up is upsetting, open your eyes.', 4],
@@ -362,7 +362,7 @@ export const TRACKS = [
     },
     en: {
       name: "Setting down other people's worries for tonight",
-      style: 'in the spirit of family systems therapy',
+      style: 'in the spirit of the family systems approach',
       core: [
         ['Today you may have worried quite a lot on behalf of other people.', 6],
         ["Other people's feelings can drift onto you, like weather.", 7],
@@ -383,7 +383,7 @@ export const TRACKS = [
     lens: 'behavioral',
     zh: {
       name: '放鬆身體',
-      style: '行為治療的漸進式放鬆',
+      style: '行為取向的漸進式放鬆',
       core: [
         ['如果身體有受傷或疼痛的地方，那裡就不用出力，讓它休息就好。', 4],
         ['我們從腳開始。輕輕把腳趾往下彎。', 3],
@@ -403,7 +403,7 @@ export const TRACKS = [
     },
     en: {
       name: 'Relaxing the body',
-      style: 'progressive relaxation from behavior therapy',
+      style: 'progressive relaxation from the behavioral approach',
       core: [
         ['If any part of your body is injured or sore, skip the tensing there and just let it rest.', 4],
         ['Start with your feet. Gently curl your toes.', 3],
@@ -440,7 +440,7 @@ export const TRACKS = [
     },
     en: {
       name: 'A little encouragement',
-      style: 'in the spirit of Adlerian therapy',
+      style: 'in the spirit of the Adlerian approach',
       core: [
         ["Something you did today may have made someone's day a little easier, even if you did not see it.", 7],
         ['Maybe just a thank you, or listening to someone all the way through.', 6],

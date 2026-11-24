@@ -180,7 +180,7 @@ export const LENSES = [
     people: 'B. F. Skinner; Joseph Wolpe; Albert Bandura; Arnold Lazarus',
     excludeTopics: ['loss'],
     zh: {
-      name: '行為治療',
+      name: '行為取向',
       idea: '行為是在情境中被學會、被維持的。看清楚「之前發生什麼、做了什麼、之後發生什麼」，就能設計小而具體的改變，並且用結果來檢驗。',
       steps: [
         { q: '最近一次這個困擾出現時，前面發生了什麼？（時間、地點、和誰、在做什麼）', why: '行為取向先看觸發的情境（A，前因）。' },
@@ -193,7 +193,7 @@ export const LENSES = [
       misses: '比較少探索意義和情緒的內在經驗。比較嚴重的焦慮或創傷（例如需要逐步暴露時）可以和心理師或醫師一起規劃，不要自己硬撐。',
     },
     en: {
-      name: 'Behavior therapy',
+      name: 'Behavioral',
       idea: 'Behavior is learned and maintained in context. Seeing clearly what came before, what you did, and what followed lets you design small, concrete changes and test them by their results.',
       steps: [
         { q: 'The last time this worry showed up, what was happening just before? (Time, place, who was there, what you were doing.)', why: 'A behavioral approach starts with the trigger (A, antecedent).' },
@@ -216,7 +216,7 @@ export const LENSES = [
       idea: '和難受的想法、感受對抗，常常讓它們更大。練習不帶評價地注意它們，和它們保持一點距離，然後仍然朝自己在乎的方向前進。這裡的正念不是正向思考，也不需要任何宗教信仰。',
       steps: [
         { q: '花三個呼吸的時間，注意現在的感受，不去改變它。然後寫下：這個困擾最常對你說的一句話是什麼？', why: '正念從不評價地注意開始。' },
-        { rewrite: 'defuse', q: '把那句話讀成：「我注意到我有一個想法：……」。這樣看它，你和它的距離有沒有變化？', why: '接納與承諾治療（ACT，Hayes）把這叫做認知脫鉤：想法還在，但你不一定要照它說的做。' },
+        { rewrite: 'defuse', q: '把那句話讀成：「我注意到我有一個想法：……」。這樣看它，你和它的距離有沒有變化？', why: '接納與承諾取向（ACT，Hayes）把這叫做認知脫鉤：想法還在，但你不一定要照它說的做。' },
         { q: '就算這個想法和感受還在，今天你仍然想朝什麼重要的方向做一點點？', why: '接納不是放棄，而是把力氣留給你在乎的事。' },
       ],
       noticed: '這個困擾最常說的話：「{1}」。把它看成「一個想法」時，你注意到：「{2}」。即使它還在，你仍想朝這個方向做一點點：「{3}」。',
@@ -229,7 +229,7 @@ export const LENSES = [
       idea: 'Fighting difficult thoughts and feelings often makes them bigger. Notice them without judgment, hold them a little more lightly, and keep moving toward what matters to you. Mindfulness here is not positive thinking, and it needs no religious belief.',
       steps: [
         { q: 'Take three breaths and notice what you feel, without changing it. Then write: what is the sentence this worry says to you most often?', why: 'Mindfulness starts with noticing without judgment.' },
-        { rewrite: 'defuse', q: 'Read it as: "I notice I am having the thought that ...". Does the distance between you and the thought change?', why: 'Acceptance and commitment therapy (ACT, Hayes) calls this defusion: the thought is still there, but you do not have to do what it says.' },
+        { rewrite: 'defuse', q: 'Read it as: "I notice I am having the thought that ...". Does the distance between you and the thought change?', why: 'The acceptance and commitment approach (ACT, Hayes) calls this defusion: the thought is still there, but you do not have to do what it says.' },
         { q: 'Even with this thought and feeling still here, what small step toward something important do you want to take today?', why: 'Acceptance is not giving up; it frees energy for what you care about.' },
       ],
       noticed: 'What the worry says most often: "{1}". Seeing it as "a thought", you noticed: "{2}". Even with it here, the step you still want to take: "{3}".',
@@ -244,7 +244,7 @@ export const LENSES = [
     people: 'Albert Ellis',
     excludeTopics: ['loss'],
     zh: {
-      name: '理情行為治療（REBT）',
+      name: '理情行為取向（REBT）',
       idea: '讓我們困擾的，常常不只是事件本身，而是我們對事件的信念，特別是那些絕對的「應該」和「必須」。',
       steps: [
         { q: '發生了什麼事？只寫事實，像攝影機拍到的那樣。（A，觸發事件）', why: '這是 Ellis 的 ABC 模式：REBT 先把事件和我們對事件的解讀分開。' },
@@ -258,7 +258,7 @@ export const LENSES = [
       misses: '有時太直接。有些「應該」反映的是真實的不公平，問題不只在想法；這時更需要的是改變處境或找到支持。',
     },
     en: {
-      name: 'Rational emotive behavior therapy (REBT)',
+      name: 'Rational emotive behavior (REBT)',
       idea: 'What upsets us is often less the event itself than our beliefs about it, especially absolute "shoulds" and "musts".',
       steps: [
         { q: 'What happened? Only the facts, as a camera would have recorded them. (A, the activating event)', why: 'This is Ellis\'s ABC model: REBT first separates the event from our interpretation of it.' },
@@ -278,10 +278,10 @@ export const LENSES = [
     people: 'Aaron T. Beck; Judith Beck; Donald Meichenbaum',
     excludeTopics: ['loss'],
     zh: {
-      name: '認知治療',
+      name: '認知取向',
       idea: '我們的感受深受自動冒出來的想法影響。把想法當成可以檢驗的假設，而不是事實，常能找到更平衡的看法。',
       steps: [
-        { q: '這件事發生時，你腦中第一個冒出來的想法是什麼？', why: 'Beck 把這種想法叫做「自動化思考」，認知治療從抓住它開始。' },
+        { q: '這件事發生時，你腦中第一個冒出來的想法是什麼？', why: 'Beck 把這種想法叫做「自動化思考」，認知取向從抓住它開始。' },
         { q: '有什麼證據支持這個想法？又有什麼證據不太符合它？', why: '把想法當成假設，看看兩邊的證據。' },
         { q: '如果是你在乎的人（朋友、家人、學弟妹都可以）遇到一樣的事、有一樣的想法，你會對他說什麼？', why: '我們對朋友通常比對自己公平，這能幫你找到更平衡的看法。' },
       ],
@@ -291,10 +291,10 @@ export const LENSES = [
       misses: '不是所有的難受都來自認知扭曲（Beck 指的是想法偏離事實的習慣，例如非黑即白）。有時你的想法是準確的，問題在處境本身；這時要做的不是改想法，而是處理處境。',
     },
     en: {
-      name: 'Cognitive therapy',
+      name: 'Cognitive',
       idea: 'How we feel is shaped by thoughts that pop up automatically. Treating a thought as a hypothesis to test, not a fact, often leads to a more balanced view.',
       steps: [
-        { q: 'When this happened, what was the first thought that popped into your head?', why: 'Beck called these automatic thoughts, and cognitive therapy starts by catching one.' },
+        { q: 'When this happened, what was the first thought that popped into your head?', why: 'Beck called these automatic thoughts, and the cognitive approach starts by catching one.' },
         { q: 'What evidence supports that thought? What evidence does not quite fit it?', why: 'Treat the thought as a hypothesis and look at both sides.' },
         { q: 'If someone you care about (a friend, a family member, a coworker) had the same experience and the same thought, what would you tell them?', why: 'We are usually fairer to friends than to ourselves, which helps find a balanced view.' },
       ],
@@ -310,10 +310,10 @@ export const LENSES = [
     people: 'William Glasser; Robert Wubbolding',
     excludeTopics: ['loss'],
     zh: {
-      name: '現實治療與選擇理論',
+      name: '現實取向與選擇理論',
       idea: '我們都在努力滿足生存、愛與歸屬、權力（成就感）、自由和樂趣這五種需求。與其停在過去，不如看清楚：我想要什麼、我正在做什麼、這有沒有用、接下來的計畫是什麼。',
       steps: [
-        { q: '在這件事裡，你真正想要的是什麼？（W，想要）', why: '現實治療從釐清你想要什麼開始。這四題是 Wubbolding 依 Glasser 的選擇理論整理出的 WDEP。' },
+        { q: '在這件事裡，你真正想要的是什麼？（W，想要）', why: '現實取向從釐清你想要什麼開始。這四題是 Wubbolding 依 Glasser 的選擇理論整理出的 WDEP。' },
         { q: '你現在實際上在做什麼？請寫具體的行為，不是感覺。（D，行動）', why: '它把焦點放在你能掌握的行動上。' },
         { q: '你現在做的事，有讓你更接近想要的嗎？（E，評估）', why: '自我評估是這個取向的核心：由你判斷，不是由別人評價。' },
         { q: '一個簡單、今天或明天就能做、靠你自己就能完成的計畫是什麼？（P，計畫）', why: '好的計畫要小、具體、立刻可做，而且不依賴別人先改變。' },
@@ -324,10 +324,10 @@ export const LENSES = [
       misses: '強調可控制的選擇，可能低估創傷、病痛和社會結構的壓力。它不是在說你的痛苦是你「選」的。',
     },
     en: {
-      name: 'Reality therapy and choice theory',
+      name: 'Reality and choice theory',
       idea: 'We are all trying to meet five basic needs: survival, love and belonging, power (a sense of achievement), freedom, and fun. Rather than dwelling on the past, look clearly at what you want, what you are doing, whether it works, and what your plan is.',
       steps: [
-        { q: 'In this situation, what do you really want? (W, wants)', why: 'Reality therapy starts by clarifying what you want. These four questions follow WDEP, which Wubbolding built on Glasser\'s choice theory.' },
+        { q: 'In this situation, what do you really want? (W, wants)', why: 'The reality approach starts by clarifying what you want. These four questions follow WDEP, which Wubbolding built on Glasser\'s choice theory.' },
         { q: 'What are you actually doing right now? Write specific actions, not feelings. (D, doing)', why: 'It focuses on the actions you have control over.' },
         { q: 'Is what you are doing getting you closer to what you want? (E, evaluation)', why: 'Self-evaluation is the core: you are the one who decides, not anyone else.' },
         { q: 'What is a simple plan you can carry out yourself, today or tomorrow? (P, plan)', why: 'Good plans are small, specific, immediate, and do not depend on someone else changing first.' },
@@ -344,10 +344,10 @@ export const LENSES = [
     people: 'Jean Baker Miller; Carolyn Zerbe Enns; Laura Brown',
     excludeTopics: [],
     zh: {
-      name: '女性主義治療',
+      name: '女性主義取向',
       idea: '個人的困擾，常常和社會角色、性別期待和權力關係有關。分清楚哪些是你的，哪些是別人或社會給的，本身就有力量。',
       steps: [
-        { q: '有沒有哪些「應該」是別人或社會給的？例如身為女兒、媳婦、長子長女「就應該……」。哪些你也認同？哪些不太同意，卻一直照著做？', why: '女性主義治療會做性別角色分析：看見那些被視為理所當然的期待（職場上「員工就應該……」也算），再分清楚哪些是你自己也要的。' },
+        { q: '有沒有哪些「應該」是別人或社會給的？例如身為女兒、媳婦、長子長女「就應該……」。哪些你也認同？哪些不太同意，卻一直照著做？', why: '女性主義取向會做性別角色分析：看見那些被視為理所當然的期待（職場上「員工就應該……」也算），再分清楚哪些是你自己也要的。' },
         { q: '在這件事裡，通常誰說了算？（例如長輩、主管、負擔家計的人）你說的話有多少份量？這怎麼影響你？', why: '它也會做權力分析，因為困擾常和不平等的位置有關。' },
         { q: '哪些部分是你可以處理的？哪些其實不是你一個人的責任？', why: '分清楚個人和結構，可以減少不必要的自責。' },
       ],
@@ -357,10 +357,10 @@ export const LENSES = [
       misses: '個人內在的情緒處理談得比較少。分析結構不代表一定要正面衝突，你的安全永遠優先。',
     },
     en: {
-      name: 'Feminist therapy',
+      name: 'Feminist',
       idea: 'Personal distress is often tied to social roles, gender expectations, and power. Sorting out what is yours from what was handed to you is powerful in itself.',
       steps: [
-        { q: 'Are there "shoulds" here that came from other people or society? For example, as a daughter, a mother, the oldest child, or the "strong one," you "should ...". Which do you share, and which do you follow without really agreeing?', why: 'Feminist therapy uses gender-role analysis to make taken-for-granted expectations visible (workplace ones count too), and to sort out which of them you also want for yourself.' },
+        { q: 'Are there "shoulds" here that came from other people or society? For example, as a daughter, a mother, the oldest child, or the "strong one," you "should ...". Which do you share, and which do you follow without really agreeing?', why: 'The feminist approach uses gender-role analysis to make taken-for-granted expectations visible (workplace ones count too), and to sort out which of them you also want for yourself.' },
         { q: 'In this situation, who usually has the final say (a parent, a boss, whoever earns the money)? How much weight do your words carry? How does that affect you?', why: 'It also uses power analysis, since distress is often tied to unequal positions.' },
         { q: 'Which parts can you handle? Which parts are not yours alone to carry?', why: 'Separating the personal from the structural can reduce unnecessary self-blame.' },
       ],
@@ -408,10 +408,10 @@ export const LENSES = [
     people: 'Michael White; David Epston',
     excludeTopics: ['loss'],
     zh: {
-      name: '敘事治療',
+      name: '敘事取向',
       idea: '人不是問題，問題才是問題。我們活在自己和別人說的故事裡，而故事是可以被重新說的。',
       steps: [
-        { q: '如果這個困擾是一個角色，你會給它取什麼名字？', why: 'White 和 Epston 的敘事治療會把問題外化：把它和「你這個人」分開。' },
+        { q: '如果這個困擾是一個角色，你會給它取什麼名字？', why: 'White 和 Epston 的敘事取向會把問題外化：把它和「你這個人」分開。' },
         { q: '「{1}」通常怎麼影響你？它叫你做什麼、相信什麼？', why: '看清楚問題的影響，就能開始看見你和它的關係。' },
         { q: '有沒有一次，你沒有照「{1}」說的做？很小的一次也算，例如晚了五分鐘才照做。那一次透露了你是怎樣的人？想不到也沒關係。', why: '這是「獨特結果」：主流故事之外，關於你的另一個故事。' },
       ],
@@ -421,10 +421,10 @@ export const LENSES = [
       misses: '重寫故事需要時間，通常也需要見證的人。外化不適合用在自己對別人造成的傷害上，那需要的是負起責任。',
     },
     en: {
-      name: 'Narrative therapy',
+      name: 'Narrative',
       idea: 'The person is not the problem; the problem is the problem. We live inside stories told by ourselves and others, and stories can be retold.',
       steps: [
-        { q: 'If this worry were a character, what would you name it?', why: 'White and Epston\'s narrative therapy externalizes the problem, separating it from who you are.' },
+        { q: 'If this worry were a character, what would you name it?', why: 'White and Epston\'s narrative approach externalizes the problem, separating it from who you are.' },
         { q: 'How does "{1}" usually affect you? What does it tell you to do or believe?', why: 'Mapping the problem\'s influence makes your relationship with it visible.' },
         { q: 'Was there a time you did not do what "{1}" told you? A small one counts, like waiting five minutes before doing what it said. What does that say about you as a person? If nothing comes, that is fine.', why: 'This is a "unique outcome": another story about you, outside the dominant one.' },
       ],
@@ -536,12 +536,12 @@ const SUMMARY_TEXT = {
   behavioral: {
     zh: {
       shorts: ['困擾出現之前發生的事', '當時做了什麼，之後怎麼樣', '下次可以試的小做法'],
-      perspective: '行為治療認為行為是在情境裡學會、也在情境裡被維持的。它把一次經過拆成前因、行為、後果三段來看，特別留意那些短時間內讓人好過、長期卻讓困擾留下來的做法。它不靠意志力，而是把改變做成很小、看得見的一步，再用結果來檢驗。',
+      perspective: '行為取向認為行為是在情境裡學會、也在情境裡被維持的。它把一次經過拆成前因、行為、後果三段來看，特別留意那些短時間內讓人好過、長期卻讓困擾留下來的做法。它不靠意志力，而是把改變做成很小、看得見的一步，再用結果來檢驗。',
       tryThis: '幫一個小做法（可以是剛才寫的那個）在行事曆上排一個時間。做之前和做之後各用 0 到 10 記一下心情，一週後比較看看。',
     },
     en: {
       shorts: ['What was happening just before', 'What you did, and what followed', 'A small different response for next time'],
-      perspective: 'Behavior therapy holds that behavior is learned and kept going in context. It breaks one episode into what came before, what was done, and what followed, and looks closely at responses that bring relief in the short term while keeping the problem in place over time. It does not rely on willpower. Change is made into one small, observable step and then tested by its results.',
+      perspective: 'The behavioral approach holds that behavior is learned and kept going in context. It breaks one episode into what came before, what was done, and what followed, and looks closely at responses that bring relief in the short term while keeping the problem in place over time. It does not rely on willpower. Change is made into one small, observable step and then tested by its results.',
       tryThis: 'Put one small response (it can be the one you wrote) on your calendar. Rate your mood 0 to 10 before and after, and compare after a week.',
     },
   },
@@ -560,7 +560,7 @@ const SUMMARY_TEXT = {
   rebt: {
     zh: {
       shorts: ['事件（A）', '「應該」或「必須」（B）', '感受和反應（C）', '把「一定要」換成「很希望」之後'],
-      perspective: '理情行為治療把事件（A）、對事件的信念（B）和隨之而來的感受（C）分開來看。它認為讓失望變成難以承受的，常常是信念裡「一定要、不然就完了」的那一部分。它不否定人想要的東西，只看「一定要」能不能換成「很希望」。有些「應該」是真心看重的責任，有些指向真實的不公平，這個取向不會把這些都當成想法的問題。',
+      perspective: '理情行為取向把事件（A）、對事件的信念（B）和隨之而來的感受（C）分開來看。它認為讓失望變成難以承受的，常常是信念裡「一定要、不然就完了」的那一部分。它不否定人想要的東西，只看「一定要」能不能換成「很希望」。有些「應該」是真心看重的責任，有些指向真實的不公平，這個取向不會把這些都當成想法的問題。',
       tryThis: '這週每次發現自己說「應該」或「必須」，就試著在心裡改成「我很希望……」，看看感受有沒有不同。',
     },
     en: {
@@ -572,36 +572,36 @@ const SUMMARY_TEXT = {
   cognitive: {
     zh: {
       shorts: ['第一個冒出來的想法', '支持和不符合的證據', '會對在乎的人說的話'],
-      perspective: '認知治療認為感受深受自動冒出來的想法影響。它把這種想法當成可以檢驗的假設，把支持和不符合的證據都擺出來看。它也常借用人對朋友說話的方式，因為人對朋友通常比對自己公平。如果檢驗之後想法是準確的，這個取向會把問題放回處境本身。',
+      perspective: '認知取向認為感受深受自動冒出來的想法影響。它把這種想法當成可以檢驗的假設，把支持和不符合的證據都擺出來看。它也常借用人對朋友說話的方式，因為人對朋友通常比對自己公平。如果檢驗之後想法是準確的，這個取向會把問題放回處境本身。',
       tryThis: '準備三句可以對自己說的話：事前（例如「我知道這會有點難，我可以一步一步來」）、當下、事後各一句。這是 Meichenbaum 的因應自我對話。',
     },
     en: {
       shorts: ['The first thought that came up', 'Evidence for it and against it', 'What you would say to someone you care about'],
-      perspective: 'Cognitive therapy holds that feelings are shaped by thoughts that come up automatically. It treats such a thought as a hypothesis and lays out the evidence on both sides. It often borrows the way people talk to a friend, because people are usually fairer to a friend than to themselves. When a thought turns out to be accurate, this approach puts the problem back in the situation itself.',
+      perspective: 'The cognitive approach holds that feelings are shaped by thoughts that come up automatically. It treats such a thought as a hypothesis and lays out the evidence on both sides. It often borrows the way people talk to a friend, because people are usually fairer to a friend than to themselves. When a thought turns out to be accurate, this approach puts the problem back in the situation itself.',
       tryThis: 'Prepare three things to say to yourself: one for before (for example "I know this will be a little hard, and I can take it one step at a time"), one for during, one for after. These are Meichenbaum\'s coping self-statements.',
     },
   },
   reality: {
     zh: {
       shorts: ['真正想要的（W）', '現在實際在做的（D）', '這樣做有沒有更接近（E）', '一個簡單的計畫（P）'],
-      perspective: '現實治療認為人都在努力滿足幾種基本需求：生存、愛與歸屬、成就感、自由和樂趣。它不停在過去，而是照順序問四件事：想要什麼、正在做什麼、這樣做有沒有用、接下來的計畫是什麼。評估是由當事人自己做的。計畫沒做到時，這個取向不追究原因，只把計畫改小。',
+      perspective: '現實取向認為人都在努力滿足幾種基本需求：生存、愛與歸屬、成就感、自由和樂趣。它不停在過去，而是照順序問四件事：想要什麼、正在做什麼、這樣做有沒有用、接下來的計畫是什麼。評估是由當事人自己做的。計畫沒做到時，這個取向不追究原因，只把計畫改小。',
       tryThis: '照一個今天或明天就做得到的計畫做做看（可以是剛才寫的那個）。如果沒做到，不用責怪自己，回來把計畫改得更小一點。',
     },
     en: {
       shorts: ['What you really want (W)', 'What you are doing now (D)', 'Whether it is getting you closer (E)', 'A simple plan (P)'],
-      perspective: 'Reality therapy holds that people are always trying to meet a few basic needs: survival, love and belonging, a sense of achievement, freedom, and fun. It does not stay in the past. It asks four things in order: what is wanted, what is being done, whether that is working, and what the plan is. The person makes the evaluation themselves. When a plan does not happen, this approach does not look for blame; the plan is made smaller.',
+      perspective: 'The reality approach holds that people are always trying to meet a few basic needs: survival, love and belonging, a sense of achievement, freedom, and fun. It does not stay in the past. It asks four things in order: what is wanted, what is being done, whether that is working, and what the plan is. The person makes the evaluation themselves. When a plan does not happen, this approach does not look for blame; the plan is made smaller.',
       tryThis: 'Try a plan you can carry out today or tomorrow (it can be the one you wrote). If it does not happen, do not blame yourself; come back and make the plan smaller.',
     },
   },
   feminist: {
     zh: {
       shorts: ['別人或社會給的「應該」', '誰說了算，自己的話有多少份量', '能處理的，和不是一個人的責任'],
-      perspective: '女性主義治療認為個人的困擾常和社會角色、性別期待、權力關係連在一起。它會問一個「應該」是誰給的、誰在這件事裡說了算，並且把一個人能處理的部分，和不該由一個人扛的部分分開。在這個取向裡，把這些分清楚本身就是有用的工作，而且它不把結構造成的壓力說成個人的問題。',
+      perspective: '女性主義取向認為個人的困擾常和社會角色、性別期待、權力關係連在一起。它會問一個「應該」是誰給的、誰在這件事裡說了算，並且把一個人能處理的部分，和不該由一個人扛的部分分開。在這個取向裡，把這些分清楚本身就是有用的工作，而且它不把結構造成的壓力說成個人的問題。',
       tryThis: '把「不是我一個人的責任」那部分寫下來，這週和一個能理解的人聊聊，看看別人是不是也背著類似的期待。',
     },
     en: {
       shorts: ['"Shoulds" handed down by others or society', 'Who has the final say, and how much yours counts', 'What you can handle, and what is not yours alone'],
-      perspective: 'Feminist therapy holds that personal distress is often tied to social roles, gender expectations, and power. It asks who handed down a "should" and who has the say in a situation, and it separates what one person can handle from what was never one person\'s to carry. In this approach, sorting these out is useful work in itself, and pressure that comes from structures is not described as a personal problem.',
+      perspective: 'The feminist approach holds that personal distress is often tied to social roles, gender expectations, and power. It asks who handed down a "should" and who has the say in a situation, and it separates what one person can handle from what was never one person\'s to carry. In this approach, sorting these out is useful work in itself, and pressure that comes from structures is not described as a personal problem.',
       tryThis: 'Write down the part that is not yours alone. This week, talk about it with someone who might understand, and see whether they carry similar expectations.',
     },
   },
@@ -620,12 +620,12 @@ const SUMMARY_TEXT = {
   narrative: {
     zh: {
       shorts: ['給這個困擾取的名字', '它怎麼影響你', '沒有照它說的做的那一次'],
-      perspective: '敘事治療的出發點是：人不是問題，問題才是問題。它替困擾取名字，讓人可以站在旁邊看它怎麼運作、叫人相信什麼。它也會留意沒有照困擾說的去做的時刻，就算很小，因為那些時刻屬於另一個也能說的故事。',
+      perspective: '敘事取向的出發點是：人不是問題，問題才是問題。它替困擾取名字，讓人可以站在旁邊看它怎麼運作、叫人相信什麼。它也會留意沒有照困擾說的去做的時刻，就算很小，因為那些時刻屬於另一個也能說的故事。',
       tryThis: '這週每當這個困擾出現（可以用你取的名字叫它），就記下它說了什麼，以及有沒有哪一次沒聽它的。',
     },
     en: {
       shorts: ['The name given to this worry', 'How it affects you', 'A time you did not do what it said'],
-      perspective: 'Narrative therapy starts from the idea that the person is not the problem; the problem is the problem. Giving the worry a name lets a person stand beside it and see how it works and what it asks them to believe. This approach also watches for moments when the problem was not obeyed, however small, because those moments belong to another story that can also be told.',
+      perspective: 'The narrative approach starts from the idea that the person is not the problem; the problem is the problem. Giving the worry a name lets a person stand beside it and see how it works and what it asks them to believe. This approach also watches for moments when the problem was not obeyed, however small, because those moments belong to another story that can also be told.',
       tryThis: 'Each time this worry shows up this week (you can call it by the name you gave it), note what it said, and any time you did not listen to it.',
     },
   },

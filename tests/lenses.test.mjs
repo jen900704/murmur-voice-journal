@@ -485,4 +485,19 @@ test('nights keep a themes list, and older nights with one theme stay valid', ()
   assert.equal(none.theme, null);
 });
 
+test('saved sessions keep before/after heaviness (0-10) and the distance answer; old sessions stay valid', () => {
+  const old = cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', answers: ['a'] });
+  assert.equal(old.before, null);
+  assert.equal(old.after, null);
+  assert.equal(old.distance, null);
+  const s = cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', before: 7, after: 0, distance: { kind: 'friend', text: 'x'.repeat(1200) } });
+  assert.equal(s.before, 7);
+  assert.equal(s.after, 0);
+  assert.equal(s.distance.kind, 'friend');
+  assert.equal(s.distance.text.length, 1000);
+  for (const bad of [11, -1, 4.5, '5', null, NaN]) assert.equal(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', before: bad }).before, null);
+  assert.equal(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', distance: { kind: 'other', text: 'hi' } }).distance, null);
+  assert.equal(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', distance: { kind: 'year', text: '  ' } }).distance, null);
+});
+
 console.log(`\n${passed} passed`);

@@ -77,7 +77,7 @@ const QUERIES = [
   ['男友 吵架', { 'lens:s04': 2, 'entry:c15': 1 }],
   ['家人', { 'worry:n02': 2, 'lens:s02': 2, 'entry:c03': 1, 'entry:c11': 1 }],
   ['feeling alone at night', { 'entry:c17': 2 }],
-  ['認知治療', { 'lens:s01': 2 }],
+  ['認知取向', { 'lens:s01': 2 }],
 ];
 
 const docs = journalDocs({ entries, nights, sessions });

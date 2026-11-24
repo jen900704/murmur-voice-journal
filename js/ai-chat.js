@@ -70,7 +70,7 @@ function notesBlock(context) {
   return `<person_notes>\nWorry: ${context.concern ? clean(context.concern) : '(none)'}\nAnswers in the guided exercise:\n${answers || '(none)'}\n</person_notes>\n\n`;
 }
 
-export async function callModel({ key, model, system, messages, signal }) {
+export async function callModel({ key, model, system, messages, signal, maxTokens = 500 }) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     signal,
@@ -80,7 +80,7 @@ export async function callModel({ key, model, system, messages, signal }) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
-    body: JSON.stringify({ model, max_tokens: 500, system, messages }),
+    body: JSON.stringify({ model, max_tokens: maxTokens, system, messages }),
   });
   if (!res.ok) {
     let detail = '';
@@ -100,9 +100,9 @@ export async function callModel({ key, model, system, messages, signal }) {
 
 const S = {
   'zh-TW': {
-    title: (n) => `和 AI 用「${n}」繼續聊`,
-    badge: '實驗功能',
-    notice: '你在這裡輸入的文字，以及剛才練習裡寫的內容，會傳送到 Anthropic，依照它的 API 資料政策處理。AI 不是心理師，可能會說錯話。對話不會存在這個裝置上，離開這個畫面就消失。',
+    title: (n) => `用「${n}」的提問方式，和 AI 繼續想`,
+    badge: '實驗功能 · 這是 AI，不是真人，也不是心理師',
+    notice: '你在這裡輸入的文字，以及剛才練習裡寫的內容，會傳送到 Anthropic，依照它的 API 資料政策處理。它是反思提問的小幫手，不是心理師，不提供諮商、治療或診斷，可能會說錯話。對話不會存在這個裝置上，離開這個畫面就消失。',
     placeholder: '想說什麼都可以',
     send: '送出',
     thinking: 'AI 正在想……',
@@ -122,9 +122,9 @@ const S = {
     tooLong: '回覆太長被截斷了，請再送一次',
   },
   en: {
-    title: (n) => `Keep talking with AI through the ${n} lens`,
-    badge: 'Experimental',
-    notice: 'What you type here, and what you wrote in the exercise, is sent to Anthropic and handled under its API data policy. The AI is not a counselor and can be wrong. The conversation is not saved on this device; it disappears when you leave this screen.',
+    title: (n) => `Keep reflecting with AI, using ${n} questions`,
+    badge: 'Experimental · This is AI, not a person and not a therapist',
+    notice: 'What you type here, and what you wrote in the exercise, is sent to Anthropic and handled under its API data policy. It is a reflection helper, not a counselor or therapist; it does not provide counseling, therapy or diagnosis, and it can be wrong. The conversation is not saved on this device; it disappears when you leave this screen.',
     placeholder: 'Say whatever you like',
     send: 'Send',
     thinking: 'The AI is thinking…',

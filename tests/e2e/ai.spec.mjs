@@ -9,10 +9,12 @@ async function finishLens(page) {
   await page.locator('[data-key="lens-start"]').click();
   await page.fill('#lens-concern', '報告一直拖著沒寫');
   await page.locator('[data-key="topic-work"]').click();
+  // with AI on, the lens exercise can also use the model; these tests are about the chat, so use the fixed version
+  await page.locator('[data-key="lens-llm-off"]').waitFor({ state: 'visible', timeout: 3000 }).then(() => page.locator('[data-key="lens-llm-off"]').check()).catch(() => {});
   await page.locator('.actions .btn.primary').click();
   await page.locator('.lens-option').nth(2).click();
   // pick the cognitive lens explicitly
-  await page.locator('.lens-row', { hasText: '認知治療' }).click();
+  await page.locator('.lens-row', { hasText: '認知取向' }).click();
   for (let i = 0; i < 4 && !(await page.locator('.lens-summary').count()); i++) {
     await page.fill('#lens-answer', `回答 ${i + 1}`);
     await page.locator('[data-key="lens-next"]').click();
@@ -63,9 +65,9 @@ test('with a key, the conversation uses the lens and sends only what it should',
   await expect(page.locator('.ai-msg.assistant')).toContainText('第一個想法');
   // passage ids are not shown; the line under the reply names what it was based on
   await expect(page.locator('.ai-msg.assistant')).not.toContainText('cognitive.');
-  await expect(page.locator('.ai-msg.assistant .ai-based')).toHaveText('根據：認知治療｜自動化思考、認知扭曲、證據檢驗');
+  await expect(page.locator('.ai-msg.assistant .ai-based')).toHaveText('根據：認知取向｜自動化思考、認知扭曲、證據檢驗');
   expect(bodies).toHaveLength(1);
-  expect(bodies[0].system).toContain('Cognitive therapy');
+  expect(bodies[0].system).toContain('Cognitive');
   expect(bodies[0].system).toContain('Never use:');
   expect(bodies[0].system).not.toContain('報告一直拖著沒寫');
   expect(bodies[0].messages).toHaveLength(1);

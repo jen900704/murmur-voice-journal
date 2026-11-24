@@ -171,7 +171,7 @@ test.describe('theory lens', () => {
     const names = await page.locator('.lens-row-name').allInnerTexts();
     expect(names).toHaveLength(14);
     expect(new Set(names).size).toBe(14);
-    expect(names.slice(0, 6)).toEqual(['家族系統取向', '阿德勒學派', '女性主義治療', '敘事治療', '個人中心取向', '認知治療']);
+    expect(names.slice(0, 6)).toEqual(['家族系統取向', '阿德勒學派', '女性主義取向', '敘事取向', '個人中心取向', '認知取向']);
     await page.locator('[data-key="pick-family-systems"]').click();
     for (let i = 0; i < 3; i++) {
       await page.fill('#lens-answer', `回答 ${i + 1}`);
@@ -194,7 +194,7 @@ test.describe('theory lens', () => {
   });
 
   test('a loss chosen with another topic still hides lenses unsuited to grief, everywhere', async ({ page }) => {
-    const allowed = ['精神分析取向', '個人中心取向', '正念與接納取向', '女性主義治療', '家族系統取向'];
+    const allowed = ['精神分析取向', '個人中心取向', '正念與接納取向', '女性主義取向', '家族系統取向'];
     for (const order of [['work', 'loss'], ['loss', 'self']]) {
       await page.goto('/#lens');
       await page.reload();

@@ -1,6 +1,6 @@
 {
   "id": "theory_fidelity",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "frozen_on": "2026-11-24",
   "langs": [
     "zh-TW",
@@ -215,8 +215,8 @@
       "avoid": "empty chair, unfinished business with abusers or the deceased, exaggeration exercises"
     },
     "behavioral": {
-      "name_en": "Behavior therapy",
-      "name_zh": "行為治療",
+      "name_en": "Behavioral",
+      "name_zh": "行為取向",
       "chapter": 9,
       "concepts_en": [
         "antecedent, behavior, consequence (ABC)",
@@ -253,8 +253,8 @@
       "avoid": "telling someone to accept an unsafe or unfair situation"
     },
     "rebt": {
-      "name_en": "Rational emotive behavior therapy (REBT)",
-      "name_zh": "理情行為治療（REBT）",
+      "name_en": "Rational emotive behavior (REBT)",
+      "name_zh": "理情行為取向（REBT）",
       "chapter": 10,
       "concepts_en": [
         "the ABC model",
@@ -272,8 +272,8 @@
       "avoid": "forceful disputation, shame-attacking exercises, treating valued family duties as irrational"
     },
     "cognitive": {
-      "name_en": "Cognitive therapy",
-      "name_zh": "認知治療",
+      "name_en": "Cognitive",
+      "name_zh": "認知取向",
       "chapter": 10,
       "concepts_en": [
         "automatic thoughts",
@@ -293,8 +293,8 @@
       "avoid": "labelling the person's thinking as distorted or defective; core-belief or schema work"
     },
     "reality": {
-      "name_en": "Reality therapy and choice theory",
-      "name_zh": "現實治療與選擇理論",
+      "name_en": "Reality and choice theory",
+      "name_zh": "現實取向與選擇理論",
       "chapter": 11,
       "concepts_en": [
         "WDEP",
@@ -312,8 +312,8 @@
       "avoid": "implying their distress is a choice"
     },
     "feminist": {
-      "name_en": "Feminist therapy",
-      "name_zh": "女性主義治療",
+      "name_en": "Feminist",
+      "name_zh": "女性主義取向",
       "chapter": 12,
       "concepts_en": [
         "the personal is political",
@@ -352,8 +352,8 @@
       "avoid": "the miracle question when the topic is grief or hopelessness"
     },
     "narrative": {
-      "name_en": "Narrative therapy",
-      "name_zh": "敘事治療",
+      "name_en": "Narrative",
+      "name_zh": "敘事取向",
       "chapter": 13,
       "concepts_en": [
         "externalizing",

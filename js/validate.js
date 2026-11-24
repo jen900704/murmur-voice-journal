@@ -9,6 +9,7 @@ const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
 const optStr = (v, max) => (typeof v === 'string' ? v.slice(0, max) : null);
 const num = (v) => (Number.isFinite(v) ? v : null);
 const rating = (v) => (Number.isInteger(v) && v >= 1 && v <= 7 ? v : null);
+const heavy = (v) => (Number.isInteger(v) && v >= 0 && v <= 10 ? v : null);
 const plain = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 function cleanFeatures(f) {
@@ -83,5 +84,12 @@ export function cleanSession(s) {
     concern: str(s.concern, 400),
     answers: Array.isArray(s.answers) ? s.answers.slice(0, 10).map((a) => (Number.isFinite(a) ? a : str(a, 400))) : [],
     rating: Number.isInteger(s.rating) && s.rating >= 1 && s.rating <= 5 ? s.rating : null,
+    // how heavy the worry felt before and after, 0-10 (both optional; older sessions have neither)
+    before: heavy(s.before),
+    after: heavy(s.after),
+    // the optional step-back question: which one was asked, and the answer
+    // text a language model wrote for this session (labeled as AI-written when shown)
+    generated: plain(s.generated) && (typeof s.generated.perspective === 'string' || typeof s.generated.tryThis === 'string') ? { perspective: optStr(s.generated.perspective, 800), tryThis: optStr(s.generated.tryThis, 300), source: s.generated.source === 'device' ? 'device' : 'cloud' } : null,
+    distance: plain(s.distance) && (s.distance.kind === 'friend' || s.distance.kind === 'year') && typeof s.distance.text === 'string' && s.distance.text.trim() ? { kind: s.distance.kind, text: s.distance.text.slice(0, 1000) } : null,
   };
 }

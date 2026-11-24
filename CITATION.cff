@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use Murmur or its evaluation modules in research, please cite it as below."
+title: "Murmur 低語日記: an offline voice and writing journal for looking at a worry from several counseling perspectives"
+authors:
+  - family-names: Yeh
+    given-names: Hsiang-Chen
+    orcid: "https://orcid.org/0009-0004-5613-4814"
+repository-code: "https://github.com/jen900704/murmur-voice-journal"
+url: "https://jen900704.github.io/murmur-voice-journal/"
+license: MIT
+type: software
+keywords:
+  - psychoeducation
+  - counseling theories
+  - speech analysis
+  - language analysis
+  - privacy
+  - progressive web app

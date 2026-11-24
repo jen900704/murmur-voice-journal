@@ -148,7 +148,7 @@ flowchart LR
 
 ### Theory lenses and AI chat with retrieval
 
-`js/lenses.js` is content plus a few pure helpers: 14 approaches in zh-TW and English, each with an idea, questions with a reason for each, a summary template, an experiment, concepts and "what it might miss"; `lensesForTopic` (only five lenses for loss) and `TOPIC_COMMON` (the expert order). `js/lens-view.js` drives the exercise, the compare and draw-a-card modes, saving, and ratings.
+`js/lenses.js` is content plus a few pure helpers: 14 approaches in zh-TW and English, each with an idea, questions with a reason for each, a summary template, an experiment, concepts and "what it might miss"; `lensesForTopic` (only five lenses for loss) and `TOPIC_COMMON` (the expert order). `js/lens-view.js` drives the exercise, the compare and draw-a-card modes, saving, and ratings. `js/lens-insight.js` holds the explainable helpers around it: cue lists per approach that suggest an angle together with the matched span, the before/after heaviness shift, what one angle's answers add over another's (character-bigram overlap), related earlier sessions, and the first-person share. `js/scene.js` reads a card picture from the person's words (setting from the topic, weather from the weight of the words, up to three allowlisted objects in the order mentioned, a companion, a lens glyph), keeps the source word for every element, returns a fixed calm scene when the risk screen matches, and draws it as SVG with an optional animation inside `prefers-reduced-motion`. Design notes: `docs/change-the-angle.md`.
 
 `js/ai-chat.js` continues an exercise as a chat. It builds a system prompt per lens (allowed moves and moves to avoid), fences the person's earlier notes inside `<person_notes>`, and calls `https://api.anthropic.com/v1/messages` directly from the browser with the stored key. Guards in code: risk words in the outgoing message pause before sending; an empty or refused reply ends the chat with help lines; a reply that matches the risk screen without a help line is held back; a reply with a help line ends the chat; ten user turns at most. The conversation lives in memory only.
 
@@ -156,7 +156,7 @@ flowchart LR
 
 ### Bedtime ritual and speech player
 
-`js/bedtime.js` holds nine track scripts, the theme-to-track mapping, and `BedtimePlayer`, which plays a script line by line through `speechSynthesis` with timed pauses, or as timed read-along text when there is no local voice or speech is off. `js/night-view.js` runs the ritual steps (worry, one kind thing, track, postcard), always in the dark palette. `js/postcard.js` draws the postcard and shares it as a PNG. The calm flow reuses `pickVoice` from this module, so the local-voice rule applies there too.
+`js/bedtime.js` holds nine track scripts, the theme-to-track mapping, and `BedtimePlayer`, which plays a script line by line through `speechSynthesis` with timed pauses, or as timed read-along text when there is no local voice or speech is off. `js/night-view.js` runs the ritual steps (worry, one kind thing, track, postcard), always in the dark palette. `js/postcard.js` draws the postcard and shares it as a PNG; `cardSvg` switches to the scene from `js/scene.js` when the kind thing names something drawable, and the PNG export drops the animation. The calm flow reuses `pickVoice` from this module, so the local-voice rule applies there too.
 
 ### Search
 

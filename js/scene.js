@@ -36,16 +36,21 @@ const OBJECTS = [
   ['heart', ['喜歡', '喜欢', '愛', '爱', '想念', '暗戀', '在一起', '約會', '约会'], ['love', 'crush', 'miss', 'date', 'together']],
   ['gift', ['禮物', '礼物', '生日'], ['gift', 'present', 'birthday']],
   ['bike', ['腳踏車', '單車', '騎車'], ['bike', 'bicycle', 'cycling']],
+  ['friends', ['朋友', '同學', '室友', '聚餐', '閨蜜'], ['friend', 'friends', 'roommate', 'classmate']],
+  ['money', ['錢', '钱', '薪水', '房租', '帳單', '存款', '預算'], ['money', 'rent', 'salary', 'bill', 'bills', 'budget']],
+  ['game', ['遊戲', '游戏', '打電動', '手遊', 'switch'], ['game', 'games', 'gaming']],
+  ['suitcase', ['旅行', '出國', '旅遊', '行李', '機場'], ['trip', 'travel', 'airport', 'vacation', 'luggage']],
 ];
 
-const HEAVY = {
-  zh: ['難過', '难过', '傷心', '伤心', '哭', '累', '焦慮', '焦虑', '壓力', '压力', '煩', '烦', '生氣', '生气', '害怕', '擔心', '担心', '怕', '孤單', '孤单', '寂寞', '失望', '後悔', '后悔', '丟臉', '委屈', '心累', '崩潰', '崩溃', '痛', '不安', '慌', '低落', '沮喪', '空虛', '自責', '討厭', '吵架', '分手', '離開', '過世', '走了', '下雨', '雨'],
-  en: ['sad', 'cry', 'tired', 'anxious', 'anxiety', 'stress', 'stressed', 'angry', 'afraid', 'scared', 'worried', 'worry', 'lonely', 'alone', 'disappointed', 'regret', 'ashamed', 'hurt', 'upset', 'overwhelmed', 'exhausted', 'guilty', 'fight', 'breakup', 'lost', 'grief', 'rain', 'nervous', 'panic'],
+// How heavy the words are, by kind, so the weather fits the feeling: sad words bring rain,
+// worried words wind, tired words fog, angry words a warm dusk.
+const MOOD = {
+  rain: ['難過', '难过', '傷心', '伤心', '哭', '孤單', '孤单', '寂寞', '失望', '委屈', '低落', '沮喪', '空虛', '後悔', '后悔', '想念', '分手', '過世', '走了', '下雨', 'sad', 'cry', 'lonely', 'alone', 'disappointed', 'regret', 'hurt', 'upset', 'grief', 'miss', 'breakup', 'rain'],
+  wind: ['焦慮', '焦虑', '擔心', '担心', '害怕', '怕', '不安', '慌', '壓力', '压力', '緊張', '紧张', '崩潰', '崩溃', '來不及', 'anxious', 'anxiety', 'worried', 'worry', 'afraid', 'scared', 'nervous', 'panic', 'stress', 'stressed', 'overwhelmed'],
+  fog: ['累', '心累', '疲倦', '疲憊', '沒力', '没力', '熬夜', '好睏', '提不起勁', 'tired', 'exhausted', 'drained', 'sleepy', 'numb'],
+  dusk: ['生氣', '生气', '煩', '烦', '討厭', '讨厌', '吵架', '不公平', '火大', '氣死', 'angry', 'annoyed', 'mad', 'furious', 'fight', 'unfair'],
 };
-const LIGHT = {
-  zh: ['開心', '开心', '放鬆', '放松', '感謝', '感谢', '謝謝', '谢谢', '安心', '輕鬆', '轻松', '期待', '喜歡', '好玩', '笑', '溫暖', '温暖', '舒服', '平靜', '平静', '踏實', '有希望', '晴'],
-  en: ['happy', 'relieved', 'grateful', 'thankful', 'calm', 'excited', 'glad', 'fun', 'laugh', 'warm', 'peaceful', 'hopeful', 'proud', 'sunny', 'okay'],
-};
+const LIGHT = ['開心', '开心', '放鬆', '放松', '感謝', '感谢', '謝謝', '谢谢', '安心', '輕鬆', '轻松', '期待', '好玩', '笑', '溫暖', '温暖', '舒服', '平靜', '平静', '踏實', '有希望', '晴', 'happy', 'relieved', 'grateful', 'thankful', 'calm', 'excited', 'glad', 'fun', 'laugh', 'warm', 'peaceful', 'hopeful', 'proud', 'sunny'];
 
 const SETTINGS = { work: 'desk', relationship: 'bench', family: 'roof', self: 'path', loss: 'candle', other: 'field' };
 
@@ -130,37 +135,58 @@ export function readScene({ texts = [], topics = [], lensId = null, shift = null
     base.companion = pets[0].el;
     base.evidence.push({ element: pets[0].el, word: pets[0].word, context: around(raw, raw.toLowerCase().indexOf(lower(pets[0].word)), pets[0].word.length) });
   }
-  // weather from how heavy the words are
+  // weather from how heavy the words are, and of what kind
+  const counts = {};
   let heavy = 0;
-  let light = 0;
   let heavyWord = null;
+  let topWord = {};
+  for (const [kind, words] of Object.entries(MOOD)) {
+    counts[kind] = 0;
+    for (const w of words) {
+      const at = findWord(text, lower(w));
+      if (at >= 0) {
+        counts[kind]++;
+        if (!topWord[kind] || at < topWord[kind].at) topWord[kind] = { w, at };
+      }
+    }
+    heavy += counts[kind];
+  }
+  let light = 0;
   let lightWord = null;
-  for (const w of [...HEAVY.zh, ...HEAVY.en]) if (findWord(text, w) >= 0) { heavy++; heavyWord = heavyWord || w; }
-  for (const w of [...LIGHT.zh, ...LIGHT.en]) if (findWord(text, w) >= 0) { light++; lightWord = lightWord || w; }
-  if (heavy && heavy >= light * 2) base.weather = heavy >= 3 ? 'rain' : 'cloudy';
+  for (const w of LIGHT) if (findWord(text, lower(w)) >= 0) { light++; lightWord = lightWord || w; }
+  // the most frequent kind wins; on a tie, feelings beat events (sad, then worried, tired, angry)
+  const order = Object.keys(MOOD);
+  const kinds = order.filter((k) => counts[k]).sort((a, b) => counts[b] - counts[a] || order.indexOf(a) - order.indexOf(b));
+  if (kinds.length) heavyWord = topWord[kinds[0]].w;
+  if (heavy && heavy >= light * 2) base.weather = heavy === 1 && kinds[0] === 'rain' ? 'cloudy' : kinds[0];
   else if (heavy && light) base.weather = 'mixed';
   else if (light) base.weather = 'sunny';
-  const wWord = base.weather === 'sunny' ? lightWord : heavyWord;
+  const wWord = base.weather === 'sunny' || base.weather === 'mixed' ? lightWord : heavyWord;
   if (wWord && base.weather !== 'clear') {
     base.evidence.push({ element: base.weather, word: wWord, context: around(raw, raw.toLowerCase().indexOf(lower(wWord)), wWord.length) });
   }
   // after the exercise felt lighter, the sky opens a little
-  if (shift != null && shift < 0 && (base.weather === 'rain' || base.weather === 'cloudy')) base.clearing = true;
+  if (shift != null && shift < 0 && ['rain', 'cloudy', 'wind', 'fog', 'dusk'].includes(base.weather)) base.clearing = true;
   return base;
 }
 
 // Plain-language notes on where each part of the picture came from.
 const EL_NAME = {
-  zh: { cat: '貓', dog: '狗', coffee: '咖啡', tea: '茶', book: '書', laptop: '電腦', phone: '手機', clock: '時鐘', house: '小房子', plant: '小花', letter: '信', music: '音符', food: '碗', bed: '枕頭', bus: '公車', sea: '海浪', mountain: '小山', heart: '愛心', gift: '禮物', bike: '腳踏車', rain: '小雨', cloudy: '雲', mixed: '雲後面的太陽', sunny: '太陽' },
-  en: { cat: 'cat', dog: 'dog', coffee: 'coffee cup', tea: 'tea', book: 'book', laptop: 'laptop', phone: 'phone', clock: 'clock', house: 'little house', plant: 'flower', letter: 'letter', music: 'music notes', food: 'bowl', bed: 'pillow', bus: 'bus', sea: 'waves', mountain: 'hill', heart: 'heart', gift: 'gift', bike: 'bike', rain: 'rain', cloudy: 'clouds', mixed: 'sun behind clouds', sunny: 'sun' },
+  zh: { cat: '貓', dog: '狗', coffee: '咖啡', tea: '茶', book: '書', laptop: '電腦', phone: '手機', clock: '時鐘', house: '小房子', plant: '小花', letter: '信', music: '音符', food: '碗', bed: '枕頭', bus: '公車', sea: '海浪', mountain: '小山', heart: '愛心', gift: '禮物', bike: '腳踏車', friends: '兩個杯子', money: '小存錢罐', game: '遊戲手把', suitcase: '行李箱', rain: '小雨', cloudy: '雲', mixed: '雲後面的太陽', sunny: '太陽', wind: '風', fog: '薄霧', dusk: '傍晚的天色' },
+  en: { cat: 'cat', dog: 'dog', coffee: 'coffee cup', tea: 'tea', book: 'book', laptop: 'laptop', phone: 'phone', clock: 'clock', house: 'little house', plant: 'flower', letter: 'letter', music: 'music notes', food: 'bowl', bed: 'pillow', bus: 'bus', sea: 'waves', mountain: 'hill', heart: 'heart', gift: 'gift', bike: 'bike', friends: 'two cups', money: 'coin jar', game: 'game controller', suitcase: 'suitcase', rain: 'rain', cloudy: 'clouds', mixed: 'sun behind clouds', sunny: 'sun', wind: 'wind', fog: 'mist', dusk: 'dusk sky' },
 };
 
 export function sceneNotes(scene, lang = 'zh') {
   const names = EL_NAME[lang] || EL_NAME.zh;
   if (scene.calm) return [lang === 'en' ? 'A quiet night scene. Nothing in it is drawn from what you wrote.' : '一個安靜的夜晚。這張圖沒有從你寫的內容取材。'];
-  const notes = scene.evidence.map((e) => (lang === 'en' ? `The ${names[e.element] || e.element} is from "${e.word}" (${e.context})` : `${names[e.element] || e.element}來自你寫的「${e.word}」（${e.context}）`));
+  const notes = scene.evidence.map((e) => (lang === 'en' ? `"${e.word}" became the ${names[e.element] || e.element} (${e.context})` : `${names[e.element] || e.element}來自你寫的「${e.word}」（${e.context}）`));
   if (scene.clearing) notes.push(lang === 'en' ? 'You said it felt a little lighter, so the sky opens a bit.' : '你說寫完輕一點了，所以天空開了一點。');
   return notes;
+}
+
+// For tests: every readable object must have a drawing and a name in both languages.
+export function coverage() {
+  return OBJECTS.map(([el]) => ({ el, drawn: typeof OBJ[el] === 'function', zh: !!EL_NAME.zh[el], en: !!EL_NAME.en[el] }));
 }
 
 // ---------- drawing ----------
@@ -170,6 +196,9 @@ const PAL = {
   cloudy: { bg: ['#e4ebf2', '#f3eaf0'], ink: '#46506a', soft: '#fbfcff', accent: '#b4bfd9', leaf: '#9fc6ad', ground: '#d7e2e8' },
   mixed: { bg: ['#e2f1ec', '#fdf0dc'], ink: '#475a52', soft: '#fbfffd', accent: '#f2c57c', leaf: '#8fbf9f', ground: '#d4ead9' },
   sunny: { bg: ['#fff1d1', '#fde1e6'], ink: '#6b4f4a', soft: '#fffaf0', accent: '#f4a7a0', leaf: '#a8cf8f', ground: '#f5e1c4' },
+  wind: { bg: ['#e0efef', '#eceaf6'], ink: '#3f5a5c', soft: '#f7fdfd', accent: '#9cc8c4', leaf: '#9cc3b3', ground: '#d3e6e3' },
+  fog: { bg: ['#e9e7ef', '#f2eef0'], ink: '#4f4d63', soft: '#fbfaff', accent: '#bdb6d3', leaf: '#a9c4b5', ground: '#dedbe8' },
+  dusk: { bg: ['#fbe0d2', '#efd6ea'], ink: '#6a4552', soft: '#fff6f1', accent: '#f0a58f', leaf: '#b7c99a', ground: '#f0d2c8' },
   clear: { bg: ['#e9f0fb', '#f5ecfa'], ink: '#4d4a6e', soft: '#fbf9ff', accent: '#c7a6e3', leaf: '#a3c9b7', ground: '#e2e0f3' },
   night: { bg: ['#2f3557', '#4a3f66'], ink: '#f2ecff', soft: '#fff7e6', accent: '#f3d08a', leaf: '#9fc6b8', ground: '#3b3f63' },
 };
@@ -214,6 +243,10 @@ const OBJ = {
   mountain: (p, x, y, r) => `<path d="M${x - r * 0.9} ${y} l${r * 0.6} ${-r * 0.95} l${r * 0.35} ${r * 0.45} l${r * 0.25} ${-r * 0.25} l${r * 0.6} ${r * 0.75}z" fill="${p.leaf}"/><path d="M${x - r * 0.42} ${y - r * 0.75} l${r * 0.12} ${-r * 0.2} l${r * 0.12} ${r * 0.18}z" fill="${p.soft}"/>`,
   heart: (p, x, y, r) => `<path d="M${x} ${y - r * 0.15} c${-r * 0.8} ${-r * 0.45} ${-r * 0.55} ${-r * 1.15} 0 ${-r * 0.8} c${r * 0.55} ${-r * 0.35} ${r * 0.8} ${r * 0.35} 0 ${r * 0.8}z" fill="${p.accent}"/>`,
   gift: (p, x, y, r) => `<rect x="${x - r * 0.5}" y="${y - r * 0.7}" width="${r}" height="${r * 0.7}" rx="${r * 0.06}" fill="${p.accent}"/><rect x="${x - r * 0.08}" y="${y - r * 0.7}" width="${r * 0.16}" height="${r * 0.7}" fill="${p.soft}"/><path d="M${x} ${y - r * 0.7} c${-r * 0.3} ${-r * 0.35} ${-r * 0.45} 0 0 0 c${r * 0.3} ${-r * 0.35} ${r * 0.45} 0 0 0" stroke="${p.soft}" stroke-width="${r * 0.08}" fill="none"/>`,
+  friends: (p, x, y, r) => `<path d="M${x - r * 0.75} ${y - r * 0.7} h${r * 0.6} l${-r * 0.06} ${r * 0.7} h${-r * 0.48}z" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}"/><path d="M${x + r * 0.15} ${y - r * 0.7} h${r * 0.6} l${-r * 0.06} ${r * 0.7} h${-r * 0.48}z" fill="${p.accent}"/>${eyes(x - r * 0.45, y - r * 0.4, r * 0.08, p.ink, p.accent)}${eyes(x + r * 0.45, y - r * 0.4, r * 0.08, p.ink, p.soft)}<path d="M${x - r * 0.1} ${y - r * 1.0} c${-r * 0.1} ${-r * 0.12} ${-r * 0.02} ${-r * 0.22} ${r * 0.1} ${-r * 0.1} c${r * 0.12} ${-r * 0.12} ${r * 0.2} ${-r * 0.02} ${r * 0.1} ${r * 0.1} l${-r * 0.1} ${r * 0.1}z" fill="${p.accent}"/>`,
+  money: (p, x, y, r) => `<rect x="${x - r * 0.45}" y="${y - r * 0.85}" width="${r * 0.9}" height="${r * 0.85}" rx="${r * 0.2}" fill="${p.soft}" stroke="${p.accent}" stroke-width="${r * 0.05}" opacity=".9"/><rect x="${x - r * 0.35}" y="${y - r * 0.98}" width="${r * 0.7}" height="${r * 0.16}" rx="${r * 0.05}" fill="${p.accent}"/>${[[-0.15, -0.25], [0.15, -0.25], [0, -0.48]].map(([dx, dy]) => `<circle cx="${(x + dx * r).toFixed(1)}" cy="${(y + dy * r).toFixed(1)}" r="${(r * 0.15).toFixed(1)}" fill="${p.accent}"/>`).join('')}`,
+  game: (p, x, y, r) => `<rect x="${x - r * 0.7}" y="${y - r * 0.65}" width="${r * 1.4}" height="${r * 0.6}" rx="${r * 0.3}" fill="${p.accent}"/><path d="M${x - r * 0.45} ${y - r * 0.35} h${r * 0.3} M${x - r * 0.3} ${y - r * 0.5} v${r * 0.3}" stroke="${p.soft}" stroke-width="${r * 0.08}" stroke-linecap="round"/><circle cx="${x + r * 0.3}" cy="${y - r * 0.42}" r="${r * 0.08}" fill="${p.soft}"/><circle cx="${x + r * 0.48}" cy="${y - r * 0.3}" r="${r * 0.08}" fill="${p.soft}"/>`,
+  suitcase: (p, x, y, r) => `<rect x="${x - r * 0.55}" y="${y - r * 0.85}" width="${r * 1.1}" height="${r * 0.8}" rx="${r * 0.12}" fill="${p.accent}"/><path d="M${x - r * 0.2} ${y - r * 0.85} v${-r * 0.15} h${r * 0.4} v${r * 0.15}" stroke="${p.ink}" stroke-opacity=".5" stroke-width="${r * 0.06}" fill="none"/><path d="M${x - r * 0.3} ${y - r * 0.85} v${r * 0.8} M${x + r * 0.3} ${y - r * 0.85} v${r * 0.8}" stroke="${p.soft}" stroke-width="${r * 0.06}"/><circle cx="${x - r * 0.35}" cy="${y}" r="${r * 0.07}" fill="${p.ink}" opacity=".5"/><circle cx="${x + r * 0.35}" cy="${y}" r="${r * 0.07}" fill="${p.ink}" opacity=".5"/>`,
   bike: (p, x, y, r) => `<circle cx="${x - r * 0.5}" cy="${y - r * 0.3}" r="${r * 0.3}" fill="none" stroke="${p.ink}" stroke-opacity=".6" stroke-width="${r * 0.06}"/><circle cx="${x + r * 0.5}" cy="${y - r * 0.3}" r="${r * 0.3}" fill="none" stroke="${p.ink}" stroke-opacity=".6" stroke-width="${r * 0.06}"/><path d="M${x - r * 0.5} ${y - r * 0.3} l${r * 0.35} ${-r * 0.45} h${r * 0.45} l${r * 0.2} ${r * 0.45} M${x - r * 0.15} ${y - r * 0.75} l${r * 0.2} ${r * 0.45}" stroke="${p.accent}" stroke-width="${r * 0.07}" fill="none" stroke-linecap="round"/>`,
 };
 
@@ -284,6 +317,22 @@ function sky(weather, p, rand, uid) {
       return sun(200, 70, 18) + cloud(110, 70, 30, `${uid}-cloud`) + cloud(190, 86, 24, `${uid}-cloud2`);
     case 'rain':
       return sun(200, 70, 18) + drops() + cloud(120, 74, 34, `${uid}-cloud`) + cloud(195, 84, 26, `${uid}-cloud2`);
+    case 'wind': {
+      let w = '';
+      for (let i = 0; i < 3; i++) {
+        const y = 70 + i * 28 + rand() * 8;
+        const x = 30 + rand() * 40;
+        w += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} q40 -14 80 0 t80 0 q16 6 8 -10" stroke="${p.accent}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="150 60"/>`;
+      }
+      return sun(210, 62, 16) + cloud(200, 92, 22, `${uid}-cloud2`) + `<g class="${uid}-wind">${w}</g>`;
+    }
+    case 'fog': {
+      let f = '';
+      for (let i = 0; i < 4; i++) f += `<rect x="${(-20 + rand() * 40).toFixed(1)}" y="${(90 + i * 42).toFixed(1)}" width="${(200 + rand() * 90).toFixed(1)}" height="14" rx="7" fill="${p.soft}" opacity=".55"/>`;
+      return sun(200, 66, 18) + `<g class="${uid}-fog">${f}</g>`;
+    }
+    case 'dusk':
+      return `<g class="${uid}-sun"><circle cx="200" cy="150" r="46" fill="${p.accent}" opacity=".22"/><circle cx="200" cy="150" r="26" fill="${p.accent}"/></g>` + cloud(110, 80, 26, `${uid}-cloud`);
     case 'night': {
       let s = '';
       for (let i = 0; i < 12; i++) s += `<circle cx="${(20 + rand() * 230).toFixed(1)}" cy="${(30 + rand() * 120).toFixed(1)}" r="${(1 + rand() * 2).toFixed(1)}" fill="${p.soft}" opacity=".8"/>`;
@@ -302,13 +351,14 @@ function motionCss(uid, scene) {
   .${uid}-pal{animation:${uid}hop 1.1s cubic-bezier(.3,1.6,.5,1) .5s 2 both;transform-box:fill-box;transform-origin:50% 100%}
   .${uid}-spark{animation:${uid}tw 1.6s ease-in-out .9s 3 both;transform-box:fill-box;transform-origin:center}
   .${uid}-obj{animation:${uid}pop .55s cubic-bezier(.3,1.5,.5,1) both;transform-box:fill-box;transform-origin:50% 100%}
-  ${clear ? `.${uid}-cloud{animation:${uid}drift 2.4s ease-in-out .3s both}.${uid}-cloud2{animation:${uid}drift2 2.4s ease-in-out .3s both}.${uid}-rain{animation:${uid}fade 1.8s ease .4s both}.${uid}-sun{animation:${uid}glow 2.4s ease .6s both}` : `.${uid}-rain{animation:${uid}fall 1.2s linear infinite}`}
+  ${clear ? `.${uid}-wind{animation:${uid}fade 2s ease .4s both}.${uid}-fog{animation:${uid}fade 2.4s ease .3s both}.${uid}-cloud{animation:${uid}drift 2.4s ease-in-out .3s both}.${uid}-cloud2{animation:${uid}drift2 2.4s ease-in-out .3s both}.${uid}-rain{animation:${uid}fade 1.8s ease .4s both}.${uid}-sun{animation:${uid}glow 2.4s ease .6s both}` : `.${uid}-rain{animation:${uid}fall 1.2s linear infinite}.${uid}-wind path{animation:${uid}blow 2.2s linear infinite}`}
   @keyframes ${uid}hop{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-14px) scale(.95,1.06)}60%{transform:translateY(0) scale(1.06,.94)}}
   @keyframes ${uid}tw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
   @keyframes ${uid}pop{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:scale(1)}}
   @keyframes ${uid}drift{to{transform:translateX(-70px);opacity:.55}}
   @keyframes ${uid}drift2{to{transform:translateX(60px);opacity:.55}}
   @keyframes ${uid}fade{to{opacity:0}}
+  @keyframes ${uid}blow{to{stroke-dashoffset:-210}}
   @keyframes ${uid}glow{0%{opacity:.4}100%{opacity:1}}
   @keyframes ${uid}fall{0%{transform:translateY(-4px);opacity:.9}100%{transform:translateY(8px);opacity:.3}}
 }</style>`;
@@ -350,7 +400,7 @@ export function sceneSvg(scene, { seed = 'm', line = '', label = '', date = '', 
   // text panel
   const fontStack = `'Bricolage', ui-sans-serif, system-ui, -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif`;
   pieces.push(`<rect x="296" y="36" width="272" height="328" rx="22" fill="#fff" opacity="${scene.weather === 'night' ? '.12' : '.5'}"/>`);
-  if (scene.lensGlyph && GLYPH[scene.lensGlyph]) pieces.push(`<g transform="translate(540 70)">${GLYPH[scene.lensGlyph](p.ink)}</g>`);
+  if (scene.lensGlyph && GLYPH[scene.lensGlyph]) pieces.push(`<g transform="translate(546 300)">${GLYPH[scene.lensGlyph](p.ink)}</g>`);
   if (label) pieces.push(`<text x="320" y="76" font-size="16" fill="${p.ink}" opacity=".75" font-family="${fontStack}">${esc(label)}</text>`);
   const fit = fitText ? fitText(line) : { lines: [line], size: 20, lh: 28 };
   const top = Math.max(200 - ((fit.lines.length - 1) * fit.lh) / 2, 104 + fit.size);
@@ -363,4 +413,45 @@ export function sceneSvg(scene, { seed = 'm', line = '', label = '', date = '', 
   ${animate ? motionCss(uid, scene) : ''}
   <g clip-path="url(#${uid}clip)">${pieces.join('')}</g>
 </svg>`;
+}
+
+// What a model may choose from when it picks the card's picture (js/lens-llm.js).
+export const CHOICES = {
+  objects: OBJECTS.map(([el]) => el),
+  weather: ['clear', 'sunny', 'mixed', 'cloudy', 'rain', 'wind', 'fog', 'dusk'],
+  companion: ['bun', 'bird', 'cat', 'dog', 'sprout', 'cloudlet'],
+};
+
+// A scene from a model's choices. Every object must come with a word that is really in the
+// person's text; anything else is dropped. The keyword scene fills in whatever is missing,
+// and the risk rule still wins.
+export function sceneFromSpec(spec, { texts = [], topics = [], lensId = null, shift = null } = {}) {
+  const base = readScene({ texts, topics, lensId, shift });
+  if (base.calm || !spec || typeof spec !== 'object') return base;
+  const raw = texts.filter(Boolean).join('\n');
+  const lowRaw = raw.toLowerCase();
+  const picked = [];
+  const evidence = [];
+  for (const o of Array.isArray(spec.objects) ? spec.objects.slice(0, 3) : []) {
+    if (!o || !CHOICES.objects.includes(o.object) || typeof o.word !== 'string') continue;
+    const w = o.word.trim();
+    const at = lowRaw.indexOf(w.toLowerCase());
+    if (!w || w.length > 12 || at < 0 || picked.includes(o.object)) continue;
+    picked.push(o.object);
+    evidence.push({ element: o.object, word: w, context: around(raw, at, w.length), by: 'model' });
+  }
+  const out = { ...base };
+  if (picked.length) {
+    out.objects = picked;
+    out.evidence = [...evidence, ...base.evidence.filter((e) => !OBJECTS.some(([el]) => el === e.element))];
+  }
+  if (CHOICES.weather.includes(spec.weather) && typeof spec.weatherWord === 'string' && spec.weatherWord.trim() && lowRaw.includes(spec.weatherWord.trim().toLowerCase())) {
+    const w = spec.weatherWord.trim();
+    out.weather = spec.weather;
+    out.evidence = out.evidence.filter((e) => !CHOICES.weather.includes(e.element));
+    out.evidence.push({ element: spec.weather, word: w, context: around(raw, lowRaw.indexOf(w.toLowerCase()), w.length), by: 'model' });
+    if (shift != null && shift < 0 && ['rain', 'cloudy', 'wind', 'fog', 'dusk'].includes(out.weather)) out.clearing = true;
+  }
+  if (CHOICES.companion.includes(spec.companion)) out.companion = spec.companion;
+  return out;
 }

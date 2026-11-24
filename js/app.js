@@ -1262,7 +1262,7 @@ async function exportJson() {
 // Everything lives on this one phone, and Safari can clear it. After some real entries, and
 // then once a month, a quiet note offers a backup. Dismissing it waits another month.
 function backupNote() {
-  const real = state.entries.filter((e) => !e.demo).length;
+  const real = state.entries.filter((e) => !e.demo).length + (state.writtenCount || 0);
   const month = 30 * 24 * 3600 * 1000;
   if (real < 10 || Date.now() - (state.lastBackup || 0) < month) return null;
   const later = () => {
@@ -1860,6 +1860,11 @@ async function init() {
   state.aiKeySet = !!aiKey;
   state.aiModel = aiModel;
   state.entries = entries;
+  // 換角度 sessions and nights hold the person's own words too, so they count toward the
+  // backup note; read in the background and picked up on the next render
+  Promise.all([db.listLensSessions(), db.listNights()])
+    .then(([sessions, nights]) => (state.writtenCount = sessions.length + nights.length))
+    .catch(() => {});
   state.promptIndex = promptOfDay(getLang()).index;
   clockChanged();
   const tab = location.hash.replace('#', '');

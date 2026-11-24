@@ -327,7 +327,7 @@ test('journal documents: notes, check-ins, kept worries, kind things, lens exerc
   const lens = docs[4];
   assert.equal(lens.fields.text, '報告一直拖著');
   assert.equal(lens.fields.more, '我一定會搞砸'); // "not sure" and ratings are not searchable text
-  assert.ok(lens.fields.title.includes('認知治療') && lens.fields.title.includes('Cognitive therapy'));
+  assert.ok(lens.fields.title.includes('認知取向') && lens.fields.title.includes('Cognitive'));
   assert.equal(entryDoc({ id: 'x', note: '' }), null);
   const ix = createIndex({ fields: JOURNAL_FIELDS });
   ix.sync(docs);
@@ -400,9 +400,9 @@ test('passage ids are taken out of the shown reply and drive the "based on" line
   assert.equal(stripCitations(reply), '你提到報告一直拖著。 當你想到要開始寫，第一個想法是什麼？');
   assert.equal(stripCitations('年份 [1988] 和 [不是代號] 留著'), '年份 [1988] 和 [不是代號] 留著');
   assert.deepEqual(citedIds('x [cognitive.why2] y [narrative.idea]', chunks), ['cognitive.why2']);
-  assert.equal(basedOn(chunks, 'zh-TW', 'x [cognitive.why1]'), '根據：認知治療｜自動化思考');
-  assert.match(basedOn(chunks, 'zh-TW', 'no ids'), /^根據：認知治療｜/);
-  assert.match(basedOn(retrieve('evidence', 'cognitive', { lang: 'en', region: 'TW' }), 'en'), /^Based on: Cognitive therapy · /);
+  assert.equal(basedOn(chunks, 'zh-TW', 'x [cognitive.why1]'), '根據：認知取向｜自動化思考');
+  assert.match(basedOn(chunks, 'zh-TW', 'no ids'), /^根據：認知取向｜/);
+  assert.match(basedOn(retrieve('evidence', 'cognitive', { lang: 'en', region: 'TW' }), 'en'), /^Based on: Cognitive · /);
   assert.equal(basedOn([], 'en'), '');
 });
 

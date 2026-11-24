@@ -81,7 +81,7 @@ class AppFlow(unittest.TestCase):
         body = req["body"]
         base = b.system_prompt("rebt", "en", False)
         self.assertTrue(body["system"].startswith(base))
-        self.assertIn("Rational emotive behavior therapy", base)
+        self.assertIn("Rational emotive behavior (REBT)", base)
         self.assertNotIn("final reply", body["system"])
         notes = b.notes_block(self.CONTEXT["concern"], self.CONTEXT["answers"])
         self.assertEqual(body["messages"], [{"role": "user", "content": notes + "I must get this promotion or it is all over."}])

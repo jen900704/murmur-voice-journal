@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readScene, sceneSvg, sceneNotes } from '../js/scene.js';
+import { readScene, sceneSvg, sceneNotes, coverage } from '../js/scene.js';
 import { fitText } from '../js/postcard.js';
 
 let passed = 0;
@@ -21,13 +21,18 @@ test('a pet the person names becomes the companion', () => {
   const s = readScene({ texts: ['回家只有我的貓陪我'], topics: ['family'] });
   assert.equal(s.companion, 'cat');
 });
-test('heavy words make rain, light words make sun', () => {
-  assert.equal(readScene({ texts: ['好累好焦慮壓力好大'] }).weather, 'rain');
+test('the kind of feeling picks the weather: sad rain, worried wind, tired fog, angry dusk, light sun', () => {
+  assert.equal(readScene({ texts: ['好累好焦慮壓力好大'] }).weather, 'wind');
+  assert.equal(readScene({ texts: ['很難過，一直哭，好寂寞'] }).weather, 'rain');
+  assert.equal(readScene({ texts: ['好累，熬夜好幾天'] }).weather, 'fog');
+  assert.equal(readScene({ texts: ['他這樣真的很不公平，我很生氣'] }).weather, 'dusk');
+  assert.equal(readScene({ texts: ['I feel so lonely'] }).weather, 'cloudy');
   assert.equal(readScene({ texts: ['今天很開心也很放鬆'] }).weather, 'sunny');
   assert.equal(readScene({ texts: ['有點累但也很期待'] }).weather, 'mixed');
 });
 test('feeling lighter afterward opens the sky', () => {
   assert.equal(readScene({ texts: ['好累好焦慮壓力好大'], shift: -2 }).clearing, true);
+  assert.ok(sceneSvg(readScene({ texts: ['好焦慮'], shift: -1 }), { animate: true }).includes('-wind{animation'));
   assert.ok(!readScene({ texts: ['好累好焦慮壓力好大'], shift: 1 }).clearing);
 });
 test('risky text is never drawn from', () => {
@@ -51,6 +56,19 @@ test('svg is well formed, escapes text, animation only when asked', () => {
   assert.ok(!still.includes('@keyframes'));
   const moving = sceneSvg(s, { line: 'x', animate: true, fitText });
   assert.ok(moving.includes('prefers-reduced-motion: no-preference'));
+});
+test('every object the scene can read has a drawing and a name in both languages', () => {
+  for (const c of coverage()) assert.ok(c.drawn && c.zh && c.en, c.el);
+});
+test('no NaN or undefined in any drawing', () => {
+  const s = readScene({ texts: ['朋友約我出國旅行，房租還沒繳，只想打電動，貓在睡'], topics: ['self'] });
+  for (const animate of [false, true]) assert.ok(!/NaN|undefined/.test(sceneSvg(s, { animate })));
+  for (const c of coverage()) {
+    for (const weather of ['rain', 'wind', 'fog', 'dusk', 'mixed', 'sunny', 'clear', 'night', 'cloudy']) {
+      const svg = sceneSvg({ ...s, objects: [c.el, c.el, c.el], weather, lensGlyph: 'book' }, { animate: true });
+      assert.ok(!/NaN|undefined/.test(svg), c.el + ' ' + weather);
+    }
+  }
 });
 console.log(`scene: ${passed} passed`);
 

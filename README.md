@@ -1,30 +1,61 @@
 # Murmur · 低語日記
 
-A private voice journal and wind-down companion that runs entirely in your browser. Speak for about 30 seconds a day, and Murmur measures your pitch, pitch movement, speaking rate, pauses, and voice regularity on your own device. Over time it shows how your voice changes compared with your own usual range, and, if you check in with a quick mood and energy rating, how your voice relates to how you feel.
+**Look at one worry from 14 counseling perspectives, in your own words, on your own phone.**
 
-**Try it:** https://jen900704.github.io/murmur-voice-journal/
-(On a phone, add it to your home screen and it works like an app, including offline.)
+Write down what is on your mind. Pick an angle (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavioral, acceptance, REBT, cognitive, reality, feminist, solution-focused, narrative or family systems), answer three short questions in that approach's style, and get back your own words, the approach's perspective, one small thing to try, and a card whose picture is drawn from what you wrote. Nothing leaves the device.
 
-[中文說明在下方](#中文說明)
+**Try it:** https://jen900704.github.io/murmur-voice-journal/ (add it to your home screen and it works offline)
 
-<p>
-  <img src="docs/lens.png" width="200" alt="Theory lens summary in the style of narrative therapy">
-  <img src="docs/bedtime.png" width="200" alt="Bedtime track playing on a dark screen with a breathing circle">
-  <img src="docs/postcard.png" width="200" alt="A pastel postcard with one kind thing written on it">
-  <img src="docs/trends.png" width="200" alt="Trend chart of pitch with the usual range shaded">
-  <img src="docs/journal.png" width="200" alt="Journal of voice shapes, one per recording">
-</p>
+[Try it](https://jen900704.github.io/murmur-voice-journal/) · [Design notes](docs/change-the-angle.md) · [Architecture](docs/architecture.md) · [Research modules](#research-and-engineering-modules) · [Privacy](PRIVACY.md) · [中文說明](#中文說明)
 
-The trend and journal screenshots use the app's built-in synthetic demo data.
+> **Not therapy, not for emergencies.** Murmur is psychoeducation for self-reflection. If you are not safe right now, contact local emergency services or find a help line at [findahelpline.com](https://findahelpline.com). Help lines for Taiwan and the US are one tap away on every screen.
 
-## What is in it
+<p><img src="docs/cards.gif" width="820" alt="Three cards drawn from what people wrote: a desk with a laptop, phone and clock under clearing rain for a work worry with wind easing; a cat, tea and a house for a family worry; a heart, waves and a little house for a loss"></p>
+
+[![tests](https://github.com/jen900704/murmur-voice-journal/actions/workflows/test.yml/badge.svg)](https://github.com/jen900704/murmur-voice-journal/actions/workflows/test.yml) ![no tracking](https://img.shields.io/badge/data-stays%20on%20device-6b8f71) ![license](https://img.shields.io/badge/license-MIT-7a6fa3)
+
+## Why
+
+Most self-help apps offer one way of looking at a problem. Counselors learn many, because what helps depends on the person and the situation. Murmur lets anyone try several of those ways on the same worry and notice which one opens something up, while being clear that this is psychoeducation for self-reflection, not therapy.
+
+- **Your words, not templates.** The summary quotes what you wrote, question by question. It never builds sentences around your answers.
+- **Follows you when a model is available.** With the browser's on-device model, or your own API key if you turn that on, the questions are reworded for your worry, one follow-up picks up a phrase you wrote, and the closing is written for your situation. Every model output is checked (quotes must be your own words, no praise, no diagnosis, risk screen) and anything that fails falls back to the reviewed text. Without a model, the reviewed text is used.
+- **Explainable.** When an angle is suggested, you see the exact words that suggested it. Every part of the card picture can tell you which word it came from.
+- **Private by design.** No account, server, analytics or remote fonts. Voice is analyzed in the browser; everything is stored in IndexedDB and can be exported or deleted.
+- **Safe by default.** Every free-text field goes through a Chinese and English risk screen that pauses with help lines for the person's region. Cards are never drawn from text that trips it.
+- **Tested.** Unit tests, about 240 Playwright end-to-end tests in Chromium and WebKit, accessibility checks on every screen, and research modules with preregistered evaluations.
+
+## What stays on the device
+
+| | Works offline | Leaves the device |
+|---|---|---|
+| 換角度, cards, ratings | yes | never |
+| Voice journal | yes | never (audio is analyzed in the browser) |
+| Language mirror, imports | yes | never |
+| Bedtime ritual and tracks | yes (device voices only) | never |
+| Sharing a card | yes | only the image you choose to share |
+| AI conversation (off by default) | no | that conversation, to the provider you chose, with your own key |
+| Research modules in `lab/`, `infra/` | n/a | they never receive anyone's journal; they run on scripted or synthetic data |
+
+## How 換角度 works
+
+1. Write the worry and pick one or more kinds (work or school, relationships, family, self, loss, other). Optionally rate how heavy it feels, 0 to 10.
+2. Choose an angle: suggested from your words with the matched phrase shown, from a list ordered for that kind of worry, at random, or three side by side. Loss only offers the five approaches suited to grief.
+3. Answer three questions. "Not sure" is fine and is never quoted back.
+4. Read the summary, rate how heavy it feels now, and keep the card. Look at the same worry from another angle and see what the new one brought up.
+
+The design, the research each part borrows from, and the limits are in [docs/change-the-angle.md](docs/change-the-angle.md). How the app words what it is, and the Taiwan and US rules behind that, are in [docs/wording-and-law.md](docs/wording-and-law.md). What happens to data after weeks of use, and how research donation could work, is in [docs/data-lifecycle.md](docs/data-lifecycle.md).
+
+## Also in Murmur
+
+Smaller features around the core. They share the same privacy and safety rules.
+
 
 - **Voice journal.** Speak for about 30 seconds (at least 5, at most 90); see pitch, pace, pauses, and voice regularity against your own usual range. Until there are 10 usable recordings to form that range, the result screen shows the voice shape and the check-in first, with the numbers folded under "See the numbers". The journal also has a short look back at the last seven days.
 - **Silent check-in.** When speaking aloud is not possible, note mood, energy and one line without recording. These entries are listed in the journal and counted in the seven-day look back, but stay out of the voice trends, the usual range, the correlations, and the CSV export. A low mood rating in one still brings up the low-mood note.
 - **Language mirror (語言鏡).** Paste your own writing or import your own social media data export (Instagram, Facebook, X, Threads, Reddit), and see transparent, on-device language analysis: pronouns, thinking style, feelings, relationships, power and politeness, loss, motives, moral themes and writing style, each with the exact words that counted, an interval, what it cannot tell you, and a downloadable evidence report. It is for self-reflection, not assessment; it shows no personality scores and cannot judge mental state or honesty. Chinese categories are written for Murmur (LIWC and C-LIWC cannot be bundled).
 - **Too much right now.** One button for breathing (4-2-6, optional on-device voice), then 5-4-3-2-1 grounding, then self-compassion phrases to tap and hear.
 - **Write it out.** Prompts by weight; the deep ones follow Pennebaker's expressive writing (15 minutes, can repeat over days), with a short closing afterwards.
-- **Theory lens** (換個角度看看 in Chinese; the tab reads 換角度). Write down a worry, pick the kind of worry, and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Draw a lens at random, compare three side by side, or choose from a compact list that puts the lenses often used for that kind of worry first. When the worry is a loss, only the five lenses suited to grief are offered. Answers such as "not sure" are accepted and are never quoted back in the summary. Collect lens cards, and see which lenses you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
 - **Bedtime ritual.** Set a worry down, note one kind thing you did for yourself, and listen to one of nine wind-down tracks of about three to five minutes, each in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). From 8 pm to 4 am the ritual's card comes first on Today; at other times it is a link there. You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks. The whole ritual is shown in dark colors, whatever the system theme.
 - **Goodnight card.** Send one pastel card to one person through your phone's share sheet. It carries only a line you pick, never what you wrote; there is no feed, count, or read receipt.
 - **Breathe for a minute.** A one-minute pacer (in for 4 seconds, out for 6) on Today and on the low-mood note.
@@ -37,6 +68,18 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 **Safety.** Text typed into the theory lens, the bedtime ritual, check-in notes (with or without a recording), the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses the lens exercise, the bedtime ritual and the AI chat and shows help lines for the person's region (a check-in note is saved first, then help lines are shown; the prompt exchange shows them once before sharing). The region is guessed from the device's time zone and can be switched (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: the local emergency number and a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every lens and ritual step, and under About. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
+
+## Run it locally
+
+```
+git clone https://github.com/jen900704/murmur-voice-journal
+cd murmur-voice-journal
+python3 -m http.server 8787        # open http://localhost:8787 ; no build step
+npm install && npm test            # unit tests
+npx playwright install chromium && npm run test:e2e
+```
+
+The app is plain ES modules, HTML and CSS with no framework and no bundler, so every file in `js/` is what the browser runs. Contribution notes: [CONTRIBUTING.md](CONTRIBUTING.md). Security reports: [SECURITY.md](SECURITY.md). Citing: [CITATION.cff](CITATION.cff).
 
 ## Research and engineering modules
 
@@ -211,6 +254,18 @@ Made by [Hsiang-Chen (Jen) Yeh](https://jen900704.github.io/jen-portfolio/).
 ---
 
 ## 中文說明
+
+**用 14 個諮商學派的角度，看同一件煩心事。用你自己的話，在你自己的手機上。**
+
+寫下心裡卡住的事，選一個角度（精神分析、阿德勒、存在主義、個人中心、完形、行為、接納、理情、認知、現實、女性主義、焦點解決、敘事、家庭系統），用那個學派的方式回答三個短問題。最後你會看到自己寫的話、這個學派會怎麼看、一件可以試試的小事，還有一張從你寫的內容畫出來的小卡（寫到貓就有貓，寫到考試就有書，寫完覺得輕一點，雲會散開一點）。所有東西都留在你的裝置上。
+
+- **有模型時會跟著你變。** 用瀏覽器內建的裝置端模型，或你自己開啟的 API 金鑰，問題會依你的煩惱改寫、會多一個引用你原話的追問、小結依你的情況寫成；每段 AI 產生的文字都會檢查，不合格就退回審過的固定內容。
+- **用你的話，不套模板。** 小結逐題引用你寫的內容，不會把你的回答塞進固定句子裡。
+- **看得到理由。** 建議某個角度時，會標出是你寫的哪幾個字讓它這樣建議；小卡上的每個圖案也說得出來自你寫的哪個詞。
+- **安全優先。** 每個輸入框都會檢查風險訊號；出現時暫停並顯示求助專線，小卡也不會從這樣的文字取材。
+- **不是諮商。** 這是心理教育和自我覺察的練習，只收錄適合自己試的方法。
+
+設計、每個部分參考的研究和限制，寫在 [docs/change-the-angle.md](docs/change-the-angle.md)。用詞規則與台灣、美國相關法規整理在 [docs/wording-and-law.md](docs/wording-and-law.md)（不是法律意見）；用了幾週之後資料怎麼處理、未來怎麼捐贈給研究，寫在 [docs/data-lifecycle.md](docs/data-lifecycle.md)。下面其他功能是圍繞這個核心的小工具。
 
 **功能。** 聲音日記之外，還有：不方便出聲時只記心情（不錄音；會列在紀錄裡，也算進「這七天」的回顧，但不進聲音趨勢、平常範圍和 CSV）、換個角度看看（分頁名稱是「換角度」；用 14 個諮商學派的提問方式看同一個煩惱，每個學派問 3 到 4 題，可以抽一張、比較三個，或從依煩惱類型排序的精簡清單裡自己選；寫「不知道」也可以，小結不會把它引用回來；屬於心理教育，不是諮商）、睡前儀式（放下心事、寫下今天對自己好的一件事、從九段三到五分鐘的睡前引導裡聽一段、收一張粉彩明信片；也可以「只想聽一段」直接開始；整個儀式都用深色畫面；晚上 8 點到凌晨 4 點，睡前儀式的卡片會排在「今天」的最上面）、寄一張晚安明信片給一個人（明信片上只有你選的一句話）、呼吸一分鐘、對自己好的小罐子（最近一次心情記得偏低時，會把你寫過的幾件事和三件一般的小事帶回來；晚上只各列一件）、每日小題交換（共 40 題，同一天每個人拿到同一題）、加進行事曆的睡前提醒（Murmur 不會傳送通知）、附內容提醒的溫和作品推薦（42 部），以及實驗性的 AI 對話（預設關閉，需要你自己的 API 金鑰，最多十輪；只從審過的學派內容檢索並附出處）。另外有：語言鏡（在「紀錄」裡；貼上自己的文字，或匯入自己的 IG、FB、X、Threads、Reddit 官方匯出檔，在手機上分析用詞，每個數字都看得到是哪些字、有區間和限制，可以下載證據報告；這是自我探索用的分析，不是專業評估，不判斷人格、心理狀態或是否說謊）、慌的時候（一鍵帶你呼吸，接著 5-4-3-2-1 回到身邊和自我慈悲短句）、寫一寫（題目分輕中重，重的採 Pennebaker 的表達性書寫）、搜尋自己寫過的所有內容、可下載的聲音證據報告，以及可選擇開啟、在手機上學習的推薦（預設關閉）。累積 10 筆可用的錄音之前，結果頁會先顯示聲音圖形和心情紀錄，數字先收合起來，點開才看得到。
 

@@ -1,8 +1,15 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
-import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText } from './lenses.js';
+import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText, quote, isNonAnswer } from './lenses.js';
+import { cardSvg, postcardPng, sharePng } from './postcard.js';
+import { readScene, sceneNotes } from './scene.js';
+import { suggestLenses, heavinessShift, onlyHere, relatedSessions } from './lens-insight.js';
 import { checkRisk, helpList } from './safety.js';
-import { createAiChat } from './ai-chat.js';
+import { createAiChat, callModel, MODELS } from './ai-chat.js';
+import { pickProvider, adaptQuestions, personalSummary } from './lens-llm.js';
+import { sceneFromSpec, sceneSvg } from './scene.js';
+import { fitText } from './postcard.js';
+import { stripCitations } from './rag.js';
 import { createFlowHistory } from './flow-history.js';
 
 // The featured-row policy (js/policy.js) is optional and off by default. It is loaded on its
@@ -91,6 +98,39 @@ const S = {
     resourcesTitle: '求助資源',
     resourcesBody: '如果你或身邊的人有立即的危險，請直接打緊急電話。',
     topicHidden: '有些學派不適合用來看這類煩惱，所以沒有列出。',
+    heavyQ: '現在這件事有多重？0 到 10（可以不選）',
+    heavyAfterQ: '寫完之後，現在呢？',
+    heavyEnds: ['0 很輕', '10 很重'],
+    heavyLighter: '這是寫完之後此刻的感覺，之後還可能再變。',
+    heavySame: '數字沒有變也很常見，看清楚一件事不一定會讓它變輕。',
+    heavyHeavier: '有時候看清楚反而更重，這也很常見。',
+    cardAlt: (name) => `一張從你寫的話畫出來的小卡，角度是「${name}」`,
+    cardNotes: '這張圖從哪裡來',
+    cardSave: '存成圖片',
+    cardSaveFailed: '沒辦法存成圖片，請再試一次。',
+    suggestTitle: '從你寫的話看，這些角度可能合適',
+    because: '因為你寫了',
+    relatedLine: (date, name) => `你在 ${date} 用「${name}」看過類似的事`,
+    relatedOpen: '打開那次的練習',
+    addedTitle: '這次這個角度多看見的',
+    addedEmpty: '這兩次寫下的內容很接近，沒有找到只出現在這次的句子。',
+    sameAnother: '同一件事，換另一個角度',
+    backToSummary: '回到這次的小結',
+    distTitle: '再拉遠一點看（可以跳過）',
+    distIntro: '想的話，選一個問題回答。不回答也可以。',
+    distFriend: '如果是一個好朋友遇到這件事，你會跟他說什麼？',
+    distYear: '一年後回頭看，你猜你會怎麼看這件事？',
+    distAdd: '加到小結裡',
+    distEdit: '修改',
+    distHeadFriend: '如果是好朋友遇到',
+    distHeadYear: '一年後回頭看',
+    llmCloud: '這次寫的內容會傳給 Anthropic 來調整問題和小結；不想的話可以關掉。',
+    llmDevice: '問題和小結會依你寫的內容調整，在這台裝置上產生，不會傳出去。',
+    llmOff: '用固定版本',
+    adaptedNote: '依你寫的內容調整過的問題',
+    showOriginal: '原本的問題',
+    llmLabel: '依你寫的內容寫成（AI 產生，可能不準）',
+    llmLoading: '正在依你寫的內容整理……',
   },
   en: {
     drewTitle: 'You drew',
@@ -173,6 +213,39 @@ const S = {
     resourcesTitle: 'Where to get help',
     resourcesBody: 'If you or someone near you is in immediate danger, call your emergency number.',
     topicHidden: 'Some schools are not suited to this kind of worry, so they are not listed.',
+    heavyQ: 'How heavy does this feel right now? 0 to 10 (optional)',
+    heavyAfterQ: 'Now that you have written it out, how heavy does it feel?',
+    heavyEnds: ['0 light', '10 very heavy'],
+    heavyLighter: 'This is how it feels right after writing; it may shift again.',
+    heavySame: 'It is common for the number to stay the same; looking closely does not always make something lighter.',
+    heavyHeavier: 'Sometimes seeing it more clearly makes it feel heavier, and that is common too.',
+    cardAlt: (name) => `A small card drawn from your own words, through the ${name} lens`,
+    cardNotes: 'Where this picture comes from',
+    cardSave: 'Save as image',
+    cardSaveFailed: 'Could not save the image. Please try again.',
+    suggestTitle: 'From your words, these angles may fit',
+    because: 'Because you wrote',
+    relatedLine: (date, name) => `On ${date} you looked at something similar through ${name}`,
+    relatedOpen: 'Open that exercise',
+    addedTitle: 'What this angle added',
+    addedEmpty: 'What you wrote both times is close; nothing came up only this time.',
+    sameAnother: 'Same worry, another angle',
+    backToSummary: 'Back to this summary',
+    distTitle: 'One step further back (you can skip this)',
+    distIntro: 'If you like, pick one question to answer. You can also leave it.',
+    distFriend: 'If a good friend were going through this, what would you tell them?',
+    distYear: 'Looking back a year from now, how do you think you will see this?',
+    distAdd: 'Add to the summary',
+    distEdit: 'Edit',
+    distHeadFriend: 'If it were a good friend',
+    distHeadYear: 'A year from now',
+    llmCloud: 'What you write this time is sent to Anthropic to adjust the questions and summary. You can turn this off.',
+    llmDevice: 'The questions and summary are adjusted to what you write, on this device. Nothing is sent out.',
+    llmOff: 'Use the fixed version',
+    adaptedNote: 'Adjusted to what you wrote',
+    showOriginal: 'Original question',
+    llmLabel: 'Written for what you wrote (AI-generated, may be wrong)',
+    llmLoading: 'Fitting this to what you wrote…',
   },
 };
 
@@ -242,7 +315,14 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.step = 0;
     st.compare = [];
     st.rating = null;
+    st.before = null;
+    st.after = null;
+    st.distance = null;
+    st.cardAnimated = null;
+    st.savedReturn = null;
     st.riskSeen = false;
+    // language-model help: provider undefined until worked out, null for none
+    st.llm = { provider: undefined, resolving: false, off: false, shown: false, adapt: null, lock: {}, orig: {}, sum: null };
     st.pol.dec = null;
     st.counted = false;
   }
@@ -273,7 +353,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.answers = [];
     st.step = 0;
     st.rating = null;
+    st.after = null;
+    st.distance = null;
+    st.cardAnimated = null;
+    st.startedAt = Date.now();
     st.counted = false;
+    startAdapt(lensById(id));
     go('step');
   }
 
@@ -345,6 +430,108 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // ----- language-model help (js/lens-llm.js); with no provider everything stays fixed -----
+  function llmState() {
+    if (!st.llm) st.llm = { provider: undefined, resolving: false, off: false, shown: false, adapt: null, lock: {}, orig: {}, sum: null };
+    return st.llm;
+  }
+
+  async function resolveProvider() {
+    const m = llmState();
+    if (m.provider !== undefined || m.resolving) return;
+    m.resolving = true;
+    let p = null;
+    try {
+      const [key, model] = await Promise.all([db.getSetting('aiKey', '').catch(() => ''), db.getSetting('aiModel', MODELS[0].id).catch(() => MODELS[0].id)]);
+      p = await pickProvider({ lang: lk(), aiEnabled: st.aiEnabled === true, key, model, callModel });
+    } catch (_) {
+      p = null;
+    }
+    m.resolving = false;
+    if (st.llm !== m) return; // the exercise was reset meanwhile
+    m.provider = p || null;
+    if (m.provider && (st.stage === 'concern' || st.stage === 'concern-for-lens')) rerender();
+  }
+
+  // the provider to call now: only after the person has seen the disclosure, never after risk words
+  function activeProvider() {
+    const m = llmState();
+    return m.provider && m.shown && !m.off && !st.riskSeen ? m.provider : null;
+  }
+
+  // one line before the first call: where the text goes, and a switch back to the fixed version
+  function llmDisclosure() {
+    const m = llmState();
+    if (!m.provider) return null;
+    m.shown = true;
+    return h(
+      'div',
+      { class: 'lens-llm-note', 'data-key': 'lens-llm-note' },
+      h('p', { class: 'muted small' }, m.provider.kind === 'cloud' ? L().llmCloud : L().llmDevice),
+      h(
+        'label',
+        { class: 'toggle' },
+        h('input', { type: 'checkbox', checked: m.off, 'data-key': 'lens-llm-off', onchange: (e) => (m.off = e.target.checked) }),
+        h('span', {}, L().llmOff)
+      )
+    );
+  }
+
+  function startAdapt(lens) {
+    const m = llmState();
+    m.adapt = null;
+    m.lock = {};
+    m.orig = {};
+    m.sum = null;
+    const provider = activeProvider();
+    if (!provider) return;
+    const id = lens.id;
+    adaptQuestions({ provider, lens, lang: lk(), concern: st.concern, topics: st.topics })
+      .then((res) => {
+        if (st.llm !== m || st.lensId !== id || !res || res.source === 'fixed') return;
+        m.adapt = res;
+        // swap in only on a step the person has not started typing in
+        if (st.stage === 'step' && m.lock[st.step] === undefined && !String(st.answers[st.step] ?? '').trim()) {
+          rerender();
+          const f = document.getElementById('lens-answer');
+          if (f) f.focus({ preventScroll: true });
+        }
+      })
+      .catch(() => {});
+  }
+
+  // which question to show for step i: the adapted one if it was there before typing began
+  function adaptedFor(i, s) {
+    const m = llmState();
+    if (s.scale || !m.adapt || !m.adapt.adapted[i]) return null;
+    if (m.lock[i] !== undefined) return m.lock[i];
+    return String(st.answers[i] ?? '').trim() ? null : m.adapt.questions[i];
+  }
+
+  function startSummary(lens) {
+    const m = llmState();
+    const key = `${lens.id}|${st.concern}|${st.answers.join('\u0001')}`;
+    if (m.sum && m.sum.key === key) return m.sum;
+    const provider = activeProvider();
+    if (!provider) return (m.sum = null);
+    const sum = (m.sum = { key, status: 'loading', result: null });
+    const done = (status, result) => {
+      if (st.llm !== m || m.sum !== sum || sum.status !== 'loading') return;
+      sum.status = status;
+      sum.result = result;
+      if (st.stage === 'summary') {
+        const y = window.scrollY;
+        rerender();
+        window.scrollTo(0, y);
+      }
+    };
+    setTimeout(() => done('timeout', null), 8000);
+    personalSummary({ provider, lens, lang: lk(), concern: st.concern, answers: st.answers.map((a) => String(a ?? '')) })
+      .then((r) => done(r && r.source !== 'fixed' ? 'done' : 'fixed', r))
+      .catch(() => done('fixed', null));
+    return sum;
+  }
+
   function concern(onNext) {
     const input = h('textarea', {
       id: 'lens-concern',
@@ -387,6 +574,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           );
         })
       ),
+      heavyRow('before', L().heavyQ),
+      (resolveProvider(), llmDisclosure()),
       h(
         'div',
         { class: 'actions left' },
@@ -409,11 +598,75 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // 0-10 as eleven toggle chips; pressing the chosen one again clears it (the question is optional)
+  function heavyRow(which, question) {
+    const id = `heavy-${which}-label`;
+    const cur = st[which];
+    return h(
+      'div',
+      { class: 'heavy', 'data-key': `heavy-${which}` },
+      h('p', { class: 'lens-label', id }, question),
+      h(
+        'div',
+        { class: 'heavy-chips', role: 'group', 'aria-labelledby': id },
+        Array.from({ length: 11 }, (_, i) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'chip heavy-chip' + (cur === i ? ' on' : ''),
+              'aria-pressed': cur === i ? 'true' : 'false',
+              'data-key': `heavy-${which}-${i}`,
+              onclick: () => {
+                st[which] = cur === i ? null : i;
+                rerender();
+                const b = document.querySelector(`[data-key="heavy-${which}-${i}"]`);
+                if (b) b.focus();
+              },
+            },
+            String(i)
+          )
+        )
+      ),
+      h('div', { class: 'scale-ends', 'aria-hidden': 'true' }, h('span', {}, L().heavyEnds[0]), h('span', {}, L().heavyEnds[1]))
+    );
+  }
+
+  // Lenses whose cue words appear in the worry, each with the words that matched. Nothing
+  // matched: nothing is shown.
+  function suggestBlock() {
+    let found = [];
+    try {
+      found = suggestLenses(st.concern, { allowed: lensesForTopics(st.topics).map((l) => l.id) }).filter((x) => lensById(x.id));
+    } catch (_) {
+      found = [];
+    }
+    if (!found.length) return null;
+    const zh = lk() === 'zh';
+    return h(
+      'section',
+      { class: 'lens-suggest', 'data-key': 'lens-suggest', 'aria-labelledby': 'lens-suggest-title' },
+      h('h3', { id: 'lens-suggest-title' }, L().suggestTitle),
+      found.map((x) => {
+        const lens = lensById(x.id);
+        return h(
+          'div',
+          { class: 'lens-suggest-item' },
+          h('button', { type: 'button', class: 'btn', 'data-key': `suggest-${x.id}`, onclick: () => startLens(x.id) }, lensMark(lens, 24), ' ', lens[lk()].name),
+          x.evidence.map((ev) =>
+            h('p', { class: 'muted small lens-because' }, L().because, zh ? '「' : ' "', ev.before, h('mark', {}, ev.match), ev.after, zh ? '」' : '"')
+          )
+        );
+      })
+    );
+  }
+
   function choose() {
     const pool = lensesForTopics(st.topics);
     const option = (label, why, onclick) => h('button', { type: 'button', class: 'lens-option', onclick }, h('strong', {}, label), h('span', {}, why));
     return [
       h('h2', {}, L().choose),
+      suggestBlock(),
       h(
         'div',
         { class: 'lens-options' },
@@ -689,6 +942,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       };
       if (guard(String(a), proceed)) proceed();
     };
+    const fq = (t) => fill(t, st.answers, { inQuestion: true });
+    const fixedQ = fq(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q);
+    const adapted = adaptedFor(st.step, s);
     let field;
     if (s.scale) {
       field = h(
@@ -721,6 +977,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         'aria-labelledby': 'lens-q',
         oninput: (e) => {
           st.answers[st.step] = e.target.value;
+          // from the first keystroke this step keeps the question it showed
+          const m = llmState();
+          if (m.lock[st.step] === undefined) m.lock[st.step] = adapted;
           const btn = document.querySelector('[data-key="lens-next"]');
           if (btn) btn.disabled = !e.target.value.trim();
         },
@@ -731,7 +990,21 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h('div', { class: 'lens-step-head' }, lensMark(lens, 36), h('div', {}, h('p', { class: 'lens-name' }, c.name), h('p', { class: 'muted small' }, L().stepOf(st.step + 1, n)))),
       st.step === 0 ? h('blockquote', { class: 'lens-concern-quote' }, st.concern) : null,
       s.rewrite && prevAnswer ? h('p', { class: 'lens-rewrite' }, rewriteText(s.rewrite, prevAnswer, getLang())) : null,
-      h('p', { class: 'lens-q', id: 'lens-q' }, fill(s.qZero && String(st.answers[0]) === '0' ? s.qZero : s.q, st.answers, { inQuestion: true })),
+      h('p', { class: 'lens-q', id: 'lens-q' }, adapted ? fq(adapted) : fixedQ),
+      adapted
+        ? h(
+            'p',
+            { class: 'muted small lens-adapted', 'data-key': 'lens-adapted' },
+            L().adaptedNote,
+            ' · ',
+            h('button', { type: 'button', class: 'link', 'aria-expanded': llmState().orig[st.step] ? 'true' : 'false', 'data-key': 'lens-show-original', onclick: () => {
+              const o = llmState().orig;
+              o[st.step] = !o[st.step];
+              rerender();
+            } }, L().showOriginal)
+          )
+        : null,
+      adapted && llmState().orig[st.step] ? h('p', { class: 'muted small lens-original', 'data-key': 'lens-original' }, fixedQ) : null,
       h('details', { class: 'lens-why' }, h('summary', {}, L().why), h('p', {}, s.why)),
       field,
       field.tagName === 'TEXTAREA' ? h('p', { class: 'muted small lens-hint' }, L().answerHint) : null,
@@ -758,6 +1031,240 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     ];
   }
 
+  // One optional question that steps back from the worry, shown on the summary under the
+  // answers (as a separate page it would sit between the questions and the summary every time).
+  // The person picks which question. For a loss it stays folded unless opened.
+  function distanceInline() {
+    const d = (st.distance = st.distance || { kind: null, text: '', done: false });
+    if (d.done && distanceOf(d)) {
+      return [
+        ...distanceBlock(d),
+        h('button', { type: 'button', class: 'link', 'data-key': 'lens-distance-edit', onclick: () => {
+          d.done = false;
+          rerender();
+          const f = document.getElementById('lens-distance');
+          if (f) f.focus();
+        } }, L().distEdit),
+      ];
+    }
+    // folded to one line, so Save stays close; for a loss it is not suggested beyond that line
+    if (!d.open) {
+      return h('button', { type: 'button', class: 'link', 'data-key': 'lens-distance-open', onclick: () => {
+        d.open = true;
+        rerender();
+      } }, L().distTitle);
+    }
+    const kinds = [
+      ['friend', L().distFriend],
+      ['year', L().distYear],
+    ];
+    const field = d.kind
+      ? h('textarea', {
+          id: 'lens-distance',
+          rows: '3',
+          maxlength: '1000',
+          placeholder: L().answerPlaceholder,
+          'aria-labelledby': 'lens-distance-q',
+          'data-key': 'lens-distance',
+          oninput: (e) => {
+            d.text = e.target.value;
+            const b = document.querySelector('[data-key="lens-distance-add"]');
+            if (b) b.disabled = !d.text.trim();
+          },
+        })
+      : null;
+    if (field) field.value = d.text;
+    const done = () => {
+      d.done = true;
+      rerender();
+    };
+    return h(
+      'div',
+      { class: 'lens-distance', 'data-key': 'lens-distance-block' },
+      h('h3', { id: 'lens-distance-title' }, L().distTitle),
+      h('p', { class: 'muted small' }, L().distIntro),
+      h(
+        'div',
+        { class: 'lens-options', role: 'group', 'aria-labelledby': 'lens-distance-title' },
+        kinds.map(([k, q]) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'lens-option' + (d.kind === k ? ' on' : ''),
+              'aria-pressed': d.kind === k ? 'true' : 'false',
+              'data-key': `distance-${k}`,
+              onclick: () => {
+                d.kind = k;
+                rerender();
+                const f = document.getElementById('lens-distance');
+                if (f) f.focus();
+              },
+            },
+            h('strong', {}, q)
+          )
+        )
+      ),
+      d.kind ? h('p', { class: 'lens-q', id: 'lens-distance-q' }, d.kind === 'friend' ? L().distFriend : L().distYear) : null,
+      field,
+      d.kind
+        ? h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn', 'data-key': 'lens-distance-add', disabled: !d.text.trim(), onclick: () => {
+            if (guard(d.text, done)) done();
+          } }, L().distAdd))
+        : null
+    );
+  }
+
+  // the distance answer, if one was written and is more than "not sure"
+  function distanceOf(d) {
+    if (!d || !d.kind || d.done === false || !d.text || !String(d.text).trim() || isNonAnswer(d.text)) return null;
+    return d;
+  }
+
+  function distanceBlock(d, head = 'h3') {
+    d = distanceOf(d);
+    if (!d) return null;
+    return [h(head, {}, d.kind === 'friend' ? L().distHeadFriend : L().distHeadYear), h('blockquote', { class: 'lens-answer', 'data-key': 'lens-distance-answer' }, d.text)];
+  }
+
+  // The card's line: the person's own last real answer (not a scale number, not "not sure").
+  function cardLine(answers, name) {
+    const real = (answers || []).filter((a) => typeof a === 'string' && a.trim() && !isNonAnswer(a) && !/^\d+$/.test(a.trim()));
+    return real.length ? quote(real[real.length - 1], 60) : name;
+  }
+
+  function fmtDay(t) {
+    return new Intl.DateTimeFormat(getLang(), { dateStyle: 'medium' }).format(new Date(t));
+  }
+
+  // An SVG string from postcard.js, parsed as XML (not innerHTML) and placed in the page.
+  function svgNode(str) {
+    const doc = new DOMParser().parseFromString(str, 'image/svg+xml');
+    const el = doc.documentElement;
+    if (!el || el.nodeName !== 'svg') return null;
+    const node = document.importNode(el, true);
+    node.setAttribute('aria-hidden', 'true');
+    node.setAttribute('focusable', 'false');
+    return node;
+  }
+
+  // The keepsake card: drawn from the worry and answers, with notes on where each part came from.
+  function keepsake({ concern, answers, topics, lensId, before, after, createdAt, animate, saveKey = true, showNotes = true, onPlayed = null, spec = null, genLine = null }) {
+    const lens = lensById(lensId);
+    const name = lens[lk()].name;
+    const sh = heavinessShift(before, after);
+    const shift = sh ? sh.delta : null;
+    const texts = [concern, ...(answers || []).filter((a) => typeof a === 'string')];
+    const args = { seed: String(createdAt || concern || lensId), line: genLine || cardLine(answers, name), label: name, date: fmtDay(createdAt || Date.now()), texts, topics, lensId, shift };
+    // with a model's picture choices: the scene from them (each tied to a word the person wrote)
+    const specScene = spec ? sceneFromSpec(spec, { texts, topics, lensId, shift }) : null;
+    const draw = (anim) => (specScene && !specScene.calm ? sceneSvg(specScene, { seed: args.seed, line: args.line, label: args.label, date: args.date, animate: anim, fitText }) : cardSvg({ ...args, animate: anim }));
+    let svg;
+    let notes = [];
+    try {
+      svg = draw(animate);
+      notes = sceneNotes(specScene || readScene({ texts, topics, lensId, shift }), lk()) || [];
+    } catch (_) {
+      return null;
+    }
+    const art = svgNode(svg);
+    if (!art) return null;
+    const box = h('div', { class: 'lens-card-art', role: 'img', 'aria-label': L().cardAlt(name), 'data-key': 'lens-card-art' });
+    if (animate && 'IntersectionObserver' in window) {
+      // the card sits at the end of the summary: its short animation starts when it scrolls into view
+      box.classList.add('waiting');
+      const io = new IntersectionObserver((list) => {
+        if (!list.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        box.classList.remove('waiting');
+        box.appendChild(art);
+        if (onPlayed) onPlayed();
+      }, { threshold: 0.3 });
+      io.observe(box);
+    } else {
+      box.appendChild(art);
+      if (animate && onPlayed) onPlayed();
+    }
+    return h(
+      'div',
+      { class: 'lens-keepsake' },
+      box,
+      showNotes && notes.length
+        ? h('details', { class: 'lens-more', 'data-key': 'lens-card-notes' }, h('summary', {}, L().cardNotes), h('ul', { class: 'lens-card-notes' }, notes.map((n) => h('li', {}, n))))
+        : null,
+      saveKey
+        ? h('button', { type: 'button', class: 'btn', 'data-key': 'lens-card-save', onclick: async (e) => {
+            const b = e.currentTarget;
+            b.disabled = true;
+            try {
+              const png = await postcardPng(draw(false));
+              const d = new Date(createdAt || Date.now());
+              const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              await sharePng(png, `murmur-lens-${ymd}.png`, name);
+            } catch (_) {
+              toast(L().cardSaveFailed);
+            } finally {
+              b.disabled = false;
+            }
+          } }, L().cardSave)
+        : null
+    );
+  }
+
+  function heavyResult() {
+    const sh = heavinessShift(st.before, st.after);
+    if (!sh) return null;
+    const line = sh.direction === 'lighter' ? L().heavyLighter : sh.direction === 'same' ? L().heavySame : L().heavyHeavier;
+    return h('div', { class: 'heavy-result', 'data-key': 'heavy-result' }, h('p', { class: 'heavy-nums' }, `${sh.before} → ${sh.after}`), h('p', { class: 'muted small' }, line));
+  }
+
+  // Earlier saved exercises about a similar worry; for one with a different lens, what only this one brought up.
+  function relatedBlock(lens) {
+    let rel = [];
+    try {
+      rel = relatedSessions(st.concern, st.sessions, { excludeId: st.savedId }).filter((r) => lensById(r.session.lensId)).slice(0, 2);
+    } catch (_) {
+      rel = [];
+    }
+    if (!rel.length) return null;
+    const other = rel.find((r) => r.session.lensId !== lens.id);
+    const mine = st.answers.filter((a) => typeof a === 'string');
+    const added = other ? onlyHere(mine, (other.session.answers || []).filter((a) => typeof a === 'string')) : [];
+    return h(
+      'div',
+      { class: 'lens-related', 'data-key': 'lens-related' },
+      rel.map((r) =>
+        h(
+          'div',
+          { class: 'lens-related-row' },
+          h('p', {}, L().relatedLine(fmtDay(r.session.createdAt), lensById(r.session.lensId)[lk()].name)),
+          h('button', { type: 'button', class: 'link', 'data-key': 'lens-related-open', onclick: () => {
+            st.savedReturn = 'summary';
+            st.savedFocus = r.session.id;
+            go('saved');
+            const el = document.getElementById(`lens-saved-${r.session.id}`);
+            if (el) {
+              el.scrollIntoView({ block: 'start' });
+              const hd = el.querySelector('h3');
+              if (hd) {
+                hd.setAttribute('tabindex', '-1');
+                hd.focus({ preventScroll: true });
+              }
+            }
+          } }, L().relatedOpen)
+        )
+      ),
+      other
+        ? h(
+            'details',
+            { class: 'lens-more', 'data-key': 'lens-added' },
+            h('summary', {}, L().addedTitle),
+            added.length ? added.map((x) => h('blockquote', { class: 'lens-answer' }, x.text)) : h('p', { class: 'muted small' }, L().addedEmpty)
+          )
+        : null
+    );
+  }
+
   // The person's answers, exactly as written: each question in its short form, then the answer
   // as a quotation. Nothing here puts their words inside a sentence of ours.
   function answerList(lens, answers) {
@@ -777,6 +1284,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function summary() {
     const lens = lensById(st.lensId);
     const c = lens[lk()];
+    const sum = startSummary(lens);
+    const loading = sum && sum.status === 'loading';
+    const gen = sum && sum.status === 'done' ? sum.result : null;
+    const genPerspective = gen && gen.perspective ? stripCitations(gen.perspective) : null;
+    const genTry = gen && gen.tryThis ? gen.tryThis : null;
+    const skel = () => h('p', { class: 'lens-skel muted small', 'aria-busy': 'true', 'data-key': 'lens-llm-loading' }, L().llmLoading);
+    const genLabel = () => h('p', { class: 'muted small lens-llm-label', 'data-key': 'lens-llm-label' }, L().llmLabel);
     const rate = (v) => {
       st.rating = v;
       rerender();
@@ -788,10 +1302,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('div', { class: 'lens-card-head' }, lensMark(lens), h('h2', {}, c.name)),
         h('h3', {}, L().wrote),
         answerList(lens, st.answers),
+        distanceInline(),
         h('h3', {}, L().perspective),
-        h('p', { 'data-key': 'lens-perspective' }, c.perspective),
+        loading ? skel() : [genPerspective ? genLabel() : null, h('p', { 'data-key': 'lens-perspective' }, genPerspective || c.perspective)],
         h('h3', {}, L().tryThis),
-        h('p', { 'data-key': 'lens-try' }, c.tryThis),
+        loading ? skel() : [genTry ? genLabel() : null, h('p', { 'data-key': 'lens-try' }, genTry || c.tryThis)],
         h('h3', {}, L().misses),
         h('p', {}, c.misses),
         // background on the approach, folded so rating and saving are close at hand
@@ -805,6 +1320,8 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           h('p', { class: 'muted small' }, L().reading(lens.chapter))
         )
       ),
+      st.before !== null && st.before !== undefined ? heavyRow('after', L().heavyAfterQ) : null,
+      heavyResult(),
       h(
         'div',
         { class: 'lens-rate' },
@@ -852,6 +1369,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 answers: st.answers.slice(),
                 rating: st.rating,
               };
+              if (Number.isInteger(st.before)) session.before = st.before;
+              if (Number.isInteger(st.after)) session.after = st.after;
+              const dist = distanceOf(st.distance);
+              if (dist) session.distance = { kind: dist.kind, text: dist.text.slice(0, 1000) };
+              // keep what the model wrote, so reopening shows the same words (and says they were AI-written)
+              if (genPerspective || genTry) session.generated = { perspective: genPerspective || null, tryThis: genTry || null, source: gen.source };
               try {
                 await db.saveLensSession(session);
                 st.sessions = await db.listLensSessions();
@@ -873,18 +1396,29 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           {
             type: 'button',
             class: 'btn',
+            'data-key': 'lens-another',
             onclick: () => {
               commitRating();
-              const keep = { concern: st.concern, topics: st.topics.slice(), riskSeen: st.riskSeen };
+              const keep = { concern: st.concern, topics: st.topics.slice(), riskSeen: st.riskSeen, before: st.before, startedAt: st.startedAt };
+              const m = llmState();
               reset();
+              Object.assign(st.llm, { provider: m.provider, off: m.off, shown: m.shown });
               Object.assign(st, keep);
               go('choose');
             },
           },
-          L().anotherLens
+          L().sameAnother
         ),
         h('button', { type: 'button', class: 'btn ghost', onclick: finish }, L().finish)
       ),
+      // the keepsake card closes the summary; it animates the first time it is seen, and later
+      // redraws (rating, the after number) show it still
+      (() => {
+        const key = `${st.lensId}|${st.before}|${st.after}`;
+        if (loading) return null; // the card waits for the summary, so its picture does not change under the person
+        return keepsake({ concern: st.concern, answers: st.answers, topics: st.topics, lensId: lens.id, before: st.before, after: st.after, createdAt: st.startedAt, animate: st.cardAnimated !== key, onPlayed: () => (st.cardAnimated = key), spec: gen && gen.card, genLine: gen && gen.cardLine });
+      })(),
+      relatedBlock(lens),
       // personal responses belong in the AI conversation, not in fixed sentences on this page
       st.aiEnabled ? h('p', { class: 'muted small lens-ai-note', 'data-key': 'ai-note' }, L().aiNote) : null,
       st.aiEnabled
@@ -1041,20 +1575,25 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         const c = l[lk()];
         return h(
           'article',
-          { class: 'lens-summary compact', style: `--lens-hue:${HUES[LENSES.indexOf(l) % HUES.length]}` },
+          { class: 'lens-summary compact', id: `lens-saved-${s.id}`, style: `--lens-hue:${HUES[LENSES.indexOf(l) % HUES.length]}` },
           h('div', { class: 'lens-card-head' }, lensMark(l, 32), h('h3', {}, c.name)),
           h('p', { class: 'muted small' }, new Intl.DateTimeFormat(getLang(), { dateStyle: 'medium' }).format(new Date(s.createdAt))),
           h('blockquote', { class: 'lens-concern-quote' }, s.concern),
           h('h4', {}, L().wrote),
           answerList(l, s.answers),
+          distanceBlock(s.distance, 'h4'),
+          Number.isInteger(s.before) && Number.isInteger(s.after) ? h('p', { class: 'muted small heavy-nums-small' }, `${s.before} → ${s.after}`) : null,
           h(
             'details',
             { class: 'lens-more' },
             h('summary', {}, L().savedMore),
+            keepsake({ concern: s.concern, answers: s.answers, topics: s.topics || [], lensId: l.id, before: s.before, after: s.after, createdAt: s.createdAt, animate: false, saveKey: false, showNotes: false }),
             h('h4', {}, L().perspective),
-            h('p', {}, c.perspective),
+            s.generated && s.generated.perspective ? h('p', { class: 'muted small lens-llm-label' }, L().llmLabel) : null,
+            h('p', {}, (s.generated && s.generated.perspective) || c.perspective),
             h('h4', {}, L().tryThis),
-            h('p', {}, c.tryThis)
+            s.generated && s.generated.tryThis ? h('p', { class: 'muted small lens-llm-label' }, L().llmLabel) : null,
+            h('p', {}, (s.generated && s.generated.tryThis) || c.tryThis)
           ),
           h(
             'button',
@@ -1072,7 +1611,12 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           )
         );
       }),
-      h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('home') }, L().back)),
+      st.savedReturn === 'summary' && lensById(st.lensId)
+        ? h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn', 'data-key': 'lens-back-summary', onclick: () => {
+            st.savedReturn = null;
+            go('summary');
+          } }, L().backToSummary))
+        : h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn ghost', onclick: () => go('home') }, L().back)),
     ];
   }
 
@@ -1179,6 +1723,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         st.step--;
         go('step');
       }
+    } else if (s === 'saved' && st.savedReturn === 'summary' && lensById(st.lensId)) {
+      st.savedReturn = null;
+      go('summary');
     } else if (s === 'summary') {
       // back to the last question, answers kept
       st.step = Math.max(0, lensById(st.lensId)[lk()].steps.length - 1);
@@ -1208,7 +1755,10 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       st.stage = 'home';
       flow.sync();
     },
-    setAiEnabled: (v) => (st.aiEnabled = v),
+    setAiEnabled: (v) => {
+      st.aiEnabled = v;
+      if (st.llm && !st.llm.shown) st.llm.provider = undefined; // worked out again on the next worry
+    },
     // in the middle of an exercise or AI chat (not on the lens home page)
     active: () => {
       // on the help page, what matters is the page the person came from
