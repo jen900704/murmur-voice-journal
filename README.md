@@ -117,7 +117,7 @@ cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
 npx playwright test           # browser tests: recording through a fake microphone, the main flows,
-                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 18 screens
+                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 19 screens
 ```
 
 Microphone access requires `https` or `localhost`. The unit tests (`npm test`) need no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.

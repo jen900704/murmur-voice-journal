@@ -73,6 +73,30 @@ const screens = [
     await page.locator('[data-key="breathe-start"]').click();
     await page.locator('.breathe-phase').filter({ hasText: /./ }).waitFor();
   }],
+  ['AI conversation', async (page) => {
+    await page.route('https://api.anthropic.com/**', (route) => route.fulfill({ json: { content: [{ type: 'text', text: 'It sounds like this has been weighing on you. What part feels heaviest?' }], stop_reason: 'end_turn' } }));
+    await page.goto('/#about');
+    await page.locator('[data-key="ai-enabled"]').check();
+    await page.fill('#ai-key', 'sk-ant-test');
+    await page.locator('#ai-key').press('Tab');
+    await page.waitForTimeout(300);
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await page.fill('#lens-concern', 'work stress');
+    await page.locator('[data-key="topic-work"]').click();
+    await page.locator('[data-key="lens-concern-next"]').click();
+    await page.locator('.lens-option').nth(2).click();
+    await page.locator('.lens-card .btn').first().click();
+    for (let i = 0; i < 5 && !(await page.locator('.lens-summary').count()); i++) {
+      if (await page.locator('.scale-11').count()) await page.locator('[data-key="scale-3"]').click();
+      else await page.fill('#lens-answer', 'something');
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    await page.locator('[data-key="ai-open"]').click();
+    await page.fill('#ai-input', 'I keep putting it off');
+    await page.locator('[data-key="ai-send"]').click();
+    await page.locator('.ai-msg.assistant').waitFor();
+  }],
   ['crisis pause', async (page) => {
     await page.goto('/#lens');
     await page.locator('[data-key="lens-start"]').click();

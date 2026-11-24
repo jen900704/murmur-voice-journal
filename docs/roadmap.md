@@ -13,7 +13,7 @@
 - Gentle recommendations with content notes
 - Experimental AI conversation for theory lenses (off by default, own API key)
 - Safety net for risk language in every free-text field that is stored or shared, with help lines always reachable
-- Unit tests, browser tests through a fake microphone, an offline test through the service worker, and a WCAG 2.1 AA audit of 18 screens, all in CI
+- Unit tests, browser tests through a fake microphone, an offline test through the service worker, and a WCAG 2.1 AA audit of 19 screens, all in CI
 - Releases: `npm run prepare-release` regenerates the content review file and the cache name (a hash of the app files); unit tests fail if either is stale
 
 ## Needs the owner's review
