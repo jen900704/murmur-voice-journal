@@ -714,10 +714,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function fit() {
     const rows = LENSES.map((l) => {
       const r = (st.stats[l.id] && st.stats[l.id].ratings) || [];
-      return { l, n: r.length, avg: r.length ? r.reduce((a, b) => a + b, 0) / r.length : 0 };
+      const sum = r.reduce((a, b) => a + b, 0);
+      // ranked by an average pulled toward the middle of the scale, so one rating of 5 does not
+      // outrank many ratings near 5; the plain average and count are what is shown
+      return { l, n: r.length, avg: r.length ? sum / r.length : 0, score: (sum + 3) / (r.length + 1) };
     })
       .filter((x) => x.n)
-      .sort((a, b) => b.avg - a.avg || b.n - a.n);
+      .sort((a, b) => b.score - a.score || b.n - a.n);
     return [
       h('h2', {}, L().fit),
       rows.length ? h('p', { class: 'muted small' }, L().fitIntro) : h('p', { class: 'empty' }, L().fitEmpty),
