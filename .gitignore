@@ -6,3 +6,11 @@ validation-audio/
 test-results/
 playwright-report/
 !tests/fixtures/*.wav
+.terraform/
+*.tfstate
+*.tfstate.*
+__pycache__/
+*.pyc
+lab/eval/runs/*
+!lab/eval/runs/example*/
+lab/eval/.cache/

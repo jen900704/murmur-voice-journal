@@ -1,0 +1,30 @@
+# Checkov settings for infra/. Run from this folder: checkov -d . --config-file .checkov.yaml
+# Each skipped check has its reason. Everything else must pass.
+framework:
+  - terraform
+quiet: true
+compact: true
+skip-check:
+  # Logging that is left off on purpose
+  - CKV_AWS_86   # CloudFront access logs always contain the query string; the site logs nothing
+  - CKV_AWS_18   # S3 access logs: same reason for the site bucket; the results bucket has one writer
+  - CKV2_AWS_11  # VPC flow logs: one outbound-only task a week, no inbound rules at all
+  - CKV_AWS_338  # log retention under a year is intended; logs hold model outputs for test cases
+  - CKV_AWS_65   # Container Insights costs more than the job it would watch
+  # Customer managed keys: optional through kms_key_arn, not required for synthetic test data
+  - CKV_AWS_145  # site bucket uses S3 managed keys so origin access control needs no key policy
+  - CKV_AWS_136  # ECR image holds only public repository code
+  - CKV_AWS_297  # the schedule carries no payload
+  # Resilience and edge features that do not fit a small static site and a weekly job
+  - CKV_AWS_144  # cross-region replication
+  - CKV2_AWS_62  # S3 event notifications
+  - CKV_AWS_310  # CloudFront origin failover
+  - CKV_AWS_374  # geo restriction: the app is public
+  - CKV_AWS_68   # WAF: static public files, no backend, and a WAF has a monthly fee
+  - CKV2_AWS_47  # WAF Log4j rule: same
+  # Limits of the defaults
+  - CKV_AWS_174  # without a custom domain CloudFront fixes the minimum at TLSv1; with one it is TLSv1.2_2021
+  - CKV_AWS_259  # HSTS is set for two years with subdomains; preload is not ours to ask for on cloudfront.net
+  - CKV_AWS_394  # the first two zones by name are used; the list is sorted, so a new zone does not move them
+  # False positive
+  - CKV2_AWS_5   # the security group is attached through the scheduler's network configuration

@@ -1,0 +1,15 @@
+# Used automatically by BuildKit for infra/eval-runner/Dockerfile.
+# Send only what the image copies.
+*
+!package.json
+!js
+!data
+!lab
+lab/*
+!lab/eval
+lab/eval/runs
+!infra
+infra/*
+!infra/eval-runner
+**/__pycache__
+**/node_modules

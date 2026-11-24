@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is ignored by git (see .gitignore here).
+
+aws_region = "us-east-1"
+
+# Exact models the eval may call. Replace 123456789012 with your account id and check the
+# model ids in the Bedrock console. A cross-region inference profile needs its own ARN plus
+# the foundation model ARN in every region it can route to.
+bedrock_model_arns = [
+  "arn:aws:bedrock:us-east-1:123456789012:inference-profile/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+  "arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+  "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+]
+
+monthly_budget_usd = 10
+budget_emails      = ["you@example.com"]
+
+# Turn on after the first manual run has worked.
+eval_schedule_enabled = false
+
+# Optional CloudFront hosting of the PWA.
+enable_static_site = false

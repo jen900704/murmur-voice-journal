@@ -1,0 +1,22 @@
+{
+  "name": "murmur-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only Model Context Protocol server for Murmur's vetted psychoeducation content.",
+  "type": "module",
+  "bin": {
+    "murmur-mcp": "server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  }
+}
