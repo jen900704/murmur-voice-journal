@@ -3,7 +3,7 @@
 // and it sends the conversation text to Anthropic. Voice entries and bedtime notes are never sent.
 // Nothing from the conversation is stored.
 import { lensById } from './lenses.js';
-import { checkRisk, helpList as regionHelpList, HELP_NUMBER } from './safety.js';
+import { checkRisk, helpList as regionHelpList, hasHelpLine } from './safety.js';
 
 export const MODELS = [
   { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5' },
@@ -63,8 +63,10 @@ function announce(text) {
 }
 
 function notesBlock(context) {
-  const answers = (context.answers || []).filter(Boolean).map((a, i) => `(${i + 1}) ${a}`).join('\n');
-  return `<person_notes>\nWorry: ${context.concern || '(none)'}\nAnswers in the guided exercise:\n${answers || '(none)'}\n</person_notes>\n\n`;
+  // angle brackets removed so the person's text cannot close the notes fence
+  const clean = (v) => String(v).replace(/[<>]/g, ' ');
+  const answers = (context.answers || []).filter((a) => a !== null && a !== '').map((a, i) => `(${i + 1}) ${clean(a)}`).join('\n');
+  return `<person_notes>\nWorry: ${context.concern ? clean(context.concern) : '(none)'}\nAnswers in the guided exercise:\n${answers || '(none)'}\n</person_notes>\n\n`;
 }
 
 export async function callModel({ key, model, system, messages, signal }) {
@@ -147,11 +149,14 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
   const L = () => S[getLang()] || S.en;
 
   function open(lensId, context) {
-    Object.assign(st, { lensId, context, messages: [], busy: false, error: '', crisis: false, ended: false, draft: '', pause: false, showHelp: false });
+    Object.assign(st, { chat: (st.chat || 0) + 1, lensId, context, messages: [], busy: false, abort: null, error: '', crisis: false, ended: false, draft: '', pause: false, showHelp: false });
   }
 
   function abort() {
     if (st.abort) st.abort.abort();
+    st.chat = (st.chat || 0) + 1;
+    st.busy = false;
+    st.abort = null;
     st.messages = [];
     st.context = null;
     st.draft = '';
@@ -167,21 +172,26 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
   async function send(rerender, { confirmed = false } = {}) {
     const text = st.draft.trim();
     if (!text || st.busy) return;
+    st.busy = true; // set before any await, so a quick double tap cannot send twice
+    const chat = st.chat; // which conversation this send belongs to
     // risk language: pause with help first; the person can still send if it was something else
     if (!confirmed && checkRisk(text).risk) {
+      st.busy = false;
       st.pause = true;
       return rerender();
     }
     st.pause = false;
     const key = await db.getSetting('aiKey', '');
     if (!key) {
+      st.busy = false;
       st.error = L().noKey;
       return rerender();
     }
-    const model = await db.getSetting('aiModel', MODELS[0].id);
+    const stored = await db.getSetting('aiModel', MODELS[0].id);
+    const model = MODELS.some((m) => m.id === stored) ? stored : MODELS[0].id;
+    if (chat !== st.chat) return; // the chat was closed or restarted meanwhile
     st.messages.push({ role: 'user', content: text });
     st.draft = '';
-    st.busy = true;
     st.error = '';
     rerender();
     const userTurns = st.messages.filter((m) => m.role === 'user').length;
@@ -200,7 +210,7 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         st.messages.pop();
         st.draft = text;
         st.error = L().error(L().tooLong);
-      } else if (checkRisk(reply).risk && !HELP_NUMBER.test(reply)) {
+      } else if (checkRisk(reply).risk && !hasHelpLine(reply)) {
         // hold this one reply back and show help; what the person wrote stays, and they can continue
         st.crisis = true;
         st.messages.pop();
@@ -209,12 +219,13 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         st.messages.push({ role: 'assistant', content: reply });
         announce(reply);
         // the model was told to stop and give help lines when risk appears; respect that
-        if (HELP_NUMBER.test(reply)) {
+        if (hasHelpLine(reply)) {
           st.ended = true;
           st.showHelp = true;
         }
+        // the last turn ends the chat only once a reply has actually arrived
+        if (userTurns >= MAX_USER_TURNS) st.ended = true;
       }
-      if (userTurns >= MAX_USER_TURNS) st.ended = true;
     } catch (e) {
       if (e.name !== 'AbortError') {
         st.messages.pop();
@@ -222,8 +233,11 @@ export function createAiChat({ h, add, getLang, db, onClose }) {
         st.error = e.status === 401 || e.status === 403 ? L().badKey : L().error(e.message);
       }
     } finally {
-      st.busy = false;
-      st.abort = null;
+      // a newer chat may have started while this request was in flight; leave its state alone
+      if (chat === st.chat) {
+        st.busy = false;
+        st.abort = null;
+      }
       rerender();
       const box = document.getElementById('ai-input');
       if (box) box.focus();

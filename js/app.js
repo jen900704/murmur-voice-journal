@@ -11,6 +11,7 @@ import { checkRisk, helpList } from './safety.js';
 import { MODELS as AI_MODELS } from './ai-chat.js';
 import { DAILY, promptOfDay } from './prompts.js';
 import { breatheSheet } from './breathe.js';
+import { cleanEntry, cleanNight, cleanSession } from './validate.js';
 
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 90;
@@ -1132,12 +1133,14 @@ function backupNote() {
 
 async function importJson(file) {
   try {
+    if (file.size > 50 * 1024 * 1024) throw new Error('too big');
     const data = JSON.parse(await file.text());
     if (!data || data.app !== 'murmur' || !Array.isArray(data.entries)) throw new Error('bad');
-    const n = await db.importEntries(data.entries.map((e) => ({ ...e, hasAudio: false })));
+    // every record is checked and trimmed first: one bad record must not break a screen
+    const n = await db.importEntries(data.entries.map(cleanEntry).filter(Boolean));
     // bedtime notes and saved lens exercises come back too; ids keep a second import from duplicating them
-    for (const night of Array.isArray(data.nights) ? data.nights : []) if (night && night.id) await db.saveNight(night).catch(() => {});
-    for (const ses of Array.isArray(data.lensSessions) ? data.lensSessions : []) if (ses && ses.id) await db.saveLensSession(ses).catch(() => {});
+    for (const night of (Array.isArray(data.nights) ? data.nights : []).map(cleanNight).filter(Boolean)) await db.saveNight(night).catch(() => {});
+    for (const ses of (Array.isArray(data.lensSessions) ? data.lensSessions : []).map(cleanSession).filter(Boolean)) await db.saveLensSession(ses).catch(() => {});
     if (lensView) lensView.reload();
     await extras.loadNights();
     state.entries = await db.listEntries();
@@ -1217,7 +1220,10 @@ function viewAbout() {
             'select',
             {
               id: 'ai-model',
-              onchange: (e) => db.setSetting('aiModel', e.target.value),
+              onchange: (e) => {
+                state.aiModel = e.target.value;
+                db.setSetting('aiModel', e.target.value);
+              },
             },
             AI_MODELS.map((m) => h('option', { value: m.id, selected: m.id === state.aiModel ? 'selected' : null }, m.label))
           ),
@@ -1345,6 +1351,8 @@ const TABS = ['today', 'journal', 'trends', 'lens', 'about'];
 let lensView = null;
 function goLens(stage) {
   if (!lensView) render();
+  // coming from another tab starts fresh, so Back on the help page goes to the lens home
+  lensView.reset();
   lensView.go(stage);
   if (location.hash !== '#lens') location.hash = '#lens';
 }

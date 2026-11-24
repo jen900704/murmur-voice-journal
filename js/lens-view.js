@@ -7,10 +7,13 @@ import { createAiChat } from './ai-chat.js';
 const S = {
   'zh-TW': {
     title: '換個角度看看',
+    saveFailed: '沒有存成功，請再試一次。',
+    broken: '剛才那一頁出了問題，先回到這裡。你存下的練習都還在。',
     intro:
       '同一個煩惱，不同的諮商學派會問不同的問題。選一個角度，用 3 到 4 個問題重新看看這件事。這是幫助自己整理想法的練習，不是諮商或治療。',
     madeBy: '由諮商研究所學生製作，不是執業諮商心理師提供的服務，也沒有經過臨床驗證。',
     privacy: '你在這裡寫的內容不會離開這個裝置。沒有按「儲存」的話，關掉就消失。',
+    privacyAi: '例外：你自己開啟並使用 AI 對話時，那次練習的內容會傳給 Anthropic。',
     start: '開始',
     deck: '理論卡',
     fit: '哪個角度適合我',
@@ -73,11 +76,14 @@ const S = {
     topicHidden: '有些學派不適合用來看這類煩惱，所以沒有列出。',
   },
   en: {
+    saveFailed: 'Could not save. Please try again.',
+    broken: 'That page ran into a problem, so you are back here. Saved exercises are still here.',
     title: 'Theory lens',
     intro:
       'Different counseling schools ask different questions about the same worry. Pick a lens and look at yours from a new angle in three or four questions. This is psychoeducation, not counseling or therapy.',
     madeBy: 'Made by a counseling graduate student. It is not a service from a licensed counselor and has not been clinically validated.',
     privacy: 'Nothing you write here leaves this device, and it disappears when you finish unless you choose Save.',
+    privacyAi: 'The exception: when you use the AI conversation, that exercise is sent to Anthropic.',
     start: 'Start',
     deck: 'Lens cards',
     fit: 'Which lens fits me',
@@ -191,6 +197,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
 
   function reset() {
     ai.abort();
+    st.prevStage = null;
     st.concern = '';
     st.topic = null;
     st.lensId = null;
@@ -217,9 +224,6 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     st.answers = [];
     st.step = 0;
     st.rating = null;
-    const s = (st.stats[id] = st.stats[id] || { used: 0, ratings: [] });
-    s.used++;
-    db.setSetting('lensStats', st.stats);
     go('step');
   }
 
@@ -277,7 +281,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return [
       h('h2', {}, L().title),
       h('p', {}, L().intro),
-      h('p', { class: 'muted small' }, L().madeBy, ' ', L().privacy),
+      h('p', { class: 'muted small' }, L().madeBy, ' ', L().privacy, st.aiEnabled ? ' ' + L().privacyAi : ''),
       h('div', { class: 'actions left' }, h('button', { type: 'button', class: 'btn primary', 'data-key': 'lens-start', onclick: () => go('concern') }, L().start)),
       h(
         'div',
@@ -412,7 +416,13 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       if (a === undefined || a === null || String(a).trim() === '') return;
       const proceed = () => {
         st.stage = 'step';
-        if (isLast) go('summary');
+        if (isLast) {
+          // a lens counts as used once its exercise is finished, not when it is opened
+          const s = (st.stats[st.lensId] = st.stats[st.lensId] || { used: 0, ratings: [] });
+          s.used++;
+          db.setSetting('lensStats', st.stats);
+          go('summary');
+        }
         else {
           st.step++;
           rerender();
@@ -547,7 +557,11 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
           {
             type: 'button',
             class: 'btn primary',
+            'data-key': 'lens-save',
+            disabled: st.saving,
             onclick: async () => {
+              if (st.saving) return;
+              st.saving = true;
               const session = {
                 id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
                 createdAt: Date.now(),
@@ -558,9 +572,15 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
                 rating: st.rating,
               };
               commitRating();
-              await db.saveLensSession(session);
-              st.sessions = await db.listLensSessions();
-              toast(L().savedToast);
+              try {
+                await db.saveLensSession(session);
+                st.sessions = await db.listLensSessions();
+                toast(L().savedToast);
+              } catch (_) {
+                toast(L().saveFailed);
+              } finally {
+                st.saving = false;
+              }
               finish();
             },
           },
@@ -713,10 +733,10 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
   function saved() {
     return [
       h('h2', {}, L().saved),
-      st.sessions.length ? null : h('p', { class: 'empty' }, L().savedEmpty),
+      st.sessions.some((s) => lensById(s.lensId)) ? null : h('p', { class: 'empty' }, L().savedEmpty),
       [...st.sessions].reverse().map((s) => {
         const l = lensById(s.lensId);
-        if (!l) return null;
+        if (!l) return null; // from a lens that no longer exists; "delete all data" still removes it
         const c = l[lk()];
         return h(
           'article',
@@ -813,8 +833,20 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       resources,
       ai: () => ai.view(rerender),
     };
+    // stages that show a lens need one; anything stale falls back to the lens home page
+    const needsLens = ['step', 'summary', 'lensinfo', 'concern-for-lens', 'ai'];
+    if (needsLens.includes(st.stage) && !lensById(st.lensId)) st.stage = 'home';
     const wrap = h('section', { class: 'view lens' });
-    add(wrap, (stages[st.stage] || home)());
+    let body;
+    try {
+      body = (stages[st.stage] || home)();
+    } catch (err) {
+      // never leave the tab blank: go home and say something went wrong
+      console.error(err);
+      st.stage = 'home';
+      body = [h('p', { class: 'error', role: 'alert' }, L().broken), ...home()];
+    }
+    add(wrap, body);
     if (st.stage !== 'crisis' && st.stage !== 'resources') add(wrap, helpBar());
     return wrap;
   }

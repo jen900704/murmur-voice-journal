@@ -7,6 +7,7 @@ import { checkRisk, helpList } from './safety.js';
 const S = {
   'zh-TW': {
     gentleTitle: '今晚來點溫柔的',
+    recsFailed: '片單沒有載入成功，請連上網路後再試一次。',
     gentleNote: '這些是有些人覺得溫柔、有陪伴感的作品，不是治療。清單由 Murmur 整理，可能有錯，歡迎回報。',
     all: '全部',
     types: { film: '電影', series: '影集', book: '書', musical: '音樂劇', opera: '歌劇', music: '音樂', short: '短片' },
@@ -49,6 +50,7 @@ const S = {
     exchangeText: (p, a, url) => `今天的題目：${p}\n\n我的回答：${a}\n\n你也來回答同一題：${url}`,
   },
   en: {
+    recsFailed: 'The list did not load. Please try again when you are online.',
     gentleTitle: 'Something gentle for tonight',
     gentleNote: 'Works some people find gentle or companionable. This is not treatment. The list was put together for Murmur and may contain mistakes; please report them.',
     all: 'All',
@@ -93,7 +95,7 @@ const S = {
   },
 };
 
-const HEAVY = new Set(['suicide', 'self-harm', 'abuse', 'genocide', 'violence', 'mental illness']);
+const HEAVY = new Set(['suicide', 'self-harm', 'abuse', 'genocide', 'violence', 'mental illness', 'war', 'sexual content']);
 const TYPE_HUE = { film: 262, series: 200, book: 28, musical: 340, opera: 300, music: 160, short: 90 };
 
 export function createExtras({ h, add, getLang, render, toast, db, getState, openSheet, closeSheet, goLens, startRitual, openBreathe }) {
@@ -111,7 +113,9 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
       try {
         ex.recs = (await fetch('./data/recs.json').then((r) => r.json())).items;
       } catch (_) {
-        ex.recs = [];
+        // not cached, so the next tap tries again
+        toast(L().recsFailed);
+        return;
       }
     }
     openSheet(gentleBody);
@@ -265,13 +269,20 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
   function lowMoodCard(latest) {
     if (!latest || !Number.isFinite(latest.mood) || latest.mood > 2) return null;
     if (ex.lowDismissed === latest.id) return null;
+    try {
+      if (localStorage.getItem('murmur-low-dismissed') === latest.id) return null;
+    } catch (_) {
+      /* storage unavailable */
+    }
     if (Date.now() - latest.createdAt > 36 * 3600 * 1000) return null;
     if (!ex.loaded) {
       loadNights().then(render);
       return null;
     }
     const items = jarItems();
-    const pick = items.sort(() => Math.random() - 0.5).slice(0, 3);
+    // pick once per check-in, so the card does not reshuffle on every screen update
+    if (!ex.jarPickFor || ex.jarPickFor.id !== latest.id) ex.jarPickFor = { id: latest.id, items: items.sort(() => Math.random() - 0.5).slice(0, 3) };
+    const pick = ex.jarPickFor.items;
     // general small actions, not other users' posts: something outside oneself, with nothing to compare against
     if (!ex.smallPick || ex.smallPick.lang !== getLang()) {
       // no walking outside suggested late at night
@@ -296,7 +307,15 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
         h('button', { type: 'button', class: 'link', onclick: startRitual }, L().lowRitual),
         h('button', { type: 'button', class: 'link', onclick: () => goLens('home') }, L().lowLens),
         latest.mood <= 1 ? null : h('button', { type: 'button', class: 'link', onclick: () => goLens('resources') }, L().lowHelp),
-        h('button', { type: 'button', class: 'link muted-link', onclick: () => ((ex.lowDismissed = latest.id), render()) }, L().lowDismiss)
+        h('button', { type: 'button', class: 'link muted-link', onclick: () => {
+          ex.lowDismissed = latest.id;
+          try {
+            localStorage.setItem('murmur-low-dismissed', latest.id);
+          } catch (_) {
+            /* storage unavailable */
+          }
+          render();
+        } }, L().lowDismiss)
       )
     );
   }

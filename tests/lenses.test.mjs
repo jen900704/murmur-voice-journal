@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { buildContent } from '../tools/export-content.mjs';
 import { expectedCache, shellFiles } from '../tools/bump-cache.mjs';
-import { checkRisk, HELP_NUMBER } from '../js/safety.js';
+import { checkRisk, hasHelpLine } from '../js/safety.js';
+import { cleanEntry, cleanNight, cleanSession } from '../js/validate.js';
 import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
 
 let passed = 0;
@@ -231,8 +232,8 @@ test('lenses unsuited to loss are excluded for that topic', () => {
 
 
 test('help numbers are matched as whole numbers only', () => {
-  for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '(911)', 'Samaritans on 116 123', 'Lifeline 13 11 14']) assert.ok(HELP_NUMBER.test(t), t);
-  for (const t of ['我 1988 年出生', '民國 113 年', '113年的計畫', 'on 9/11', '21130', '1925/1/1']) assert.ok(!HELP_NUMBER.test(t), t);
+  for (const t of ['請打 1925', 'call or text 988.', '113 保護專線', '請現在撥打 1925 或 988', 'call the Samaritans on 116 123', 'Lifeline 13 11 14']) assert.ok(hasHelpLine(t), t);
+  for (const t of ['我 1988 年出生', '民國 113 年', '113年的計畫', 'on 9/11', '21130', 'In 1925 my grandmother moved', 'I got 113 points', 'room 112', '999 messages']) assert.ok(!hasHelpLine(t), t);
 });
 
 test('no regex lookbehind in app code (Safari before 16.4 cannot parse it)', () => {
@@ -259,6 +260,23 @@ test('every app file is in the service worker list, so edits to it change the ca
 test('the service worker cache name matches the app files (run node tools/bump-cache.mjs)', () => {
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   assert.equal(sw.match(/const CACHE = '([^']*)';/)[1], expectedCache(sw));
+});
+
+test('backup records are checked before they are stored', () => {
+  const ok = { id: 'a', createdAt: 1.7e12, mood: 3, energy: 9, note: 'x'.repeat(900), features: { ok: true, f0MedianHz: 200, quality: { flags: ['noisy', 3] }, contour: [{ f0: 200, e: 40 }, 'x', { f0: 'y', e: 3 }] } };
+  const e = cleanEntry(ok);
+  assert.equal(e.energy, null);
+  assert.equal(e.note.length, 400);
+  assert.deepEqual(e.features.quality.flags, ['noisy']);
+  assert.deepEqual(e.features.contour, [{ f0: 200, e: 40 }, { f0: null, e: 0 }, { f0: null, e: 3 }]);
+  assert.equal(cleanEntry({ ...ok, createdAt: 9e15 }), null);
+  assert.equal(cleanEntry({ ...ok, features: null }), null);
+  assert.equal(cleanEntry(JSON.parse('{"id":"b","createdAt":1,"features":{"__proto__":{"polluted":1}}}')).features.polluted, undefined);
+  assert.equal(cleanNight({ id: 'n', kindness: 'hi' }), null);
+  assert.equal(cleanNight({ id: 'n', createdAt: 5, kindness: '<b>' }).kindness, '<b>');
+  assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', answers: null }).answers, []);
+  assert.deepEqual(cleanSession({ id: 's', createdAt: 5, lensId: 'gestalt', answers: ['a', 7, {}] }).answers, ['a', 7, '']);
+  assert.equal(({}).polluted, undefined);
 });
 
 console.log(`\n${passed} passed`);

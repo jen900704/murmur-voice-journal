@@ -26,9 +26,16 @@ function open() {
         db.close();
         dbPromise = null;
       };
+      // the browser can close the connection (storage pressure); open again next time
+      db.onclose = () => {
+        dbPromise = null;
+      };
       resolve(db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      dbPromise = null; // a failed open is retried next time, not cached
+      reject(req.error);
+    };
     req.onblocked = () => {
       dbPromise = null;
       reject(new Error('blocked'));
@@ -43,7 +50,26 @@ function tx(store, mode, fn) {
       new Promise((resolve, reject) => {
         const t = db.transaction(store, mode);
         let result;
-        Promise.resolve(fn(t)).then((r) => (result = r));
+        // fn runs right away (a transaction closes once the current task ends);
+        // if it throws, abort so nothing half-written is kept
+        let out;
+        try {
+          out = fn(t);
+        } catch (err) {
+          out = Promise.reject(err);
+        }
+        Promise.resolve(out)
+          .then(
+            (r) => (result = r),
+            (err) => {
+              try {
+                t.abort();
+              } catch (_) {
+                /* already finished */
+              }
+              reject(err);
+            }
+          );
         t.oncomplete = () => resolve(result);
         t.onerror = () => reject(t.error);
         t.onabort = () => reject(t.error);

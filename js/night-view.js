@@ -158,6 +158,7 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   async function begin({ stay = false } = {}) {
     const run = ++st.run;
     st.helpOpen = false;
+    st.sendPngs = null;
     st.worry = '';
     st.theme = null;
     st.kind = '';
@@ -528,9 +529,17 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
   // the person picks goes on it; never the worry or the kind thing. No feed, counts, or receipts.
   function sendCard() {
     const lines = L().sendLines;
+    const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
+    const make = (line) => postcardPng(postcardSvg({ seed: `send-${line}-${date}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date }));
     return h(
       'details',
-      { class: 'send-card' },
+      {
+        class: 'send-card',
+        // draw the cards when the section opens, so the share sheet opens right after the tap
+        ontoggle: (e) => {
+          if (e.currentTarget.open && !st.sendPngs) st.sendPngs = lines.map(make);
+        },
+      },
       h('summary', { 'data-key': 'night-send' }, L().sendTitle),
       h('p', { class: 'muted small' }, L().sendHelp),
       h(
@@ -544,12 +553,17 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
               class: 'chip',
               'data-key': `send-line-${i}`,
               onclick: async () => {
-                const date = new Intl.DateTimeFormat(getLang(), { dateStyle: 'long' }).format(new Date());
-                const svg = postcardSvg({ seed: `send-${Date.now()}`, line, label: getLang() === 'en' ? 'Good night' : '晚安', date });
-                const png = await postcardPng(svg);
-                const r = await sharePng(png, `goodnight-${new Date().toISOString().slice(0, 10)}.png`, line);
-                if (r === 'shared') toast(L().shared);
-                if (r === 'downloaded') toast(L().downloaded);
+                if (st.sending) return; // a second tap while the share sheet opens would fail
+                st.sending = true;
+                try {
+                  const png = await (st.sendPngs ? st.sendPngs[i] : make(line));
+                  const d = new Date();
+                  const r = await sharePng(png, `goodnight-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.png`, line);
+                  if (r === 'shared') toast(L().shared);
+                  if (r === 'downloaded') toast(L().downloaded);
+                } finally {
+                  st.sending = false;
+                }
               },
             },
             line

@@ -122,10 +122,15 @@ export function checkRisk(text) {
   return { risk: kinds.length > 0, kinds };
 }
 
-// Help lines given in model replies, as whole numbers (not inside 1988 or 2113, not 113 年).
-// Also common lines elsewhere (UK and Ireland 116 123, Australia 13 11 14, text 741741, 112, 999),
-// so a reply that gives a local number for someone outside Taiwan and the US is not held back.
-export const HELP_NUMBER = /(?:^|[^\d/])(?:1925|1995|1980|113|988|911|116\s?123|13\s?11\s?14|741741|112|999)(?![\d/]|\s*年)/;
+
+// A help line as a model gives it: a number next to a word like call, text, line or 專線.
+// A bare number ("in 1925 my grandmother", "room 112") does not count.
+const NUMS = '(?:1925|1995|1980|113|988|911|116\\s?123|13\\s?11\\s?14|741741|112|999)';
+const WORDS = '(?:call|text|dial|phone|ring|hotline|helpline|lifeline|crisis line|samaritans|專線|撥打|撥|打給|打電話|打|電話|生命線|安心專線|保護專線)';
+const HELP_LINE = new RegExp(`${WORDS}[^\\n\\d]{0,20}${NUMS}(?![\\d/])|${NUMS}(?![\\d/])[^\\n\\d]{0,12}(?:專線|生命線|line|hotline|lifeline)`, 'i');
+export function hasHelpLine(text) {
+  return HELP_LINE.test(String(text || ''));
+}
 
 // Help lines by region. Shown for the region the person picks (a guess from the time zone
 // at first), so a person in Taiwan does not have to read past US numbers in a hard moment.

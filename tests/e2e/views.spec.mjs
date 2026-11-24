@@ -117,3 +117,31 @@ test.describe('on iPhone Safari', () => {
     await expect(page.locator('[data-key="ios-install-ok"]')).toHaveCount(0);
   });
 });
+
+test('a damaged backup imports what it can and every screen still opens', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.prompt-text').waitFor();
+  const demo = await page.evaluate(() => fetch('./demo/demo-data.json').then((r) => r.json()));
+  const good = { ...demo.entries[0], id: 'good', createdAt: Date.now() - 3600000, demo: false };
+  const backup = {
+    app: 'murmur',
+    version: 1,
+    entries: [good, { ...good, id: 'future', createdAt: 9e15 }, { id: 'nofeat', createdAt: Date.now() }, null, 'x'],
+    nights: [{ id: 'n1', kindness: 'no date' }, { id: 'n2', createdAt: Date.now(), kindness: '<img src=x onerror=alert(1)>', seed: 's' }],
+    lensSessions: [{ id: 's1', createdAt: Date.now(), lensId: 'gestalt', answers: null }],
+  };
+  page.on('dialog', (d) => d.dismiss());
+  await page.goto('/#about');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'b.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  await expect(page.locator('.toast')).toContainText(/1/);
+  for (const tab of ['today', 'journal', 'trends', 'lens', 'about']) {
+    await page.goto('/#' + tab);
+    await expect(page.locator('#main section')).toBeVisible();
+  }
+  await page.goto('/#journal');
+  await page.locator('[data-key="jmode-nights"]').click();
+  await expect(page.locator('#main img')).toHaveCount(0);
+  await page.goto('/#lens');
+  await page.locator('.lens-link', { hasText: /saved|存下/i }).click();
+  await expect(page.locator('.lens-summary')).toHaveCount(1);
+});
