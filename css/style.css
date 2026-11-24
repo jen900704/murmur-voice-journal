@@ -1189,10 +1189,7 @@ h3.sub {
 }
 .night-track {
   font-size: 14px;
-  color: #8f88b0;
-}
-.night-track span {
-  opacity: 0.8;
+  color: #aaa3cc;
 }
 .breath {
   width: 120px;
@@ -1234,7 +1231,7 @@ h3.sub {
   transition: width 1s linear;
 }
 .night-dim {
-  color: #8f88b0;
+  color: #a39cc4;
 }
 .btn.night-btn {
   background: transparent;
@@ -1387,16 +1384,30 @@ h3.sub {
   white-space: nowrap;
 }
 .conf-high {
-  background: color-mix(in srgb, #3e9b6a 18%, transparent);
-  color: color-mix(in srgb, #3e9b6a 85%, var(--ink));
+  background: #dcefe3;
+  color: #1f5a39;
 }
 .conf-medium {
-  background: color-mix(in srgb, var(--amber) 20%, transparent);
-  color: color-mix(in srgb, var(--amber) 80%, var(--ink));
+  background: #f6e7cc;
+  color: #6b4400;
 }
 .conf-low {
-  background: color-mix(in srgb, var(--danger) 14%, transparent);
-  color: color-mix(in srgb, var(--danger) 85%, var(--ink));
+  background: #f6dde1;
+  color: #8a1f30;
+}
+@media (prefers-color-scheme: dark) {
+  .conf-high {
+    background: #1f3d2c;
+    color: #a9e3c0;
+  }
+  .conf-medium {
+    background: #3d2f15;
+    color: #f3cf8a;
+  }
+  .conf-low {
+    background: #43202a;
+    color: #ffb3bf;
+  }
 }
 .conf-why {
   display: block;
