@@ -52,3 +52,9 @@ export async function openLensMore(page) {
   await page.locator('[data-key="lens-more-open"]').click();
   await page.locator('[data-key="lens-sheet"][open]').waitFor();
 }
+
+// When a flow (lens exercise, bedtime ritual) ends, it removes its own history entry with
+// history.back(), which lands a moment later. Navigating before that lands would be undone by it.
+export async function flowSettled(page) {
+  await page.waitForFunction(() => !(history.state && typeof history.state === 'object' && history.state.murmurFlow));
+}

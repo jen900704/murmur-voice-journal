@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { enterConcern } from './helpers.mjs';
+import { enterConcern, flowSettled } from './helpers.mjs';
 
 test.use({ locale: 'zh-TW' });
 
@@ -38,6 +38,7 @@ async function seed(page) {
   }
   await page.locator('[data-key="lens-save"]').click();
   await expect(page.locator('#toast')).toContainText('已儲存');
+  await flowSettled(page);
   await page.goto('/#journal');
   await expect(page.locator('.silent-list li')).toHaveCount(2);
 }

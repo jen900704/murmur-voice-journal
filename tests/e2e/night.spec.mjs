@@ -1,3 +1,4 @@
+import { flowSettled } from './helpers.mjs';
 import { test, expect } from '@playwright/test';
 
 // the first visit shows a welcome card; close it so the usual Today screen is there
@@ -35,6 +36,7 @@ test('bedtime ritual: worry, kind thing, track, postcard; appears in nights and 
   await expect(page.locator('.postcard svg')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.postcard')).toContainText('下班後去買了喜歡的麵包');
   await page.locator('[data-key="night-done"]').click();
+  await flowSettled(page);
   await page.goto('/#journal');
   await page.locator('[data-key="jmode-nights"]').click();
   await expect(page.locator('.night-thumb')).toHaveCount(1);
