@@ -529,6 +529,13 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     return txt;
   }
 
+  // The same sentence as valueText; the interval is its own piece so it wraps whole (css/language.css).
+  function valueParts(sc, res) {
+    const txt = valueText(sc, res);
+    const i = sc.enough && sc.ci ? txt.indexOf(', ') : -1;
+    return i < 0 ? txt : [txt.slice(0, i + 2), h('span', { class: 'll-ci' }, txt.slice(i + 2))];
+  }
+
   function row(sc, res, cmp, max, keySuffix = '') {
     const s = L();
     const m = scoreMeta(sc.id, getLang());
@@ -551,7 +558,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
         'button',
         { type: 'button', class: 'll-row', 'data-key': `score-${sc.id}${keySuffix}`, onclick: () => openDetail(sc.id) },
         h('span', { class: 'll-row-label' }, m.label),
-        h('span', { class: 'll-row-value' + (sc.enough ? '' : ' muted') }, valueText(sc, res)),
+        h('span', { class: 'll-row-value' + (sc.enough ? '' : ' muted') }, valueParts(sc, res)),
         bar,
         c ? h('span', { class: 'll-row-cmp muted' }, s.earlier(show(sc, c.earlier), s.verdict[c.verdict])) : null,
         h('span', { class: 'll-row-open' }, s.open)
@@ -819,7 +826,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     const out = [
       h('h2', {}, m.label),
       valid ? h('p', { class: 'll-valid' + (valid.checked ? ' checked' : ''), 'data-key': 'll-valid' }, valid.text) : null,
-      h('p', { class: 'll-detail-value', 'data-key': 'll-detail-value' }, valueText(sc, res)),
+      h('p', { class: 'll-detail-value', 'data-key': 'll-detail-value' }, valueParts(sc, res)),
     ];
     out.push(h('h3', {}, s.whatCounts), h('p', {}, m.definition), m.cite ? h('p', { class: 'muted small' }, s.motivated(m.cite)) : null);
     if (sc.kind === 'sentiment' && sc.nSentences) {

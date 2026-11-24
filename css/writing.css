@@ -180,3 +180,57 @@
 .writing-area .actions {
   margin-top: 6px;
 }
+
+/* ---------- final pass ---------- */
+/* no single character left on a last line */
+.writing-prompt,
+.writing-note li,
+.writing-note p,
+.sheet-body:has(.writing-tabs) > .muted.small {
+  text-wrap: pretty;
+}
+/* a label that runs to two lines reads as a sentence */
+.writing-label {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+/* the prompt, the page and the line under it share the sheet's left edge */
+.writing-chosen,
+.writing-meta {
+  padding-inline: 0;
+}
+/* the same turning mark as the other disclosures in the app */
+.writing-help summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+.writing-help summary::-webkit-details-marker {
+  display: none;
+}
+.writing-help summary::before {
+  content: '›';
+  font: 400 1.3rem/1 var(--body);
+  transition: transform 0.15s;
+}
+.writing-help[open] summary::before {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .writing-help summary::before {
+    transition: none;
+  }
+}
+/* the quiet way out always has its own row, on the left edge, in both languages */
+.writing-actions::after {
+  content: '';
+  order: 1;
+  flex-basis: 100%;
+  height: 0;
+}
+.writing-actions > .btn.ghost {
+  order: 2;
+  margin: -8px 0 0 -17.5px;
+  padding-inline: 16px;
+}

@@ -238,6 +238,9 @@ export function groundingStage({ h, getLang, speaker, onEnd, onStop }) {
 }
 
 // ---------- phrases ----------
+// The same text, one span per clause, so css/calm.css can keep a Chinese clause on one line.
+const clauses = (h, s) => (s.match(/[^，。？！；]+[，。？！；]*/g) || [s]).map((c) => h('span', { class: 'calm-clause' }, c));
+
 function phraseCard({ h, getLang, speaker, st }, rerender) {
   const L = text(getLang);
   if (st.pickLang !== getLang()) {
@@ -274,7 +277,7 @@ function phraseCard({ h, getLang, speaker, st }, rerender) {
         L.draw
       )
     ),
-    h('p', { class: 'calm-big calm-picked', role: 'status' }, st.pick === null ? '' : L.phrases[st.pick]),
+    h('p', { class: 'calm-big calm-picked', role: 'status' }, st.pick === null ? '' : clauses(h, L.phrases[st.pick])),
     h(
       'ul',
       { class: 'calm-phrase-list' },
@@ -332,7 +335,7 @@ export function calmSheet({ h, getLang }) {
       h('div', { class: 'calm-flow' }, flow.render(rerender)),
       // one thing at a time: the phrases wait until the flow is over or has not begun
       busy ? null : phraseCard({ h, getLang, speaker, st }, rerender),
-      h('p', { class: 'small calm-body-note', role: 'note' }, L.body),
+      h('p', { class: 'small calm-body-note', role: 'note' }, clauses(h, L.body)),
       h(
         'div',
         { class: 'calm-help' },

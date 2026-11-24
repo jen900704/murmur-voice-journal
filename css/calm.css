@@ -288,3 +288,23 @@
 .breathe-flow.compact > .breathe-phase.calm-big + .actions {
   margin-top: 20px;
 }
+
+/* ---------- final pass ---------- */
+/* one digit in the middle of a circle: the natural figure, not the wide tabular one */
+.breathe-count,
+.ground-num {
+  font-variant-numeric: normal;
+}
+/* a chosen phrase and the note break between clauses in Chinese, never inside a word */
+.calm-clause:lang(zh) {
+  display: inline-block;
+}
+.ground-hint,
+.breathe-handoff .muted {
+  text-wrap: balance;
+}
+/* phrases start on the same edge as the card's title and never leave one character behind */
+.calm-phrase {
+  padding-inline: 0;
+  text-wrap: pretty;
+}

@@ -377,7 +377,7 @@ export function writingSheet({ h, getLang, db, toast, onSaved, onUpdated }) {
       helpList(h, getLang()),
       h(
         'div',
-        { class: 'actions left wrap' },
+        { class: 'actions left wrap writing-actions' },
         h('button', { type: 'button', class: 'btn', 'data-key': 'writing-help-back', onclick: () => ((st.stage = 'write'), rerender()) }, L().helpBack),
         h('button', { type: 'button', class: 'btn ghost', 'data-key': 'writing-help-save', onclick: () => store(rerender) }, L().helpSave)
       ),
@@ -427,7 +427,7 @@ export function writingSheet({ h, getLang, db, toast, onSaved, onUpdated }) {
       st.closingHelp ? h('div', { class: 'writing-note', role: 'note' }, h('p', { class: 'small' }, L().helpBody), helpList(h, getLang())) : null,
       h(
         'div',
-        { class: 'actions left wrap' },
+        { class: 'actions left wrap writing-actions' },
         st.saved ? h('button', { type: 'button', class: 'btn primary', 'data-key': 'writing-closing-keep', onclick: keep }, L().closeKeep) : null,
         h('button', { type: 'button', class: st.saved ? 'btn ghost' : 'btn primary', 'data-key': 'writing-closing-done', onclick: finish }, L().closeSkip)
       ),
@@ -591,7 +591,7 @@ export function writingSheet({ h, getLang, db, toast, onSaved, onUpdated }) {
         h('div', { class: 'writing-meta' }, timerBox(view), count),
         h(
           'div',
-          { class: 'actions left wrap' },
+          { class: 'actions left wrap writing-actions' },
           h('button', { type: 'button', class: 'btn primary', 'data-key': 'writing-save', onclick: () => trySave(rerender) }, L().save),
           h('button', { type: 'button', class: 'btn', 'data-key': 'writing-copy', onclick: copy }, L().copy),
           h(

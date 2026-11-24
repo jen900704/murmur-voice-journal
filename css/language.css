@@ -752,3 +752,52 @@ mark.ll-hit.neg {
   font-size: 14px;
   color: var(--muted, #6b6784);
 }
+
+/* ---------- final pass: the mirror ----------
+   Line endings, the evidence table and the highlighted words. */
+/* no single character or lone number left on a last line */
+.view.language p,
+.ll-obs-text,
+.sheet-body:has(.ll-cannot) p {
+  text-wrap: pretty;
+}
+/* a rate and its interval: when they do not fit on one line, the interval moves down whole */
+.ll-ci {
+  display: inline-block;
+}
+.ll-row-cmp {
+  text-wrap: pretty;
+}
+.ll-note {
+  margin-bottom: 16px;
+}
+/* one rule above the line of waiting groups; the report section below brings its own */
+.ll-locked {
+  border-bottom: 0;
+}
+/* their names start on the page's edge, under the line that opened them, and the marks line up */
+.ll-group-short:not([open]) {
+  padding: 0;
+}
+/* counted words: the word on the left, its numbers in two columns on the right */
+.ll-table[data-key='ll-words'] th:first-child {
+  width: 100%;
+}
+.ll-table[data-key='ll-words'] th:not(:first-child),
+.ll-table[data-key='ll-words'] td {
+  padding-left: 16px;
+  text-align: end;
+  white-space: nowrap;
+}
+.ll-table[data-key='ll-words'] tr > :last-child {
+  padding-right: 0;
+}
+/* in running text the mark hugs the word, so the sentence keeps its own spacing */
+mark.ll-hit {
+  margin: 0;
+  padding: 1px 3px;
+  border-radius: 4px 4px 2px 2px;
+}
+mark.ll-hit:lang(zh) {
+  margin: 0 1px;
+}
