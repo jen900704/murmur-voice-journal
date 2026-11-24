@@ -21,16 +21,16 @@ The trend and journal screenshots use the app's built-in synthetic demo data.
 
 - **Voice journal.** Speak for about 30 seconds; see pitch, pace, pauses, and voice regularity against your own usual range.
 - **Theory lens** (換個角度看看 in Chinese). Write down a worry and look at it through one of 14 counseling approaches (psychoanalytic, Adlerian, existential, person-centered, Gestalt, behavior therapy, mindfulness and acceptance, REBT, cognitive therapy, reality therapy, feminist, solution-focused, narrative, family systems). Each lens asks three or four questions in its own style, then shows what it noticed, a small experiment, key ideas, and what the lens might miss. Compare three lenses side by side, collect lens cards, and see which ones you rate as most helpful. This is psychoeducation, not counseling, and only techniques that are reasonable to try alone are included.
-- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a three to five minute wind-down track in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks.
+- **Bedtime ritual.** In the evening: set a worry down, note one kind thing you did for yourself, and listen to a wind-down track of about three to four minutes in the style of a counseling approach suited to bedtime, read by your phone's own voice (or shown as slow read-along text). You get a pastel postcard to keep or share. Every step can be skipped, "Just listen" goes straight to a track, and there are no streaks.
 - **Goodnight card.** Send one pastel card to one person through your phone's share sheet. It carries only a line you pick, never what you wrote; there is no feed, count, or read receipt.
 - **Breathe for a minute.** A one-minute pacer (in for 4 seconds, out for 6) on Today and on the low-mood card.
 - **Kindness jar.** The kind things you noted, kept privately. When a mood check-in is low, a few of them come back, along with three small general actions many people find a little helpful (not other users' posts, so there is nothing to compare against).
 - **Daily prompt.** Everyone gets the same prompt on the same day, and you can swap answers with someone through a link.
-- **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: one reflection and one question per turn, the reasoning named, no praise or reassurance, only techniques suitable for self-help, and a stop with help lines if risk appears on either side. Uses your own API key.
+- **AI conversation (experimental, off by default).** After a theory-lens exercise, continue as a conversation with an AI model that stays inside that approach: instructed to give one reflection and one question per turn, avoid praise and reassurance, and use only techniques suitable for self-help. Risk words in your message pause it with help lines (you can still send); a risky reply without help lines is held back; the chat ends when the model gives help lines. At most ten turns. Uses your own API key.
 - **Bedtime reminder.** Add a daily calendar event at a time you choose; Murmur sends no notifications.
 - **Something gentle.** A short, curated list of films, short films, series, books, musicals, opera, and music, with content notes; heavier works are hidden unless you ask for them. The list is ordered for the moment (shorter works late at night, gentler ones after a low check-in), worked out on the device.
 
-**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses and shows help lines for the person's region (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every step. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
+**Safety.** Text typed into the theory lens, the bedtime ritual, voice-entry notes, the prompt exchange, and the AI conversation is checked for signs that someone may be at risk (suicide, self-harm, harm to others, abuse) in Chinese and English. A match pauses the lens exercise, the bedtime ritual and the AI chat and shows help lines for the person's region (a voice note is saved first, then help lines are shown; the prompt exchange shows them before sharing) (Taiwan: 1925, 1995, 113, 110, 119, 1980; US: 988, the domestic violence hotline, 911; elsewhere: a link to findahelpline.com). Nothing is deleted: if the match was a false alarm, the person can carry on. Help is one tap away on every lens and ritual step, and under About. The check is a coarse safety net, tested against about 210 phrases, and will still miss some wording.
 
 Plans and safety requirements for features that connect people are in [`docs/social-design.md`](docs/social-design.md). What is built, what needs review, and the idea backlog are in [`docs/roadmap.md`](docs/roadmap.md).
 
@@ -68,7 +68,7 @@ Each recording is resampled to 16 kHz mono, high-pass filtered at about 50 Hz to
 
 Speech activity is found with an adaptive energy threshold placed between the recording's noise floor (5th percentile of frame energy) and its peak (99th percentile). A recording is rejected as "no speech" when fewer than 0.5 s of frames, or fewer than 20% of speech frames, are voiced, so noise or breathing alone is not saved.
 
-**Recording conditions.** The app asks the browser to switch off echo cancellation, noise suppression, and automatic gain control, because they change pitch and loudness dynamics, and records at 128 kbit/s. Browsers do not always comply, so each entry stores the settings the browser actually applied, the container format, the share of clipped samples, and an SNR estimate (median speech energy minus the noise floor). Recordings with more than 1% clipped samples or an SNR below 15 dB are flagged, kept in the journal, and left out of baselines, trends, and correlations. Features are computed from the browser's compressed recording (Opus or AAC), not from raw PCM.
+**Recording conditions.** The app asks the browser to switch off echo cancellation, noise suppression, and automatic gain control, because they change pitch and loudness dynamics, and records at 128 kbit/s. Browsers do not always comply, so each entry stores the settings the browser actually applied, the container format, the share of clipped samples, and an SNR estimate (median speech energy minus the noise floor). Recordings with more than 1% clipped samples, or an SNR below 15 dB when at least 10% of the recording is silence (otherwise the noise floor is really quiet speech), are flagged, kept in the journal, and left out of baselines, trends, and correlations. Features are computed from the browser's compressed recording (Opus or AAC), not from raw PCM.
 
 **What the evidence says about each feature.** Pitch is the best supported. Pause measures did well on clean read speech. Speaking rate, articulation rate, and pitch range should be read as rough, person-specific indices. Nothing here shows that any feature relates to mood.
 
@@ -103,9 +103,9 @@ The unit tests (`npm test`) cover YIN on harmonic tones from 90 to 380 Hz, rejec
 - Speaking rate is an estimate based on intensity peaks, not a transcript.
 - Lexical tones in Mandarin (and other tone languages) raise pitch movement and pitch range by themselves. The usual range is only meaningful if recordings are in the same language.
 - The correlations are descriptive and based on one person's data. They are leads to be curious about, not findings.
-- If you speak with almost no silence at all, the noise floor is estimated from speech, which can make a recording look noisy or be rejected. Leaving a short pause at the start helps.
+- If you speak with almost no silence at all, the noise floor is estimated from speech, which can get a recording rejected as unclear. (It is not flagged as noisy in that case.) Leaving a short pause at the start helps.
 - Music, singing, or a TV in the background can pass the voicing check and produce numbers that are not about your speech.
-- Safari on iPhone may clear site data after 7 days without a visit unless Murmur is used from the home screen, and the home-screen app keeps its data separately from Safari tabs. Exported backups contain measurements only, not audio.
+- Safari on iPhone may clear site data after 7 days without a visit unless Murmur is used from the home screen, and the home-screen app keeps its data separately from Safari tabs. Backups contain measurements, notes, bedtime notes and saved exercises as unencrypted text; audio is not included.
 
 ## Run it locally
 
@@ -116,11 +116,11 @@ git clone https://github.com/jen900704/murmur-voice-journal
 cd murmur-voice-journal
 python3 -m http.server 8080   # then open http://localhost:8080
 npm test                      # unit tests (Node 18 or later)
-npx playwright test           # browser tests: recording through a fake microphone, every feature,
-                              # a mocked AI API, and an axe-core WCAG 2.1 AA audit of each screen
+npx playwright test           # browser tests: recording through a fake microphone, the main flows,
+                              # a mocked AI API, offline use, and an axe-core WCAG 2.1 AA audit of 15 screens
 ```
 
-Microphone access requires `https` or `localhost`. The test suite needs no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
+Microphone access requires `https` or `localhost`. The unit tests (`npm test`) need no browser; `tools/validate.sh` additionally needs eSpeak NG, FFmpeg, and Python with `praat-parselmouth`.
 
 ```
 index.html            app shell
@@ -139,11 +139,15 @@ js/night-view.js      bedtime ritual screens
 js/postcard.js        procedural postcards
 js/extras.js          recommendations, nights, kindness jar, prompt exchange
 js/prompts.js         daily prompts
+js/breathe.js         one-minute breathing pacer
+js/validate.js        checks records in an imported backup
 js/ai-chat.js         experimental AI conversation (system prompt and safety rules)
 data/recs.json        curated recommendations
 sw.js                 offline cache
 tools/validate.sh     comparison with Praat on synthesized speech
-tools/make-demo.mjs   builds the synthetic demo data
+tools/make-demo.mjs   builds the synthetic demo data (demo/demo-data.json)
+tools/export-content.mjs  writes docs/content-review.md from the content
+tools/bump-cache.mjs  sets the service worker cache name from the app files
 ```
 
 The voice shape for each entry is the recording's pitch contour wrapped around a circle: the outline moves outward when pitch rises above that recording's median and inward when it falls, and loudness thickens it slightly.
@@ -184,7 +188,7 @@ Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天�
 
 **為什麼只跟自己比。** 音高起伏、語速、停頓這些特徵常出現在情緒和心理健康的語音研究裡，但每個人的聲音差異很大。對一個人來說偏低的數字，對另一個人可能很正常。所以 Murmur 不拿你和其他人比較，只拿你和你自己比較。
 
-**隱私。** 錄音在瀏覽器裡解碼和分析，不會上傳。所有資料存在你裝置上的 IndexedDB，沒有帳號、沒有追蹤、沒有第三方請求。你可以選擇只保留數據不保留錄音，也可以隨時匯出或全部刪除。
+**隱私。** 錄音在瀏覽器裡解碼和分析，不會上傳。資料存在你裝置上的 IndexedDB（求助專線的地區設定存在瀏覽器的 localStorage），沒有帳號、沒有追蹤、沒有第三方請求。唯一的例外是你自己開啟的實驗性 AI 對話。睡前引導只用裝置內建的語音。你可以選擇只保留分析結果不保留錄音，也可以隨時匯出或全部刪除。
 
 **和自己比的規則。** 累積 10 筆可用的紀錄後，每筆新的數值會和你之前的紀錄比較（中位數加減 k 個標準化的 MAD）。紀錄少的時候中位數本身也不準，所以 k 會隨筆數調整：10 筆時是 3.02，100 筆時是 2.06。這個公式是用模擬校正的，在什麼都沒變的情況下，不論累積幾筆，大約都只有 5% 的數值會被標成「比平常的範圍高或低」；結果頁一次看五項，所以平常的日子也常會有一兩項落在範圍外，app 會在結果旁說明。爆音或背景噪音太大的錄音會保留，但不會拿來算平常範圍。聲音和心情的相關要等到有 20 筆標記後才顯示，並且會清楚說明同時看了很多個相關、每天的紀錄彼此不獨立，所以只能當作線索。
 
@@ -192,6 +196,6 @@ Murmur 低語日記是一個完全在瀏覽器裡執行的聲音日記。每天�
 
 **驗證。** 先公開登錄分析計畫，再用 36 段真人英文錄音和 Praat 比較：音高很接近（嚴重音高錯誤 1.8%，細部誤差中位數 4.6 cents），停頓偵測在 30 組數字串中有 29 組完全正確。有聲段覆蓋率、部分說話者的音高中位數、音高範圍和音節數沒有達到事先訂的標準，原因寫在 `docs/validation-results.md`。另一個登錄過的研究測試了壓縮、音量、自動增益、噪音、回音和電話音質：64 kbit/s 以上的壓縮、±6 dB 音量和自動增益幾乎沒有影響，背景噪音則會影響響度起伏、聲音規律度和時間相關的特徵。另外用兩段中文真人錄音做了探索性的小測試（`docs/mandarin-pilot.md`）：音高幾乎沒有嚴重錯誤（0.2%），逐格誤差比英文大（中位數 22 cents，仍遠小於半音），Murmur 回報的音高中位數比 Praat 高 4 到 6%，原因是有些 Praat 判為無聲的音框被 Murmur 算成有聲；兩邊都算有聲的音框則幾乎完全一致（差 0.1%）。因為只跟自己比，這種穩定的差異不影響「比平常高或低」的判斷。真正的中文驗證還需要台灣使用者日常用手機錄的聲音。
 
-**資料可能會不見的情況。** iPhone 的 Safari 如果超過 7 天沒打開這個網站，可能會清掉資料，加入主畫面後使用可以避免；主畫面 App 和 Safari 分頁的資料是分開的；匯出的備份只有數據，沒有錄音檔。
+**資料可能會不見的情況。** iPhone 的 Safari 如果超過 7 天沒打開這個網站，可能會清掉資料，加入主畫面後使用可以避免；主畫面 App 和 Safari 分頁的資料是分開的；匯出的備份包含分析結果、備註、睡前紀錄和存下的練習，是沒有加密的文字檔；錄音檔不包含在內。
 
 如果你最近過得很辛苦：台灣可撥安心專線 1925（24 小時），美國可撥打或傳訊 988。

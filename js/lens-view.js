@@ -18,7 +18,7 @@ const S = {
     intro:
       '同一個煩惱，不同的諮商學派會問不同的問題。選一個角度，用 3 到 4 個問題重新看看這件事。這是幫助自己整理想法的練習，不是諮商或治療。',
     madeBy: '由諮商研究所學生製作，不是執業諮商心理師提供的服務，也沒有經過臨床驗證。',
-    privacy: '你在這裡寫的內容不會離開這個裝置。沒有按「儲存」的話，關掉就消失。',
+    privacy: '你在這裡寫的內容不會離開這個裝置。沒有按「儲存」的話，關掉就消失；只會記下你用過哪些學派和給的評分。',
     privacyAi: '例外：你自己開啟並使用 AI 對話時，那次練習的內容會傳給 Anthropic。',
     start: '開始',
     deck: '理論卡',
@@ -95,7 +95,7 @@ const S = {
     intro:
       'Different counseling schools ask different questions about the same worry. Pick a lens and look at yours from a new angle in three or four questions. This is psychoeducation, not counseling or therapy.',
     madeBy: 'Made by a counseling graduate student. It is not a service from a licensed counselor and has not been clinically validated.',
-    privacy: 'Nothing you write here leaves this device, and it disappears when you finish unless you choose Save.',
+    privacy: 'Nothing you write here leaves this device, and it disappears when you finish unless you choose Save. Only which lenses you used and your ratings are kept.',
     privacyAi: 'The exception: when you use the AI conversation, that exercise is sent to Anthropic.',
     start: 'Start',
     deck: 'Lens cards',

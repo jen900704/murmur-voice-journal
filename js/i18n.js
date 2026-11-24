@@ -119,7 +119,6 @@ export const STRINGS = {
     notMedicalBody:
       'Murmur 不是醫療器材，不做診斷，也無法判斷你的身心狀況。聲音會受到感冒、睡眠、環境噪音、麥克風位置影響。如果你最近過得很辛苦，請找信任的人或專業人員聊聊。',
     helpTitle: '需要馬上找人說話',
-    helpLines: ['台灣：安心專線 1925（24 小時，免付費）', '美國：988 自殺與危機專線（可打電話或傳簡訊）', '其他地區：請聯絡當地的緊急服務或危機專線'],
     settingsTitle: '設定與資料',
     keepAudio: '保存錄音檔（關閉後，新的紀錄只保留分析結果；已存的錄音不受影響）',
     language: 'Language / 語言',
@@ -146,7 +145,7 @@ export const STRINGS = {
     dbBlocked: '另一個 Murmur 分頁正在使用資料。請關掉其他 Murmur 分頁後重新整理。',
     deletedAll: '已刪除所有資料',
     sourceCode: '開源程式碼',
-    methodsNote: '方法說明，以及在合成語音上和 Praat 比較的結果，都在 GitHub 的 README。',
+    methodsNote: '方法說明，以及和 Praat 比較的驗證結果（真人錄音、壓縮與噪音測試），都在 GitHub 的 README。',
     installHint: '想當成 App 來用：在 Safari 按「分享」，再選「加入主畫面」；Chrome 則在選單裡選「安裝應用程式」。',
     units: { '/s': '音節/秒', st: '半音', s: '秒' },
     confidence: { high: '可信度：較高', medium: '可信度：中等', low: '可信度：較低' },
@@ -292,7 +291,6 @@ export const STRINGS = {
     notMedicalBody:
       'Murmur is not a medical device. It does not diagnose anything or tell you whether you have any condition. Your voice also changes with colds, sleep, background noise, and how you hold the phone. If things have been hard lately, talk with someone you trust or a professional.',
     helpTitle: 'If you need to talk to someone now',
-    helpLines: ['US: 988 Suicide & Crisis Lifeline (call or text)', 'Taiwan: 1925 mental health support line (24 hours)', 'Elsewhere: contact your local emergency number or crisis line'],
     settingsTitle: 'Settings and data',
     keepAudio: 'Keep audio recordings (when off, new entries keep measurements only; saved audio stays)',
     language: 'Language / 語言',
@@ -319,7 +317,7 @@ export const STRINGS = {
     dbBlocked: 'Another Murmur tab is using the data. Close other Murmur tabs and reload.',
     deletedAll: 'All data deleted',
     sourceCode: 'Source code',
-    methodsNote: 'Methods, and a comparison with Praat on synthesized speech, are in the README on GitHub.',
+    methodsNote: 'Methods and the validation against Praat (recorded human speech, plus codec and noise tests) are in the README on GitHub.',
     installHint: 'To use it like an app: in Safari, tap Share, then Add to Home Screen. In Chrome, choose Install app from the menu.',
     units: { '/s': 'syllables/s', st: 'semitones' },
     confidence: { high: 'Confidence: higher', medium: 'Confidence: medium', low: 'Confidence: lower' },

@@ -30,7 +30,7 @@ Confidence summarizes [`validation-results.md`](validation-results.md) (agreemen
 | `voicedFraction` | Voiced frames divided by speech frames | fraction | |
 | `clipFraction` | Share of samples at or above 0.99 full scale | fraction | |
 | `snrDb` | Median speech-frame energy minus the noise floor (5th percentile of frame energy). Runs 2 to 4 dB above the true SNR in testing. | dB | |
-| `qualityFlags` | `clipping` (over 1% clipped samples) and/or `noisy` (snrDb under 15 dB). Flagged entries are kept but left out of baselines, trends, and correlations in the app. | | |
+| `qualityFlags` | `clipping` (over 1% clipped samples) and/or `noisy` (snrDb under 15 dB, when at least 10% of the frames are not speech). Flagged entries are kept but left out of baselines, trends, and correlations in the app. | | |
 | `mimeType` | Container and codec the browser recorded | | |
 | `autoGainControl`, `noiseSuppression`, `echoCancellation` | Whether the browser reported these as on; the app asks for them off, and browsers do not always comply | true/false/empty | |
 | `featureVersion` | Version of the feature code | | |
