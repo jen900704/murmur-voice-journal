@@ -1,6 +1,6 @@
 // The bedtime ritual: set a worry down, note one kind thing, listen to a short wind-down
 // track, and get a postcard. Every step can be skipped. No streaks, no reminders of missed days.
-import { TRACKS, THEMES, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
+import { TRACKS, THEMES, THEME_TRACK, trackById, buildScript, BedtimePlayer, pickVoice, voicesFor, voicesReady, unlockSpeech } from './bedtime.js';
 import { postcardSvg, postcardPng, sharePng } from './postcard.js';
 import { checkRisk, helpList } from './safety.js';
 
@@ -28,6 +28,7 @@ const S = {
     toneTitle: '今晚想聽哪一種？',
     toneHelp: '每一段都是為 Murmur 寫的，靈感來自不同的諮商取向，不是治療。',
     surprise: '幫我選',
+    suggested: '適合今晚的心事',
     playTitle: '把手機放在旁邊，讓螢幕亮著',
     pause: '暫停',
     resume: '繼續',
@@ -81,6 +82,7 @@ const S = {
     toneTitle: 'What would you like to hear tonight?',
     toneHelp: 'Each track was written for Murmur, inspired by a counseling approach. None of them is therapy.',
     surprise: 'Choose for me',
+    suggested: "Suits tonight's worry",
     playTitle: 'Put the phone down nearby and leave the screen on',
     pause: 'Pause',
     resume: 'Resume',
@@ -292,10 +294,12 @@ export function createNightView({ h, add, getLang, rerender, toast, db, onExit, 
         'div',
         { class: 'tracks' },
         h('button', { type: 'button', class: 'track surprise', 'data-key': 'track-surprise', onclick: () => play(chooseFor()) }, h('strong', {}, L().surprise)),
-        TRACKS.map((t) =>
+        // the track suited to tonight's kind of worry comes first, marked as a suggestion
+        [...TRACKS].sort((a, b) => (b.id === THEME_TRACK[st.theme]) - (a.id === THEME_TRACK[st.theme])).map((t) =>
           h(
             'button',
-            { type: 'button', class: 'track', 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
+            { type: 'button', class: 'track' + (t.id === THEME_TRACK[st.theme] ? ' suggested' : ''), 'data-key': `track-${t.id}`, onclick: () => play(t.id) },
+            t.id === THEME_TRACK[st.theme] ? h('span', { class: 'track-tag' }, L().suggested) : null,
             h('strong', {}, t[lk()].name),
             h('span', {}, t[lk()].style),
             t[lk()].note ? h('span', { class: 'track-note' }, t[lk()].note) : null

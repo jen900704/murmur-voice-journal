@@ -9,6 +9,9 @@
 
 export const THEMES = ['work', 'relationship', 'family', 'health', 'future', 'unsure'];
 
+// A gentle suggestion for each kind of worry; the person can still pick any track.
+export const THEME_TRACK = { work: 'solution-focused', relationship: 'person-centered', family: 'family-systems', health: 'relaxation', future: 'acceptance', unsure: 'person-centered' };
+
 const THEME_TEXT = {
   'zh-TW': { work: '工作或學業的事', relationship: '關係裡的事', family: '家裡的事', health: '身體的事', future: '對以後的擔心', unsure: '那件說不太清楚的事', none: '今天的事' },
   en: { work: 'the thing about work or school', relationship: 'the thing about a relationship', family: 'the thing about family', health: 'the thing about your body', future: 'the worry about what comes next', unsure: 'the thing that is hard to name', none: 'today' },

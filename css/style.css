@@ -1659,3 +1659,12 @@ h3.sub {
   max-width: 520px;
   margin: 16px auto 0;
 }
+
+.track.suggested {
+  border-color: var(--accent);
+}
+.track .track-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}

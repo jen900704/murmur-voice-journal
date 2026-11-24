@@ -170,3 +170,12 @@ test('a goodnight card carries only the chosen line, never what was written', as
   const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="send-line-0"]').click()]);
   expect(download.suggestedFilename()).toMatch(/^goodnight-.*\.png$/);
 });
+
+test("the track that fits tonight's worry comes first", async ({ page }) => {
+  await startRitual(page);
+  await page.locator('[data-key="night-theme-family"]').click();
+  await page.locator('[data-key="night-next"]').click();
+  await page.locator('[data-key="night-next"]').click();
+  await expect(page.locator('.track').nth(1)).toHaveAttribute('data-key', 'track-family-systems');
+  await expect(page.locator('.track.suggested')).toHaveCount(1);
+});
