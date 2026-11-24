@@ -9,10 +9,12 @@
 - Bedtime ritual: set a worry down, one kind thing, a wind-down track in the style of nine approaches (including a psychoanalytic "murmur": letting images drift up without interpreting them; and a family systems track on handing back other people's worries), pastel postcard
 - Kindness jar, low-mood card, daily prompt exchange by link, calendar reminder, goodnight card to one person
 - First-visit welcome with three ways in; help lines by region (Taiwan, US, elsewhere)
+- Breathe for a minute (4 in, 6 out); small general actions on the low-mood card; monthly backup reminder
 - Gentle recommendations with content notes
 - Experimental AI conversation for theory lenses (off by default, own API key)
 - Safety net for risk language in every free-text field that is stored or shared, with help lines always reachable
-- Unit tests, browser tests through a fake microphone, and a WCAG 2.1 AA audit of every screen, all in CI
+- Unit tests, browser tests through a fake microphone, an offline test through the service worker, and a WCAG 2.1 AA audit of every screen, all in CI
+- Releases: `npm run prepare-release` regenerates the content review file and the cache name (a hash of the app files); unit tests fail if either is stale
 
 ## Needs the owner's review
 
@@ -44,4 +46,4 @@ Ideas come in over time; each gets reshaped for safety and ease of use before it
 | Daily writing prompt and partner exchange | built | Exchange by link, no server |
 | "One kind thing I did today", visible to people in a low mood | built privately | Shared version waits for the social design |
 | AI counselor-style conversation | built, experimental | Psychoeducation framing; not counseling |
-| Japanese interface | not started | |
+| Japanese interface | not started | Needs Japanese crisis patterns in the safety net and verified Japanese help lines before anything else |
