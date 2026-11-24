@@ -1,7 +1,7 @@
 // Offline support. The cache name is set by tools/bump-cache.mjs (npm run prepare-release).
 // Every release installs its files into one versioned cache, and pages
 // are served from that cache, so a page never runs files from two different releases.
-const CACHE = 'murmur-2a8a15f51c';
+const CACHE = 'murmur-898e86696f';
 const SHELL = [
   './',
   './index.html',
@@ -37,10 +37,19 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
+  // Fetch each file with the cache name as a query, so a CDN edge cannot hand back a copy
+  // from an older release; store it under its plain URL. Any failure fails the install.
   e.waitUntil(
-    caches
-      .open(CACHE)
-      .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+    caches.open(CACHE).then((c) =>
+      Promise.all(
+        SHELL.map(async (u) => {
+          const bust = u === './' ? `./?v=${CACHE}` : `${u}?v=${CACHE}`;
+          const res = await fetch(bust, { cache: 'reload' });
+          if (!res.ok) throw new Error(`${u}: ${res.status}`);
+          await c.put(u, res);
+        })
+      )
+    )
   );
 });
 
@@ -60,7 +69,8 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.endsWith('/sw.js')) return;
   // Cache first, from the cache this version installed as a whole. A new release waits until
   // the page is idle and asks for it, then the page reloads, so two releases never mix.
   e.respondWith(
