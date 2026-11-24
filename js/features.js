@@ -377,7 +377,7 @@ export function analyze(input, sampleRate, opts = {}) {
     meanPauseS: round(pauses.length ? mean(pauses) : 0, 2),
     syllables: nuclei,
     speechRate: round(nuclei / Math.max(spanS, 1e-6), 2),
-    articulationRate: round(nuclei / Math.max(speechS, 1e-6), 2),
+    articulationRate: round(nuclei / Math.max(spanS - pauseS, 1e-6), 2),
     voicedFraction: round(voicedFraction, 3),
     f0MedianHz: round(median(f0Hz), 1),
     f0SdSt: round(sd(st), 2),

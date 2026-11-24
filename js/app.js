@@ -1,7 +1,7 @@
 import { t, setLang, getLang, detectLang, STRINGS } from './i18n.js';
 import { Recorder, decodeToMono16k, isSupported, TARGET_SR } from './recorder.js';
 import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
-import { personalBaseline, spearman, fmtR, mad, distinctCount } from './stats.js';
+import { personalBaseline, baselineK, spearman, fmtR, mad, distinctCount } from './stats.js';
 import { glyph, ringPath, lineChart } from './viz.js';
 import * as db from './db.js';
 
@@ -164,6 +164,12 @@ async function startRecording() {
     return render();
   }
   startRecording.busy = false;
+  // the person may have left this screen while the permission prompt was open
+  if (state.tab !== 'today' || (state.phase !== 'idle' && state.phase !== 'error')) {
+    state.recorder.cancel();
+    state.recorder = null;
+    return;
+  }
   state.levels.fill(0);
   state.phase = 'recording';
   // The time limit runs on a timer, not on animation frames, which pause in background tabs.
@@ -227,12 +233,6 @@ function cancelRecording() {
   state.phase = 'idle';
   render();
 }
-
-document.addEventListener('visibilitychange', () => {
-  // Animation frames stop while hidden; resume the ring when visible. The time limit
-  // keeps running either way.
-  if (document.visibilityState === 'visible' && state.phase === 'recording') requestAnimationFrame(tick);
-});
 
 async function savePending() {
   if (state.phase !== 'result' || !state.pending || savePending.busy) return;
@@ -684,8 +684,11 @@ async function renderDetail() {
 function viewTrends() {
   const wrap = h('section', { class: 'view trends' });
   const entries = pool();
+  const real = hasReal();
+  const flagged = state.entries.filter((e) => usable(e) && (real ? !e.demo : true) && e.features.quality && e.features.quality.flags && e.features.quality.flags.length).length;
+  const flaggedNote = flagged ? h('p', { class: 'muted small' }, t('flaggedLeftOut', flagged)) : null;
   if (entries.length < 3) {
-    add(wrap, demoBanner(), h('p', { class: 'empty' }, t('trendsEmpty')), state.entries.length ? null : h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
+    add(wrap, demoBanner(), h('p', { class: 'empty' }, t('trendsEmpty')), flaggedNote, state.entries.length ? null : h('button', { type: 'button', class: 'btn', onclick: loadDemo }, t('loadDemo')));
     return wrap;
   }
   add(wrap, demoBanner());
@@ -728,7 +731,8 @@ function viewTrends() {
   const scaleV = (v) => v * (info.scale || 1);
   const med = median(all);
   const spread = mad(all);
-  const band = all.length >= BASELINE_MIN && spread > 0 ? [scaleV(med - 2 * spread), scaleV(med + 2 * spread)] : null;
+  const kBand = baselineK(all.length);
+  const band = all.length >= BASELINE_MIN && spread > 0 ? [scaleV(med - kBand * spread), scaleV(med + kBand * spread)] : null;
   const name = t('feat')[info.key][0];
   add(wrap, 
     h('h2', { class: 'metric-title' }, name),
@@ -753,7 +757,8 @@ function viewTrends() {
       h('span', {}, t('lastN', recent.length)),
       band ? h('span', { class: 'legend-band' }, t('usualRange')) : null,
       recent.some((e) => Number.isFinite(e.mood)) ? h('span', { class: 'legend-mood' }, t('moodMarks')) : null
-    )
+    ),
+    flaggedNote
   );
 
   // links between voice and self-report
@@ -1011,7 +1016,14 @@ function render() {
 
 function onHash() {
   const tab = location.hash.replace('#', '');
-  if (tab === 'entry') return;
+  if (tab === 'entry') {
+    // reached with the Forward button after closing a detail view
+    if ($('#sheet').hidden) {
+      if (state.detailId && state.entries.some((e) => e.id === state.detailId)) renderDetail();
+      else history.replaceState(null, '', '#' + state.tab);
+    }
+    return;
+  }
   closeDetailUI();
   if (TABS.includes(tab) && tab !== state.tab) {
     if (state.phase === 'recording') cancelRecording();

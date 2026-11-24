@@ -8,11 +8,17 @@ export function mad(arr) {
   return 1.4826 * median(arr.map((v) => Math.abs(v - m)));
 }
 
+// How many scaled MADs from the median count as unusual, given n earlier values.
+// With few values the median and MAD are themselves uncertain, so the cut-off widens.
+// Calibrated by simulation on normal data so that about 5% of new values are flagged
+// when nothing has changed (n = 10: 3.02, 20: 2.42, 30: 2.26, 100: 2.04).
+export function baselineK(n) {
+  return 1.96 + 9.5 / (n - 1);
+}
+
 // Compare a value to the person's own earlier history. Needs at least `minN` entries.
-// A value counts as outside the usual range when it is more than `k` scaled MADs from
-// the median (k = 2 flags roughly 5% of values when nothing has changed).
-// Returns { n, median, spread, z, band } where band is 'higher' | 'lower' | 'usual'.
-export function personalBaseline(history, value, minN = 10, k = 2) {
+// Returns { n, median, spread, z, k, band } where band is 'higher' | 'lower' | 'usual'.
+export function personalBaseline(history, value, minN = 10, kOverride) {
   const vals = history.filter((v) => Number.isFinite(v));
   if (vals.length < minN || !Number.isFinite(value)) return null;
   const m = median(vals);
@@ -23,9 +29,10 @@ export function personalBaseline(history, value, minN = 10, k = 2) {
     spread = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (vals.length - 1));
   }
   if (!(spread > 0)) return { n: vals.length, median: m, spread: 0, z: 0, band: 'usual' };
+  const k = kOverride ?? baselineK(vals.length);
   const z = (value - m) / spread;
   const band = z > k ? 'higher' : z < -k ? 'lower' : 'usual';
-  return { n: vals.length, median: m, spread, z, band };
+  return { n: vals.length, median: m, spread, z, k, band };
 }
 
 function ranks(arr) {

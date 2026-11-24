@@ -61,6 +61,7 @@ export const STRINGS = {
     lastN: (n) => `最近 ${n} 筆`,
     usualRange: '你的平常範圍',
     moodMarks: '心情（越深越好）',
+    flaggedLeftOut: (n) => `有 ${n} 筆錄音因為爆音或背景噪音太大，沒有算進趨勢和平常範圍。它們還在紀錄裡。`,
     links: '聲音和感受的關聯',
     linksIntro:
       'Spearman 相關，只用你自己的資料，括號裡是大約 95% 區間。這裡同時看了 18 個相關，就算聲音和感受完全無關，也常會有一兩個看起來不小。每天的紀錄彼此不獨立（例如一整週都感冒），所以真實的不確定性比區間更大。灰色代表區間包含 0。',
@@ -205,6 +206,7 @@ export const STRINGS = {
     lastN: (n) => `Last ${n} entries`,
     usualRange: 'Your usual range',
     moodMarks: 'Mood (darker is better)',
+    flaggedLeftOut: (n) => `${n} recording${n === 1 ? ' was' : 's were'} left out of trends and your usual range because of clipping or background noise. ${n === 1 ? 'It is' : 'They are'} still in your journal.`,
     links: 'How your voice relates to how you feel',
     linksIntro:
       'Spearman correlations using only your own data, with approximate 95% intervals in brackets. This table shows 18 correlations at once, so one or two can look sizable even when voice and mood are unrelated. Days are not independent of each other (a week-long cold affects many entries), so the real uncertainty is larger than the intervals. Grey means the interval includes zero.',

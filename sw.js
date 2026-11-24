@@ -1,6 +1,7 @@
 // Offline support. Network first, so a new release reaches people on the next load;
 // the cache is used only when the network is unavailable.
-const CACHE = 'murmur-v2';
+const CACHE = 'murmur-v3';
+const NETWORK_TIMEOUT_MS = 3000;
 const SHELL = [
   './',
   './index.html',
@@ -42,8 +43,11 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  // a slow connection should not leave the app hanging: fall back to the cache after 3 s
+  const network = fetch(req);
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), NETWORK_TIMEOUT_MS));
   e.respondWith(
-    fetch(req)
+    Promise.race([network, timeout])
       .then((res) => {
         if (res && res.ok) {
           const copy = res.clone();
