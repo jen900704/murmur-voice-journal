@@ -2,10 +2,12 @@
 // in one place, so the owner (or a supervisor) can review the clinical content quickly.
 // Run: node tools/export-content.mjs
 import { writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { LENSES } from '../js/lenses.js';
 import { TRACKS, buildScript } from '../js/bedtime.js';
 
 const TOPIC_ZH = { work: '學業或工作', relationship: '伴侶或朋友', family: '家人', self: '自己', loss: '失落或悲傷', other: '其他' };
+export function buildContent() {
 const out = [];
 out.push('# 內容審閱清單');
 out.push('');
@@ -41,5 +43,10 @@ for (const t of TRACKS) {
   for (const [line, pause] of buildScript(t.id, null, 'zh-TW')) out.push(`- [ ] ${line}（${pause} 秒）`);
   out.push('');
 }
-writeFileSync(new URL('../docs/content-review.md', import.meta.url), out.join('\n'));
-console.log('wrote docs/content-review.md');
+return out.join('\n');
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  writeFileSync(new URL('../docs/content-review.md', import.meta.url), buildContent());
+  console.log('wrote docs/content-review.md');
+}

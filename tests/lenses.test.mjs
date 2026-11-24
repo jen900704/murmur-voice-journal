@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { buildContent } from '../tools/export-content.mjs';
 import { checkRisk, HELP_NUMBER } from '../js/safety.js';
 import { LENSES, fill, rewriteText, lensesForTopic, TOPICS } from '../js/lenses.js';
 
@@ -237,6 +238,10 @@ test('no regex lookbehind in app code (Safari before 16.4 cannot parse it)', () 
   for (const f of ['js/safety.js', 'js/ai-chat.js', 'js/lenses.js', 'js/app.js', 'js/extras.js', 'js/lens-view.js', 'js/night-view.js', 'js/bedtime.js']) {
     assert.ok(!/\(\?<[=!]/.test(readFileSync(new URL('../' + f, import.meta.url), 'utf8')), f);
   }
+});
+
+test('docs/content-review.md matches the content in the code (run node tools/export-content.mjs)', () => {
+  assert.equal(readFileSync(new URL('../docs/content-review.md', import.meta.url), 'utf8'), buildContent());
 });
 
 console.log(`\n${passed} passed`);
