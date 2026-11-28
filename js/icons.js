@@ -39,6 +39,8 @@ const P = {
   face3: '<circle class="m" cx="12" cy="12" r="8.5"/><path class="k" d="M9 9.5h.01M15 9.5h.01"/><path class="k" d="M8.5 14a4.5 4.5 0 0 0 7 0"/><circle class="d" cx="17.2" cy="13.6" r="1.6"/>',
   face4: '<circle class="m" cx="12" cy="12" r="8.5"/><path class="k" d="M8 10.5q1-1.5 2 0M14 10.5q1-1.5 2 0"/><path class="kf" d="M8 13.5h8a4 4 0 0 1-8 0z"/><circle class="d" cx="12" cy="15.3" r="1.5"/>',
   face5: '<circle class="m" cx="11.5" cy="12.5" r="8.5"/><path class="k" d="M7.5 11q1-1.5 2 0M13.5 11q1-1.5 2 0"/><path class="kf" d="M7 13.5h9a4.5 4.5 0 0 1-9 0z"/><path class="d" d="M20 1.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
+  // the language mirror: a round glass with one line of words in it
+  mirror: '<circle class="m" cx="10.5" cy="10.5" r="7.5"/><path class="k" d="M7 10.5h7"/><path class="o" d="M16.5 16.5l4 4"/><circle class="d" cx="19.5" cy="5" r="1.9"/>',
   // small utility
   lock: '<path class="o" d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><rect class="m" x="5.5" y="10.5" width="13" height="10" rx="2"/><circle class="d" cx="12" cy="15.5" r="1.9"/>',
   close: '<path class="o" d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',

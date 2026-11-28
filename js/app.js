@@ -573,6 +573,7 @@ function viewToday() {
   // One Mumu per screen: in the evening the bedtime card has the sleepy one.
   if (!welcoming) add(wrap, lensHero(!evening));
   if (idle) add(wrap, toolRow(lowCard));
+  if (idle && !welcoming) add(wrap, wordsDoor());
   add(wrap, voiceCard(prompt, promptIdx, prompts));
   // the demo offer is for a first visit only; it sits last and quiet
   if (idle && !state.entries.length) {
@@ -592,6 +593,20 @@ function lensHero(withMumu) {
     h('h2', { class: 'hero-title' }, t('heroTitle')),
     h('button', { type: 'button', class: 'btn primary hero-btn', 'data-key': 'hero-lens', onclick: startLens }, t('heroStart')),
     h('details', { class: 'hero-what' }, h('summary', { 'data-key': 'hero-what' }, t('heroWhat')), h('p', {}, t('heroWhatBody')))
+  );
+}
+
+// The front door of the language mirror (語言鏡): three lit words as a taste, one tap to the
+// playground. A plain button, so Today keeps its one colour block.
+function wordsDoor() {
+  const zh = getLang() !== 'en';
+  const taste = zh ? [['absolute', '總是'], ['should', '應該'], ['self', '我']] : [['absolute', 'always'], ['should', 'should'], ['self', 'I']];
+  return h(
+    'a',
+    { class: 'words-door', href: '#words', 'data-key': 'words-door' },
+    h('span', { class: 'words-door-icon', 'aria-hidden': 'true' }, icon('mirror', { size: 26 })),
+    h('span', { class: 'words-door-text' }, h('span', { class: 'words-door-title' }, t('wordsDoorTitle')), h('span', { class: 'words-door-line' }, t('wordsDoorLine'))),
+    h('span', { class: 'words-door-taste', 'aria-hidden': 'true' }, taste.map(([f, w]) => h('span', { class: `ll-m ll-m-${f}` }, w)))
   );
 }
 
@@ -1939,6 +1954,17 @@ function onHash() {
     return;
   }
   closeDetailUI();
+  // #words is the front door of the language mirror: the Journal, on its 語言鏡 segment
+  if (tab === 'words') {
+    if (state.phase === 'recording') cancelRecording();
+    if (state.tab === 'today' && nightView.busy()) nightView.stopAll();
+    state.tab = 'journal';
+    state.journalMode = 'words';
+    history.replaceState(null, '', '#journal');
+    render();
+    window.scrollTo(0, 0);
+    return;
+  }
   if (TABS.includes(tab) && tab !== state.tab) {
     if (state.phase === 'recording') cancelRecording();
     if (state.tab === 'today' && nightView.busy()) nightView.stopAll();

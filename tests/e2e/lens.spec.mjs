@@ -283,6 +283,35 @@ test.describe('theory lens', () => {
     const top = await page.locator('[data-key="lens-save"]').evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
     expect(top).toBeLessThan(844 * 1.5);
   });
+  test('clues in your words: the summary marks the person\'s own words, with one line on what the approach listens for', async ({ page }) => {
+    const answers = ['我應該要做到最好，我總是這樣想', '也許不會怎麼樣', '明天先寫一段就好', '做不到也沒關係'];
+    await page.goto('/#lens');
+    await page.locator('[data-key="lens-start"]').click();
+    await enterConcern(page, '我一定要把報告做到完美，不然大家會失望', ['work']);
+    await page.locator('[data-key="lens-pick-all"]').click();
+    await page.locator('[data-key="pick-rebt"]').click();
+    for (const a of answers) {
+      await page.fill('#lens-answer', a);
+      await page.locator('[data-key="lens-next"]').click();
+    }
+    const clues = page.locator('[data-key="lens-clues"]');
+    await expect(clues.getByRole('heading', { name: '字裡的線索' })).toBeVisible();
+    // the words are a quotation, exactly as typed, with the counted ones marked
+    const quote = clues.locator('blockquote.lens-clues-quote');
+    expect(await quote.locator('p').allTextContents()).toEqual(['我一定要把報告做到完美，不然大家會失望', ...answers]);
+    await expect(quote.locator('mark.ll-m-should')).toHaveText(['一定要', '應該']);
+    await expect(quote.locator('mark.ll-m-absolute')).toHaveText('總是');
+    await expect(quote.locator('mark.ll-m-maybe')).toHaveText('也許');
+    // only the kinds that showed up get a key; a key explains its mark in one line
+    await expect(clues.locator('[data-key="lens-clue-should"] .ll-key-n')).toHaveText('2');
+    await clues.locator('[data-key="lens-clue-should"]').click();
+    await expect(clues.locator('[data-key="lens-clues-note"]')).toHaveText('「應該」「必須」「一定要」這類字。');
+    // one plain line about the approach, with none of the person's words in it
+    await expect(clues.locator('[data-key="lens-clues-line"]')).toHaveText('這個取向會特別聽「應該」「必須」這類字。');
+    await expect(clues).toContainText('只是數一數你用的字，不是在判斷你。');
+    await expect(clues.locator('[data-key="lens-clues-more"]')).toHaveAttribute('href', '#words');
+    expect((await clues.locator('[data-key="lens-clue-should"]').boundingBox()).height).toBeGreaterThanOrEqual(44);
+  });
   test('the summary shows each answer as written, in its own block, and never inside a sentence', async ({ page }) => {
     const answers = ['Maybe not. 可能不會', '第一行\n第二行', 'I have no idea what to put here, honestly'];
     await page.goto('/#lens');

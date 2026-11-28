@@ -85,6 +85,10 @@ const S = {
     answerPlaceholder: '寫下你想到的，幾個字也可以',
     seeSummary: '看小結',
     wrote: '你寫下的',
+    cluesTitle: '字裡的線索',
+    cluesLegend: '每種記號代表什麼',
+    cluesHonest: '只是數一數你用的字，不是在判斷你。',
+    cluesMore: '到語言鏡玩玩看',
     leftOpen: '（先留白）',
     allOpen: '（這次每一題都先留白）',
     perspective: '這個角度會怎麼看',
@@ -221,6 +225,10 @@ const S = {
     answerPlaceholder: 'Write what comes to mind. A few words is fine',
     seeSummary: 'See summary',
     wrote: 'What you wrote',
+    cluesTitle: 'Clues in your words',
+    cluesLegend: 'What each mark means',
+    cluesHonest: 'This only counts the words you used. It does not judge you.',
+    cluesMore: 'Play with the language mirror',
     leftOpen: '(left open)',
     allOpen: '(every question left open this time)',
     perspective: 'How this approach looks at it',
@@ -1536,6 +1544,78 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
     return h('div', { class: 'lens-answers' }, row(rows[0]), rest, toggle);
   }
 
+  // 字裡的線索: the person's own words again, with seven kinds of words marked, and one plain
+  // line on what this approach listens for. Word lists load on first use. The words stay inside
+  // a quotation; nothing is drawn from text that matches the risk check.
+  let cluesMod = null;
+  function cluesBlock(lens) {
+    const texts = [st.concern, ...answerRows(lens, lk(), st.answers).filter((r) => !r.open).map((r) => r.text)].filter((x) => x && x.trim());
+    const box = h('section', { class: 'lens-clues', 'data-key': 'lens-clues', hidden: true, 'aria-labelledby': 'lens-clues-title' });
+    // with no answer written there is nothing to look at again, and the summary stays short
+    if (texts.length < 2 || texts.some((x) => checkRisk(x).risk)) return box;
+    const paint = (m) => {
+      const zh = getLang() !== 'en';
+      const F = m.FAMILY_TEXT[zh ? 'zh' : 'en'];
+      const found = texts.map((x) => m.findClues(x));
+      const counts = Object.fromEntries(m.FAMILIES.map((f) => [f, found.reduce((n, c) => n + c.counts[f], 0)]));
+      const present = m.FAMILIES.filter((f) => counts[f] > 0);
+      if (!present.length) return;
+      const para = (text, c) => {
+        const p = h('p', {});
+        let at = 0;
+        for (const sp of c.spans) {
+          if (sp.s > at) p.appendChild(document.createTextNode(text.slice(at, sp.s)));
+          p.appendChild(h('mark', { class: `ll-m ll-m-${sp.fam}` }, text.slice(sp.s, sp.e)));
+          at = sp.e;
+        }
+        if (at < text.length) p.appendChild(document.createTextNode(text.slice(at)));
+        return p;
+      };
+      const note = h('p', { class: 'll-key-note', id: 'lens-clues-note', 'data-key': 'lens-clues-note', hidden: true });
+      const fam = m.LENS_FAMILY[lens.id];
+      const keys = present.map((f) =>
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'll-key has',
+            'data-key': `lens-clue-${f}`,
+            'aria-expanded': 'false',
+            'aria-controls': 'lens-clues-note',
+            onclick: (e) => {
+              const open = e.currentTarget.getAttribute('aria-expanded') !== 'true';
+              for (const b of keys) b.setAttribute('aria-expanded', 'false');
+              e.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
+              note.hidden = !open;
+              note.textContent = open ? F[f].note : '';
+            },
+          },
+          h('span', { class: `ll-m ll-m-${f}` }, F[f].name),
+          h('span', { class: 'll-key-n' }, String(counts[f]))
+        )
+      );
+      add(
+        box,
+        h('h3', { id: 'lens-clues-title' }, L().cluesTitle),
+        h('blockquote', { class: 'lens-clues-quote' }, texts.map((x, i) => para(x.slice(0, 4000), found[i]))),
+        h('div', { class: 'll-legend', role: 'group', 'aria-label': L().cluesLegend }, keys),
+        note,
+        fam ? h('p', { class: 'lens-clues-line', 'data-key': 'lens-clues-line' }, m.LENS_LINE[zh ? 'zh' : 'en'][fam]) : null,
+        h('p', { class: 'muted small lens-clues-foot' }, L().cluesHonest, ' ', h('a', { class: 'link', href: '#words', 'data-key': 'lens-clues-more' }, L().cluesMore))
+      );
+      box.hidden = false;
+    };
+    if (cluesMod) paint(cluesMod);
+    else
+      import('./langlab/clues.js')
+        .then((m) => {
+          cluesMod = m;
+          paint(m);
+        })
+        .catch(() => {});
+    return box;
+  }
+
   // An optional if-then plan for the small thing to try ("I'll try it when ..."). Saved with
   // the exercise; the next visit asks once how it went.
   function planInput() {
@@ -1631,6 +1711,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         h('h3', {}, L().wrote),
         answerList(lens, st.answers, { collapsible: true }),
         distanceInline(),
+        cluesBlock(lens),
         h('h3', {}, L().perspective),
         loading ? skel() : [genPerspective ? genLabel() : null, h('p', { 'data-key': 'lens-perspective' }, genPerspective || c.perspective)],
         h('h3', {}, L().tryThis),

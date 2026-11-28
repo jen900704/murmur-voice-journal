@@ -13,23 +13,82 @@ const MAX_FILE_BYTES = 50e6;
 const MAX_PASTE_CHARS = 200000;
 import { buildReportData, buildReportHtml, sha256Hex } from './langlab/report.js';
 import { keepTexts, listKept, deleteKept } from './langlab/store.js';
+import { FAMILIES, FAMILY_TEXT, FAMILY_SCORES, findClues, tallyAnalysis, topWords, topFamily } from './langlab/clues.js';
+import { fingerprintSvg, FP_W, FP_H } from './langlab/fingerprint.js';
+import { sharePng } from './postcard.js';
+import { mascot } from './mascot.js';
+
+// the live playground lights at most this much text; the full analysis counts everything
+const LIVE_MAX = 4000;
+const LIT_SHOWN = 140;
+const GUESS_FROM = 50; // units: the same amount the first rows of the results need
+const FP_MIN = 8; // lit words needed before a fingerprint is drawn
 
 const PCT = Math.round(CI_LEVEL * 100);
 
 const S = {
   'zh-TW': {
     title: '語言鏡',
+    lead: '打一句話，看哪些字亮起來。',
+    playLabel: '寫一句，或貼上一大段',
+    litLabel: '亮起來的字',
+    litSample: '範例',
+    famousTag: '名句示範，不是你的資料',
+    famousNext: '下一句',
+    famousAt: (i, n) => `${i} / ${n}`,
+    famousTop: (name, n) => `這句亮最多的是「${name}」，${n} 個。`,
+    famousNone: '這句一個字都沒亮。詞表是照現代白話寫的，古文多半數不到。',
+    famousSaved: '示範的句子不會存下來。',
+    litMore: '只亮前面這一段。完整結果會數全部。',
+    litNone: '這句沒有字亮起來。換一句試試。',
+    legendLabel: '每種記號代表什麼',
+    legendCount: (name, n) => `${name}，${n} 個`,
+    samplesLabel: '沒有靈感？試試虛構的範例',
+    samples: [
+      { name: '趕報告', text: '報告又拖到最後一天，我總是這樣。我應該早點開始的，也許明天會好一點。' },
+      { name: '吵架之後', text: '我們昨天吵架了。他永遠不聽我說話，我很難過，可是我也必須承認我說得太重。' },
+      { name: '搬家前', text: '下個月我們就要搬走了。以前我很怕改變，現在好像有一點期待，也有一點捨不得大家。' },
+    ],
+    guessQ: '先猜猜看：你最常用哪一類？',
+    guessHit: (g) => `你猜「${g}」，數起來最多的也是「${g}」。`,
+    guessMiss: (g, top) => `你猜「${g}」，數起來最多的是「${top}」。`,
+    fullResults: '看完整結果',
+    importTitle: '匯入檔案',
+    howLink: '這是怎麼算的',
+    howTitle: '這是怎麼算的',
+    howBody: [
+      '語言鏡只做一件事：照著寫好的詞表，數你用了哪幾類詞。亮起來的字就是被數到的字。',
+      '七種記號裡，六種和完整結果用同一份詞表；「應該」是另外一小份清單。',
+      '英文的幾個感受類別和人工情緒標註比對過（AUC .68 到 .94）。中文幾乎都還沒驗證，請當成「你用過的詞」來看。',
+      '同一個字在不同句子裡意思不同，詞表分不出來，也看不懂反話。',
+    ],
+    honest: '這是在數詞，不是測驗。字不會離開這個裝置。',
+    fpTitle: '用字指紋',
+    fpIntro: '這次亮起來的字，各類有幾個。',
+    fpAlt: (parts) => `用字指紋：${parts}`,
+    fpTop: '最常亮起來',
+    fpFoot: '在數詞，不是測驗',
+    fpUnit: '個',
+    fpSave: '存成圖片',
+    fpSaved: '圖片存好了。',
+    fpFailed: '圖片沒有存成功。',
+    fpFew: '亮起來的字還不夠畫指紋。',
+    fpWordsTitle: (name) => `「${name}」數到的字`,
+    fpSee: (name, n) => `${name} ${n}`,
+    fpOpen: '點一類，看數到哪些字',
+    fpFull: (label) => `完整數字：${label}`,
+    fpRisk: '這次不畫指紋。',
     intro: '貼上或匯入你自己寫的文字，看看你用了哪幾類詞。每個數字都可以點開，看到是哪些詞算進去的。',
     notTest: '這是在數詞，不是在測量你是誰，也不是在測量你過得好不好。',
     privacy: '全部在這個裝置上計算，文字不會傳出去。沒有按「留在 Murmur」的話，關掉就消失。',
     own: '請只放你自己寫的文字。',
     pasteLabel: '貼上文字',
-    pastePlaceholder: '把日記、貼文或任何你寫的文字貼在這裡',
+    pastePlaceholder: '在這裡打一句話，或貼上你寫的一大段文字',
     fileLabel: '或選擇檔案',
     fileHint: '可以選 .txt、.md、.csv、.json，或各平台官方的資料匯出檔：Instagram、Facebook、Threads（JSON 格式）、X（data/tweets.js）、Bluesky（.car 或 JSON）、Reddit（posts.csv、comments.csv）。可以一次選多個檔案。',
     zipHint: '.zip 檔會直接在這個裝置上打開，只讀取貼文和留言，不讀私訊。如果打不開（檔案太大或瀏覽器較舊），請先解壓縮，再選裡面的檔案。',
     zipNo: '這個瀏覽器不能直接打開 .zip。請先解壓縮，再選裡面的檔案。',
-    analyze: '開始分析',
+    analyze: '看完整結果',
     working: '正在計算，全部在這個裝置上。',
     reading: '正在讀取檔案。',
     needText: '請先貼上文字或選擇檔案。',
@@ -125,17 +184,66 @@ const S = {
   },
   en: {
     title: 'Language mirror',
+    lead: 'Type a sentence and watch the words light up.',
+    playLabel: 'Write a sentence, or paste a long piece',
+    litLabel: 'Words that lit up',
+    litSample: 'Sample',
+    famousTag: 'A famous line, not your data',
+    famousNext: 'Next line',
+    famousAt: (i, n) => `${i} / ${n}`,
+    famousTop: (name, n) => `Lit up most in this line: ${name}, ${n}.`,
+    famousNone: 'Nothing lit up in this line. The word lists were written for modern everyday writing, so classical text is mostly missed.',
+    famousSaved: 'Sample lines are never saved.',
+    litMore: 'Only this first part is lit. The full results count everything.',
+    litNone: 'No words lit up in this one. Try another sentence.',
+    legendLabel: 'What each mark means',
+    legendCount: (name, n) => `${name}, ${n}`,
+    samplesLabel: 'Nothing in mind? Try a made-up sample',
+    samples: [
+      { name: 'Deadline', text: 'The report slipped to the last day again. I always do this. I should have started sooner, but maybe tomorrow will be easier.' },
+      { name: 'After a fight', text: 'We argued yesterday. He never listens to me and I felt sad, but I have to admit my words were harsh.' },
+      { name: 'Before moving', text: 'Next month we will move away. I was afraid of change before, and now I am perhaps a little excited, and I will miss everyone.' },
+    ],
+    guessQ: 'Guess first: which kind do you use most?',
+    guessHit: (g) => `You guessed ${g}, and ${g} was counted most.`,
+    guessMiss: (g, top) => `You guessed ${g}. Counted most: ${top}.`,
+    fullResults: 'See full results',
+    importTitle: 'Import files',
+    howLink: 'How this is counted',
+    howTitle: 'How this is counted',
+    howBody: [
+      'The language mirror does one thing: it counts which kinds of words you used, from word lists written in advance. The words that light up are the words that were counted.',
+      'Six of the seven marks use the same word lists as the full results. "Shoulds" has a short list of its own.',
+      'A few English feeling categories were checked against human emotion labels (AUC .68 to .94). Almost none of the Chinese ones have been checked, so read them as "words you used".',
+      'The same word means different things in different sentences. A word list cannot tell, and it does not understand irony.',
+    ],
+    honest: 'This counts words. It is not a test. Nothing leaves this device.',
+    fpTitle: 'Word fingerprint',
+    fpIntro: 'How many words of each kind lit up this time.',
+    fpAlt: (parts) => `Word fingerprint: ${parts}`,
+    fpTop: 'Lit up most',
+    fpFoot: 'Counts words. Not a test.',
+    fpUnit: '',
+    fpSave: 'Save as picture',
+    fpSaved: 'Picture saved.',
+    fpFailed: 'The picture could not be saved.',
+    fpFew: 'Not enough words lit up to draw a fingerprint.',
+    fpWordsTitle: (name) => `Words counted as ${name}`,
+    fpSee: (name, n) => `${name} ${n}`,
+    fpOpen: 'Tap a kind to see the words counted',
+    fpFull: (label) => `Full numbers: ${label}`,
+    fpRisk: 'No fingerprint is drawn this time.',
     intro: 'Paste or import your own writing and see which kinds of words you used. Every number opens to the exact words that were counted.',
     notTest: 'This counts words. It does not measure who you are or how you are doing.',
     privacy: 'Everything is computed on this device and no text is sent anywhere. Unless you choose "Keep in Murmur", it is gone when you close this.',
     own: 'Please use only text you wrote yourself.',
     pasteLabel: 'Paste text',
-    pastePlaceholder: 'Paste journal notes, posts, or anything you wrote',
+    pastePlaceholder: 'Type a sentence here, or paste a long piece you wrote',
     fileLabel: 'Or choose files',
     fileHint: 'You can choose .txt, .md, .csv, .json, or the official data export of Instagram, Facebook, Threads (JSON format), X (data/tweets.js), Bluesky (.car or JSON), or Reddit (posts.csv, comments.csv). Several files at once are fine.',
     zipHint: 'A .zip is opened right here on this device; only posts and comments are read, never direct messages. If it cannot be opened (very large file or older browser), extract it first and choose the files inside.',
     zipNo: 'This browser cannot open .zip files directly. Extract the archive first and choose the files inside.',
-    analyze: 'Analyze',
+    analyze: 'See full results',
     working: 'Working. Everything stays on this device.',
     reading: 'Reading the files.',
     needText: 'Paste some text or choose a file first.',
@@ -231,6 +339,25 @@ const S = {
   },
 };
 
+// Famous lines for the playground's demonstration. Public-domain text only (all published long
+// before 1929), each with its author and source. Shown in the interface language first.
+const FAMOUS = {
+  zh: [
+    { text: '我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。', by: '蘇軾〈水調歌頭〉' },
+    { text: '三人行，必有我師焉。', by: '《論語．述而》' },
+    { text: '尋尋覓覓，冷冷清清，淒淒慘慘戚戚。', by: '李清照〈聲聲慢〉' },
+    { text: '舉頭望明月，低頭思故鄉。', by: '李白〈靜夜思〉' },
+  ],
+  en: [
+    { text: 'Tomorrow, and tomorrow, and tomorrow, creeps in this petty pace from day to day.', by: 'William Shakespeare, Macbeth' },
+    { text: 'Parting is such sweet sorrow, that I shall say good night till it be morrow.', by: 'William Shakespeare, Romeo and Juliet' },
+    { text: 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.', by: 'Jane Austen, Pride and Prejudice' },
+    { text: 'The world will little note, nor long remember what we say here, but it can never forget what they did here.', by: 'Abraham Lincoln, Gettysburg Address' },
+  ],
+};
+const famousLines = (lang) => (lang === 'en' ? [...FAMOUS.en, ...FAMOUS.zh] : [...FAMOUS.zh, ...FAMOUS.en]);
+const stillMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const SVG = 'http://www.w3.org/2000/svg';
 function svg(tag, attrs = {}, ...kids) {
   const n = document.createElementNS(SVG, tag);
@@ -275,6 +402,14 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     closed: new Set(),
     detailId: null,
     excerpts: 15,
+    legend: null,
+    guess: null,
+    sample: 0,
+    famous: 0,
+    importOpen: false,
+    howOpen: false,
+    clues: null,
+    family: null,
   };
 
   const num = (x, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '');
@@ -381,6 +516,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     st.items = clean;
     st.analysis = analyze(clean, data);
     st.risk = clean.some((it) => checkRisk(it.text).risk);
+    st.clues = tallyAnalysis(st.analysis);
     st.lang = st.analysis.langs[0] || null;
     st.earlier = null;
     st.keptThis = false;
@@ -392,11 +528,26 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   }
 
   // ---------- home ----------
-  function home() {
+  const fl = () => (getLang() === 'en' ? 'en' : 'zh');
+
+  // text with its counted words marked: text nodes and <mark> only, never markup built from the text
+  function litNodes(text, spans, limit = Infinity) {
+    const out = [];
+    let at = 0;
+    for (const sp of spans) {
+      if (sp.s >= limit) break;
+      if (sp.s > at) out.push(document.createTextNode(text.slice(at, sp.s)));
+      out.push(h('mark', { class: `ll-m ll-m-${sp.fam}` }, text.slice(sp.s, sp.e)));
+      at = sp.e;
+    }
+    const end = Math.min(text.length, limit);
+    if (at < end) out.push(document.createTextNode(text.slice(at, end)));
+    return out;
+  }
+
+  // the file picker, its formats and the files read: folded until asked for
+  function importBox() {
     const s = L();
-    if (st.kept === null) refreshKept().then(() => st.screen === 'home' && st.kept.length && draw());
-    const ta = h('textarea', { id: 'll-text', class: 'll-text', rows: '7', placeholder: s.pastePlaceholder, 'data-key': 'll-text', oninput: (e) => (st.text = e.target.value) });
-    ta.value = st.text;
     const file = h('input', {
       id: 'll-file',
       class: 'll-file',
@@ -407,16 +558,14 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
       'aria-describedby': 'll-file-names ll-file-hint',
       onchange: (e) => {
         const list = [...e.target.files];
+        st.importOpen = true;
         if (list.length) readFiles(list);
       },
     });
-    return [
-      h('h2', {}, s.title),
-      h('p', {}, s.intro),
-      h('p', { class: 'll-frame' }, s.notTest),
-      h('p', { class: 'muted small' }, s.privacy + ' ' + s.own),
-      h('label', { class: 'll-label', for: 'll-text' }, s.pasteLabel),
-      ta,
+    return h(
+      'details',
+      { class: 'll-import', 'data-key': 'll-import', open: st.importOpen || st.files.length > 0 || st.picked.length > 0, ontoggle: (e) => (st.importOpen = e.currentTarget.open) },
+      h('summary', {}, s.importTitle),
       h('label', { class: 'll-label', for: 'll-file' }, s.fileLabel),
       // the real file input lies, transparent, over a button drawn in the page's language:
       // it still takes the click, the keyboard, a dropped file and the label
@@ -436,11 +585,332 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
             h('ul', {}, st.files.map((f) => h('li', {}, s.fileRow(f.name, s.kinds[f.kind] || f.kind, f.items)))),
             h('button', { type: 'button', class: 'link', 'data-key': 'll-clear', onclick: () => ((st.files = []), (st.picked = []), (st.imported = []), (st.notes = []), draw()) }, s.clearFiles)
           )
-        : null,
+        : null
+    );
+  }
+
+  // method, validity, limits and privacy: one tap away
+  function howContent() {
+    const s = L();
+    return [h('h2', {}, s.howTitle), h('p', { class: 'll-frame' }, s.notTest), s.howBody.map((x) => h('p', {}, x)), h('p', {}, s.privacy), h('p', {}, s.own), h('p', { class: 'muted small' }, NOTICE[fl()])];
+  }
+
+  function home() {
+    const s = L();
+    const F = FAMILY_TEXT[fl()];
+    if (st.kept === null) refreshKept().then(() => st.screen === 'home' && st.kept.length && draw());
+    const ta = h('textarea', { id: 'll-text', class: 'll-text', rows: '3', placeholder: s.pastePlaceholder, 'data-key': 'll-text' });
+    ta.value = st.text;
+    const lit = h('div', { class: 'll-lit', 'data-key': 'll-lit', role: 'group', 'aria-label': s.litLabel });
+    const said = h('p', { class: 'sr-only', role: 'status', 'data-key': 'll-lit-status' });
+    const note = h('p', { class: 'll-key-note', id: 'll-key-note', 'data-key': 'll-key-note' });
+    const mumu = mascot('idle', { size: 64 });
+    const keys = {};
+    const setLegend = () => {
+      for (const f of FAMILIES) keys[f].btn.setAttribute('aria-expanded', st.legend === f ? 'true' : 'false');
+      note.textContent = st.legend ? F[st.legend].note : '';
+      note.hidden = !st.legend;
+    };
+    const legend = h(
+      'div',
+      { class: 'll-legend', role: 'group', 'aria-label': s.legendLabel, 'data-key': 'll-legend' },
+      FAMILIES.map((f) => {
+        const n = h('span', { class: 'll-key-n' }, '0');
+        const btn = h(
+          'button',
+          {
+            type: 'button',
+            class: 'll-key',
+            'data-key': `ll-key-${f}`,
+            'aria-controls': 'll-key-note',
+            onclick: () => {
+              st.legend = st.legend === f ? null : f;
+              setLegend();
+            },
+          },
+          h('span', { class: `ll-m ll-m-${f}` }, F[f].name),
+          n
+        );
+        keys[f] = { btn, n };
+        return btn;
+      })
+    );
+    const guess = h(
+      'div',
+      { class: 'll-guess', 'data-key': 'll-guess', hidden: true },
+      h('p', { class: 'll-label', id: 'll-guess-q' }, s.guessQ),
+      h(
+        'div',
+        { class: 'chips wrap', role: 'group', 'aria-labelledby': 'll-guess-q' },
+        FAMILIES.map((f) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'chip' + (st.guess === f ? ' on' : ''),
+              'aria-pressed': st.guess === f ? 'true' : 'false',
+              'data-key': `ll-guess-${f}`,
+              onclick: (e) => {
+                st.guess = st.guess === f ? null : f;
+                for (const b of e.currentTarget.parentNode.children) {
+                  const on = b === e.currentTarget && !!st.guess;
+                  b.classList.toggle('on', on);
+                  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+                }
+              },
+            },
+            F[f].name
+          )
+        )
+      )
+    );
+    let sayTimer = 0;
+    let typeTimer = 0;
+    const setCounts = (c) => {
+      for (const f of FAMILIES) {
+        keys[f].n.textContent = String(c ? c.counts[f] : 0);
+        keys[f].btn.classList.toggle('has', !!c && c.counts[f] > 0);
+      }
+    };
+    // Before anything is typed: a famous line is typed in and its words light up one by one,
+    // then one plain line says what was counted most. With reduced motion the finished
+    // colouring is shown at once. These are samples: nothing here is the person's or is saved.
+    const famous = (animate) => {
+      const lines = famousLines(getLang());
+      const idx = st.famous % lines.length;
+      const line = lines[idx];
+      const c = findClues(line.text);
+      const top = topFamily(c.counts);
+      const text = h('p', { class: 'll-lit-text', lang: /[一-鿿]/.test(line.text) ? 'zh-Hant' : 'en' });
+      const after = h('p', { class: 'll-famous-note', 'data-key': 'll-famous-note' }, top ? s.famousTop(F[top].name, c.counts[top]) : s.famousNone);
+      const finish = () => {
+        clearInterval(typeTimer);
+        text.replaceChildren(...litNodes(line.text, c.spans));
+        after.hidden = false;
+        lit.dataset.typing = 'false';
+        setCounts(c);
+      };
+      lit.classList.add('is-sample');
+      lit.replaceChildren(
+        h('span', { class: 'll-lit-tag', 'data-key': 'll-famous-tag' }, s.famousTag),
+        text,
+        h('p', { class: 'll-famous-by muted small', 'data-key': 'll-famous-by' }, line.by),
+        after,
+        h(
+          'p',
+          { class: 'll-famous-nav' },
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'link',
+              'data-key': 'll-famous-next',
+              onclick: () => {
+                st.famous = (idx + 1) % lines.length;
+                famous(true);
+                const again = lit.querySelector('[data-key="ll-famous-next"]');
+                if (again) again.focus();
+              },
+            },
+            s.famousNext
+          ),
+          h('span', { class: 'll-famous-at muted small' }, s.famousAt(idx + 1, lines.length)),
+          h('span', { class: 'muted small' }, s.famousSaved)
+        )
+      );
+      clearInterval(typeTimer);
+      if (!animate || stillMotion()) return finish();
+      // type it in: a few characters at a time, about three seconds for any line
+      const step = Math.max(1, Math.ceil(line.text.length / 45));
+      let n = 0;
+      after.hidden = true;
+      lit.dataset.typing = 'true';
+      setCounts(null);
+      typeTimer = setInterval(() => {
+        if (!lit.isConnected) return clearInterval(typeTimer);
+        n += step;
+        if (n >= line.text.length) return finish();
+        // a word lights when its last character has been typed
+        const done = c.spans.filter((sp) => sp.e <= n);
+        text.replaceChildren(...litNodes(line.text, done, n), h('span', { class: 'll-caret', 'aria-hidden': 'true' }));
+        for (const f of FAMILIES) keys[f].n.textContent = String(done.filter((sp) => sp.fam === f).length);
+      }, 70);
+    };
+    // light the words in place; the page is not redrawn, so the caret and the keyboard stay
+    const live = () => {
+      const text = st.text;
+      if (!text.trim()) {
+        guess.hidden = true;
+        if (mumu.dataset.state !== 'idle') setMumu('idle');
+        return famous(true);
+      }
+      clearInterval(typeTimer);
+      delete lit.dataset.typing;
+      lit.classList.remove('is-sample');
+      if (checkRisk(text).risk) {
+        // nothing is lit or counted from text that matches; the words stay in the field
+        lit.replaceChildren(h('div', { class: 'll-help', role: 'note', 'data-key': 'll-live-help' }, h('h3', {}, s.riskTitle), h('p', {}, s.riskBody), helpList(h, getLang())));
+        setCounts(null);
+        guess.hidden = true;
+        return;
+      }
+      const c = findClues(text, { max: LIVE_MAX });
+      const shown = text.slice(0, LIVE_MAX);
+      lit.replaceChildren(
+        ...[
+          h('p', { class: 'll-lit-text' }, litNodes(shown, c.spans, LIT_SHOWN), shown.length > LIT_SHOWN ? '…' : ''),
+          shown.length > LIT_SHOWN ? h('p', { class: 'muted small' }, s.litMore) : null,
+          !c.total && c.units >= 4 ? h('p', { class: 'muted small', 'data-key': 'll-lit-none' }, s.litNone) : null,
+        ].filter(Boolean)
+      );
+      setCounts(c);
+      guess.hidden = c.units < GUESS_FROM;
+      if (c.total && mumu.dataset.state !== 'happy') setMumu('happy');
+      else if (!c.total && mumu.dataset.state !== 'idle') setMumu('idle');
+      clearTimeout(sayTimer);
+      sayTimer = setTimeout(() => (said.textContent = FAMILIES.filter((f) => c.counts[f]).map((f) => s.legendCount(F[f].name, c.counts[f])).join(getLang() === 'en' ? '; ' : '；')), 900);
+    };
+    const setMumu = (state) => {
+      const fresh = mascot(state, { size: 64 });
+      mumu.dataset.state = state;
+      mumu.className = fresh.className;
+      mumu.replaceChildren(...fresh.childNodes);
+    };
+    let liveTimer = 0;
+    ta.addEventListener('input', (e) => {
+      st.text = e.target.value;
+      clearTimeout(liveTimer);
+      liveTimer = setTimeout(live, st.text.length > 600 ? 160 : 40);
+    });
+    live();
+    setLegend();
+    return [
+      h('div', { class: 'll-head' }, h('div', {}, h('h2', {}, s.title), h('p', { class: 'll-lead' }, s.lead)), mumu),
+      h(
+        'div',
+        { class: 'll-play', 'data-key': 'll-play' },
+        h('label', { class: 'sr-only', for: 'll-text' }, s.playLabel),
+        ta,
+        lit
+      ),
+      said,
+      legend,
+      note,
+      h(
+        'div',
+        { class: 'll-samples', role: 'group', 'aria-label': s.samplesLabel },
+        h('span', { class: 'll-samples-label', 'aria-hidden': 'true' }, s.litSample),
+        s.samples.map((x, i) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'link ll-sample',
+              'data-key': `ll-sample-${i}`,
+              onclick: () => {
+                st.sample = i;
+                st.text = x.text;
+                ta.value = x.text;
+                live();
+              },
+            },
+            x.name
+          )
+        )
+      ),
+      guess,
       h('div', { class: 'll-status', role: 'status', 'aria-live': 'polite' }, st.busy ? h('p', {}, st.busy) : null, st.notes.map((n) => h('p', { class: 'll-note' }, n))),
       h('button', { type: 'button', class: 'btn primary', 'data-key': 'll-analyze', disabled: !!st.busy, onclick: run }, s.analyze),
+      importBox(),
+      h('p', { class: 'll-honest', 'data-key': 'll-honest' }, s.honest, ' ', h('button', { type: 'button', class: 'link', 'data-key': 'll-how', 'aria-expanded': openSheet ? null : st.howOpen ? 'true' : 'false', onclick: () => (openSheet ? openSheet(() => howContent()) : ((st.howOpen = !st.howOpen), draw())) }, s.howLink)),
+      !openSheet && st.howOpen ? h('div', { class: 'll-how', 'data-key': 'll-how-body' }, howContent()) : null,
       keptList(),
     ];
+  }
+
+  // ---------- the word fingerprint ----------
+  function fingerprint() {
+    const s = L();
+    const F = FAMILY_TEXT[fl()];
+    const c = st.clues;
+    if (!c) return null;
+    const head = h('h3', { id: 'll-fp-title' }, s.fpTitle);
+    if (st.risk) return null; // a picture is never drawn from text that matched the risk check
+    if (c.total < FP_MIN) return h('section', { class: 'll-fp', 'data-key': 'll-fp', 'aria-labelledby': 'll-fp-title' }, head, h('p', { class: 'muted' }, s.fpFew));
+    const top = topFamily(c.counts);
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
+    const svgText = fingerprintSvg({ counts: c.counts, words: c.words, uiLang: getLang(), date, title: s.fpTitle, topLabel: s.fpTop, foot: s.fpFoot });
+    const art = h('div', { class: 'll-fp-art', role: 'img', 'data-key': 'll-fp-art', 'aria-label': s.fpAlt(FAMILIES.map((f) => s.legendCount(F[f].name, c.counts[f])).join(getLang() === 'en' ? '; ' : '；')) });
+    // built by js/langlab/fingerprint.js from counts and counted words only, every text escaped
+    art.innerHTML = svgText;
+    return h(
+      'section',
+      { class: 'll-fp', 'data-key': 'll-fp', 'aria-labelledby': 'll-fp-title' },
+      head,
+      h('p', { class: 'muted small' }, s.fpIntro),
+      st.guess ? h('p', { class: 'll-fp-guess', 'data-key': 'll-fp-guess' }, st.guess === top ? s.guessHit(F[top].name) : s.guessMiss(F[st.guess].name, F[top].name)) : null,
+      art,
+      h('p', { class: 'muted small', id: 'll-fp-open' }, s.fpOpen),
+      h(
+        'div',
+        { class: 'll-legend', role: 'group', 'aria-labelledby': 'll-fp-open' },
+        FAMILIES.map((f) => h('button', { type: 'button', class: 'll-key' + (c.counts[f] ? ' has' : ''), 'data-key': `ll-fp-${f}`, onclick: () => openFamily(f) }, h('span', { class: `ll-m ll-m-${f}` }, F[f].name), h('span', { class: 'll-key-n' }, String(c.counts[f]))))
+      ),
+      h('button', { type: 'button', class: 'btn', 'data-key': 'll-fp-save', onclick: () => saveFingerprint(svgText) }, s.fpSave)
+    );
+  }
+
+  // the exact words behind one family's count
+  function familyContent(f) {
+    const s = L();
+    const F = FAMILY_TEXT[fl()];
+    const rows = topWords(st.clues.words[f], 40);
+    const res = st.analysis.byLang[st.lang];
+    return [
+      h('h2', {}, s.fpWordsTitle(F[f].name)),
+      h('p', {}, F[f].note),
+      rows.length
+        ? h(
+            'table',
+            { class: 'll-table', 'data-key': 'll-fp-words' },
+            h('thead', {}, h('tr', {}, [s.word, s.count].map((x) => h('th', { scope: 'col' }, x)))),
+            h('tbody', {}, rows.map(([w, n]) => h('tr', {}, h('th', { scope: 'row' }, h('span', { class: 'll-word' }, w)), h('td', {}, n))))
+          )
+        : h('p', { class: 'muted' }, s.noHits),
+      FAMILY_SCORES[f].filter((id) => findScore(res, id)).map((id) => h('button', { type: 'button', class: 'link ll-fp-full', 'data-key': `ll-fp-full-${id}`, onclick: () => openDetail(id) }, s.fpFull(scoreMeta(id, getLang()).label))),
+      h('p', { class: 'muted small' }, s.honest),
+    ];
+  }
+  function openFamily(f) {
+    if (typeof openSheet === 'function') openSheet(() => familyContent(f));
+    else {
+      st.family = st.family === f ? null : f;
+      draw();
+    }
+  }
+
+  // a still PNG, three times the drawn size
+  async function saveFingerprint(svgText) {
+    const s = L();
+    try {
+      const url = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml' }));
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = url;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = FP_W * 3;
+      canvas.height = FP_H * 3;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      const png = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const res = await sharePng(png, `murmur-word-fingerprint-${new Date().toISOString().slice(0, 10)}.png`, s.fpTitle);
+      if (res !== 'cancelled') toast(s.fpSaved);
+    } catch (_) {
+      toast(s.fpFailed);
+    }
   }
 
   // the names just chosen, in the page's language; a long selection is cut after three
@@ -579,6 +1049,8 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
     const out = [h('h2', {}, s.results), h('p', { class: 'll-notice', role: 'note', 'data-key': 'll-notice' }, NOTICE[getLang() === 'en' ? 'en' : 'zh'])];
     if (st.risk) out.push(h('div', { class: 'll-help', role: 'note', 'data-key': 'll-help' }, h('h3', {}, s.riskTitle), h('p', {}, s.riskBody), helpList(h, getLang())));
     out.push(observations(res, cmp));
+    out.push(fingerprint());
+    if (!openSheet && st.family && st.clues) out.push(h('div', { class: 'll-how', 'data-key': 'll-fp-family' }, familyContent(st.family)));
     out.push(
       h(
         'ul',
@@ -690,7 +1162,7 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   }
 
   function restart() {
-    Object.assign(st, { text: '', files: [], picked: [], imported: [], notes: [], analysis: null, earlier: null, risk: false, items: [], keptThis: false });
+    Object.assign(st, { text: '', files: [], picked: [], imported: [], notes: [], analysis: null, earlier: null, risk: false, items: [], keptThis: false, clues: null, guess: null, family: null, importOpen: false });
     st.open.clear();
     st.closed.clear();
     go('home');

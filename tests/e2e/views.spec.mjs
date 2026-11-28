@@ -182,6 +182,29 @@ test('the language mirror opens from the Journal, analyzes pasted text and keeps
   await expect(page.locator('[data-key="ll-report-html"]')).toBeVisible();
 });
 
+test.describe('language mirror front door', () => {
+  test.use({ locale: 'zh-TW' });
+  test('the language mirror has a front door on Today and a link of its own (#words)', async ({ page }) => {
+    await page.goto('/#today');
+    const close = page.locator('[data-key="welcome-close"]');
+    if (await close.count()) await close.click();
+    const door = page.locator('[data-key="words-door"]');
+    await expect(door).toContainText('語言鏡');
+    await expect(door).toContainText('打一句話，看字亮起來');
+    expect((await door.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await door.click();
+    await expect(page.locator('[data-key="jmode-words"]')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('[data-key="ll-famous-tag"]')).toBeVisible();
+    await expect(page).toHaveURL(/#journal$/);
+    // the same place from a link
+    await page.goto('/#about');
+    await page.goto('/#words');
+    await expect(page.locator('[data-key="ll-text"]')).toBeVisible();
+    await page.locator('[data-key="ll-text"]').pressSequentially('我應該');
+    await expect(page.locator('[data-key="ll-lit"] mark.ll-m-should')).toHaveText('應該');
+  });
+});
+
 test('calm and writing open from Today', async ({ page }) => {
   await page.goto('/');
   await page.locator('.prompt-text').waitFor();

@@ -27,7 +27,8 @@ function watch(page) {
   const outside = [];
   const errors = [];
   page.on('request', (r) => {
-    if (!r.url().startsWith('http://localhost')) outside.push(r.url());
+    // a blob: address is made on this device (the fingerprint picture), not a request to anywhere
+    if (!r.url().startsWith('http://localhost') && !r.url().startsWith('blob:http://localhost')) outside.push(r.url());
   });
   page.on('pageerror', (e) => errors.push(String(e)));
   return { outside, errors };
@@ -69,6 +70,158 @@ test.describe('language mirror', () => {
     await expect(page.locator('[data-key="score-care"]')).toContainText('文字還不夠');
     expect(w.outside).toEqual([]);
     expect(w.errors).toEqual([]);
+  });
+
+  test('playground: words light up as you type, each key explains its mark, samples fill the field', async ({ page }) => {
+    const w = watch(page);
+    await page.goto(HARNESS);
+    // the first screen is the playground: a famous line is typed in and lit before anything is typed
+    const lit = page.locator('[data-key="ll-lit"]');
+    await expect(lit).toHaveClass(/is-sample/);
+    await expect(lit.locator('[data-key="ll-famous-tag"]')).toHaveText('名句示範，不是你的資料');
+    await expect(lit).toHaveAttribute('data-typing', 'false');
+    await expect(lit.locator('.ll-lit-text')).toHaveText('我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。');
+    await expect(lit.locator('[data-key="ll-famous-by"]')).toHaveText('蘇軾〈水調歌頭〉');
+    await expect(lit.locator('mark.ll-m-self')).toHaveText('我');
+    await expect(lit.locator('[data-key="ll-famous-note"]')).toHaveText('這句亮最多的是「自己」，1 個。');
+    // the long list of formats and the method are one tap away, not on the first screen
+    expect(await folded(page.locator('#ll-file-hint'))).toBe(true);
+    await expect(page.locator('[data-key="ll-honest"]')).toContainText('這是在數詞，不是測驗。字不會離開這個裝置。');
+    // typing lights the words with no button
+    await page.locator('#ll-text').pressSequentially('我總是覺得我應該做得更好，也許明天我們再試。');
+    await expect(lit).not.toHaveClass(/is-sample/);
+    await expect(lit.locator('mark.ll-m-absolute')).toHaveText('總是');
+    await expect(lit.locator('mark.ll-m-should')).toHaveText('應該');
+    await expect(lit.locator('mark.ll-m-maybe')).toHaveText('也許');
+    await expect(lit.locator('mark.ll-m-time')).toHaveText('明天');
+    await expect(lit.locator('mark.ll-m-others')).toHaveText('我們');
+    await expect(lit.locator('mark.ll-m-self')).toHaveText(['我', '我']);
+    // the lit copy holds exactly what was typed
+    await expect(lit.locator('.ll-lit-text')).toHaveText('我總是覺得我應該做得更好，也許明天我們再試。');
+    await expect(page.locator('[data-key="ll-key-self"] .ll-key-n')).toHaveText('2');
+    await expect(page.locator('[data-key="ll-key-feel"] .ll-key-n')).toHaveText('0');
+    // each key opens one short line, and closes again
+    const key = page.locator('[data-key="ll-key-should"]');
+    await key.click();
+    await expect(key).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[data-key="ll-key-note"]')).toHaveText('「應該」「必須」「一定要」這類字。');
+    await key.click();
+    await expect(page.locator('[data-key="ll-key-note"]')).toBeHidden();
+    // the field kept the focus and the text while the page lit up
+    await expect(page.locator('#ll-text')).toHaveValue('我總是覺得我應該做得更好，也許明天我們再試。');
+    // a made-up sample fills the field
+    await page.locator('[data-key="ll-sample-1"]').click();
+    await expect(page.locator('#ll-text')).toHaveValue(/^我們昨天吵架了/);
+    await expect(lit.locator('mark.ll-m-absolute')).toHaveText('永遠');
+    // guessing is offered only once there is enough text for the first numbers
+    await expect(page.locator('[data-key="ll-guess"]')).toBeHidden();
+    // touch targets
+    for (const k of ['ll-key-self', 'll-sample-0', 'll-how']) expect((await page.locator(`[data-key="${k}"]`).boundingBox()).height).toBeGreaterThanOrEqual(44);
+    // the method opens in a sheet
+    await page.locator('[data-key="ll-how"]').click();
+    await expect(page.locator('#sheet').getByRole('heading', { name: '這是怎麼算的' })).toBeVisible();
+    await expect(page.locator('#sheet')).toContainText('AUC .68 到 .94');
+    expect(w.outside).toEqual([]);
+    expect(w.errors).toEqual([]);
+  });
+
+  test('famous lines: public-domain samples with their source, typed in and lit; still with reduced motion; never saved', async ({ page, browser }) => {
+    await page.goto(HARNESS);
+    const lit = page.locator('[data-key="ll-lit"]');
+    const seen = [];
+    for (let i = 0; i < 8; i++) {
+      await expect(lit).toHaveAttribute('data-typing', 'false');
+      await expect(lit.locator('.ll-famous-at')).toHaveText(`${i + 1} / 8`);
+      seen.push([await lit.locator('.ll-lit-text').textContent(), await lit.locator('[data-key="ll-famous-by"]').textContent()]);
+      if (i === 3) await expect(lit.locator('[data-key="ll-famous-note"]')).toContainText('這句一個字都沒亮');
+      if (i === 4) {
+        // an English line: three time words, and the keys count along
+        await expect(lit.locator('mark.ll-m-time')).toHaveText(['Tomorrow', 'tomorrow', 'tomorrow']);
+        await expect(page.locator('[data-key="ll-key-time"] .ll-key-n')).toHaveText('3');
+      }
+      const next = lit.locator('[data-key="ll-famous-next"]');
+      expect((await next.boundingBox()).height).toBeGreaterThanOrEqual(44);
+      await next.click();
+      // while a line is being typed the note waits
+      if (i === 0) await expect(lit).toHaveAttribute('data-typing', 'true');
+    }
+    // Chinese first in a Chinese interface, every line with its author and source
+    expect(seen.map((x) => x[1])).toEqual(['蘇軾〈水調歌頭〉', '《論語．述而》', '李清照〈聲聲慢〉', '李白〈靜夜思〉', 'William Shakespeare, Macbeth', 'William Shakespeare, Romeo and Juliet', 'Jane Austen, Pride and Prejudice', 'Abraham Lincoln, Gettysburg Address']);
+    await expect(lit).toContainText('示範的句子不會存下來。');
+    // a sample is never analysed or kept: with the field empty, the full results ask for text
+    await page.locator('[data-key="ll-analyze"]').click();
+    await expect(page.locator('.ll-status')).toContainText('請先貼上文字或選擇檔案。');
+    // typing replaces the sample at once
+    await page.locator('#ll-text').pressSequentially('我');
+    await expect(lit.locator('[data-key="ll-famous-tag"]')).toHaveCount(0);
+    await expect(lit.locator('.ll-lit-text')).toHaveText('我');
+    // reduced motion: the finished colouring, with no typing
+    const ctx = await browser.newContext({ locale: 'en-US', reducedMotion: 'reduce' });
+    const still = await ctx.newPage();
+    await still.goto(HARNESS + '?lang=en');
+    const lit2 = still.locator('[data-key="ll-lit"]');
+    await expect(lit2.locator('.ll-lit-text')).toHaveText('Tomorrow, and tomorrow, and tomorrow, creeps in this petty pace from day to day.');
+    await lit2.locator('[data-key="ll-famous-next"]').click();
+    expect(await lit2.getAttribute('data-typing')).toBe('false');
+    await expect(lit2.locator('.ll-lit-text')).toHaveText('Parting is such sweet sorrow, that I shall say good night till it be morrow.');
+    await expect(lit2.locator('[data-key="ll-famous-note"]')).toHaveText('Lit up most in this line: Feelings, 3.');
+    await ctx.close();
+  });
+
+  test('playground: text that matches the risk check is not lit; help lines show and the words stay', async ({ page }) => {
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', '我總是覺得我不想活了');
+    await expect(page.locator('[data-key="ll-live-help"]')).toBeVisible();
+    await expect(page.locator('[data-key="ll-lit"] mark')).toHaveCount(0);
+    await expect(page.locator('[data-key="ll-key-self"] .ll-key-n')).toHaveText('0');
+    await expect(page.locator('#ll-text')).toHaveValue('我總是覺得我不想活了');
+    // and no fingerprint is drawn from it
+    await page.locator('[data-key="ll-analyze"]').click();
+    await expect(page.locator('[data-key="ll-help"]')).toBeVisible();
+    await expect(page.locator('[data-key="ll-fp"]')).toHaveCount(0);
+  });
+
+  test('fingerprint: guess first, a still poster from counts, the words behind each count, PNG export', async ({ page }) => {
+    const w = watch(page);
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', ZH_TEXT);
+    await expect(page.locator('[data-key="ll-guess"]')).toBeVisible();
+    await page.locator('[data-key="ll-guess-feel"]').click();
+    await expect(page.locator('[data-key="ll-guess-feel"]')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('[data-key="ll-analyze"]').click();
+    const fp = page.locator('[data-key="ll-fp"]');
+    await expect(fp.getByRole('heading', { name: '用字指紋' })).toBeVisible();
+    await expect(page.locator('[data-key="ll-fp-guess"]')).toHaveText('你猜「感受」，數起來最多的是「自己」。');
+    // the poster is one image with a text equivalent, and holds no sentence of the person's text
+    const art = page.locator('[data-key="ll-fp-art"]');
+    await expect(art).toHaveAttribute('aria-label', /^用字指紋：自己，48 個；/);
+    expect(await art.locator('svg').evaluate((el) => el.querySelectorAll('animate, style, script, image, foreignObject').length)).toBe(0);
+    expect(await art.textContent()).not.toContain('吃飯');
+    // every count opens the exact words behind it, and from there the full numbers
+    await page.locator('[data-key="ll-fp-self"]').click();
+    const sheet = page.locator('#sheet');
+    await expect(sheet.getByRole('heading', { name: '「自己」數到的字' })).toBeVisible();
+    await expect(sheet.locator('[data-key="ll-fp-words"] tbody tr')).toHaveText(['我48']);
+    await sheet.locator('[data-key="ll-fp-full-i"]').click();
+    await expect(sheet.getByRole('heading', { name: '「我」的詞' })).toBeVisible();
+    await sheet.locator('.back').click();
+    // a PNG three times the drawn size
+    const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('[data-key="ll-fp-save"]').click()]);
+    expect(dl.suggestedFilename()).toMatch(/^murmur-word-fingerprint-\d{4}-\d\d-\d\d\.png$/);
+    const png = readFileSync(await dl.path());
+    expect(png.subarray(1, 4).toString()).toBe('PNG');
+    expect(png.readUInt32BE(16)).toBe(1080);
+    expect(png.readUInt32BE(20)).toBe(1350);
+    expect(w.outside).toEqual([]);
+    expect(w.errors).toEqual([]);
+  });
+
+  test('fingerprint: too few lit words draws no poster and says so', async ({ page }) => {
+    await page.goto(HARNESS);
+    await page.fill('#ll-text', '今天天氣很好，出門走走。');
+    await page.locator('[data-key="ll-analyze"]').click();
+    await expect(page.locator('[data-key="ll-fp"]')).toContainText('亮起來的字還不夠畫指紋。');
+    await expect(page.locator('[data-key="ll-fp-art"]')).toHaveCount(0);
   });
 
   test('what stood out: three plain sentences from passing rows only, each opening its evidence', async ({ page }) => {
@@ -261,7 +414,10 @@ test.describe('language mirror', () => {
     const w = watch(page);
     await page.goto(HARNESS);
     // the browser's own English file control is not shown; a button and a line in the page's language are
+    // the file picker and its list of formats wait behind one line
     const pick = page.locator('#ll-file');
+    await expect(page.locator('[data-key="ll-import"]')).not.toHaveAttribute('open', '');
+    await page.locator('[data-key="ll-import"] > summary').click();
     await expect(page.getByLabel('或選擇檔案')).toHaveAttribute('type', 'file');
     expect(await pick.evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
     await expect(page.locator('.ll-file-btn')).toHaveText('選擇檔案');
@@ -339,7 +495,8 @@ test.describe('language mirror', () => {
     const context = await browser.newContext({ locale: 'en-US', colorScheme: 'dark' });
     const page = await context.newPage();
     await page.goto(HARNESS + '?lang=en');
-    await expect(page.getByLabel('Paste text')).toBeVisible();
+    await expect(page.getByLabel('Write a sentence, or paste a long piece')).toBeVisible();
+    await page.locator('[data-key="ll-import"] > summary').click();
     await expect(page.getByLabel('Or choose files')).toBeVisible();
     await expect(page.getByLabel('Or choose files', { exact: true })).toHaveAttribute('data-key', 'll-file');
     await expect(page.locator('.ll-file-btn')).toHaveText('Choose files');
