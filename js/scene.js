@@ -453,6 +453,19 @@ function words(p, { line: text, label, date, brand, fitText }) {
 // card and scaled), the white panel and the words. Square corners, no border.
 // art: the picture; css: optional animation; img: false when the card sits beside its own
 // text and should not be announced as a picture.
+// The keepsake's paper: a few flat specks on the white panel, and a fine ink frame with
+// notched corners and one glint at its foot, like a ticket kept in a book.
+const PAPER_GRAIN = (() => {
+  let v = 11;
+  const r = () => ((v = (v * 1103515245 + 12345) % 2147483648) / 2147483648);
+  let d = '';
+  for (let i = 0; i < 90; i++) d += `M${Math.round(268 + r() * 330)} ${Math.round(r() * 398)}h${r() < 0.3 ? 2 : 1}v1h-1z`;
+  return `<path fill="#ECE7DB" d="${d}"/>`;
+})();
+const CARD_FRAME =
+  `<path fill="none" stroke="${INK}" stroke-width="1.5" d="M291 10H576A14 14 0 0 0 590 24V376A14 14 0 0 0 576 390H291A14 14 0 0 0 277 376V24A14 14 0 0 0 291 10Z"/>` +
+  `<rect x="421" y="385" width="25" height="10" fill="${WHITE}"/><path fill="${INK}" transform="translate(433.5 390)" d="M0 -7Q0 0 7 0Q0 0 0 7Q0 0 -7 0Q0 0 0 -7z"/>`;
+
 export function printCard(p, { uid, art = '', css = '', words: w = '', img = true }) {
   const W = 600;
   const H = 400;
@@ -460,7 +473,9 @@ export function printCard(p, { uid, art = '', css = '', words: w = '', img = tru
   <defs><clipPath id="${uid}art"><rect width="${ART.w}" height="${ART.h}"/></clipPath></defs>
   ${css}
   <rect width="${W}" height="${H}" fill="${WHITE}"/>
+  ${PAPER_GRAIN}
   <g transform="scale(${n4(ART.k)})" clip-path="url(#${uid}art)"><rect width="${ART.w}" height="${ART.h}" fill="${p.ground}"/>${art}</g>
+  ${CARD_FRAME}
   ${w}
 </svg>`;
 }

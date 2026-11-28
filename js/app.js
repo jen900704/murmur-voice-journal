@@ -1,4 +1,5 @@
-import { icon, blockArt } from './icons.js';
+import { icon } from './icons.js';
+import { world, ornament, timeOfDay, SKY } from './world.js';
 import { t, setLang, getLang, detectLang, STRINGS } from './i18n.js';
 import { Recorder, decodeToMono16k, isSupported, TARGET_SR } from './recorder.js';
 import { FEATURE_INFO, FEATURE_VERSION, median } from './features.js';
@@ -585,13 +586,22 @@ function viewToday() {
 // The hero: one question and one big button into 換角度. What it is sits behind a small tap.
 function lensHero(withMumu) {
   const mood = state.phase === 'recording' ? 'listen' : state.phase === 'analyzing' ? 'think' : restingState();
+  const now = new Date();
+  const tod = timeOfDay(now);
   return h(
     'div',
     { class: 'lens-hero' + (withMumu ? '' : ' no-mumu') },
     // the day's colour block: 玉, with the solid Mumu sitting among a circle, a half circle and a square
-    withMumu ? h('div', { class: 'cblock cblock--jade hero-block' }, blockArt('today'), mascot(mood, { size: 200, variant: 'solid' })) : null,
-    h('h2', { class: 'hero-title' }, t('heroTitle')),
-    h('button', { type: 'button', class: 'btn primary hero-btn', 'data-key': 'hero-lens', onclick: startLens }, t('heroStart')),
+    withMumu ? h('div', { class: `cblock cblock--${SKY[tod]} hero-block` }, world('today', { time: tod }), mascot(mood === 'idle' && tod === 'night' ? 'sleepy' : mood, { size: 150, variant: 'solid' })) : null,
+    // the day's ticket: the date large, a small rule, the question and the one way in
+    h(
+      'div',
+      { class: 'ticket hero-ticket' },
+      h('p', { class: 'ticket-date' }, h('span', { class: 'ticket-num' }, `${now.getMonth() + 1}/${now.getDate()}`), h('span', { class: 'ticket-day' }, h('b', {}, t('tabToday')), now.toLocaleDateString(getLang() === 'zh-TW' ? 'zh-TW' : 'en-US', { weekday: 'long' }))),
+      ornament(),
+      h('h2', { class: 'hero-title' }, h('span', { class: 'lettered' }, t('heroTitle'))),
+      h('button', { type: 'button', class: 'btn primary hero-btn', 'data-key': 'hero-lens', onclick: startLens }, t('heroStart'))
+    ),
     h('details', { class: 'hero-what' }, h('summary', { 'data-key': 'hero-what' }, t('heroWhat')), h('p', {}, t('heroWhatBody')))
   );
 }

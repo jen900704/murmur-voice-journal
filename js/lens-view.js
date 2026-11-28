@@ -1,6 +1,7 @@
 // Theory lens: a self-guided exercise that looks at one worry through a counseling theory.
 // Offline: nothing typed here leaves the device, and nothing is saved unless asked.
-import { icon, blockArt } from './icons.js';
+import { icon } from './icons.js';
+import { world } from './world.js';
 import { LENSES, TOPICS, lensById, lensesForTopics, commonForTopics, answerRows, fill, rewriteText, quote, isNonAnswer } from './lenses.js';
 import { cardSvg, postcardPng, sharePng } from './postcard.js';
 import { readScene, sceneNotes } from './scene.js';
@@ -586,7 +587,7 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
       h(
         'div',
         { class: 'lens-hero' },
-        h('div', { class: 'cblock cblock--pink hero-block' }, blockArt('lens'), mascot('idle', { size: 150, variant: 'solid' })),
+        h('div', { class: 'cblock cblock--pink hero-block' }, world('lens'), mascot('idle', { size: 150, variant: 'solid' })),
         h('h2', { class: 'lens-hero-line' }, L().homeLine),
         h('button', { type: 'button', class: 'btn primary lens-hero-btn', 'data-key': 'lens-start', onclick: () => {
           st.cstep = 0;
@@ -1230,8 +1231,9 @@ export function createLensView({ h, add, getLang, rerender, toast, db, openGentl
         'div',
         // the header block: a big numeral, the dots, and the solid Mumu listening; its colour turns with each question
         { class: `lens-step-head cblock cblock--${blockHue}` },
-        blockArt(`step-${blockHue}`),
-        h('div', { class: 'lens-step-title' }, h('span', { class: 'lens-bignum', 'aria-hidden': 'true' }, String(st.step + 1), h('small', {}, ` / ${n}`)), progress(st.step + 1, n, { dots: true, label: L().stepOf(st.step + 1, n) })),
+        world(`step-${blockHue}`),
+        h('span', { class: 'ticket-frame', 'aria-hidden': 'true' }),
+        h('div', { class: 'lens-step-title' }, h('span', { class: 'ticket-no', 'aria-hidden': 'true' }, 'No.'), h('span', { class: 'lens-bignum', 'aria-hidden': 'true' }, String(st.step + 1), h('small', {}, ` / ${n}`)), progress(st.step + 1, n, { dots: true, label: L().stepOf(st.step + 1, n) })),
         m
       ),
       h('p', { class: 'lens-name' }, lensMark(lens, 20), c.name),

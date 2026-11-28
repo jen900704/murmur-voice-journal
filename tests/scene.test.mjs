@@ -78,7 +78,8 @@ test('cards are flat: no gradients, filters, shadows or rounded card corners, an
     assert.ok(svg.includes('2026.11.24 · Murmur'));
   }
   // every weather keeps to the 丙 colours
-  const allowed = ['#151515', '#FFFFFF', '#5C5A55', '#0E7C66', '#EA4B2D', '#F2B91D', '#F4A7B9', '#12173A'];
+  // plus the flat paper speck of the card's grain
+  const allowed = ['#151515', '#FFFFFF', '#5C5A55', '#0E7C66', '#EA4B2D', '#F2B91D', '#F4A7B9', '#12173A', '#ECE7DB'];
   for (const weather of ['rain', 'wind', 'fog', 'dusk', 'mixed', 'sunny', 'clear', 'night', 'cloudy']) {
     const svg = sceneSvg({ ...s, weather, objects: ['sea', 'bed', 'bike'], companion: 'dog' }, { fitText });
     for (const c of svg.match(/#[0-9A-Fa-f]{6}/g)) assert.ok(allowed.includes(c), weather + ' ' + c);

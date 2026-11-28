@@ -6003,3 +6003,149 @@ html:root body .policy-optin { border-radius: 0; }
 @media (prefers-reduced-motion: reduce) {
   .ll-caret { display: none; }
 }
+
+
+/* ============================================================================
+   world: Mumu's hill. The loud pages become one small illustrated place with depth
+   (js/world.js): layered flat shapes, a string of lights, a ticket with the date.
+   Still 圓方 colours and shapes. Three things are new and are allowed only here:
+   a paper grain of flat specks on the page, the notched ticket frame, and layers
+   that drift on scroll. All motion is off under prefers-reduced-motion.
+   ============================================================================ */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='41' y='19' width='2' height='1' fill='%23fffdf7'/%3E%3Crect x='83' y='6' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='105' y='68' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='46' y='74' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='116' y='64' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='4' y='11' width='2' height='1' fill='%23e7e2d5'/%3E%3Crect x='53' y='8' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='11' y='70' width='2' height='1' fill='%23e7e2d5'/%3E%3Crect x='7' y='105' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='28' y='80' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='73' y='74' width='2' height='1' fill='%23e7e2d5'/%3E%3Crect x='6' y='28' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='71' y='109' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='37' y='53' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='69' y='15' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='71' y='104' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='13' y='74' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='47' y='12' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='72' y='7' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='63' y='87' width='2' height='1' fill='%23e7e2d5'/%3E%3Crect x='99' y='40' width='2' height='1' fill='%23e7e2d5'/%3E%3Crect x='74' y='118' width='2' height='1' fill='%23fffdf7'/%3E%3Crect x='46' y='38' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='101' y='23' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='10' y='73' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='67' y='63' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='93' y='57' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='77' y='9' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='65' y='53' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='96' y='43' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='62' y='53' width='1' height='1' fill='%23fffdf7'/%3E%3Crect x='85' y='9' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='43' y='88' width='1' height='1' fill='%23e7e2d5'/%3E%3Crect x='76' y='63' width='2' height='1' fill='%23fffdf7'/%3E%3C/svg%3E");
+  --ticket: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M11.25 1.25H36.75A10 10 0 0 0 46.75 11.25V36.75A10 10 0 0 0 36.75 46.75H11.25A10 10 0 0 0 1.25 36.75V11.25A10 10 0 0 0 11.25 1.25Z' fill='%23fffdf7' stroke='%23151515' stroke-width='2.5'/%3E%3Cpath d='M15.3 6.5H32.7A15 15 0 0 0 41.5 15.3V32.7A15 15 0 0 0 32.7 41.5H15.3A15 15 0 0 0 6.5 32.7V15.3A15 15 0 0 0 15.3 6.5Z' fill='none' stroke='%23151515' stroke-width='1'/%3E%3C/svg%3E");
+  --letter-mark: var(--sun);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='8' y='107' width='1' height='1' fill='%230d1230'/%3E%3Crect x='34' y='60' width='1' height='1' fill='%231b2150'/%3E%3Crect x='7' y='93' width='1' height='1' fill='%231b2150'/%3E%3Crect x='82' y='73' width='2' height='1' fill='%230d1230'/%3E%3Crect x='36' y='91' width='2' height='1' fill='%231b2150'/%3E%3Crect x='113' y='85' width='1' height='1' fill='%231b2150'/%3E%3Crect x='2' y='59' width='1' height='1' fill='%230d1230'/%3E%3Crect x='21' y='78' width='1' height='1' fill='%231b2150'/%3E%3Crect x='63' y='7' width='1' height='1' fill='%231b2150'/%3E%3Crect x='98' y='36' width='1' height='1' fill='%230d1230'/%3E%3Crect x='94' y='31' width='2' height='1' fill='%231b2150'/%3E%3Crect x='50' y='117' width='2' height='1' fill='%231b2150'/%3E%3Crect x='10' y='21' width='2' height='1' fill='%230d1230'/%3E%3Crect x='51' y='70' width='1' height='1' fill='%231b2150'/%3E%3Crect x='113' y='17' width='2' height='1' fill='%231b2150'/%3E%3Crect x='110' y='70' width='1' height='1' fill='%230d1230'/%3E%3Crect x='90' y='53' width='1' height='1' fill='%231b2150'/%3E%3Crect x='87' y='113' width='2' height='1' fill='%231b2150'/%3E%3Crect x='29' y='19' width='1' height='1' fill='%230d1230'/%3E%3Crect x='22' y='19' width='1' height='1' fill='%231b2150'/%3E%3Crect x='84' y='29' width='1' height='1' fill='%231b2150'/%3E%3Crect x='62' y='106' width='1' height='1' fill='%230d1230'/%3E%3Crect x='33' y='36' width='1' height='1' fill='%231b2150'/%3E%3Crect x='18' y='53' width='1' height='1' fill='%231b2150'/%3E%3Crect x='78' y='72' width='1' height='1' fill='%230d1230'/%3E%3Crect x='16' y='88' width='1' height='1' fill='%231b2150'/%3E%3Crect x='58' y='115' width='2' height='1' fill='%231b2150'/%3E%3Crect x='50' y='51' width='2' height='1' fill='%230d1230'/%3E%3Crect x='13' y='61' width='2' height='1' fill='%231b2150'/%3E%3Crect x='7' y='24' width='1' height='1' fill='%231b2150'/%3E%3Crect x='26' y='56' width='1' height='1' fill='%230d1230'/%3E%3Crect x='14' y='43' width='1' height='1' fill='%231b2150'/%3E%3Crect x='13' y='0' width='1' height='1' fill='%231b2150'/%3E%3Crect x='68' y='12' width='1' height='1' fill='%230d1230'/%3E%3C/svg%3E");
+    --ticket: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M11.25 1.25H36.75A10 10 0 0 0 46.75 11.25V36.75A10 10 0 0 0 36.75 46.75H11.25A10 10 0 0 0 1.25 36.75V11.25A10 10 0 0 0 11.25 1.25Z' fill='%231d2452' stroke='%23f6f3ec' stroke-width='2.5'/%3E%3Cpath d='M15.3 6.5H32.7A15 15 0 0 0 41.5 15.3V32.7A15 15 0 0 0 32.7 41.5H15.3A15 15 0 0 0 6.5 32.7V15.3A15 15 0 0 0 15.3 6.5Z' fill='none' stroke='%23f6f3ec' stroke-width='1'/%3E%3C/svg%3E");
+    --letter-mark: var(--jade);
+  }
+}
+:root.night-mode {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='78' y='3' width='1' height='1' fill='%230d1230'/%3E%3Crect x='111' y='26' width='2' height='1' fill='%231b2150'/%3E%3Crect x='19' y='81' width='1' height='1' fill='%231b2150'/%3E%3Crect x='44' y='77' width='1' height='1' fill='%230d1230'/%3E%3Crect x='60' y='15' width='1' height='1' fill='%231b2150'/%3E%3Crect x='108' y='62' width='2' height='1' fill='%231b2150'/%3E%3Crect x='61' y='61' width='1' height='1' fill='%230d1230'/%3E%3Crect x='10' y='18' width='1' height='1' fill='%231b2150'/%3E%3Crect x='95' y='43' width='1' height='1' fill='%231b2150'/%3E%3Crect x='61' y='106' width='1' height='1' fill='%230d1230'/%3E%3Crect x='66' y='2' width='1' height='1' fill='%231b2150'/%3E%3Crect x='67' y='46' width='1' height='1' fill='%231b2150'/%3E%3Crect x='88' y='69' width='1' height='1' fill='%230d1230'/%3E%3Crect x='97' y='67' width='1' height='1' fill='%231b2150'/%3E%3Crect x='82' y='110' width='1' height='1' fill='%231b2150'/%3E%3Crect x='89' y='108' width='1' height='1' fill='%230d1230'/%3E%3Crect x='66' y='46' width='1' height='1' fill='%231b2150'/%3E%3Crect x='45' y='98' width='1' height='1' fill='%231b2150'/%3E%3Crect x='68' y='69' width='1' height='1' fill='%230d1230'/%3E%3Crect x='81' y='28' width='1' height='1' fill='%231b2150'/%3E%3Crect x='103' y='30' width='2' height='1' fill='%231b2150'/%3E%3Crect x='94' y='102' width='1' height='1' fill='%230d1230'/%3E%3Crect x='25' y='66' width='2' height='1' fill='%231b2150'/%3E%3Crect x='45' y='93' width='1' height='1' fill='%231b2150'/%3E%3Crect x='3' y='101' width='1' height='1' fill='%230d1230'/%3E%3Crect x='60' y='33' width='1' height='1' fill='%231b2150'/%3E%3Crect x='88' y='77' width='1' height='1' fill='%231b2150'/%3E%3Crect x='57' y='103' width='1' height='1' fill='%230d1230'/%3E%3Crect x='46' y='10' width='1' height='1' fill='%231b2150'/%3E%3Crect x='13' y='29' width='2' height='1' fill='%231b2150'/%3E%3Crect x='25' y='43' width='1' height='1' fill='%230d1230'/%3E%3Crect x='61' y='79' width='1' height='1' fill='%231b2150'/%3E%3Crect x='61' y='116' width='1' height='1' fill='%231b2150'/%3E%3Crect x='102' y='82' width='1' height='1' fill='%230d1230'/%3E%3C/svg%3E");
+  --ticket: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M11.25 1.25H36.75A10 10 0 0 0 46.75 11.25V36.75A10 10 0 0 0 36.75 46.75H11.25A10 10 0 0 0 1.25 36.75V11.25A10 10 0 0 0 11.25 1.25Z' fill='%231d2452' stroke='%23f6f3ec' stroke-width='2.5'/%3E%3Cpath d='M15.3 6.5H32.7A15 15 0 0 0 41.5 15.3V32.7A15 15 0 0 0 32.7 41.5H15.3A15 15 0 0 0 6.5 32.7V15.3A15 15 0 0 0 15.3 6.5Z' fill='none' stroke='%23f6f3ec' stroke-width='1'/%3E%3C/svg%3E");
+  --letter-mark: var(--jade);
+}
+body { background-image: var(--grain); background-size: 120px 120px; }
+
+/* the layers */
+.world { overflow: visible; }
+/* 8px narrower each side than the block, so a layer nudged sideways never reaches past the screen edge;
+   the drawing itself overflows the layer and is cropped by the block */
+.world .w-layer { position: absolute; inset: 0 8px; }
+.world .w-layer svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cblock { container-type: inline-size; }
+@media (prefers-reduced-motion: no-preference) {
+  .world .w-layer { will-change: transform; }
+  .world .w-tw { animation: w-twinkle 4.2s ease-in-out infinite; animation-delay: var(--dl, 0s); }
+  .world .w-tw--slow { animation-duration: 6s; }
+  .world .w-bulb { animation: w-bulb 2.8s ease-in-out infinite; animation-delay: var(--dl, 0s); }
+  /* clouds drift as one layer, on the compositor */
+  .world .w-layer--drift svg { animation: w-drift 44s ease-in-out infinite alternate; will-change: transform; }
+}
+@keyframes w-twinkle { 0%, 62%, 100% { opacity: 1; } 78% { opacity: 0.3; } }
+@keyframes w-bulb { 0%, 55%, 100% { opacity: 1; } 75% { opacity: 0.45; } }
+@keyframes w-drift { from { transform: translateX(-10px); } to { transform: translateX(16px); } }
+
+/* header text over each hour's sky */
+@supports selector(:has(*)) {
+  body:has(.view > .lens-hero:first-child > .cblock--sun) .brand { color: #151515; }
+  body:has(.view > .lens-hero:first-child > .cblock--night) .brand { color: #f6f3ec; }
+}
+
+/* Today: the scene, Mumu on the near hill, the ticket overlapping the ground */
+.hero-block { height: 284px; }
+.view.today > .lens-hero .mumu { --mumu-size: 150px !important; left: 52px; bottom: 60px; }
+.ticket {
+  position: relative;
+  z-index: 2;
+  border: 17px solid transparent;
+  border-image: var(--ticket) 17 fill / 17px stretch;
+  padding: 4px 6px 6px;
+  color: var(--ink);
+}
+.view.today > .lens-hero > .hero-ticket { margin: -52px 16px 0; }
+.view.today > .lens-hero.no-mumu > .hero-ticket { margin-top: 8px; }
+.ticket-date { display: flex; align-items: flex-end; gap: 12px; margin: 0; }
+.ticket-num { font: 800 54px/0.9 var(--num); letter-spacing: -0.03em; }
+.ticket-day { display: grid; font: 400 13px/1.35 var(--body); color: var(--muted); padding-bottom: 2px; }
+.ticket-day b { font: 900 13px/1.35 var(--display); letter-spacing: 0.12em; color: var(--ink); }
+:lang(en) .ticket-day b { letter-spacing: 0.06em; text-transform: uppercase; }
+.orn { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px; color: var(--ink); }
+.orn i { flex: 1; height: 1.5px; background: currentColor; }
+.orn svg { flex: none; display: block; }
+.view.today > .lens-hero .hero-ticket .hero-title { font-size: 30px; margin: 0 0 14px; max-width: none; }
+:lang(en) .view.today > .lens-hero .hero-ticket .hero-title { font-size: 27px; }
+.view.today > .lens-hero .hero-ticket .hero-btn { width: 100%; margin: 0; }
+.view.today > .lens-hero .hero-what { margin-top: 4px; }
+/* the one lettering treatment for a loud page's heading: a flat marker band under the words */
+.lettered {
+  background-image: linear-gradient(transparent 62%, var(--letter-mark) 62%, var(--letter-mark) 94%, transparent 94%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.12em;
+  margin: 0 -0.12em;
+}
+
+/* 換角度 home */
+.view.lens .lens-hero .mumu { --mumu-size: 140px !important; left: 104px; bottom: 28px; }
+
+/* a question: a ticket. Numeral on the stub, a perforation, Mumu on the hill */
+.lens-step-head.cblock { --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M15.3 6.5H32.7A15 15 0 0 0 41.5 15.3V32.7A15 15 0 0 0 32.7 41.5H15.3A15 15 0 0 0 6.5 32.7V15.3A15 15 0 0 0 15.3 6.5Z' fill='none' stroke='%23151515' stroke-width='1.5'/%3E%3C/svg%3E"); }
+.lens-step-head.cblock--jade { --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M15.3 6.5H32.7A15 15 0 0 0 41.5 15.3V32.7A15 15 0 0 0 32.7 41.5H15.3A15 15 0 0 0 6.5 32.7V15.3A15 15 0 0 0 15.3 6.5Z' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E"); }
+.ticket-frame {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  height: 164px;
+  border: 17px solid transparent;
+  border-image: var(--frame) 17 / 17px stretch;
+  pointer-events: none;
+  z-index: 1;
+}
+.ticket-frame::before {
+  content: '';
+  position: absolute;
+  left: 142px;
+  top: -8px;
+  bottom: -8px;
+  border-left: 3px dotted currentColor;
+}
+.ticket-frame::after {
+  content: '';
+  position: absolute;
+  left: 133px;
+  bottom: -27px;
+  width: 22px;
+  height: 11px;
+  border-radius: 11px 11px 0 0;
+  background: var(--bg);
+  background-image: var(--grain);
+}
+.lens-step-head .lens-step-title { left: 34px; bottom: 30px; gap: 8px; }
+.ticket-no { font: 900 12px/1 var(--display); letter-spacing: 0.16em; }
+.lens-bignum { font-size: 86px; }
+.lens-bignum small { font-size: 24px; }
+.lens-step-head.cblock > .mumu { --mumu-size: 118px; right: 36px; bottom: 28px; }
+
+/* bedtime: the hill at night */
+.night-mumu.cblock { height: 300px; }
+.night-mumu.cblock > .mumu { --mumu-size: 140px; left: calc(50% - 70px); bottom: 50px; }
+.night-card-block .mumu { right: 22px; bottom: 28px; --mumu-size: 92px; }
+
+@media (max-width: 359px) {
+  .view.today > .lens-hero .mumu { --mumu-size: 132px !important; left: 30px; }
+  .lens-bignum { font-size: 76px; }
+  .ticket-num { font-size: 46px; }
+  .ticket-frame::before { left: 120px; }
+  .ticket-frame::after { left: 111px; }
+  .lens-step-head.cblock > .mumu { --mumu-size: 100px; right: 26px; }
+}
+
+/* depth inside a block: sky (0), a ticket's frame (1), hills and ground (2), Mumu and words (3) */
+.cblock > .mumu { z-index: 3; }
+.lens-step-head .lens-step-title { z-index: 3; }
