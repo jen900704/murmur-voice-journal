@@ -364,8 +364,13 @@ async function loadDemo() {
     }));
     await db.importEntries(entries);
     state.entries = await db.listEntries();
-    if (location.hash !== '#trends') location.hash = '#trends';
-    else render();
+    // the charts are the Trends segment of the Journal
+    state.journalMode = 'trends';
+    if (state.tab !== 'journal') location.hash = '#journal';
+    else {
+      render();
+      window.scrollTo(0, 0);
+    }
   } catch (_) {
     toast(t('demoFailed'));
   }
@@ -573,9 +578,11 @@ function viewToday() {
   // 換角度 is the heart of Today; on a first visit the welcome card already offers it.
   // One Mumu per screen: in the evening the bedtime card has the sleepy one.
   if (!welcoming) add(wrap, lensHero(!evening));
-  if (idle) add(wrap, toolRow(lowCard));
-  if (idle && !welcoming) add(wrap, wordsDoor());
+  // the second headline: the language mirror, as large as the hero; then the voice journal,
+  // smaller, and the small tools last
+  if (idle && !welcoming) add(wrap, mirrorHero());
   add(wrap, voiceCard(prompt, promptIdx, prompts));
+  if (idle) add(wrap, toolRow(lowCard));
   // the demo offer is for a first visit only; it sits last and quiet
   if (idle && !state.entries.length) {
     add(wrap, h('button', { type: 'button', class: 'link center demo-offer', onclick: loadDemo }, t('loadDemoShort')));
@@ -606,17 +613,37 @@ function lensHero(withMumu) {
   );
 }
 
-// The front door of the language mirror (語言鏡): three lit words as a taste, one tap to the
-// playground. A plain button, so Today keeps its one colour block.
-function wordsDoor() {
-  const zh = getLang() !== 'en';
-  const taste = zh ? [['absolute', '總是'], ['should', '應該'], ['self', '我']] : [['absolute', 'always'], ['should', 'should'], ['self', 'I']];
+// The second headline on Today: the language mirror (語言鏡). A 黃 field with a paper glass in
+// it; in the glass one famous public-domain line (one a day), its counted words lit in the seven marks by
+// the mirror's own code (js/langlab/clues.js, loaded after Today has drawn), and one way in.
+// Only the app's own sample lines are shown here, never the person's text.
+let cluesMod = null;
+let cluesWait = null;
+function mirrorHero() {
+  const lang = getLang();
+  const day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const text = h('p', { class: 'mirror-line', 'data-key': 'mirror-line' });
+  const by = h('p', { class: 'mirror-by', 'data-key': 'mirror-by' });
+  const fill = () => {
+    // the interface language's own lines first, one a day
+    const lines = cluesMod.TEASERS[lang === 'en' ? 'en' : 'zh'];
+    const line = lines[day % lines.length];
+    text.lang = /[\u4e00-\u9fff]/.test(line.text) ? 'zh-Hant' : 'en';
+    text.replaceChildren(...cluesMod.litNodes(h, line.text, cluesMod.findClues(line.text).spans));
+    by.textContent = line.by;
+  };
+  if (cluesMod) fill();
+  else {
+    cluesWait = cluesWait || import('./langlab/clues.js').then((m) => (cluesMod = m));
+    cluesWait.then(() => text.isConnected && fill()).catch(() => (cluesWait = null));
+  }
   return h(
-    'a',
-    { class: 'words-door', href: '#words', 'data-key': 'words-door' },
-    h('span', { class: 'words-door-icon', 'aria-hidden': 'true' }, icon('mirror', { size: 26 })),
-    h('span', { class: 'words-door-text' }, h('span', { class: 'words-door-title' }, t('wordsDoorTitle')), h('span', { class: 'words-door-line' }, t('wordsDoorLine'))),
-    h('span', { class: 'words-door-taste', 'aria-hidden': 'true' }, taste.map(([f, w]) => h('span', { class: `ll-m ll-m-${f}` }, w)))
+    'div',
+    { class: 'mirror-hero', role: 'group', 'aria-labelledby': 'mirror-title' },
+    h('p', { class: 'mirror-tag' }, h('span', { class: 'mirror-tag-icon', 'aria-hidden': 'true' }, icon('mirror', { size: 22 })), t('wordsDoorTitle')),
+    h('h2', { class: 'mirror-title', id: 'mirror-title' }, t('wordsDoorLine')),
+    h('div', { class: 'mirror-glass' }, h('span', { class: 'mirror-sample' }, t('mirrorSample')), text, by),
+    h('a', { class: 'btn primary hero-btn mirror-btn', href: '#words', 'data-key': 'words-door' }, t('mirrorOpen'))
   );
 }
 
@@ -821,18 +848,10 @@ function viewJournal() {
   }));
   if (state.journalMode === 'nights') return add(wrap, extras.nightsSection());
   if (state.journalMode === 'jar') return add(wrap, extras.jarSection());
-  if (state.journalMode === 'words') {
-    // the language mirror and its word lists load on first use
-    if (!languageView) {
-      import('./language-view.js')
-        .then(({ createLanguageView }) => {
-          languageView = createLanguageView({ h, add, getLang, toast, openSheet });
-          render();
-        })
-        .catch(() => toast(t('loadFailed')));
-      return add(wrap, h('p', { class: 'muted', role: 'status' }, t('loading')));
-    }
-    return add(wrap, languageView.view());
+  // the voice charts, once a tab of their own, are a segment here
+  if (state.journalMode === 'trends') {
+    wrap.classList.add('trends');
+    return viewTrends(wrap);
   }
   const entries = state.entries.filter((e) => e.features && e.features.ok);
   if (!entries.length) {
@@ -1088,8 +1107,8 @@ async function renderDetail() {
   audioSlot.appendChild(h('p', { class: 'muted small' }, t('noAudio')));
 }
 
-function viewTrends() {
-  const wrap = h('section', { class: 'view trends' });
+// The voice trend charts, drawn into the Journal under its Trends segment.
+function viewTrends(wrap) {
   const entries = pool();
   const real = hasReal();
   const flagged = state.entries.filter((e) => usable(e) && (real ? !e.demo : true) && e.features.quality && e.features.quality.flags && e.features.quality.flags.length).length;
@@ -1733,7 +1752,24 @@ function lensLoading() {
   loadLens().catch(() => {});
   return h('section', { class: 'view' }, h('p', { class: 'muted', role: 'status' }, t('loading')));
 }
-const TABS = ['today', 'journal', 'trends', 'lens', 'about'];
+// The two headline features sit next to Today; the voice charts live inside the Journal.
+const TABS = ['today', 'lens', 'words', 'journal', 'about'];
+const TAB_ICON = { words: 'mirror' };
+// 語言鏡: the language mirror and its word lists load on first use
+function viewWords() {
+  if (languageView) return languageView.view();
+  if (!viewWords.p) {
+    viewWords.p = import('./language-view.js').then(({ createLanguageView }) => {
+      languageView = createLanguageView({ h, add, getLang, toast, openSheet });
+      if (state.tab === 'words') render();
+    });
+    viewWords.p.catch(() => {
+      viewWords.p = null;
+      toast(t('loadFailed'));
+    });
+  }
+  return h('section', { class: 'view language' }, h('p', { class: 'muted', role: 'status' }, t('loading')));
+}
 let lensView = null;
 // the theory lens (and the AI conversation inside it) loads on first use
 function loadLens() {
@@ -1902,7 +1938,7 @@ function render() {
   const main = $('#main');
   main.innerHTML = '';
   settleLensImport();
-  const views = { today: viewToday, journal: viewJournal, trends: viewTrends, lens: lensView ? lensView.view : lensLoading, about: viewAbout };
+  const views = { today: viewToday, journal: viewJournal, words: viewWords, lens: lensView ? lensView.view : lensLoading, about: viewAbout };
   const section = views[state.tab]();
   if (state.storageDown) section.prepend(h('p', { class: 'demo-banner', role: 'note', 'data-key': 'storage-down' }, STORAGE_DOWN[getLang()] || STORAGE_DOWN['zh-TW']));
   main.appendChild(section);
@@ -1929,7 +1965,7 @@ function render() {
           },
           'aria-current': state.tab === tab ? 'page' : null,
         },
-        h('span', { class: 'tab-icon', 'aria-hidden': 'true' }, icon(tab === 'lens' ? 'lens' : tab, { size: 24 })),
+        h('span', { class: 'tab-icon', 'aria-hidden': 'true' }, icon(TAB_ICON[tab] || tab, { size: 24 })),
         h('span', { class: 'tab-label' }, t('tab' + tab[0].toUpperCase() + tab.slice(1)))
       )
     );
@@ -1964,12 +2000,12 @@ function onHash() {
     return;
   }
   closeDetailUI();
-  // #words is the front door of the language mirror: the Journal, on its 語言鏡 segment
-  if (tab === 'words') {
+  // #trends was a tab; old links and bookmarks land on the Journal's Trends segment
+  if (tab === 'trends') {
     if (state.phase === 'recording') cancelRecording();
     if (state.tab === 'today' && nightView.busy()) nightView.stopAll();
     state.tab = 'journal';
-    state.journalMode = 'words';
+    state.journalMode = 'trends';
     history.replaceState(null, '', '#journal');
     render();
     window.scrollTo(0, 0);
@@ -2024,6 +2060,11 @@ async function init() {
   clockChanged();
   const tab = location.hash.replace('#', '');
   state.tab = TABS.includes(tab) ? tab : 'today';
+  if (tab === 'trends') {
+    state.tab = 'journal';
+    state.journalMode = 'trends';
+    history.replaceState(null, '', '#journal');
+  }
   if (tab === 'entry') history.replaceState(null, '', '#today');
   if (tab.startsWith('ask=')) {
     state.askIndex = parseAsk(tab);

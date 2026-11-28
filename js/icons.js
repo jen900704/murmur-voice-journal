@@ -39,6 +39,11 @@ const P = {
   face3: '<circle class="m" cx="12" cy="12" r="8.5"/><path class="k" d="M9 9.5h.01M15 9.5h.01"/><path class="k" d="M8.5 14a4.5 4.5 0 0 0 7 0"/><circle class="d" cx="17.2" cy="13.6" r="1.6"/>',
   face4: '<circle class="m" cx="12" cy="12" r="8.5"/><path class="k" d="M8 10.5q1-1.5 2 0M14 10.5q1-1.5 2 0"/><path class="kf" d="M8 13.5h8a4 4 0 0 1-8 0z"/><circle class="d" cx="12" cy="15.3" r="1.5"/>',
   face5: '<circle class="m" cx="11.5" cy="12.5" r="8.5"/><path class="k" d="M7.5 11q1-1.5 2 0M13.5 11q1-1.5 2 0"/><path class="kf" d="M7 13.5h9a4.5 4.5 0 0 1-9 0z"/><path class="d" d="M20 1.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
+  // the nine-grid areas that have no icon above, and the dice that shuffles the question
+  people: '<circle class="m" cx="8.5" cy="12" r="6"/><circle class="m" cx="16.5" cy="12" r="4.5"/><path class="k" d="M6.5 11h.01M10 11h.01"/><circle class="d" cx="16.5" cy="12" r="1.7"/>',
+  body: '<path class="m" d="M3 13.5A5.5 5.5 0 0 1 8.5 8H21v8H3z"/><path class="o" d="M3 16v3.5M21 16v3.5"/><path class="k" d="M12 8v8"/><circle class="d" cx="7.5" cy="12.5" r="1.9"/>',
+  money: '<circle class="m" cx="12" cy="12" r="8.5"/><rect class="kf" x="9.5" y="9.5" width="5" height="5"/><circle class="d" cx="19.5" cy="4.5" r="1.9"/>',
+  dice: '<rect class="m" x="3.5" y="3.5" width="17" height="17"/><path class="k" d="M8 8h.01M16 16h.01M16 8h.01M8 16h.01"/><circle class="d" cx="12" cy="12" r="1.8"/>',
   // the language mirror: a round glass with one line of words in it
   mirror: '<circle class="m" cx="10.5" cy="10.5" r="7.5"/><path class="k" d="M7 10.5h7"/><path class="o" d="M16.5 16.5l4 4"/><circle class="d" cx="19.5" cy="5" r="1.9"/>',
   // small utility

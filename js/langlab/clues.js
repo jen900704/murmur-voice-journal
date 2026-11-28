@@ -149,3 +149,46 @@ export function tallyAnalysis(a) {
 
 export const topWords = (map, n = 3) => [...map.entries()].sort((p, q) => q[1] - p[1] || (p[0] < q[0] ? -1 : 1)).slice(0, n);
 export const topFamily = (counts) => FAMILIES.reduce((best, f) => (counts[f] > (best ? counts[best] : 0) ? f : best), null);
+
+// Famous lines for the playground's demonstration and the teaser on Today. Public-domain text only (all published long
+// before 1929), each with its author and source. Shown in the interface language first.
+export const FAMOUS = {
+  zh: [
+    { text: '我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。', by: '蘇軾〈水調歌頭〉' },
+    { text: '三人行，必有我師焉。', by: '《論語．述而》' },
+    { text: '尋尋覓覓，冷冷清清，淒淒慘慘戚戚。', by: '李清照〈聲聲慢〉' },
+    { text: '舉頭望明月，低頭思故鄉。', by: '李白〈靜夜思〉' },
+  ],
+  en: [
+    { text: 'Tomorrow, and tomorrow, and tomorrow, creeps in this petty pace from day to day.', by: 'William Shakespeare, Macbeth' },
+    { text: 'Parting is such sweet sorrow, that I shall say good night till it be morrow.', by: 'William Shakespeare, Romeo and Juliet' },
+    { text: 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.', by: 'Jane Austen, Pride and Prejudice' },
+    { text: 'The world will little note, nor long remember what we say here, but it can never forget what they did here.', by: 'Abraham Lincoln, Gettysburg Address' },
+  ],
+};
+// Today's teaser shows one of these a day: lines in which several kinds of words light up.
+// Public domain as well (published before 1929; Zhu Ziqing died in 1948, Hu Shih in 1962).
+export const TEASERS = {
+  zh: [
+    { text: '我不知道他們給了我多少日子；但我的手確乎是漸漸空虛了。', by: '朱自清〈匆匆〉' },
+    { text: '你不能做我的詩，正如我不能做你的夢。', by: '胡適〈夢與詩〉' },
+  ],
+  en: [FAMOUS.en[1], FAMOUS.en[3]],
+};
+export const famousLines = (lang) => (lang === 'en' ? [...FAMOUS.en, ...FAMOUS.zh] : [...FAMOUS.zh, ...FAMOUS.en]);
+
+// Text with its counted words marked: text nodes and <mark> only, never markup built from the
+// text. `h` is the app's element helper, so this file stays free of the DOM until it is called.
+export function litNodes(h, text, spans, limit = Infinity) {
+  const out = [];
+  let at = 0;
+  for (const sp of spans) {
+    if (sp.s >= limit) break;
+    if (sp.s > at) out.push(document.createTextNode(text.slice(at, sp.s)));
+    out.push(h('mark', { class: `ll-m ll-m-${sp.fam}` }, text.slice(sp.s, sp.e)));
+    at = sp.e;
+  }
+  const end = Math.min(text.length, limit);
+  if (at < end) out.push(document.createTextNode(text.slice(at, end)));
+  return out;
+}

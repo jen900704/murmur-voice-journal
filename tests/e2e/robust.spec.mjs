@@ -358,11 +358,11 @@ test.describe('back button and hashes', () => {
     await page.fill('#night-worry', '心事');
     await page.locator('[data-key="night-next"]').click();
     await page.fill('#night-kind', '喝了熱茶');
-    await page.locator('#tabs a[href="#trends"]').click();
-    await expect(page.locator('.view.trends')).toBeVisible();
+    await page.locator('#tabs a[href="#words"]').click();
+    await expect(page.locator('.view.language')).toBeVisible();
     await page.goBack();
     await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
-    await page.locator('#tabs a[href="#trends"]').click();
+    await page.locator('#tabs a[href="#words"]').click();
     await page.locator('#tabs a[href="#today"]').click();
     await expect(page.locator('#night-kind')).toHaveValue('喝了熱茶');
     // Back still means one step back inside the ritual
@@ -885,9 +885,9 @@ test.describe('storage unavailable', () => {
     await page.locator('[data-key="night-next"]').click();
     await page.locator('[data-key="night-skip-track"]').click();
     await expect(page.locator('.postcard svg')).toBeVisible();
-    for (const tab of ['journal', 'trends', 'lens', 'about']) {
+    for (const [tab, cls] of [['journal', 'journal'], ['words', 'language'], ['lens', 'lens'], ['about', 'about']]) {
       await page.locator(`#tabs a[href="#${tab}"]`).click();
-      await expect(page.locator(`.view.${tab}`)).toBeVisible();
+      await expect(page.locator(`.view.${cls}`)).toBeVisible();
     }
     expect(errors).toEqual([]);
   });

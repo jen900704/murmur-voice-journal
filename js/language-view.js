@@ -13,7 +13,7 @@ const MAX_FILE_BYTES = 50e6;
 const MAX_PASTE_CHARS = 200000;
 import { buildReportData, buildReportHtml, sha256Hex } from './langlab/report.js';
 import { keepTexts, listKept, deleteKept } from './langlab/store.js';
-import { FAMILIES, FAMILY_TEXT, FAMILY_SCORES, findClues, tallyAnalysis, topWords, topFamily } from './langlab/clues.js';
+import { FAMILIES, FAMILY_TEXT, FAMILY_SCORES, findClues, tallyAnalysis, topWords, topFamily, famousLines, litNodes as litNodesWith } from './langlab/clues.js';
 import { fingerprintSvg, FP_W, FP_H } from './langlab/fingerprint.js';
 import { sharePng } from './postcard.js';
 import { mascot } from './mascot.js';
@@ -339,23 +339,6 @@ const S = {
   },
 };
 
-// Famous lines for the playground's demonstration. Public-domain text only (all published long
-// before 1929), each with its author and source. Shown in the interface language first.
-const FAMOUS = {
-  zh: [
-    { text: '我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。', by: '蘇軾〈水調歌頭〉' },
-    { text: '三人行，必有我師焉。', by: '《論語．述而》' },
-    { text: '尋尋覓覓，冷冷清清，淒淒慘慘戚戚。', by: '李清照〈聲聲慢〉' },
-    { text: '舉頭望明月，低頭思故鄉。', by: '李白〈靜夜思〉' },
-  ],
-  en: [
-    { text: 'Tomorrow, and tomorrow, and tomorrow, creeps in this petty pace from day to day.', by: 'William Shakespeare, Macbeth' },
-    { text: 'Parting is such sweet sorrow, that I shall say good night till it be morrow.', by: 'William Shakespeare, Romeo and Juliet' },
-    { text: 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.', by: 'Jane Austen, Pride and Prejudice' },
-    { text: 'The world will little note, nor long remember what we say here, but it can never forget what they did here.', by: 'Abraham Lincoln, Gettysburg Address' },
-  ],
-};
-const famousLines = (lang) => (lang === 'en' ? [...FAMOUS.en, ...FAMOUS.zh] : [...FAMOUS.zh, ...FAMOUS.en]);
 const stillMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -530,20 +513,8 @@ export function createLanguageView({ h, add, getLang, toast, openSheet }) {
   // ---------- home ----------
   const fl = () => (getLang() === 'en' ? 'en' : 'zh');
 
-  // text with its counted words marked: text nodes and <mark> only, never markup built from the text
-  function litNodes(text, spans, limit = Infinity) {
-    const out = [];
-    let at = 0;
-    for (const sp of spans) {
-      if (sp.s >= limit) break;
-      if (sp.s > at) out.push(document.createTextNode(text.slice(at, sp.s)));
-      out.push(h('mark', { class: `ll-m ll-m-${sp.fam}` }, text.slice(sp.s, sp.e)));
-      at = sp.e;
-    }
-    const end = Math.min(text.length, limit);
-    if (at < end) out.push(document.createTextNode(text.slice(at, end)));
-    return out;
-  }
+  // text with its counted words marked (js/langlab/clues.js)
+  const litNodes = (text, spans, limit) => litNodesWith(h, text, spans, limit);
 
   // the file picker, its formats and the files read: folded until asked for
   function importBox() {

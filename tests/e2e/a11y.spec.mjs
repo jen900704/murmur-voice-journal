@@ -28,8 +28,7 @@ async function openWriting(page) {
   await key(page, 'writing-tab-deep').waitFor();
 }
 async function openMirror(page) {
-  await page.goto('/#journal');
-  await key(page, 'jmode-words').click();
+  await page.goto('/#words');
   await key(page, 'll-text').waitFor();
 }
 async function mirrorResults(page) {
@@ -55,14 +54,15 @@ const screens = [
   ['journal (demo)', async (page) => {
     await page.goto('/#journal');
     await page.locator('[data-key="journal-demo"]').click();
-    // loading the demo moves to Trends; let that finish before going back (WebKit interrupts otherwise)
-    await page.waitForURL(/#trends/);
-    await page.goto('/#journal');
+    // loading the demo opens the Trends segment; the voice list is the first segment
+    await page.locator('.view.journal.trends .chart').waitFor();
+    await page.locator('[data-key="jmode-voice"]').click();
+    await page.locator('.tile').first().waitFor();
   }],
   ['trends (demo)', async (page) => {
     await page.goto('/#journal');
     await page.locator('[data-key="journal-demo"]').click();
-    await page.waitForURL(/#trends/);
+    await page.locator('.view.journal.trends .chart').waitFor();
   }],
   ['lens home', async (page) => page.goto('/#lens')],
   ['lens worry, kinds of worry', async (page) => {

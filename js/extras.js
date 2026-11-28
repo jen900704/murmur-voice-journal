@@ -34,7 +34,7 @@ const S = {
     minutes: (m) => `${m} 分鐘`,
     close: '關閉',
     none: '沒有符合的作品。',
-    modes: { voice: '聲音', nights: '夜晚', jar: '小罐子', words: '語言鏡' },
+    modes: { voice: '聲音', trends: '趨勢', nights: '夜晚', jar: '小罐子' },
     nightsEmpty: '還沒有夜晚的紀錄。',
     emptyRitual: '做一次睡前儀式',
     jarTitle: '對自己好的小罐子',
@@ -100,7 +100,7 @@ const S = {
     minutes: (m) => `${m} min`,
     close: 'Close',
     none: 'Nothing matches.',
-    modes: { voice: 'Voice', nights: 'Nights', jar: 'Kindness jar', words: 'Words' },
+    modes: { voice: 'Voice', trends: 'Trends', nights: 'Nights', jar: 'Kindness jar' },
     nightsEmpty: 'No nights yet.',
     emptyRitual: 'Try the bedtime ritual',
     jarTitle: 'Kindness jar',
@@ -322,7 +322,7 @@ export function createExtras({ h, add, getLang, render, toast, db, getState, ope
     return h(
       'div',
       { class: 'seg journal-modes', role: 'tablist' },
-      ['voice', 'nights', 'jar', 'words'].map((m) =>
+      ['voice', 'trends', 'nights', 'jar'].map((m) =>
         h('button', { type: 'button', role: 'tab', 'aria-selected': mode === m ? 'true' : 'false', class: 'seg-btn' + (mode === m ? ' on' : ''), 'data-key': `jmode-${m}`, onclick: () => setMode(m) }, L().modes[m])
       )
     );

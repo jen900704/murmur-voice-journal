@@ -12,7 +12,9 @@ for (const [locale, scheme] of [
       page.on('pageerror', (e) => errors.push(String(e)));
       await page.goto('/#journal');
       await page.locator('[data-key="journal-demo"]').click();
-      await expect(page).toHaveURL(/#trends$/);
+      // the charts are a segment of the Journal now
+      await expect(page).toHaveURL(/#journal$/);
+      await expect(page.locator('[data-key="jmode-trends"]')).toHaveAttribute('aria-selected', 'true');
       await expect(page.locator('.demo-banner')).toBeVisible();
       await expect(page.locator('.chart')).toHaveAttribute('aria-label', /.+/);
       await expect(page.locator('.links-table tbody tr')).toHaveCount(9);
@@ -20,7 +22,7 @@ for (const [locale, scheme] of [
       await page.locator('.chip.on').focus();
       await page.keyboard.press('ArrowRight');
       await expect(page.locator('.chip.on')).toBeFocused();
-      await page.goto('/#journal');
+      await page.locator('[data-key="jmode-voice"]').click();
       await expect(page.locator('.tile')).toHaveCount(40);
       await page.locator('.demo-banner .link').click();
       await expect(page.locator('.tile')).toHaveCount(0);
@@ -134,7 +136,7 @@ test('a damaged backup imports what it can and every screen still opens', async 
   await page.goto('/#about');
   await page.locator('input[type="file"]').setInputFiles({ name: 'b.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
   await expect(page.locator('.toast')).toContainText(/1/);
-  for (const tab of ['today', 'journal', 'trends', 'lens', 'about']) {
+  for (const tab of ['today', 'lens', 'words', 'journal', 'trends', 'about']) {
     await page.goto('/#' + tab);
     await expect(page.locator('#main section')).toBeVisible();
   }
@@ -173,29 +175,76 @@ test('a silent check-in saves mood without a recording and shows in the journal,
   await expect(page.locator('.low-card')).toBeVisible();
 });
 
-test('the language mirror opens from the Journal, analyzes pasted text and keeps the notice on top', async ({ page }) => {
+test('the language mirror opens from its tab, analyzes pasted text and keeps the notice on top', async ({ page }) => {
   await page.goto('/#journal');
-  await page.locator('[data-key="jmode-words"]').click();
+  await page.locator('#tabs a[href="#words"]').click();
   await page.locator('[data-key="ll-text"]').fill('I miss my family and I keep thinking that I should have called. But maybe I just need rest, because I am tired. '.repeat(6));
   await page.locator('[data-key="ll-analyze"]').click();
   await expect(page.locator('[data-key="ll-notice"]')).toBeVisible();
   await expect(page.locator('[data-key="ll-report-html"]')).toBeVisible();
 });
 
-test.describe('language mirror front door', () => {
+test.describe('tabs: the two headline features, and Trends inside the Journal', () => {
   test.use({ locale: 'zh-TW' });
-  test('the language mirror has a front door on Today and a link of its own (#words)', async ({ page }) => {
+  test('the tab bar is Today, 換角度, 語言鏡, Journal, About, each with an icon from the one family', async ({ page }) => {
+    await page.goto('/#today');
+    await expect(page.locator('#tabs a')).toHaveText(['今天', '換角度', '語言鏡', '紀錄', '關於']);
+    expect(await page.locator('#tabs a').evaluateAll((as) => as.map((a) => a.getAttribute('href')))).toEqual(['#today', '#lens', '#words', '#journal', '#about']);
+    await expect(page.locator('#tabs a svg.ic')).toHaveCount(5);
+    await page.locator('#tabs a[href="#words"]').click();
+    await expect(page.locator('#tabs a[href="#words"]')).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('.view.language [data-key="ll-famous-tag"]')).toBeVisible();
+    await expect(page).toHaveURL(/#words$/);
+    // the mirror is no longer a segment of the Journal
+    await page.locator('#tabs a[href="#journal"]').click();
+    await expect(page.locator('.journal-modes [role="tab"]')).toHaveText(['聲音', '趨勢', '夜晚', '小罐子']);
+    await expect(page.locator('[data-key="jmode-words"]')).toHaveCount(0);
+  });
+
+  test('#trends still works: it lands on the Journal with the Trends segment open', async ({ page }) => {
+    await page.goto('/#trends');
+    await expect(page).toHaveURL(/#journal$/);
+    await expect(page.locator('#tabs a[href="#journal"]')).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('[data-key="jmode-trends"]')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.view.journal.trends .empty')).toBeVisible();
+    // and from inside the app, as an old link would
+    await page.locator('#tabs a[href="#about"]').click();
+    await page.evaluate(() => (location.hash = '#trends'));
+    await expect(page.locator('.view.journal.trends')).toBeVisible();
+    await expect(page).toHaveURL(/#journal$/);
+    // the other segments are one tap away, and Back does not loop through #trends
+    await page.locator('[data-key="jmode-voice"]').click();
+    await expect(page.locator('.view.journal.trends')).toHaveCount(0);
+    await page.goBack();
+    await expect(page.locator('.view.about')).toBeVisible();
+  });
+
+  test('Today: 換角度 first, 語言鏡 second with a lit famous line, then the voice journal, then the small tools', async ({ page }) => {
+    // the teaser shows one line a day; fix the day
+    await page.clock.install({ time: new Date('2026-11-28T10:00:00+08:00') });
     await page.goto('/#today');
     const close = page.locator('[data-key="welcome-close"]');
     if (await close.count()) await close.click();
+    const order = await page.locator('.view.today > *').evaluateAll((els) => els.map((e) => e.className.split(' ')[0]));
+    const at = (c) => order.indexOf(c);
+    expect(at('lens-hero')).toBeGreaterThanOrEqual(0);
+    expect(at('lens-hero')).toBeLessThan(at('mirror-hero'));
+    expect(at('mirror-hero')).toBeLessThan(at('voice-card'));
+    expect(at('voice-card')).toBeLessThan(at('tool-row'));
+    // the teaser is lit by the mirror's own code: marks around counted words, plain text nodes otherwise
+    const line = page.locator('[data-key="mirror-line"]');
+    await expect(line.locator('mark.ll-m').first()).toBeVisible();
+    await expect(line).toHaveText('我不知道他們給了我多少日子；但我的手確乎是漸漸空虛了。');
+    await expect(line.locator('mark.ll-m-self')).toHaveCount(3);
+    await expect(page.locator('[data-key="mirror-by"]')).toHaveText('朱自清〈匆匆〉');
+    expect(await line.evaluate((n) => [...n.querySelectorAll('*')].every((x) => x.tagName === 'MARK'))).toBe(true);
+    // one button opens the playground
     const door = page.locator('[data-key="words-door"]');
-    await expect(door).toContainText('語言鏡');
-    await expect(door).toContainText('打一句話，看字亮起來');
+    await expect(door).toHaveText('打開語言鏡');
     expect((await door.boundingBox()).height).toBeGreaterThanOrEqual(44);
     await door.click();
-    await expect(page.locator('[data-key="jmode-words"]')).toHaveAttribute('aria-selected', 'true');
+    await expect(page).toHaveURL(/#words$/);
     await expect(page.locator('[data-key="ll-famous-tag"]')).toBeVisible();
-    await expect(page).toHaveURL(/#journal$/);
     // the same place from a link
     await page.goto('/#about');
     await page.goto('/#words');
